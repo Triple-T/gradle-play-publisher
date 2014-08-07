@@ -23,6 +23,6 @@ dependencies {
 
     compile gradleApi()
 
-    compile 'com.android.tools.build:gradle:0.12.0'
+    compile 'com.android.tools.build:gradle:0.12.2'
     compile 'com.google.apis:google-api-services-androidpublisher:v2-rev2-1.19.0'
 }

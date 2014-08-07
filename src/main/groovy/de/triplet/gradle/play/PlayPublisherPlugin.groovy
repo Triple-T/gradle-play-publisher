@@ -35,7 +35,9 @@ class PlayPublisherPlugin implements Plugin<Project> {
             def projectFlavorName = projectFlavorNames.join()
 
             def publishTaskName = "publish$projectFlavorName$buildTypeName"
-            project.tasks.create(publishTaskName)
+            def publishTask = project.tasks.create(publishTaskName)
+
+            publishTask.dependsOn project.tasks.getByName("assemble$projectFlavorName$buildTypeName")
         }
     }
 
