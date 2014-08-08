@@ -1,5 +1,7 @@
 package de.triplet.gradle.play
 
+import com.android.builder.core.DefaultManifestParser
+import com.android.builder.core.ManifestParser
 import com.google.api.client.http.AbstractInputStreamContent
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
@@ -17,8 +19,13 @@ class PlayPublishTask extends DefaultTask {
     @Input
     File inputFile
 
+    @Input
+    File manifestFile
+
     @TaskAction
     def publish() {
+
+        def applicationId = new DefaultManifestParser().getPackage(manifestFile)
 
         AndroidPublisher service = AndroidPublisherHelper.init(extension.serviceAccountEmail, extension.pk12File)
 
@@ -26,7 +33,7 @@ class PlayPublishTask extends DefaultTask {
 
         // Create a new edit to make changes to your listing.
         AndroidPublisher.Edits.Insert editRequest = edits.insert(
-                extension.applicationId,
+                applicationId,
                 null /** no content yet */);
         AppEdit edit = editRequest.execute();
 
@@ -38,7 +45,7 @@ class PlayPublishTask extends DefaultTask {
 
         AndroidPublisher.Edits.Apks.Upload uploadRequest = edits
                 .apks()
-                .upload(extension.applicationId, editId, apkFile);
+                .upload(applicationId, editId, apkFile);
 
         Apk apk = uploadRequest.execute();
 
@@ -46,10 +53,10 @@ class PlayPublishTask extends DefaultTask {
         apkVersionCodes.add(apk.getVersionCode());
         AndroidPublisher.Edits.Tracks.Update updateTrackRequest = edits
                 .tracks()
-                .update(extension.applicationId, editId, "alpha", new Track().setVersionCodes(apkVersionCodes));
+                .update(applicationId, editId, "alpha", new Track().setVersionCodes(apkVersionCodes));
         updateTrackRequest.execute();
 
-        AndroidPublisher.Edits.Commit commitRequest = edits.commit(extension.applicationId, editId);
+        AndroidPublisher.Edits.Commit commitRequest = edits.commit(applicationId, editId);
         commitRequest.execute();
     }
 

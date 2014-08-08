@@ -36,13 +36,17 @@ class PlayPublisherPlugin implements Plugin<Project> {
 
             def publishTaskName = "publish$projectFlavorName$buildTypeName"
             def zipalignTaskName = "zipalign$projectFlavorName$buildTypeName"
+            def manifestTaskName = "process${projectFlavorName}${buildTypeName}Manifest"
 
             try {
                 def zipalignTask = project.tasks."$zipalignTaskName"
+                def manifestTask = project.tasks."$manifestTaskName"
+
                 def publishTask = project.tasks.create(publishTaskName, PlayPublishTask)
 
                 publishTask.extension = extension
                 publishTask.inputFile = zipalignTask.outputFile
+                publishTask.manifestFile = manifestTask.manifestOutputFile
 
                 publishTask.dependsOn project.tasks."assemble$projectFlavorName$buildTypeName"
             } catch (MissingPropertyException e) {
