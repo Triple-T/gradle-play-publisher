@@ -33,8 +33,6 @@ apply plugin: 'play'
 
 ## Configuration
 
-To use this plugin you have to
-
 Once you have applied this plugin to your android application project you can configure it via the ```play``` closure. Drop in your service account email address and the p12 key file you generated in the API Console here.
 
 ```
