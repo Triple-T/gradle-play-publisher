@@ -4,9 +4,8 @@ import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Test
 
-import static org.hamcrest.MatcherAssert.assertThat
-import static org.hamcrest.Matchers.hasSize
 import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertNotNull
 
 
 class PlayPublisherPluginTest {
@@ -19,12 +18,32 @@ class PlayPublisherPluginTest {
     }
 
     @Test
-    public void testCreatesTasks() {
+    public void testCreatesDefaultTask() {
         Project project = evaluatableProject()
         project.evaluate()
 
-        assertThat(project.getTasksByName("publishRelease", true), hasSize(1))
+        assertNotNull(project.tasks.publishRelease)
         assertEquals(project.tasks.publishRelease.inputFile, project.tasks.zipalignRelease.outputFile)
+
+        assertEquals(project.tasks.zipalignRelease.outputFile, project.tasks.publishRelease.inputFile)
+    }
+
+    @Test
+    public void testCreatesFlavorTasks() {
+        Project project = evaluatableProject()
+
+        project.android.productFlavors {
+            free
+            paid
+        }
+
+        project.evaluate()
+
+        assertNotNull(project.tasks.publishPaidRelease)
+        assertNotNull(project.tasks.publishFreeRelease)
+
+        assertEquals(project.tasks.zipalignPaidRelease.outputFile, project.tasks.publishPaidRelease.inputFile)
+        assertEquals(project.tasks.zipalignFreeRelease.outputFile, project.tasks.publishFreeRelease.inputFile)
     }
 
     def evaluatableProject() {
@@ -41,6 +60,7 @@ class PlayPublisherPluginTest {
                 }
             }
         }
+
         return project
     }
 }
