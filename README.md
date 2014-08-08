@@ -1,6 +1,6 @@
 # gradle-play-publisher
 
-Gradle plugin to upload your release APKs to the Google Play Store. Works with the android application plugin.
+Gradle plugin to upload your release APKs to the Google Play Store. Needs the ```com.android.application``` plugin applied. Supports the Android Application Plugin as of version ```0.12.2```.
 
 ## Requirements
 
