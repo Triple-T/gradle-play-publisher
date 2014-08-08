@@ -41,3 +41,7 @@ play {
     pk12File = file('key.p12')
 }
 ```
+
+## Run
+
+The plugin adds a publish task for every flavor of your app. So in the most simple case (where there are no flavors at all) that would be ```publishRelease```. If there are flavors like *free* and *paid* you would get the tasks ```publishFreeRelease```and ```publishPaidRelease```.
