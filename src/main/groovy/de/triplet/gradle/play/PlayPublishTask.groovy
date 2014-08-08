@@ -20,8 +20,7 @@ class PlayPublishTask extends DefaultTask {
     @TaskAction
     def publish() {
 
-        AndroidPublisher service = AndroidPublisherHelper.init(
-                extension.applicationName, extension.serviceAccountEmail, extension.pk12File)
+        AndroidPublisher service = AndroidPublisherHelper.init(extension.serviceAccountEmail, extension.pk12File)
 
         final AndroidPublisher.Edits edits = service.edits();
 

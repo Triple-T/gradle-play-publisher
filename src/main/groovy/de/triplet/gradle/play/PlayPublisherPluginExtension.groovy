@@ -7,8 +7,6 @@ class PlayPublisherPluginExtension {
     // TODO: read application ID from merged manifest
     private String applicationId
 
-    private String applicationName
-
     private File pk12File
 
     void setServiceAccountEmail(String email) {
@@ -17,14 +15,6 @@ class PlayPublisherPluginExtension {
 
     def getServiceAccountEmail() {
         return serviceAccountEmail
-    }
-
-    void setApplicationName(String app) {
-        applicationName = app
-    }
-
-    def getApplicationName() {
-        return applicationName
     }
 
     void setPk12File(File file) {
