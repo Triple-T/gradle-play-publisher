@@ -9,7 +9,7 @@ class PlayPublisherPluginExtension {
 
     private String applicationName
 
-    private String pk12File
+    private File pk12File
 
     void setServiceAccountEmail(String email) {
         serviceAccountEmail = email
@@ -27,7 +27,7 @@ class PlayPublisherPluginExtension {
         return applicationName
     }
 
-    void setPk12File(String file) {
+    void setPk12File(File file) {
         pk12File = file
     }
 

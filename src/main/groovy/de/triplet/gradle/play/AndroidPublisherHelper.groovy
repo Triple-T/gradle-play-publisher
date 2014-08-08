@@ -35,7 +35,7 @@ import org.apache.commons.logging.LogFactory;
  * Helper class to initialize the publisher APIs client library.
  * <p>
  * Before making any calls to the API through the client library you need to
- * call the {@link AndroidPublisherHelper#init(String, String, String)} method. This will run
+ * call the {@link AndroidPublisherHelper#init(String, String, File)} method. This will run
  * all precondition checks for for client id and secret setup properly in
  * resources/client_secrets.json and authorize this client against the API.
  * </p>
@@ -52,7 +52,7 @@ public class AndroidPublisherHelper {
     /** Global instance of the HTTP transport. */
     private static HttpTransport HTTP_TRANSPORT;
 
-    private static Credential authorizeWithServiceAccount(String serviceAccountEmail, String pk12File)
+    private static Credential authorizeWithServiceAccount(String serviceAccountEmail, File pk12File)
             throws GeneralSecurityException, IOException {
         log.info(String.format("Authorizing using Service Account: %s", serviceAccountEmail));
 
@@ -63,7 +63,7 @@ public class AndroidPublisherHelper {
                 .setServiceAccountId(serviceAccountEmail)
                 .setServiceAccountScopes(
                 Collections.singleton(AndroidPublisherScopes.ANDROIDPUBLISHER))
-                .setServiceAccountPrivateKeyFromP12File(new File(pk12File))
+                .setServiceAccountPrivateKeyFromP12File(pk12File)
                 .build();
         return credential;
     }
@@ -78,7 +78,7 @@ public class AndroidPublisherHelper {
      * @throws GeneralSecurityException
      * @throws IOException
      */
-    protected static AndroidPublisher init(String applicationName, String serviceAccountEmail, String pk12File)
+    protected static AndroidPublisher init(String applicationName, String serviceAccountEmail, File pk12File)
             throws IOException, GeneralSecurityException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(applicationName),
                 "applicationName cannot be null or empty!");

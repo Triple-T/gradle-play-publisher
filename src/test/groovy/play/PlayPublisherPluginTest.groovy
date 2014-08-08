@@ -6,6 +6,7 @@ import org.junit.Test
 
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.hasSize
+import static org.junit.Assert.assertEquals
 
 
 class PlayPublisherPluginTest {
@@ -22,9 +23,8 @@ class PlayPublisherPluginTest {
         Project project = evaluatableProject()
         project.evaluate()
 
-        println project.tasks
-
         assertThat(project.getTasksByName("publishRelease", true), hasSize(1))
+        assertEquals(project.tasks.publishRelease.inputFile, project.tasks.zipalignRelease.outputFile)
     }
 
     def evaluatableProject() {
@@ -34,6 +34,12 @@ class PlayPublisherPluginTest {
         project.android {
             compileSdkVersion 20
             buildToolsVersion '20.0.0'
+
+            buildTypes {
+                release {
+                    signingConfig signingConfigs.debug
+                }
+            }
         }
         return project
     }

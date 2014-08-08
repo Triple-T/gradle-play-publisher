@@ -35,11 +35,20 @@ class PlayPublisherPlugin implements Plugin<Project> {
             def projectFlavorName = projectFlavorNames.join()
 
             def publishTaskName = "publish$projectFlavorName$buildTypeName"
-            def publishTask = project.tasks.create(publishTaskName, PlayPublishTask)
+            def zipalignTaskName = "zipalign$projectFlavorName$buildTypeName"
 
-            publishTask.extension = extension
+            try {
+                def zipalignTask = project.tasks."$zipalignTaskName"
+                def publishTask = project.tasks.create(publishTaskName, PlayPublishTask)
 
-            publishTask.dependsOn project.tasks.getByName("assemble$projectFlavorName$buildTypeName")
+                publishTask.extension = extension
+                publishTask.inputFile = zipalignTask.outputFile
+
+                publishTask.dependsOn project.tasks."assemble$projectFlavorName$buildTypeName"
+            } catch (MissingPropertyException e) {
+                log.info("Could not find task ${zipalignTaskName}. Did you specify a signinConfig for the variation $projectFlavorName$buildTypeName?")
+            }
+
         }
     }
 
