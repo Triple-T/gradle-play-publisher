@@ -12,7 +12,7 @@ Once you finished the setup you have a so called *service account email address*
 
 Add it to your buildscript dependencies:
 
-```
+```groovy
 buildscript {
 
     repositories {
@@ -20,14 +20,14 @@ buildscript {
     }
     
     dependencies {
-        classpath 'com.github.triplet.gradle:play-publisher:0.0.1'
+        classpath 'com.github.triplet.gradle:play-publisher:0.0.2'
     }
 }
 ```
 
 Apply it:
 
-```
+```groovy
 apply plugin: 'play'
 ```
 
@@ -35,12 +35,22 @@ apply plugin: 'play'
 
 Once you have applied this plugin to your android application project you can configure it via the ```play``` closure. Drop in your service account email address and the p12 key file you generated in the API Console here.
 
-```
+```groovy
 play {
     serviceAccountEmail = 'your-service-account-email'
     pk12File = file('key.p12')
 }
 ```
+
+As a default your APK is published to the alpha track and you can promote it to beta or production manually. If you want to directly publish to another track you can specify it via the ```track``` property:
+
+```groovy
+play {
+    // ...
+    track = 'production' // or 'beta' or 'alpha'
+}
+```
+
 
 ## Run
 
