@@ -53,7 +53,7 @@ class PlayPublishTask extends DefaultTask {
         apkVersionCodes.add(apk.getVersionCode());
         AndroidPublisher.Edits.Tracks.Update updateTrackRequest = edits
                 .tracks()
-                .update(applicationId, editId, "alpha", new Track().setVersionCodes(apkVersionCodes));
+                .update(applicationId, editId, extension.track, new Track().setVersionCodes(apkVersionCodes));
         updateTrackRequest.execute();
 
         AndroidPublisher.Edits.Commit commitRequest = edits.commit(applicationId, editId);

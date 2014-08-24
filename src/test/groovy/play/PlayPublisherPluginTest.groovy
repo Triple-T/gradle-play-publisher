@@ -46,6 +46,36 @@ class PlayPublisherPluginTest {
         assertEquals(project.tasks.zipalignFreeRelease.outputFile, project.tasks.publishFreeRelease.inputFile)
     }
 
+    @Test
+    public void testDefaultTrack() {
+        Project project = evaluatableProject()
+        project.evaluate()
+
+        assertEquals('alpha', project.extensions.findByName("play").track)
+    }
+
+    @Test
+    public void testTrack() {
+        Project project = evaluatableProject()
+
+        project.play {
+            track 'production'
+        }
+
+        project.evaluate()
+
+        assertEquals('production', project.extensions.findByName("play").track)
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testInvalidTrack() {
+        Project project = evaluatableProject()
+
+        project.play {
+            track 'gamma'
+        }
+    }
+
     def evaluatableProject() {
         Project project = ProjectBuilder.builder().withProjectDir(new File("src/test/fixtures/android_app")).build();
         project.apply plugin: 'android'

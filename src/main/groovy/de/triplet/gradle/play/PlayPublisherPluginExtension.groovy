@@ -4,6 +4,8 @@ class PlayPublisherPluginExtension {
 
     private String serviceAccountEmail
 
+    private String track = 'alpha'
+
     private File pk12File
 
     void setServiceAccountEmail(String email) {
@@ -20,6 +22,18 @@ class PlayPublisherPluginExtension {
 
     def getPk12File() {
         return pk12File
+    }
+
+    void setTrack(String track) {
+        if (!(track in ['alpha', 'beta', 'production'])) {
+            throw new IllegalArgumentException("Track has to be one of 'alpha', 'beta', or 'production'.")
+        }
+
+        this.track = track
+    }
+
+    def getTrack() {
+        return track
     }
 
 }
