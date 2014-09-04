@@ -22,7 +22,7 @@ buildscript {
     }
     
     dependencies {
-        classpath 'com.github.triplet.gradle:play-publisher:0.0.2'
+        classpath 'com.github.triplet.gradle:play-publisher:0.0.3'
     }
 }
 ```
@@ -57,6 +57,39 @@ play {
 ## Run
 
 The plugin adds a publish task for every flavor of your app. So in the most simple case (where there are no flavors at all) that would be ```publishRelease```. If there are flavors like *free* and *paid* you would get the tasks ```publishFreeRelease```and ```publishPaidRelease```.
+
+
+## Play Store Metadata
+
+You can also update the Store Metadata automatically whenever you publish a new APK. 
+
+For now we just support the summary of recent changes (What's new). To use this feature, create a special source folder called ```play```. Inside, you can create a folder for each locale you want to support. Then drop your summary of recent changes into a file called ```whatsnew```:
+
+```
+- src
+  |
+  + - main
+  |   |
+  |   + - play
+  |       |
+  |       + - en-US
+  |       |   |
+  |       |   + - whatsnew
+  |       |
+  |       + - de-DE
+  |           |
+  |           + - whatsnew
+  |
+  + - paid
+      |
+      + - play
+          |
+          + - fr-FR
+              |
+              + - whatsnew
+```
+
+Note: You can provide different summaries for different locales and even special summaries (or additional locales) for each product flavor. Make sure your texts do not exceed the allowed length of *500 characters*.
 
 ## License
 
