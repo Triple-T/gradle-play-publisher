@@ -1,15 +1,16 @@
 package de.triplet.gradle.play
 
 import com.android.builder.core.DefaultManifestParser
-import com.android.builder.core.ManifestParser
 import com.google.api.client.http.AbstractInputStreamContent
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.Apk
+import com.google.api.services.androidpublisher.model.ApkListing
 import com.google.api.services.androidpublisher.model.AppEdit
 import com.google.api.services.androidpublisher.model.Track
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.TaskAction
 
 class PlayPublishTask extends DefaultTask {
@@ -17,10 +18,13 @@ class PlayPublishTask extends DefaultTask {
     private PlayPublisherPluginExtension extension
 
     @Input
-    File inputFile
+    File apkFile
 
     @Input
     File manifestFile
+
+    @InputDirectory
+    File inputFolder
 
     @TaskAction
     def publish() {
@@ -40,7 +44,7 @@ class PlayPublishTask extends DefaultTask {
         final String editId = edit.getId();
 
         final AbstractInputStreamContent apkFile =
-                new FileContent(AndroidPublisherHelper.MIME_TYPE_APK, inputFile);
+                new FileContent(AndroidPublisherHelper.MIME_TYPE_APK, apkFile);
 
 
         AndroidPublisher.Edits.Apks.Upload uploadRequest = edits
@@ -55,6 +59,27 @@ class PlayPublishTask extends DefaultTask {
                 .tracks()
                 .update(applicationId, editId, extension.track, new Track().setVersionCodes(apkVersionCodes));
         updateTrackRequest.execute();
+
+        inputFolder.eachDirRecurse { dir ->
+            File file = new File(dir.getAbsolutePath().toString() + "/whatsnew")
+            if (file.exists()) {
+
+                def whatsNewText = file.text
+                def locale = dir.getName()
+                ApkListing newApkListing = new ApkListing();
+                newApkListing.setRecentChanges(whatsNewText);
+
+                AndroidPublisher.Edits.Apklistings.Update updateRecentChangesRequest = edits
+                        .apklistings()
+                        .update(applicationId,
+                        editId,
+                        apk.getVersionCode(),
+                        locale,
+                        newApkListing);
+
+                updateRecentChangesRequest.execute();
+            }
+        }
 
         AndroidPublisher.Edits.Commit commitRequest = edits.commit(applicationId, editId);
         commitRequest.execute();
