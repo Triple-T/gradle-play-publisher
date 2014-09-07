@@ -86,29 +86,9 @@ class PlayPublisherPluginTest {
         }
 
         project.evaluate()
+
         assertNotNull(project.tasks.generateFreeReleasePlayResources)
         assertNotNull(project.tasks.generatePaidReleasePlayResources)
-
-        project.tasks.generatePaidReleasePlayResources.generate()
-
-
-    }
-
-    @Test
-    public void testWhatsNewPublishTask() {
-        Project project = evaluatableProject()
-
-        project.android.productFlavors {
-            free
-            paid
-        }
-
-        project.evaluate()
-        assertNotNull(project.tasks.generateFreeReleasePlayResources)
-        assertNotNull(project.tasks.generatePaidReleasePlayResources)
-
-        project.tasks.generateFreeReleasePlayResources.generate()
-        project.tasks.publishFreeRelease.publish()
     }
 
     def evaluatableProject() {
