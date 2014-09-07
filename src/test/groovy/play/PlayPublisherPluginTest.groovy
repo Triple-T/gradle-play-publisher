@@ -23,9 +23,9 @@ class PlayPublisherPluginTest {
         project.evaluate()
 
         assertNotNull(project.tasks.publishRelease)
-        assertEquals(project.tasks.publishRelease.inputFile, project.tasks.zipalignRelease.outputFile)
+        assertEquals(project.tasks.publishRelease.apkFile, project.tasks.zipalignRelease.outputFile)
 
-        assertEquals(project.tasks.zipalignRelease.outputFile, project.tasks.publishRelease.inputFile)
+        assertEquals(project.tasks.zipalignRelease.outputFile, project.tasks.publishRelease.apkFile)
     }
 
     @Test
@@ -42,8 +42,8 @@ class PlayPublisherPluginTest {
         assertNotNull(project.tasks.publishPaidRelease)
         assertNotNull(project.tasks.publishFreeRelease)
 
-        assertEquals(project.tasks.zipalignPaidRelease.outputFile, project.tasks.publishPaidRelease.inputFile)
-        assertEquals(project.tasks.zipalignFreeRelease.outputFile, project.tasks.publishFreeRelease.inputFile)
+        assertEquals(project.tasks.zipalignPaidRelease.outputFile, project.tasks.publishPaidRelease.apkFile)
+        assertEquals(project.tasks.zipalignFreeRelease.outputFile, project.tasks.publishFreeRelease.apkFile)
     }
 
     @Test
@@ -74,6 +74,21 @@ class PlayPublisherPluginTest {
         project.play {
             track 'gamma'
         }
+    }
+
+    @Test
+    public void testGenerateTask() {
+        Project project = evaluatableProject()
+
+        project.android.productFlavors {
+            free
+            paid
+        }
+
+        project.evaluate()
+
+        assertNotNull(project.tasks.generateFreeReleasePlayResources)
+        assertNotNull(project.tasks.generatePaidReleasePlayResources)
     }
 
     def evaluatableProject() {
