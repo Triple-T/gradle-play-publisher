@@ -1,14 +1,19 @@
 package play
 
+import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Test
 
+import static junit.framework.TestCase.assertEquals
+import static junit.framework.TestCase.assertFalse
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
-
+import static org.junit.Assert.assertTrue
 
 class PlayPublisherPluginTest {
+
+    public static final File FIXTURE_WORKING_DIR = new File("src/test/fixtures/android_app")
 
     @Test(expected = IllegalStateException.class)
     public void testThrowsOnLibraryProjects() {
@@ -89,10 +94,44 @@ class PlayPublisherPluginTest {
 
         assertNotNull(project.tasks.generateFreeReleasePlayResources)
         assertNotNull(project.tasks.generatePaidReleasePlayResources)
+
+        project.tasks.clean.execute()
+
+        assertFalse(new File(FIXTURE_WORKING_DIR, "build/outputs/play").exists())
+
+        project.tasks.generateFreeReleasePlayResources.execute()
+
+        assertTrue(new File(FIXTURE_WORKING_DIR, "build/outputs/play").exists())
+        assertTrue(new File(FIXTURE_WORKING_DIR, "build/outputs/play/freeRelease").exists())
+        assertTrue(new File(FIXTURE_WORKING_DIR, "build/outputs/play/freeRelease/de-DE").exists())
+        assertTrue(new File(FIXTURE_WORKING_DIR, "build/outputs/play/freeRelease/en-US").exists())
+        assertTrue(new File(FIXTURE_WORKING_DIR, "build/outputs/play/freeRelease/fr-FR").exists())
+
+        String content = FileUtils.readFileToString(
+                new File(FIXTURE_WORKING_DIR, "build/outputs/play/freeRelease/de-DE/whatsnew"))
+        assertEquals("free german", content)
+        content = FileUtils.readFileToString(
+                new File(FIXTURE_WORKING_DIR, "build/outputs/play/freeRelease/fr-FR/whatsnew"))
+        assertEquals("main french", content)
+        content = FileUtils.readFileToString(
+                new File(FIXTURE_WORKING_DIR, "build/outputs/play/freeRelease/en-US/whatsnew"))
+        assertEquals("main english", content)
+
+        project.tasks.generatePaidReleasePlayResources.execute()
+
+        content = FileUtils.readFileToString(
+                new File(FIXTURE_WORKING_DIR, "build/outputs/play/paidRelease/de-DE/whatsnew"))
+        assertEquals("paid german", content)
+        content = FileUtils.readFileToString(
+                new File(FIXTURE_WORKING_DIR, "build/outputs/play/paidRelease/fr-FR/whatsnew"))
+        assertEquals("main french", content)
+        content = FileUtils.readFileToString(
+                new File(FIXTURE_WORKING_DIR, "build/outputs/play/paidRelease/en-US/whatsnew"))
+        assertEquals("paid english", content)
     }
 
     def evaluatableProject() {
-        Project project = ProjectBuilder.builder().withProjectDir(new File("src/test/fixtures/android_app")).build();
+        Project project = ProjectBuilder.builder().withProjectDir(FIXTURE_WORKING_DIR).build();
         project.apply plugin: 'android'
         project.apply plugin: 'play'
         project.android {
