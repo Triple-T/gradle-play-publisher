@@ -18,7 +18,7 @@ class PlayPublishTask extends DefaultTask {
     private PlayPublisherPluginExtension extension
 
     def MAX_CHARACTER_LENGTH = 500
-    def FILE_NAME_FOR_WHATS_NEW_TEXT = "/whatsnew"
+    def FILE_NAME_FOR_WHATS_NEW_TEXT = "whatsnew"
 
     @Input
     File apkFile
@@ -65,7 +65,7 @@ class PlayPublishTask extends DefaultTask {
 
         //TODO handle locale folder name (regex) "\"^[a-z]{2}-[A-Z]{2}\$\"
         inputFolder.eachDirRecurse { dir ->
-            File file = new File(dir.getAbsolutePath().toString() + FILE_NAME_FOR_WHATS_NEW_TEXT)
+            File file = new File(dir.getAbsolutePath(), FILE_NAME_FOR_WHATS_NEW_TEXT)
             if (file.exists()) {
 
                 def locale = dir.getName()
