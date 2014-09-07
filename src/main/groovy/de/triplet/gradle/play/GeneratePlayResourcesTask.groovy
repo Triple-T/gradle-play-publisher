@@ -6,7 +6,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 
-class GeneratePlayResourceTask extends DefaultTask {
+class GeneratePlayResourcesTask extends DefaultTask {
 
     String flavor;
 
