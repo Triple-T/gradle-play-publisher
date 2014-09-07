@@ -47,10 +47,21 @@ class PlayPublisherPlugin implements Plugin<Project> {
 
                 // Create task to collect the play store resources.
                 def playResourcesTask = project.tasks.create(playResourcesTaskName, GeneratePlayResourcesTask)
-                playResourcesTask.flavor = StringUtils.uncapitalize(projectFlavorName)
 
-                def playResourcesOutput = "${project.getProjectDir().toString()}/build/outputs/play/${variant.name}"
-                playResourcesTask.outputFolder = new File(playResourcesOutput)
+                // Configure the inputs and outputs
+                def configurations = []
+                configurations << "main"
+
+                def flavor = StringUtils.uncapitalize(projectFlavorName)
+                if (!StringUtils.isEmpty(flavor)) {
+                    configurations << flavor
+                }
+                configurations.each { c ->
+                    playResourcesTask.inputs.file(new File(project.getProjectDir(), "src/${c}/play"))
+                }
+
+                def playResourcesOutput = new File(project.getProjectDir(), "build/outputs/play/${variant.name}")
+                playResourcesTask.outputFolder = playResourcesOutput
 
                 // Create and configure publisher task for this variant.
                 def publishTask = project.tasks.create(publishTaskName, PlayPublishTask)
