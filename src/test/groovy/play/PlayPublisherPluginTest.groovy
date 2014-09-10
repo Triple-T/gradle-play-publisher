@@ -28,9 +28,7 @@ class PlayPublisherPluginTest {
         project.evaluate()
 
         assertNotNull(project.tasks.publishRelease)
-        assertEquals(project.tasks.publishRelease.apkFile, project.tasks.zipalignRelease.outputFile)
-
-        assertEquals(project.tasks.zipalignRelease.outputFile, project.tasks.publishRelease.apkFile)
+        assertEquals(project.tasks.publishApkRelease.apkFile, project.tasks.zipalignRelease.outputFile)
     }
 
     @Test
@@ -47,8 +45,8 @@ class PlayPublisherPluginTest {
         assertNotNull(project.tasks.publishPaidRelease)
         assertNotNull(project.tasks.publishFreeRelease)
 
-        assertEquals(project.tasks.zipalignPaidRelease.outputFile, project.tasks.publishPaidRelease.apkFile)
-        assertEquals(project.tasks.zipalignFreeRelease.outputFile, project.tasks.publishFreeRelease.apkFile)
+        assertEquals(project.tasks.zipalignPaidRelease.outputFile, project.tasks.publishApkPaidRelease.apkFile)
+        assertEquals(project.tasks.zipalignFreeRelease.outputFile, project.tasks.publishApkFreeRelease.apkFile)
     }
 
     @Test
@@ -128,6 +126,21 @@ class PlayPublisherPluginTest {
         content = FileUtils.readFileToString(
                 new File(FIXTURE_WORKING_DIR, "build/outputs/play/paidRelease/en-US/whatsnew"))
         assertEquals("paid english", content)
+    }
+
+    @Test
+    public void testPublishListingTask() {
+        Project project = evaluatableProject()
+
+        project.android.productFlavors {
+            free
+            paid
+        }
+
+        project.evaluate()
+
+        assertNotNull(project.tasks.publishListingFreeRelease)
+        assertNotNull(project.tasks.publishListingPaidRelease)
     }
 
     def evaluatableProject() {

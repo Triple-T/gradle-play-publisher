@@ -35,10 +35,12 @@ class PlayPublisherPlugin implements Plugin<Project> {
 
             def projectFlavorName = projectFlavorNames.join('')
 
-            def publishTaskName = "publish$projectFlavorName$buildTypeName"
             def zipalignTaskName = "zipalign$projectFlavorName$buildTypeName"
             def manifestTaskName = "process${projectFlavorName}${buildTypeName}Manifest"
             def playResourcesTaskName = "generate${projectFlavorName}${buildTypeName}PlayResources"
+            def publishApkTaskName = "publishApk$projectFlavorName$buildTypeName"
+            def publishListingTaskName = "publishListing$projectFlavorName$buildTypeName"
+            def publishTaskName = "publish$projectFlavorName$buildTypeName"
 
             try {
                 // Find Android tasks to use their outputs.
@@ -63,16 +65,26 @@ class PlayPublisherPlugin implements Plugin<Project> {
                 def playResourcesOutput = new File(project.getProjectDir(), "build/outputs/play/${variant.name}")
                 playResourcesTask.outputFolder = playResourcesOutput
 
-                // Create and configure publisher task for this variant.
-                def publishTask = project.tasks.create(publishTaskName, PlayPublishTask)
-                publishTask.extension = extension
-                publishTask.apkFile = zipalignTask.outputFile
-                publishTask.manifestFile = manifestTask.manifestOutputFile
-                publishTask.inputFolder = playResourcesTask.outputFolder
+                // Create and configure publisher apk task for this variant.
+                def publishApkTask = project.tasks.create(publishApkTaskName, PlayPublishApkTask)
+                publishApkTask.extension = extension
+                publishApkTask.apkFile = zipalignTask.outputFile
+                publishApkTask.manifestFile = manifestTask.manifestOutputFile
+                publishApkTask.inputFolder = playResourcesTask.outputFolder
+
+                // Create and configure publisher meta task for this variant
+                def publishListingTask = project.tasks.create(publishListingTaskName, PlayPublishListingTask)
+                publishListingTask.extension = extension
+                publishListingTask.inputFolder = playResourcesTask.outputFolder
+
+                def publishTask = project.tasks.create(publishTaskName)
 
                 // Attach tasks to task graph.
-                publishTask.dependsOn playResourcesTask
-                publishTask.dependsOn project.tasks."assemble$projectFlavorName$buildTypeName"
+                publishTask.dependsOn publishApkTask
+                publishTask.dependsOn publishListingTask
+                publishListingTask.dependsOn playResourcesTask
+                publishApkTask.dependsOn playResourcesTask
+                publishApkTask.dependsOn project.tasks."assemble$projectFlavorName$buildTypeName"
 
             } catch (MissingPropertyException e) {
                 log.info("Could not find task ${zipalignTaskName}. Did you specify a signinConfig for the variation $projectFlavorName$buildTypeName?")
