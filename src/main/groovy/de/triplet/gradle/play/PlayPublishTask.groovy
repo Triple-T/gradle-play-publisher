@@ -17,8 +17,8 @@ class PlayPublishTask extends DefaultTask {
 
     PlayPublisherPluginExtension extension
 
-//    @Input
-//    File manifestFile
+    @Input
+    File manifestFile
 
     String applicationId
     String editId
@@ -26,20 +26,20 @@ class PlayPublishTask extends DefaultTask {
     AndroidPublisher.Edits edits
 
     def publish() {
-//
-//        applicationId = new DefaultManifestParser().getPackage(manifestFile)
-//
-//        final AndroidPublisher service = AndroidPublisherHelper.init(extension.serviceAccountEmail, extension.pk12File)
-//
-//        edits = service.edits();
-//
-//        // Create a new edit to make changes to your listing.
-//        AndroidPublisher.Edits.Insert editRequest = edits.insert(
-//                applicationId,
-//                null /** no content yet */);
-//        AppEdit edit = editRequest.execute();
-//
-//        editId = edit.getId();
+
+        applicationId = new DefaultManifestParser().getPackage(manifestFile)
+
+        final AndroidPublisher service = AndroidPublisherHelper.init(extension.serviceAccountEmail, extension.pk12File)
+
+        edits = service.edits();
+
+        // Create a new edit to make changes to your listing.
+        AndroidPublisher.Edits.Insert editRequest = edits.insert(
+                applicationId,
+                null /** no content yet */);
+        AppEdit edit = editRequest.execute();
+
+        editId = edit.getId();
     }
 
     void setExtension(PlayPublisherPluginExtension extension) {
