@@ -6,13 +6,14 @@ import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.Apk
 import com.google.api.services.androidpublisher.model.ApkListing
 import com.google.api.services.androidpublisher.model.Track
+import org.apache.commons.lang.StringUtils
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.TaskAction
 
 class PlayPublishApkTask extends PlayPublishTask {
 
-    def MAX_CHARACTER_LENGTH = 500
+    def MAX_CHARACTER_LENGTH_FOR_WHATS_NEW_TEXT = 500
     def FILE_NAME_FOR_WHATS_NEW_TEXT = "whatsnew"
 
     @Input
@@ -20,6 +21,8 @@ class PlayPublishApkTask extends PlayPublishTask {
 
     @InputDirectory
     File inputFolder
+
+    def matcher = ~"^[a-z]{2}(-[A-Z]{2})?\\z"
 
     @TaskAction
     publishApk() {
@@ -41,23 +44,17 @@ class PlayPublishApkTask extends PlayPublishTask {
                 .update(applicationId, editId, extension.track, new Track().setVersionCodes(apkVersionCodes));
         updateTrackRequest.execute();
 
-        //TODO handle locale folder name (regex) "\"^[a-z]{2}-[A-Z]{2}\$\"
-        inputFolder.eachDirRecurse { dir ->
-            File file = new File(dir.getAbsolutePath(), FILE_NAME_FOR_WHATS_NEW_TEXT)
-            if (file.exists()) {
+        // Matches if locale have the correct naming e.g. en-US for play store
+        inputFolder.eachDirMatch(matcher) { dir ->
 
+            File whatsNewFile = new File(dir.getAbsolutePath(), FILE_NAME_FOR_WHATS_NEW_TEXT)
+            def whatsNewText = TaskHelper.readAndTrimFile(whatsNewFile, MAX_CHARACTER_LENGTH_FOR_WHATS_NEW_TEXT)
+
+            if (!StringUtils.isEmpty(whatsNewText)) {
                 def locale = dir.getName()
-
-                def whatsNewText = file.text
-
-                if (whatsNewText.length() > MAX_CHARACTER_LENGTH) {
-                    whatsNewText.substring(0, MAX_CHARACTER_LENGTH)
-                }
-
 
                 ApkListing newApkListing = new ApkListing();
                 newApkListing.setRecentChanges(whatsNewText);
-
                 AndroidPublisher.Edits.Apklistings.Update updateRecentChangesRequest = edits
                         .apklistings()
                         .update(applicationId,
@@ -65,13 +62,13 @@ class PlayPublishApkTask extends PlayPublishTask {
                         apk.getVersionCode(),
                         locale,
                         newApkListing);
-
+                
                 updateRecentChangesRequest.execute();
             }
         }
 
         AndroidPublisher.Edits.Commit commitRequest = edits.commit(applicationId, editId);
         commitRequest.execute();
-
     }
+
 }
