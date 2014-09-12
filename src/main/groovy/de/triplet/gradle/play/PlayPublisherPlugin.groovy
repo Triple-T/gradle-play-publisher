@@ -75,6 +75,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
                 // Create and configure publisher meta task for this variant
                 def publishListingTask = project.tasks.create(publishListingTaskName, PlayPublishListingTask)
                 publishListingTask.extension = extension
+                publishListingTask.manifestFile = manifestTask.manifestOutputFile
                 publishListingTask.inputFolder = playResourcesTask.outputFolder
 
                 def publishTask = project.tasks.create(publishTaskName)
@@ -83,6 +84,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
                 publishTask.dependsOn publishApkTask
                 publishTask.dependsOn publishListingTask
                 publishListingTask.dependsOn playResourcesTask
+                publishListingTask.dependsOn manifestTask
                 publishApkTask.dependsOn playResourcesTask
                 publishApkTask.dependsOn project.tasks."assemble$projectFlavorName$buildTypeName"
 

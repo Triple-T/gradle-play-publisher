@@ -46,6 +46,8 @@ public class AndroidPublisherHelper {
 
     static final String MIME_TYPE_APK = "application/vnd.android.package-archive";
 
+    static final String MIME_TYPE_IMAGE= "image/*";
+
     /** Global instance of the JSON factory. */
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 
