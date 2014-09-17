@@ -26,13 +26,6 @@ class PlayPublishListingTask extends PlayPublishTask {
     def IMAGE_TYPE_SEVEN_INCH_SCREENSHOTS = "sevenInchScreenshots"
     def IMAGE_TYPE_TEN_INCH_SCREENSHOTS = "tenInchScreenshots"
 
-    def PATH_FOR_FEATURE_GRAPHIC = "featureGraphic/"
-    def PATH_FOR_ICON = "icon/"
-    def PATH_FOR_PHONE_SCREESHOTS = "phoneScreenshots/"
-    def PATH_FOR_PROMO_GRAPHIC = "promoGraphic/"
-    def PATH_FOR_SEVEN_INCH_SCREENSHOTS = "sevenInchScreenshots/"
-    def PATH_FOR_TEN_INCH_SCREENSHOTS = "tenInchScreenshots/"
-
     def matcher = ~"^[a-z]{2}(-[A-Z]{2})?\\z"
 
     @InputDirectory
@@ -76,63 +69,67 @@ class PlayPublishListingTask extends PlayPublishTask {
                         editId, locale, listing);
                 updateListingsRequest.execute();
 
-                AndroidPublisher.Edits.Images images = edits.images()
-                //Only one ContentFile allow for featureGraphic
-                AbstractInputStreamContent featureGraphicContent = TaskHelper.getAbtractInputStreamContentFile(listingDir, PATH_FOR_FEATURE_GRAPHIC)
-                if (featureGraphicContent != null) {
-                    images.upload(applicationId, editId, locale, IMAGE_TYPE_FEATURE_GRAPHIC, featureGraphicContent).execute()
-                }
+                // By default this value is false , optional you can set this value of true in play extension
+                def uploadImages = extension.uploadImages
 
-                //Only one ContentFile allow for iconGraphic
-                AbstractInputStreamContent iconGraphicContent = TaskHelper.getAbtractInputStreamContentFile(listingDir, PATH_FOR_ICON)
-                if (iconGraphicContent != null) {
-                    images.upload(applicationId, editId, locale, IMAGE_TYPE_ICON, iconGraphicContent).execute()
-                }
+                if (uploadImages) {
+                    // delete all images from play store entry for each locale
+                    // after that upload the new one
 
-                //Only one ContentFile allow for promoGraphic
-                AbstractInputStreamContent promoGraphicContent = TaskHelper.getAbtractInputStreamContentFile(listingDir, PATH_FOR_PROMO_GRAPHIC)
-                if (promoGraphicContent != null) {
-                    images.upload(applicationId, editId, locale, IMAGE_TYPE_PROMO_GRAPHIC, promoGraphicContent).execute()
-                }
+                    //Only one ContentFile allow for featureGraphic
+                    AbstractInputStreamContent featureGraphicContent = TaskHelper.getAbtractInputStreamContentFile(listingDir, IMAGE_TYPE_FEATURE_GRAPHIC + "/")
+                    uploadSingleGraphic(featureGraphicContent, locale, IMAGE_TYPE_FEATURE_GRAPHIC)
 
-                //Upload phoneScreenshots
-                List<AbstractInputStreamContent> phoneContentList = TaskHelper.getAbstractInputStreamContentList(listingDir, PATH_FOR_PHONE_SCREESHOTS)
-                if (phoneContentList != null) {
-                    if (phoneContentList.size() > MAX_SCREESHOTS_SIZE) {
-                        logger.info("Sorry! You could only upload 8 screenshots  ")
-                    } else {
-                        phoneContentList.each { phoneContentGraphic ->
-                            images.upload(applicationId, editId, locale, IMAGE_TYPE_PHONE_SCREENSHOTS, phoneContentGraphic).execute()
-                        }
-                    }
-                }
+                    //Only one ContentFile allow for iconGraphic
+                    AbstractInputStreamContent iconGraphicContent = TaskHelper.getAbtractInputStreamContentFile(listingDir, IMAGE_TYPE_ICON + "/")
+                    uploadSingleGraphic(iconGraphicContent, locale, IMAGE_TYPE_ICON)
 
-                //Upload sevenInchScreenshots
-                List<AbstractInputStreamContent> sevenInchContentList = TaskHelper.getAbstractInputStreamContentList(listingDir, PATH_FOR_SEVEN_INCH_SCREENSHOTS)
-                if (sevenInchContentList != null) {
-                    if (sevenInchContentList.size() > MAX_SCREESHOTS_SIZE) {
-                        logger.info("Sorry! You could only upload 8 screenshots  ")
-                    } else {
-                        sevenInchContentList.each { sevenInchContentGraphic ->
-                            images.upload(applicationId, editId, locale, IMAGE_TYPE_SEVEN_INCH_SCREENSHOTS, sevenInchContentGraphic).execute()
-                        }
-                    }
-                }
+                    //Only one ContentFile allow for promoGraphic
+                    AbstractInputStreamContent promoGraphicContent = TaskHelper.getAbtractInputStreamContentFile(listingDir, IMAGE_TYPE_PROMO_GRAPHIC + "/")
+                    uploadSingleGraphic(promoGraphicContent, locale, IMAGE_TYPE_PROMO_GRAPHIC)
 
-                //Upload tenInchScreenshots
-                List<AbstractInputStreamContent> tenInchContentList = TaskHelper.getAbstractInputStreamContentList(listingDir, PATH_FOR_TEN_INCH_SCREENSHOTS)
-                if (tenInchContentList != null) {
-                    if (tenInchContentList.size() > MAX_SCREESHOTS_SIZE) {
-                        logger.info("Sorry! You could only upload 8 screenshots  ")
-                    } else {
-                        tenInchContentList.each { tenInchContentGraphic ->
-                            images.upload(applicationId, editId, locale, IMAGE_TYPE_TEN_INCH_SCREENSHOTS, tenInchContentGraphic).execute()
-                        }
-                    }
+                    //Upload phoneScreenshots
+                    List<AbstractInputStreamContent> phoneContentList = TaskHelper.getAbstractInputStreamContentList(listingDir, IMAGE_TYPE_PHONE_SCREENSHOTS + "/")
+                    uploadScreenshots(phoneContentList, locale, IMAGE_TYPE_PHONE_SCREENSHOTS)
+
+                    //Upload sevenInchScreenshots
+                    List<AbstractInputStreamContent> sevenInchContentList = TaskHelper.getAbstractInputStreamContentList(listingDir, IMAGE_TYPE_SEVEN_INCH_SCREENSHOTS + "/")
+                    uploadScreenshots(sevenInchContentList, locale, IMAGE_TYPE_SEVEN_INCH_SCREENSHOTS)
+
+                    //Upload tenInchScreenshots
+                    List<AbstractInputStreamContent> tenInchContentList = TaskHelper.getAbstractInputStreamContentList(listingDir, IMAGE_TYPE_TEN_INCH_SCREENSHOTS + "/")
+                    uploadScreenshots(tenInchContentList, locale, IMAGE_TYPE_TEN_INCH_SCREENSHOTS)
                 }
             }
             AndroidPublisher.Edits.Commit commitRequest = edits.commit(applicationId, editId);
             commitRequest.execute();
+        }
+    }
+
+
+    def uploadSingleGraphic(AbstractInputStreamContent contentGraphic, String locale, String imageType) {
+        AndroidPublisher.Edits.Images images = edits.images()
+
+        images.deleteall(applicationId, editId, locale, imageType).execute()
+
+        if (contentGraphic != null) {
+            images.upload(applicationId, editId, locale, imageType, contentGraphic).execute()
+        }
+    }
+
+    def uploadScreenshots(List<AbstractInputStreamContent> contentGraphicList, String locale, String imageType) {
+        AndroidPublisher.Edits.Images images = edits.images()
+
+        images.deleteall(applicationId, editId, locale, imageType).execute()
+
+        if (contentGraphicList != null) {
+            if (contentGraphicList.size() > MAX_SCREESHOTS_SIZE) {
+                logger.info("Sorry! You could only upload 8 screenshots  ")
+            } else {
+                contentGraphicList.each { contentGraphic ->
+                    images.upload(applicationId, editId, locale, imageType, contentGraphic).execute()
+                }
+            }
         }
     }
 

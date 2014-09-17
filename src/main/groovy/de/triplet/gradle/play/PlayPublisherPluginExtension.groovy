@@ -8,6 +8,17 @@ class PlayPublisherPluginExtension {
 
     private File pk12File
 
+    private boolean uploadImages = false
+
+    boolean getUploadImages() {
+        return uploadImages
+    }
+
+    void setUploadImages(boolean uploadImages) {
+        this.uploadImages = uploadImages
+    }
+
+
     void setServiceAccountEmail(String email) {
         serviceAccountEmail = email
     }
