@@ -110,9 +110,11 @@ class PlayPublishListingTask extends PlayPublishTask {
     def uploadSingleGraphic(AbstractInputStreamContent contentGraphic, String locale, String imageType) {
         AndroidPublisher.Edits.Images images = edits.images()
 
-        images.deleteall(applicationId, editId, locale, imageType).execute()
 
         if (contentGraphic != null) {
+            // delete all images in play store before upload new images
+            images.deleteall(applicationId, editId, locale, imageType).execute()
+
             images.upload(applicationId, editId, locale, imageType, contentGraphic).execute()
         }
     }
@@ -120,9 +122,11 @@ class PlayPublishListingTask extends PlayPublishTask {
     def uploadScreenshots(List<AbstractInputStreamContent> contentGraphicList, String locale, String imageType) {
         AndroidPublisher.Edits.Images images = edits.images()
 
-        images.deleteall(applicationId, editId, locale, imageType).execute()
 
         if (contentGraphicList != null) {
+            // delete all images in play store before upload new images 
+            images.deleteall(applicationId, editId, locale, imageType).execute()
+
             if (contentGraphicList.size() > MAX_SCREESHOTS_SIZE) {
                 logger.info("Sorry! You could only upload 8 screenshots  ")
             } else {
