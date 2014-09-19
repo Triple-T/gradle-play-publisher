@@ -8,4 +8,4 @@ before_install:
   - source ~/.android-sdk-installer/env
 
 script:
-  - ./gradlew check --stacktrace
+  - ./gradlew check --stacktrace --debug
