@@ -1,17 +1,10 @@
 package de.triplet.gradle.play
 
 import com.android.builder.core.DefaultManifestParser
-import com.google.api.client.http.AbstractInputStreamContent
-import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
-import com.google.api.services.androidpublisher.model.Apk
-import com.google.api.services.androidpublisher.model.ApkListing
 import com.google.api.services.androidpublisher.model.AppEdit
-import com.google.api.services.androidpublisher.model.Track
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.TaskAction
 
 class PlayPublishTask extends DefaultTask {
 
@@ -23,13 +16,17 @@ class PlayPublishTask extends DefaultTask {
     String applicationId
     String editId
 
+    AndroidPublisher service
+
     AndroidPublisher.Edits edits
 
     def publish() {
 
         applicationId = new DefaultManifestParser().getPackage(manifestFile)
 
-        final AndroidPublisher service = AndroidPublisherHelper.init(extension.serviceAccountEmail, extension.pk12File)
+        if (service == null) {
+            service = AndroidPublisherHelper.init(extension.serviceAccountEmail, extension.pk12File)
+        }
 
         edits = service.edits();
 
