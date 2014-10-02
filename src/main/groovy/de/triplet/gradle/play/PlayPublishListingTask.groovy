@@ -101,9 +101,10 @@ class PlayPublishListingTask extends PlayPublishTask {
                     uploadScreenshots(tenInchContentList, locale, IMAGE_TYPE_TEN_INCH_SCREENSHOTS)
                 }
             }
-            AndroidPublisher.Edits.Commit commitRequest = edits.commit(applicationId, editId);
-            commitRequest.execute();
         }
+
+        AndroidPublisher.Edits.Commit commitRequest = edits.commit(applicationId, editId);
+        commitRequest.execute();
     }
 
 
