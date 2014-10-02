@@ -16,20 +16,20 @@ class TaskHelper {
         return message;
     }
 
-    def static List<AbstractInputStreamContent> getAbstractInputStreamContentList(File listingDir, String graphicPath) {
+    def static List<AbstractInputStreamContent> getImageListAsStream(File listingDir, String graphicPath) {
         File graphicDir = new File(listingDir, graphicPath)
         if (graphicDir.exists()) {
-            return graphicDir.listFiles().collect { file ->
+            return graphicDir.listFiles(new ImageFileFilter()).collect { file ->
                 new FileContent(AndroidPublisherHelper.MIME_TYPE_IMAGE, file);
             }
         }
         return null
     }
 
-    def static AbstractInputStreamContent getAbtractInputStreamContentFile(File listingDir, String graphicPath) {
+    def static AbstractInputStreamContent getImageAsStream(File listingDir, String graphicPath) {
         File graphicDir = new File(listingDir, graphicPath)
         if (graphicDir.exists()) {
-            File[] files = graphicDir.listFiles()
+            File[] files = graphicDir.listFiles(new ImageFileFilter())
             if (files.length > 0) {
                 File graphicFile = files[0]
                 return new FileContent(AndroidPublisherHelper.MIME_TYPE_IMAGE, graphicFile);
