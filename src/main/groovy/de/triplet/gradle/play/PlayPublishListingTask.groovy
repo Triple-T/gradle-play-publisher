@@ -26,8 +26,6 @@ class PlayPublishListingTask extends PlayPublishTask {
     def IMAGE_TYPE_SEVEN_INCH_SCREENSHOTS = "sevenInchScreenshots"
     def IMAGE_TYPE_TEN_INCH_SCREENSHOTS = "tenInchScreenshots"
 
-    def matcher = ~"^[a-z]{2}(-[A-Z]{2})?\\z"
-
     @InputDirectory
     File inputFolder
 

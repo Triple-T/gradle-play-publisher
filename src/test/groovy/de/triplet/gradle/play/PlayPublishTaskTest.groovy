@@ -8,6 +8,11 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+
+import static org.junit.Assert.assertFalse
+import static org.junit.Assert.assertTrue
 import static org.mockito.Matchers.any
 import static org.mockito.Matchers.anyString
 import static org.mockito.Mockito.doReturn
@@ -84,5 +89,25 @@ public class PlayPublishTaskTest {
 
         // verify that we init the connection with the correct application id
         verify(editsMock).insert("com.example.publisher.paid", null)
+    }
+
+    @Test
+    public void testMatcher() {
+        Project project = TestHelper.evaluatableProject();
+        project.evaluate()
+
+        Pattern pattern = project.tasks.publishApkRelease.matcher
+
+        Matcher m = pattern.matcher("de-DE")
+        assertTrue(m.find())
+
+        m = pattern.matcher("de")
+        assertTrue(m.find())
+
+        m = pattern.matcher("es-419")
+        assertTrue(m.find())
+
+        m = pattern.matcher("de_DE")
+        assertFalse(m.find())
     }
 }

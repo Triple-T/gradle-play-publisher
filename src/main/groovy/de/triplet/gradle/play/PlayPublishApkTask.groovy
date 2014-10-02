@@ -22,8 +22,6 @@ class PlayPublishApkTask extends PlayPublishTask {
     @InputDirectory
     File inputFolder
 
-    def matcher = ~"^[a-z]{2}(-[A-Z]{2})?\\z"
-
     @TaskAction
     publishApk() {
         super.publish()
