@@ -77,27 +77,27 @@ class PlayPublishListingTask extends PlayPublishTask {
                     // after that upload the new one
 
                     //Only one ContentFile allow for featureGraphic
-                    AbstractInputStreamContent featureGraphicContent = TaskHelper.getAbtractInputStreamContentFile(listingDir, IMAGE_TYPE_FEATURE_GRAPHIC + "/")
+                    AbstractInputStreamContent featureGraphicContent = TaskHelper.getImageAsStream(listingDir, IMAGE_TYPE_FEATURE_GRAPHIC + "/")
                     uploadSingleGraphic(featureGraphicContent, locale, IMAGE_TYPE_FEATURE_GRAPHIC)
 
                     //Only one ContentFile allow for iconGraphic
-                    AbstractInputStreamContent iconGraphicContent = TaskHelper.getAbtractInputStreamContentFile(listingDir, IMAGE_TYPE_ICON + "/")
+                    AbstractInputStreamContent iconGraphicContent = TaskHelper.getImageAsStream(listingDir, IMAGE_TYPE_ICON + "/")
                     uploadSingleGraphic(iconGraphicContent, locale, IMAGE_TYPE_ICON)
 
                     //Only one ContentFile allow for promoGraphic
-                    AbstractInputStreamContent promoGraphicContent = TaskHelper.getAbtractInputStreamContentFile(listingDir, IMAGE_TYPE_PROMO_GRAPHIC + "/")
+                    AbstractInputStreamContent promoGraphicContent = TaskHelper.getImageAsStream(listingDir, IMAGE_TYPE_PROMO_GRAPHIC + "/")
                     uploadSingleGraphic(promoGraphicContent, locale, IMAGE_TYPE_PROMO_GRAPHIC)
 
                     //Upload phoneScreenshots
-                    List<AbstractInputStreamContent> phoneContentList = TaskHelper.getAbstractInputStreamContentList(listingDir, IMAGE_TYPE_PHONE_SCREENSHOTS + "/")
+                    List<AbstractInputStreamContent> phoneContentList = TaskHelper.getImageListAsStream(listingDir, IMAGE_TYPE_PHONE_SCREENSHOTS + "/")
                     uploadScreenshots(phoneContentList, locale, IMAGE_TYPE_PHONE_SCREENSHOTS)
 
                     //Upload sevenInchScreenshots
-                    List<AbstractInputStreamContent> sevenInchContentList = TaskHelper.getAbstractInputStreamContentList(listingDir, IMAGE_TYPE_SEVEN_INCH_SCREENSHOTS + "/")
+                    List<AbstractInputStreamContent> sevenInchContentList = TaskHelper.getImageListAsStream(listingDir, IMAGE_TYPE_SEVEN_INCH_SCREENSHOTS + "/")
                     uploadScreenshots(sevenInchContentList, locale, IMAGE_TYPE_SEVEN_INCH_SCREENSHOTS)
 
                     //Upload tenInchScreenshots
-                    List<AbstractInputStreamContent> tenInchContentList = TaskHelper.getAbstractInputStreamContentList(listingDir, IMAGE_TYPE_TEN_INCH_SCREENSHOTS + "/")
+                    List<AbstractInputStreamContent> tenInchContentList = TaskHelper.getImageListAsStream(listingDir, IMAGE_TYPE_TEN_INCH_SCREENSHOTS + "/")
                     uploadScreenshots(tenInchContentList, locale, IMAGE_TYPE_TEN_INCH_SCREENSHOTS)
                 }
             }
