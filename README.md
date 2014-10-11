@@ -1,6 +1,6 @@
 # gradle-play-publisher
 
-Gradle plugin to upload your release APKs to the Google Play Store. Needs the ```com.android.application``` plugin applied. Supports the Android Application Plugin as of version ```0.12.2```.
+Gradle plugin to upload your APK and app details to the Google Play Store. Needs the ```com.android.application``` plugin applied. Supports the Android Application Plugin as of version ```0.12.2```.
 
 [![Build Status](https://travis-ci.org/Triple-T/gradle-play-publisher.svg?branch=master)](https://travis-ci.org/Triple-T/gradle-play-publisher)
 
@@ -22,7 +22,7 @@ buildscript {
     }
     
     dependencies {
-        classpath 'com.github.triplet.gradle:play-publisher:0.0.3'
+        classpath 'com.github.triplet.gradle:play-publisher:0.0.4'
     }
 }
 ```
@@ -61,35 +61,44 @@ The plugin adds a publish task for every flavor of your app. So in the most simp
 
 ## Play Store Metadata
 
-You can also update the Store Metadata automatically whenever you publish a new APK. 
+You can also update the Play Store Metadata automatically along with your APK. 
 
-For now we just support the summary of recent changes (What's new). To use this feature, create a special source folder called ```play```. Inside, you can create a folder for each locale you want to support. Then drop your summary of recent changes into a file called ```whatsnew```:
+To use this feature, create a special source folder called ```play```. Inside, create a folder for each locale you want to support. Then drop your summary of recent changes into a file called ```whatsnew```. The title,  the description and the short description go into their own files in a subfolder called ```listing```. Once setup, your project should look something like this:
 
 ```
-- src
+- [src]
   |
-  + - main
-  |   |
-  |   + - play
-  |       |
-  |       + - en-US
-  |       |   |
-  |       |   + - whatsnew
-  |       |
-  |       + - de-DE
-  |           |
-  |           + - whatsnew
-  |
-  + - paid
+  + - [main]
       |
-      + - play
+      + - [play]
           |
-          + - fr-FR
+          + - [en-US]
+          |   |
+          |   + - [listing]
+          |   |   |
+          |   |   + - description
+          |   |   |
+          |   |   + - shortdescription
+          |   |   |
+          |   |   + - title
+          |   |
+          |   + - whatsnew
+          |
+          + - [de-DE]
+              |
+              + - [listing]
+              |   |
+              |   + - description
+              |   |
+              |   + - shortdescription
+              |   |
+              |   + - title
               |
               + - whatsnew
 ```
+Note: Make sure your texts comply to the requirements of the Play Store, that is they do not exceed the allowed lengths of *30 characters* for the title, *80 characters* for the short description, *4000 characters* for the description and *500 characters* for the summary of recent changes.
 
-Note: You can provide different summaries for different locales and even special summaries (or additional locales) for each product flavor. Make sure your texts do not exceed the allowed length of *500 characters*.
+Note: You can provide different texts for different locales and product flavors. You may even support additional locales for some product flavors.
 
 ## License
 
