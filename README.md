@@ -76,7 +76,7 @@ To use this feature, create a special source folder called ```play```. Inside, c
           |   |
           |   + - [listing]
           |   |   |
-          |   |   + - description
+          |   |   + - fulldescription
           |   |   |
           |   |   + - shortdescription
           |   |   |
@@ -88,7 +88,7 @@ To use this feature, create a special source folder called ```play```. Inside, c
               |
               + - [listing]
               |   |
-              |   + - description
+              |   + - fulldescription
               |   |
               |   + - shortdescription
               |   |
