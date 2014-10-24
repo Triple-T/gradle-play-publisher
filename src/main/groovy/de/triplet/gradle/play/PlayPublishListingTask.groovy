@@ -63,8 +63,7 @@ class PlayPublishListingTask extends PlayPublishTask {
 
                 AndroidPublisher.Edits.Listings.Update updateListingsRequest = edits
                         .listings()
-                        .update(applicationId,
-                        editId, locale, listing);
+                        .update(applicationId, editId, locale, listing);
                 updateListingsRequest.execute();
 
                 // By default this value is false , optional you can set this value of true in play extension
@@ -74,27 +73,27 @@ class PlayPublishListingTask extends PlayPublishTask {
                     // delete all images from play store entry for each locale
                     // after that upload the new one
 
-                    //Only one ContentFile allow for featureGraphic
+                    // Only one ContentFile allow for featureGraphic
                     AbstractInputStreamContent featureGraphicContent = TaskHelper.getImageAsStream(listingDir, IMAGE_TYPE_FEATURE_GRAPHIC + "/")
                     uploadSingleGraphic(featureGraphicContent, locale, IMAGE_TYPE_FEATURE_GRAPHIC)
 
-                    //Only one ContentFile allow for iconGraphic
+                    // Only one ContentFile allow for iconGraphic
                     AbstractInputStreamContent iconGraphicContent = TaskHelper.getImageAsStream(listingDir, IMAGE_TYPE_ICON + "/")
                     uploadSingleGraphic(iconGraphicContent, locale, IMAGE_TYPE_ICON)
 
-                    //Only one ContentFile allow for promoGraphic
+                    // Only one ContentFile allow for promoGraphic
                     AbstractInputStreamContent promoGraphicContent = TaskHelper.getImageAsStream(listingDir, IMAGE_TYPE_PROMO_GRAPHIC + "/")
                     uploadSingleGraphic(promoGraphicContent, locale, IMAGE_TYPE_PROMO_GRAPHIC)
 
-                    //Upload phoneScreenshots
+                    // Upload phoneScreenshots
                     List<AbstractInputStreamContent> phoneContentList = TaskHelper.getImageListAsStream(listingDir, IMAGE_TYPE_PHONE_SCREENSHOTS + "/")
                     uploadScreenshots(phoneContentList, locale, IMAGE_TYPE_PHONE_SCREENSHOTS)
 
-                    //Upload sevenInchScreenshots
+                    // Upload sevenInchScreenshots
                     List<AbstractInputStreamContent> sevenInchContentList = TaskHelper.getImageListAsStream(listingDir, IMAGE_TYPE_SEVEN_INCH_SCREENSHOTS + "/")
                     uploadScreenshots(sevenInchContentList, locale, IMAGE_TYPE_SEVEN_INCH_SCREENSHOTS)
 
-                    //Upload tenInchScreenshots
+                    // Upload tenInchScreenshots
                     List<AbstractInputStreamContent> tenInchContentList = TaskHelper.getImageListAsStream(listingDir, IMAGE_TYPE_TEN_INCH_SCREENSHOTS + "/")
                     uploadScreenshots(tenInchContentList, locale, IMAGE_TYPE_TEN_INCH_SCREENSHOTS)
                 }

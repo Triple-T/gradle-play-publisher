@@ -34,7 +34,7 @@ import org.apache.commons.logging.LogFactory;
  * <p>
  * Before making any calls to the API through the client library you need to
  * call the {@link AndroidPublisherHelper#init(String, File)} method. This will run
- * all precondition checks for for client id and secret setup properly in
+ * all precondition checks for client id and secret setup properly in
  * resources/client_secrets.json and authorize this client against the API.
  * </p>
  */
@@ -54,7 +54,6 @@ public class AndroidPublisherHelper {
     /** Global instance of the HTTP transport. */
     private static HttpTransport HTTP_TRANSPORT;
 
-
     private static Credential authorizeWithServiceAccount(String serviceAccountEmail, File pk12File)
             throws GeneralSecurityException, IOException {
         log.info(String.format("Authorizing using Service Account: %s", serviceAccountEmail));
@@ -64,8 +63,7 @@ public class AndroidPublisherHelper {
                 .setTransport(HTTP_TRANSPORT)
                 .setJsonFactory(JSON_FACTORY)
                 .setServiceAccountId(serviceAccountEmail)
-                .setServiceAccountScopes(
-                Collections.singleton(AndroidPublisherScopes.ANDROIDPUBLISHER))
+                .setServiceAccountScopes(Collections.singleton(AndroidPublisherScopes.ANDROIDPUBLISHER))
                 .setServiceAccountPrivateKeyFromP12File(pk12File)
                 .build();
         return credential;
@@ -74,7 +72,6 @@ public class AndroidPublisherHelper {
     /**
      * Performs all necessary setup steps for running requests against the API.
      *
-     * @param applicationName the name of the application: com.example.app
      * @param serviceAccountEmail the Service Account Email (empty if using
      *            installed application)
      * @return the {@Link AndroidPublisher} service
@@ -96,7 +93,7 @@ public class AndroidPublisherHelper {
 
     private static void newTrustedTransport() throws GeneralSecurityException,
             IOException {
-        if (null == HTTP_TRANSPORT) {
+        if (HTTP_TRANSPORT == null) {
             HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         }
     }

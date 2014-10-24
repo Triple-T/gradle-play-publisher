@@ -55,12 +55,8 @@ class PlayPublishApkTask extends PlayPublishTask {
                 newApkListing.setRecentChanges(whatsNewText);
                 AndroidPublisher.Edits.Apklistings.Update updateRecentChangesRequest = edits
                         .apklistings()
-                        .update(applicationId,
-                        editId,
-                        apk.getVersionCode(),
-                        locale,
-                        newApkListing);
-                
+                        .update(applicationId, editId, apk.getVersionCode(), locale, newApkListing);
+
                 updateRecentChangesRequest.execute();
             }
         }
