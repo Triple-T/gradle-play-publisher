@@ -10,14 +10,13 @@ class PlayPublisherPluginExtension {
 
     private boolean uploadImages = false
 
-    boolean getUploadImages() {
-        return uploadImages
-    }
-
     void setUploadImages(boolean uploadImages) {
         this.uploadImages = uploadImages
     }
 
+    boolean getUploadImages() {
+        return uploadImages
+    }
 
     void setServiceAccountEmail(String email) {
         serviceAccountEmail = email
