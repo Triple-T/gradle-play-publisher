@@ -23,7 +23,7 @@ dependencies {
     compile gradleApi()
 
     compile 'com.android.tools.build:gradle:0.12.2'
-    compile 'com.google.apis:google-api-services-androidpublisher:v2-rev2-1.19.0'
+    compile 'com.google.apis:google-api-services-androidpublisher:v2-rev8-1.19.0'
     compile 'commons-lang:commons-lang:2.6'
     compile 'commons-io:commons-io:1.4'
 
