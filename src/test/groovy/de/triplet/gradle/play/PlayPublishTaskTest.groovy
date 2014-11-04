@@ -6,7 +6,6 @@ import org.gradle.api.Project
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
-import org.mockito.MockitoAnnotations
 
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -17,6 +16,7 @@ import static org.mockito.Matchers.any
 import static org.mockito.Matchers.anyString
 import static org.mockito.Mockito.doReturn
 import static org.mockito.Mockito.verify
+import static org.mockito.MockitoAnnotations.initMocks
 
 public class PlayPublishTaskTest {
 
@@ -34,7 +34,7 @@ public class PlayPublishTaskTest {
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
+        initMocks(this)
 
         doReturn(editsMock).when(publisherMock).edits()
         doReturn(insertMock).when(editsMock).insert(anyString(), any(AppEdit.class))
@@ -43,7 +43,7 @@ public class PlayPublishTaskTest {
 
     @Test
     public void testApplicationId() {
-        Project project = TestHelper.evaluatableProject();
+        Project project = TestHelper.evaluatableProject()
         project.evaluate()
 
         // Attach the mock
@@ -63,7 +63,7 @@ public class PlayPublishTaskTest {
 
     @Test
     public void testApplicationIdWithFlavors() {
-        Project project = TestHelper.evaluatableProject();
+        Project project = TestHelper.evaluatableProject()
 
         project.android {
             productFlavors {
@@ -93,7 +93,7 @@ public class PlayPublishTaskTest {
 
     @Test
     public void testMatcher() {
-        Project project = TestHelper.evaluatableProject();
+        Project project = TestHelper.evaluatableProject()
         project.evaluate()
 
         Pattern pattern = project.tasks.publishApkRelease.matcher

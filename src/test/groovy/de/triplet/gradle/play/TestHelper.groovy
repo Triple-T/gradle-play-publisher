@@ -13,7 +13,7 @@ public class TestHelper {
         project.apply plugin: 'play'
         project.android {
             compileSdkVersion 21
-            buildToolsVersion '21.0.2'
+            buildToolsVersion '21.1.0'
 
             defaultConfig {
                 versionCode 1
