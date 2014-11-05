@@ -7,6 +7,8 @@ import org.gradle.api.Project
 
 class PlayPublisherPlugin implements Plugin<Project> {
 
+    public static final String PLAY_STORE_GROUP = "Play Store"
+
     @Override
     void apply(Project project) {
         def log = project.logger
@@ -59,6 +61,8 @@ class PlayPublisherPlugin implements Plugin<Project> {
                 playResourcesTask.inputs.file(new File(project.getProjectDir(), "src/${flavor}/play"))
             }
             playResourcesTask.outputFolder = new File(project.getProjectDir(), "build/outputs/play/${variant.name}")
+            playResourcesTask.description = "Collects play store resources for the ${variationName} build"
+            playResourcesTask.group = PLAY_STORE_GROUP
 
             // Create and configure publisher apk task for this variant.
             def publishApkTask = project.tasks.create(publishApkTaskName, PlayPublishApkTask)
@@ -66,14 +70,20 @@ class PlayPublisherPlugin implements Plugin<Project> {
             publishApkTask.apkFile = zipalignTask.outputFile
             publishApkTask.manifestFile = manifestTask.manifestOutputFile
             publishApkTask.inputFolder = playResourcesTask.outputFolder
+            publishApkTask.description = "Uploads the APK for the ${variationName} build"
+            publishApkTask.group = PLAY_STORE_GROUP
 
             // Create and configure publisher meta task for this variant
             def publishListingTask = project.tasks.create(publishListingTaskName, PlayPublishListingTask)
             publishListingTask.extension = extension
             publishListingTask.manifestFile = manifestTask.manifestOutputFile
             publishListingTask.inputFolder = playResourcesTask.outputFolder
+            publishListingTask.description = "Updates the play store listing for the ${variationName} build"
+            publishListingTask.group = PLAY_STORE_GROUP
 
             def publishTask = project.tasks.create(publishTaskName)
+            publishTask.description = "Updates APK and play store listing for the ${variationName} build"
+            publishTask.group = PLAY_STORE_GROUP
 
             // Attach tasks to task graph.
             publishTask.dependsOn publishApkTask
