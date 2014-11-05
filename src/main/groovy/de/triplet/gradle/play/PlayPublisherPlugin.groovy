@@ -35,9 +35,6 @@ class PlayPublisherPlugin implements Plugin<Project> {
 
             def variationName = "${productFlavorName}${buildTypeName}"
 
-            def zipalignTaskName = "zipalign${variationName}"
-            def manifestTaskName = "process${variationName}Manifest"
-            def assembleTaskName = "assemble${variationName}"
             def playResourcesTaskName = "generate${variationName}PlayResources"
             def publishApkTaskName = "publishApk${variationName}"
             def publishListingTaskName = "publishListing${variationName}"
@@ -45,15 +42,15 @@ class PlayPublisherPlugin implements Plugin<Project> {
 
             def variantData = variant.variantData
 
-            if (!variantData.zipAlign) {
+            if (!variantData.zipAlignEnabled) {
                 log.info("Could not find ZipAlign task. Did you specify a signingConfig for the variation ${variationName}?")
                 return
             }
 
-            // Find Android tasks to use their outputs.
-            def zipalignTask = project.tasks."$zipalignTaskName"
-            def manifestTask = project.tasks."$manifestTaskName"
-            def assembleTask = project.tasks."$assembleTaskName"
+            def outputData = variant.outputs[0]
+            def zipalignTask = outputData.zipAlign
+            def manifestTask = outputData.processManifest
+            def assembleTask = outputData.assemble
 
             // Create and configure task to collect the play store resources.
             def playResourcesTask = project.tasks.create(playResourcesTaskName, GeneratePlayResourcesTask)

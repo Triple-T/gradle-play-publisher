@@ -1,6 +1,7 @@
 package de.triplet.gradle.play
 
 import org.gradle.api.Project
+import org.gradle.api.internal.plugins.PluginApplicationException
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Test
 
@@ -9,7 +10,7 @@ import static org.junit.Assert.assertNotNull
 
 class PlayPublisherPluginTest {
 
-    @Test(expected = IllegalStateException.class)
+    @Test(expected = PluginApplicationException.class)
     public void testThrowsOnLibraryProjects() {
         Project project = ProjectBuilder.builder().build()
         project.apply plugin: 'android-library'
@@ -65,7 +66,7 @@ class PlayPublisherPluginTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testInvalidTrack() {
+    public void testThrowsOnInvalidTrack() {
         Project project = TestHelper.evaluatableProject()
 
         project.play {
