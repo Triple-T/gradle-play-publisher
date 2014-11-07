@@ -2,7 +2,6 @@ package de.triplet.gradle.play
 
 import com.google.api.services.androidpublisher.model.Apk
 import com.google.api.services.androidpublisher.model.ApkListing
-import com.google.api.services.androidpublisher.model.Image
 import com.google.api.services.androidpublisher.model.Listing
 import org.apache.commons.io.FileUtils
 import org.gradle.api.tasks.OutputDirectory
@@ -10,6 +9,7 @@ import org.gradle.api.tasks.TaskAction
 
 class BootstrapTask extends PlayPublishTask {
 
+    /*
     def IMAGE_TYPE_ARRAY = [
             PlayPublishListingTask.IMAGE_TYPE_ICON,
             PlayPublishListingTask.IMAGE_TYPE_FEATURE_GRAPHIC,
@@ -18,6 +18,7 @@ class BootstrapTask extends PlayPublishTask {
             PlayPublishListingTask.IMAGE_TYPE_TEN_INCH_SCREENSHOTS,
             PlayPublishListingTask.IMAGE_TYPE_PROMO_GRAPHIC
     ]
+    */
 
     @OutputDirectory
     File outputFolder
@@ -60,6 +61,8 @@ class BootstrapTask extends PlayPublishTask {
                 continue
             }
 
+            // TODO: Disabled for now as we have only access to preview-versions with the current API.
+            /*
             for (String imageType : IMAGE_TYPE_ARRAY) {
                 List<Image> images = edits.images()
                         .list(applicationId, editId, language, imageType)
@@ -67,6 +70,7 @@ class BootstrapTask extends PlayPublishTask {
                         .getImages()
                 saveImage(listingDir, imageType, images)
             }
+            */
 
             FileUtils.writeStringToFile(new File(listingDir, PlayPublishListingTask.FILE_NAME_FOR_FULL_DESCRIPTION), fullDescription)
             FileUtils.writeStringToFile(new File(listingDir, PlayPublishListingTask.FILE_NAME_FOR_SHORT_DESCRIPTION), shortDescription)
@@ -108,6 +112,7 @@ class BootstrapTask extends PlayPublishTask {
         }
     }
 
+    /*
     static def saveImage(File listingDir, String imageFolderName, List<Image> images) {
         File imageFolder = new File(listingDir, imageFolderName)
         if (!imageFolder.exists() && !imageFolder.mkdirs()) {
@@ -141,5 +146,6 @@ class BootstrapTask extends PlayPublishTask {
         is.close()
         os.close()
     }
+    */
 
 }
