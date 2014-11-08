@@ -37,6 +37,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
 
             def variationName = "${productFlavorName}${buildTypeName}"
 
+            def bootstrapTaskName = "bootstrap${variationName}PlayResources"
             def playResourcesTaskName = "generate${variationName}PlayResources"
             def publishApkTaskName = "publishApk${variationName}"
             def publishListingTaskName = "publishListing${variationName}"
@@ -53,6 +54,18 @@ class PlayPublisherPlugin implements Plugin<Project> {
             def zipalignTask = outputData.zipAlign
             def manifestTask = outputData.processManifest
             def assembleTask = outputData.assemble
+
+            // Create and configure bootstrap task for this variant.
+            def bootstrapTask = project.tasks.create(bootstrapTaskName, BootstrapTask)
+            bootstrapTask.extension = extension
+            bootstrapTask.manifestFile = manifestTask.manifestOutputFile
+            if (StringUtils.isNotEmpty(flavor)) {
+                bootstrapTask.outputFolder = new File(project.getProjectDir(), "src/${flavor}/play")
+            } else {
+                bootstrapTask.outputFolder = new File(project.getProjectDir(), "src/main/play")
+            }
+            bootstrapTask.description = "Downloads the play store listing for the ${variationName} build"
+            bootstrapTask.group = PLAY_STORE_GROUP
 
             // Create and configure task to collect the play store resources.
             def playResourcesTask = project.tasks.create(playResourcesTaskName, GeneratePlayResourcesTask)
@@ -86,6 +99,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             publishTask.group = PLAY_STORE_GROUP
 
             // Attach tasks to task graph.
+            bootstrapTask.dependsOn manifestTask
             publishTask.dependsOn publishApkTask
             publishTask.dependsOn publishListingTask
             publishListingTask.dependsOn playResourcesTask
