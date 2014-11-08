@@ -2,3 +2,4 @@ build
 .idea
 *.iml
 .gradle
+local.properties
