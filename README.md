@@ -100,6 +100,29 @@ Note: Make sure your texts comply to the requirements of the Play Store, that is
 
 Note: You can provide different texts for different locales and product flavors. You may even support additional locales for some product flavors.
 
+## Custom APK names
+
+The plugin automatically finds out where your APK file is located if you are using the default behavior. If, for some reason, you are changing this default output, you have to tell the plugin. In those cases, you probably have some code in a `applicationVariants.all {...}` block that looks something like this:
+
+```groovy
+applicationVariants.all { variant ->
+    if(variant.zipAlign) {
+        variant.outputFile = new File("path/to/my/custom.apk")
+    }
+}
+```
+In order to teach the plugin that you changed the output file for your variant, you have to override the `apkFile` property of the `publishApkRelease` task:
+
+```groovy
+applicationVariants.all { variant ->
+    // ... setup your custom apk name
+    
+    if (variant.buildType.name.equals("release")) {
+        project.tasks."publishApk${variant.name.capitalize()}".apkFile = variant.outputFile
+    }
+}
+```
+
 ## License
 
 	 The MIT License (MIT)
