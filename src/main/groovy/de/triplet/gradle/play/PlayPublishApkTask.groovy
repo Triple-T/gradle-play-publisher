@@ -44,10 +44,14 @@ class PlayPublishApkTask extends PlayPublishTask {
 
         // Matches if locale have the correct naming e.g. en-US for play store
         inputFolder.eachDirMatch(matcher) { dir ->
-            File whatsNewFile = new File(dir.getAbsolutePath(), FILE_NAME_FOR_WHATS_NEW_TEXT)
-            def whatsNewText = TaskHelper.readAndTrimFile(whatsNewFile, MAX_CHARACTER_LENGTH_FOR_WHATS_NEW_TEXT)
+            File whatsNewFile = new File(dir.getAbsolutePath(), FILE_NAME_FOR_WHATS_NEW_TEXT + "-" + extension.track)
 
-            if (StringUtils.isNotEmpty(whatsNewText)) {
+            if (!whatsNewFile.exists()) {
+                whatsNewFile = new File(dir.getAbsolutePath(), FILE_NAME_FOR_WHATS_NEW_TEXT)
+            }
+
+            if (whatsNewFile.exists()) {
+                def whatsNewText = TaskHelper.readAndTrimFile(whatsNewFile, MAX_CHARACTER_LENGTH_FOR_WHATS_NEW_TEXT)
                 def locale = dir.getName()
 
                 ApkListing newApkListing = new ApkListing()
