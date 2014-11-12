@@ -1,6 +1,6 @@
 # gradle-play-publisher
 
-Gradle plugin to upload your APK and app details to the Google Play Store. Needs the ```com.android.application``` plugin applied. Supports the Android Application Plugin as of version ```0.12.2```.
+Gradle plugin to upload your APK and app details to the Google Play Store. Needs the ```com.android.application``` plugin applied. Supports the Android Application Plugin as of version ```0.14.0```.
 
 [![Build Status](https://travis-ci.org/Triple-T/gradle-play-publisher.svg?branch=master)](https://travis-ci.org/Triple-T/gradle-play-publisher)
 
@@ -22,7 +22,7 @@ buildscript {
     }
     
     dependencies {
-        classpath 'com.github.triplet.gradle:play-publisher:0.0.4'
+        classpath 'com.github.triplet.gradle:play-publisher:0.14.0'
     }
 }
 ```
