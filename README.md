@@ -44,9 +44,11 @@ In case you are using product flavors you will get one of the above tasks for ev
 
 ## Configuration
 
+Once you have applied this plugin to your android application project you can configure it via the ```play``` block.
+
 ### Credentials
 
-Once you have applied this plugin to your android application project you can configure it via the ```play``` closure. Drop in your service account email address and the p12 key file you generated in the API Console here.
+Drop in your service account email address and the p12 key file you generated in the API Console here.
 
 ```groovy
 play {
