@@ -36,6 +36,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             def flavor = StringUtils.uncapitalize(productFlavorName)
 
             def variationName = "${productFlavorName}${buildTypeName}"
+            def variantApplicationId = variant.applicationId
 
             def bootstrapTaskName = "bootstrap${variationName}PlayResources"
             def playResourcesTaskName = "generate${variationName}PlayResources"
@@ -52,13 +53,12 @@ class PlayPublisherPlugin implements Plugin<Project> {
 
             def outputData = variant.outputs[0]
             def zipalignTask = outputData.zipAlign
-            def manifestTask = outputData.processManifest
             def assembleTask = outputData.assemble
 
             // Create and configure bootstrap task for this variant.
             def bootstrapTask = project.tasks.create(bootstrapTaskName, BootstrapTask)
             bootstrapTask.extension = extension
-            bootstrapTask.manifestFile = manifestTask.manifestOutputFile
+            bootstrapTask.applicationId = variantApplicationId
             if (StringUtils.isNotEmpty(flavor)) {
                 bootstrapTask.outputFolder = new File(project.getProjectDir(), "src/${flavor}/play")
             } else {
@@ -81,7 +81,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             def publishApkTask = project.tasks.create(publishApkTaskName, PlayPublishApkTask)
             publishApkTask.extension = extension
             publishApkTask.apkFile = zipalignTask.outputFile
-            publishApkTask.manifestFile = manifestTask.manifestOutputFile
+            publishApkTask.applicationId = variantApplicationId
             publishApkTask.inputFolder = playResourcesTask.outputFolder
             publishApkTask.description = "Uploads the APK for the ${variationName} build"
             publishApkTask.group = PLAY_STORE_GROUP
@@ -89,7 +89,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             // Create and configure publisher meta task for this variant
             def publishListingTask = project.tasks.create(publishListingTaskName, PlayPublishListingTask)
             publishListingTask.extension = extension
-            publishListingTask.manifestFile = manifestTask.manifestOutputFile
+            publishListingTask.applicationId = variantApplicationId
             publishListingTask.inputFolder = playResourcesTask.outputFolder
             publishListingTask.description = "Updates the play store listing for the ${variationName} build"
             publishListingTask.group = PLAY_STORE_GROUP
@@ -99,11 +99,9 @@ class PlayPublisherPlugin implements Plugin<Project> {
             publishTask.group = PLAY_STORE_GROUP
 
             // Attach tasks to task graph.
-            bootstrapTask.dependsOn manifestTask
             publishTask.dependsOn publishApkTask
             publishTask.dependsOn publishListingTask
             publishListingTask.dependsOn playResourcesTask
-            publishListingTask.dependsOn manifestTask
             publishApkTask.dependsOn playResourcesTask
             publishApkTask.dependsOn assembleTask
         }
