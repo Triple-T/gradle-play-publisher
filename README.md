@@ -22,10 +22,14 @@ buildscript {
     }
     
     dependencies {
-        classpath 'com.github.triplet.gradle:play-publisher:0.14.0'
+    	// ...
+        classpath ('com.github.triplet.gradle:play-publisher:0.14.0') {
+            exclude group: 'com.google.guava'
+        }
     }
 }
 ```
+Make sure to exclude the `guava` library that is transitively pulled in by the `google-api-client` as it conflicts with the newer one used by the android plugin. Hopefully, we can drop that extra work once they have updated their dependencies.
 
 Apply it:
 
