@@ -49,11 +49,6 @@ public class PlayPublishTaskTest {
         // Attach the mock
         project.tasks.publishApkRelease.service = publisherMock
 
-        // run predecessors
-        project.tasks.preBuild.execute()
-        project.tasks.processReleaseManifest.execute()
-        project.tasks.generateReleasePlayResources.execute()
-
         // finally run the task we want to check
         project.tasks.publishApkRelease.publish()
 
@@ -62,7 +57,7 @@ public class PlayPublishTaskTest {
     }
 
     @Test
-    public void testApplicationIdWithFlavors() {
+    public void testApplicationIdWithFlavorsAndSuffix() {
         Project project = TestHelper.evaluatableProject()
 
         project.android {
@@ -72,6 +67,12 @@ public class PlayPublishTaskTest {
                 }
                 free
             }
+
+            buildTypes {
+                release {
+                    applicationIdSuffix '.release'
+                }
+            }
         }
 
         project.evaluate()
@@ -79,16 +80,11 @@ public class PlayPublishTaskTest {
         // Attach the mock
         project.tasks.publishApkPaidRelease.service = publisherMock
 
-        // run predecessors
-        project.tasks.preBuild.execute()
-        project.tasks.processPaidReleaseManifest.execute()
-        project.tasks.generatePaidReleasePlayResources.execute()
-
         // finally run the task we want to check
         project.tasks.publishApkPaidRelease.publish()
 
         // verify that we init the connection with the correct application id
-        verify(editsMock).insert("com.example.publisher.paid", null)
+        verify(editsMock).insert("com.example.publisher.paid.release", null)
     }
 
     @Test
