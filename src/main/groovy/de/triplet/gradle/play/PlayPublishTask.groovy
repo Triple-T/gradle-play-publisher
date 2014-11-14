@@ -1,10 +1,8 @@
 package de.triplet.gradle.play
 
-import com.android.builder.core.DefaultManifestParser
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.AppEdit
 import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.Input
 
 class PlayPublishTask extends DefaultTask {
 
@@ -12,9 +10,6 @@ class PlayPublishTask extends DefaultTask {
     def matcher = ~"^[a-z]{2}(-([A-Z]{2}|419))?\\z"
 
     PlayPublisherPluginExtension extension
-
-    @Input
-    File manifestFile
 
     String applicationId
 
@@ -25,8 +20,6 @@ class PlayPublishTask extends DefaultTask {
     AndroidPublisher.Edits edits
 
     def publish() {
-        applicationId = new DefaultManifestParser().getPackage(manifestFile)
-
         if (service == null) {
             service = AndroidPublisherHelper.init(extension.serviceAccountEmail, extension.pk12File)
         }
