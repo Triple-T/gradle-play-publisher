@@ -1,6 +1,6 @@
 **0.14.1 - 2014-11-15**
 
-* Additional check if zipAlign task exists to
+* Additional check if zipAlign task exists
 * Use variant's applicationId instead of parsing the manifest
 
 **0.14.0 - 2014-11-10**
