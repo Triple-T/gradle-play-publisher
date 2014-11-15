@@ -3,7 +3,7 @@
 * Additional check if zipAlign task exists
 * Use variant's applicationId instead of parsing the manifest
 
-**0.14.0 - 2014-11-10**
+**0.14.0 - 2014-11-12**
 
 * Updated to Android plugin 0.14.+
 * Changed versioning scheme to better reflect what version of the Android plugin is supported
