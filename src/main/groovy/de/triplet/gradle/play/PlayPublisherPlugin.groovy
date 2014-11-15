@@ -44,16 +44,15 @@ class PlayPublisherPlugin implements Plugin<Project> {
             def publishListingTaskName = "publishListing${variationName}"
             def publishTaskName = "publish${variationName}"
 
-            def variantData = variant.variantData
+            def outputData = variant.outputs[0]
+            def zipAlignTask = outputData.zipAlign
+            def assembleTask = outputData.assemble
 
-            if (!variantData.zipAlignEnabled) {
-                log.info("Could not find ZipAlign task. Did you specify a signingConfig for the variation ${variationName}?")
+            def variantData = variant.variantData
+            if (!zipAlignTask || !variantData.zipAlignEnabled) {
+                log.warn("Could not find ZipAlign task. Did you specify a signingConfig for the variation ${variationName}?")
                 return
             }
-
-            def outputData = variant.outputs[0]
-            def zipalignTask = outputData.zipAlign
-            def assembleTask = outputData.assemble
 
             // Create and configure bootstrap task for this variant.
             def bootstrapTask = project.tasks.create(bootstrapTaskName, BootstrapTask)
@@ -80,7 +79,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             // Create and configure publisher apk task for this variant.
             def publishApkTask = project.tasks.create(publishApkTaskName, PlayPublishApkTask)
             publishApkTask.extension = extension
-            publishApkTask.apkFile = zipalignTask.outputFile
+            publishApkTask.apkFile = zipAlignTask.outputFile
             publishApkTask.applicationId = variantApplicationId
             publishApkTask.inputFolder = playResourcesTask.outputFolder
             publishApkTask.description = "Uploads the APK for the ${variationName} build"
