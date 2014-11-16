@@ -12,7 +12,7 @@ class PlayPublishListingTask extends PlayPublishTask {
     static def MAX_CHARACTER_LENGTH_FOR_TITLE = 30
     static def MAX_CHARACTER_LENGTH_FOR_SHORT_DESCRIPTION = 80
     static def MAX_CHARACTER_LENGTH_FOR_FULL_DESCRIPTION = 4000
-    static def MAX_SCREESHOTS_SIZE = 8
+    static def MAX_SCREENSHOTS_SIZE = 8
 
     static def FILE_NAME_FOR_TITLE = "title"
     static def FILE_NAME_FOR_SHORT_DESCRIPTION = "shortdescription"
@@ -35,7 +35,6 @@ class PlayPublishListingTask extends PlayPublishTask {
 
         // Matches if locale have the correct naming e.g. en-US for play store
         inputFolder.eachDirMatch(matcher) { dir ->
-
             def locale = dir.getName()
 
             File listingDir = new File(dir, LISTING_PATH)
@@ -61,18 +60,12 @@ class PlayPublishListingTask extends PlayPublishTask {
                     listing.setFullDescription(fullDescription)
                 }
 
-                AndroidPublisher.Edits.Listings.Update updateListingsRequest = edits
-                        .listings()
+                edits.listings()
                         .update(applicationId, editId, locale, listing)
-                updateListingsRequest.execute()
+                        .execute()
 
-                // By default this value is false , optional you can set this value of true in play extension
-                def uploadImages = extension.uploadImages
-
-                if (uploadImages) {
-                    // delete all images from play store entry for each locale
-                    // after that upload the new one
-
+                // By default this will be skipped – can be enabled in the play extension
+                if (extension.uploadImages) {
                     // Only one ContentFile allow for featureGraphic
                     AbstractInputStreamContent featureGraphicContent = TaskHelper.getImageAsStream(listingDir, IMAGE_TYPE_FEATURE_GRAPHIC + "/")
                     uploadSingleGraphic(featureGraphicContent, locale, IMAGE_TYPE_FEATURE_GRAPHIC)
@@ -100,31 +93,31 @@ class PlayPublishListingTask extends PlayPublishTask {
             }
         }
 
-        AndroidPublisher.Edits.Commit commitRequest = edits.commit(applicationId, editId)
-        commitRequest.execute()
+        edits.commit(applicationId, editId).execute()
     }
 
-
     def uploadSingleGraphic(AbstractInputStreamContent contentGraphic, String locale, String imageType) {
-        AndroidPublisher.Edits.Images images = edits.images()
-
-
         if (contentGraphic != null) {
-            // delete all images in play store before upload new images
+            AndroidPublisher.Edits.Images images = edits.images()
+
+            // Delete current image in play store
             images.deleteall(applicationId, editId, locale, imageType).execute()
 
+            // After that upload the new image
             images.upload(applicationId, editId, locale, imageType, contentGraphic).execute()
         }
     }
 
     def uploadScreenshots(List<AbstractInputStreamContent> contentGraphicList, String locale, String imageType) {
         if (contentGraphicList != null) {
-            // delete all images in play store before upload new images 
             AndroidPublisher.Edits.Images images = edits.images()
+
+            // Delete all images in play store
             images.deleteall(applicationId, editId, locale, imageType).execute()
 
-            if (contentGraphicList.size() > MAX_SCREESHOTS_SIZE) {
-                logger.info("Sorry! You could only upload 8 screenshots")
+            // After that upload the new images
+            if (contentGraphicList.size() > MAX_SCREENSHOTS_SIZE) {
+                logger.error("Sorry! You can only upload 8 screenshots")
             } else {
                 contentGraphicList.each { contentGraphic ->
                     images.upload(applicationId, editId, locale, imageType, contentGraphic).execute()
