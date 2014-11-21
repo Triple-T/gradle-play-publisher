@@ -23,7 +23,7 @@ buildscript {
     
     dependencies {
     	// ...
-        classpath ('com.github.triplet.gradle:play-publisher:0.14.0') {
+        classpath ('com.github.triplet.gradle:play-publisher:0.14.1') {
             exclude group: 'com.google.guava'
         }
     }
