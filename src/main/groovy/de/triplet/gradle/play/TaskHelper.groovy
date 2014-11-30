@@ -19,7 +19,7 @@ class TaskHelper {
     def static List<AbstractInputStreamContent> getImageListAsStream(File listingDir, String graphicPath) {
         File graphicDir = new File(listingDir, graphicPath)
         if (graphicDir.exists()) {
-            return graphicDir.listFiles(new ImageFileFilter()).collect { file ->
+            return graphicDir.listFiles(new ImageFileFilter()).sort().collect { file ->
                 new FileContent(AndroidPublisherHelper.MIME_TYPE_IMAGE, file);
             }
         }
