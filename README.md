@@ -137,17 +137,19 @@ In that case the plugin looks for the Play Store images in your `play` folder. S
           |
           + - [en-US]
               |
-              + - [featureGraphic]
-              |
-              + - [icon]
-              |
-              + - [phoneScreenshots]
-              |
-              + - [promoGraphic]
-              |
-              + - [sevenInchScreenshots]
-              |
-              + - [tenInchScreenshots]
+              + - [listing]
+                  |
+                  + - [featureGraphic]
+                  |
+                  + - [icon]
+                  |
+                  + - [phoneScreenshots]
+                  |
+                  + - [promoGraphic]
+                  |
+                  + - [sevenInchScreenshots]
+                  |
+                  + - [tenInchScreenshots]
 ```
 
 Note: The plugin currently does not enforce the correct size and file type. If you try to upload invalid files, the Google API will fail with a detailed error message.
