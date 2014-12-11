@@ -23,7 +23,7 @@ class PlayPublisherPluginTest {
         project.evaluate()
 
         assertNotNull(project.tasks.publishRelease)
-        assertEquals(project.tasks.publishApkRelease.apkFile, project.tasks.zipalignRelease.outputFile)
+        assertEquals(project.tasks.publishApkRelease.variant, project.android.applicationVariants[1])
     }
 
     @Test
@@ -40,8 +40,8 @@ class PlayPublisherPluginTest {
         assertNotNull(project.tasks.publishPaidRelease)
         assertNotNull(project.tasks.publishFreeRelease)
 
-        assertEquals(project.tasks.zipalignPaidRelease.outputFile, project.tasks.publishApkPaidRelease.apkFile)
-        assertEquals(project.tasks.zipalignFreeRelease.outputFile, project.tasks.publishApkFreeRelease.apkFile)
+        assertEquals(project.tasks.publishApkFreeRelease.variant, project.android.applicationVariants[3])
+        assertEquals(project.tasks.publishApkPaidRelease.variant, project.android.applicationVariants[1])
     }
 
     @Test
