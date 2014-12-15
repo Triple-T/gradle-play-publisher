@@ -2,12 +2,10 @@ package de.triplet.gradle.play
 
 import org.apache.commons.io.FileUtils
 import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 
 class GeneratePlayResourcesTask extends DefaultTask {
 
-    @OutputDirectory
     File outputFolder;
 
     @TaskAction

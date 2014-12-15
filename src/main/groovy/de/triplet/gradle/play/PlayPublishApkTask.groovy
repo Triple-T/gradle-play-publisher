@@ -4,8 +4,6 @@ import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.model.Apk
 import com.google.api.services.androidpublisher.model.ApkListing
 import com.google.api.services.androidpublisher.model.Track
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.TaskAction
 
 class PlayPublishApkTask extends PlayPublishTask {
@@ -13,10 +11,8 @@ class PlayPublishApkTask extends PlayPublishTask {
     static def MAX_CHARACTER_LENGTH_FOR_WHATS_NEW_TEXT = 500
     static def FILE_NAME_FOR_WHATS_NEW_TEXT = "whatsnew"
 
-    @Input
     File apkFile
 
-    @InputDirectory
     File inputFolder
 
     @TaskAction

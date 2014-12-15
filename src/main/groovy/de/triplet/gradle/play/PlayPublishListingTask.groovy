@@ -4,7 +4,6 @@ import com.google.api.client.http.AbstractInputStreamContent
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.Listing
 import org.apache.commons.lang.StringUtils
-import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.TaskAction
 
 class PlayPublishListingTask extends PlayPublishTask {
@@ -26,7 +25,6 @@ class PlayPublishListingTask extends PlayPublishTask {
     static def IMAGE_TYPE_SEVEN_INCH_SCREENSHOTS = "sevenInchScreenshots"
     static def IMAGE_TYPE_TEN_INCH_SCREENSHOTS = "tenInchScreenshots"
 
-    @InputDirectory
     File inputFolder
 
     @TaskAction

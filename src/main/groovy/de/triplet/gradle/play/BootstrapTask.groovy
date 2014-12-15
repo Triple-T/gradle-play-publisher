@@ -5,7 +5,6 @@ import com.google.api.services.androidpublisher.model.ApkListing
 import com.google.api.services.androidpublisher.model.Image
 import com.google.api.services.androidpublisher.model.Listing
 import org.apache.commons.io.FileUtils
-import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 
 class BootstrapTask extends PlayPublishTask {
@@ -19,7 +18,6 @@ class BootstrapTask extends PlayPublishTask {
             PlayPublishListingTask.IMAGE_TYPE_PROMO_GRAPHIC
     ]
 
-    @OutputDirectory
     File outputFolder
 
     @TaskAction
