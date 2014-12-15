@@ -1,5 +1,6 @@
 package de.triplet.gradle.play
 
+import com.android.build.gradle.api.ApkVariantOutput
 import com.android.build.gradle.api.ApplicationVariant
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.model.Apk
@@ -22,7 +23,9 @@ class PlayPublishApkTask extends PlayPublishTask {
     publishApk() {
         super.publish()
 
-        FileContent newApkFile = new FileContent(AndroidPublisherHelper.MIME_TYPE_APK, variant.outputFile)
+        def apkOutput = variant.outputs.find { variantOutput -> variantOutput instanceof ApkVariantOutput }
+        FileContent newApkFile = new FileContent(AndroidPublisherHelper.MIME_TYPE_APK, apkOutput.outputFile)
+
         Apk apk = edits.apks()
                 .upload(applicationId, editId, newApkFile)
                 .execute()
