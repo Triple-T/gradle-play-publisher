@@ -79,7 +79,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             // Create and configure publisher apk task for this variant.
             def publishApkTask = project.tasks.create(publishApkTaskName, PlayPublishApkTask)
             publishApkTask.extension = extension
-            publishApkTask.apkFile = zipAlignTask.outputFile
+            publishApkTask.variant = variant
             publishApkTask.applicationId = variantApplicationId
             publishApkTask.inputFolder = playResourcesTask.outputFolder
             publishApkTask.description = "Uploads the APK for the ${variationName} build"
