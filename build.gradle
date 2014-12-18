@@ -25,8 +25,8 @@ dependencies {
 
     compile gradleApi()
 
-    compile 'com.android.tools.build:gradle:0.14.1'
-    compile 'com.google.apis:google-api-services-androidpublisher:v2-rev9-1.19.0'
+    compile 'com.android.tools.build:gradle:1.0.0'
+    compile 'com.google.apis:google-api-services-androidpublisher:v2-rev13-1.19.0'
     compile 'commons-lang:commons-lang:2.6'
     compile 'commons-io:commons-io:1.4'
 
