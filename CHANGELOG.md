@@ -1,3 +1,9 @@
+**1.0.0 - 2015-01-07**
+
+* Updated to Android plugin 1.0.0
+* Find APK file based on the variant output. Eliminates workarounds for custom APK names
+* Upload images in alphabetical order
+
 **0.14.1 - 2014-11-15**
 
 * Additional check if zipAlign task exists
