@@ -1,6 +1,6 @@
 # gradle-play-publisher
 
-Gradle plugin to upload your APK and app details to the Google Play Store. Needs the ```com.android.application``` plugin applied. Supports the Android Application Plugin as of version ```0.14.0```.
+Gradle plugin to upload your APK and app details to the Google Play Store. Needs the ```com.android.application``` plugin applied. Supports the Android Application Plugin as of version ```1.0.0```.
 
 [![Build Status](https://travis-ci.org/Triple-T/gradle-play-publisher.svg?branch=master)](https://travis-ci.org/Triple-T/gradle-play-publisher)
 
@@ -27,7 +27,7 @@ buildscript {
     
     dependencies {
     	// ...
-        classpath ('com.github.triplet.gradle:play-publisher:0.14.1') {
+        classpath ('com.github.triplet.gradle:play-publisher:1.0.0') {
             exclude group: 'com.google.guava'
         }
     }
@@ -160,37 +160,12 @@ Note: The plugin currently does not enforce the correct size and file type. If y
 
 Note: We still have some issues when you change the images in those folders.For now you should do a full rebuild whenever you change them.
 
-## Advanced Usage
-
-### Custom APK names
-
-The plugin automatically finds out where your APK file is located if you are using the default behavior. If, for some reason, you are changing this default output, you have to tell the plugin. In those cases, you probably have some code in a `applicationVariants.all {...}` block that looks something like this:
-
-```groovy
-applicationVariants.all { variant ->
-    if(variant.zipAlignEnabled) {
-        variant.outputFile = new File("path/to/my/custom.apk")
-    }
-}
-```
-In order to teach the plugin that you changed the output file for your variant, you have to override the `apkFile` property of the `publishApkRelease` task:
-
-```groovy
-applicationVariants.all { variant ->
-    // ... setup your custom apk name
-    
-    if (variant.buildType.name.equals("release")) {
-        project.tasks."publishApk${variant.name.capitalize()}".apkFile = variant.outputFile
-    }
-}
-```
-
 ## License
 
 	 The MIT License (MIT)
 	 
-	 Copyright (c) 2014 Christian Becker
-	 Copyright (c) 2014 Björn Hurling
+	 Copyright (c) 2015 Christian Becker
+	 Copyright (c) 2015 Björn Hurling
 
 	 Permission is hereby granted, free of charge, to any person obtaining a copy
 	 of this software and associated documentation files (the "Software"), to deal
