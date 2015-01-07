@@ -6,7 +6,11 @@ Gradle plugin to upload your APK and app details to the Google Play Store. Needs
 
 ## Prerequisites
 
-To use the publisher plugin you have to create a service account for your existing Google Play Account. See https://developers.google.com/android-publisher/getting_started for more information.
+To use the publisher plugin you have to create a service account for your existing Google Play Account. See https://developers.google.com/android-publisher/getting_started for more information. 
+
+Due to the way the Google Play Publisher API works, you have to grant at least the following permissions to that service account:
+
+![permissions.png](https://cloud.githubusercontent.com/assets/1361086/5045988/95eb902e-6bb9-11e4-9251-30840ba014d3.png)
 
 Once you finished the setup you have a so called *service account email address* and a *p12 key file* that we will use later on.
 
