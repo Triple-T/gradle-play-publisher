@@ -1,5 +1,6 @@
 package de.triplet.gradle.play
 
+import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.AbstractInputStreamContent
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.Listing
@@ -58,9 +59,21 @@ class PlayPublishListingTask extends PlayPublishTask {
                     listing.setFullDescription(fullDescription)
                 }
 
-                edits.listings()
-                        .update(applicationId, editId, locale, listing)
-                        .execute()
+                try {
+                    edits.listings()
+                            .update(applicationId, editId, locale, listing)
+                            .execute()
+                } catch (GoogleJsonResponseException e) {
+
+                    // In case we are using an unsupported locale Google generates an error that
+                    // is not exactly helpful. In that case we just wrap the original exception in our own.
+                    if (e.getMessage() != null && e.getMessage().contains("unsupportedListingLanguage")) {
+                        throw new IllegalArgumentException("Unsupported locale " + locale, e);
+                    }
+
+                    // Just rethrow everything else.
+                    throw e;
+                }
 
                 // By default this will be skipped – can be enabled in the play extension
                 if (extension.uploadImages) {
