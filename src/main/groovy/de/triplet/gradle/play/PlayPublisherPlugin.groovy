@@ -63,7 +63,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             } else {
                 bootstrapTask.outputFolder = new File(project.getProjectDir(), "src/main/play")
             }
-            bootstrapTask.description = "Downloads the play store listing for the ${variationName} build"
+            bootstrapTask.description = "Downloads the play store listing for the ${variationName} build. No download of image resources. See #18."
             bootstrapTask.group = PLAY_STORE_GROUP
 
             // Create and configure task to collect the play store resources.
