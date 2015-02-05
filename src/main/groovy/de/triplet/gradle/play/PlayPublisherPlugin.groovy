@@ -21,8 +21,8 @@ class PlayPublisherPlugin implements Plugin<Project> {
         def extension = project.extensions.create('play', PlayPublisherPluginExtension)
 
         project.android.applicationVariants.all { variant ->
-            if (!variant.buildType.name.equals("release")) {
-                log.debug("Skipping build type ${variant.buildType.name}.")
+            if (!variant.buildType.isDebuggable()) {
+                log.debug("Skipping debuggable build type ${variant.buildType.name}.")
                 return
             }
 
