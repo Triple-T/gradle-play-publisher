@@ -1,3 +1,8 @@
+**1.0.1 - 2015-02-06**
+
+* Create publish tasks for all non-debuggable build types
+* Better error message for unsupported locales
+
 **1.0.0 - 2015-01-07**
 
 * Updated to Android plugin 1.0.0
