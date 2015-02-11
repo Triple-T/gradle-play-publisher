@@ -104,7 +104,7 @@ To use this feature, create a special source folder called ```play```. Inside, c
 ```
 Note: Make sure your texts comply to the requirements of the Play Store, that is they do not exceed the allowed lengths of *30 characters* for the title, *80 characters* for the short description, *4000 characters* for the description and *500 characters* for the summary of recent changes.
 
-Note: You can provide different texts for different locales and product flavors. You may even support additional locales for some product flavors.
+Note: You can provide different texts for different locales, build types and product flavors. You may even support additional locales for some build types or product flavors.
 
 ### Specify the track
 
