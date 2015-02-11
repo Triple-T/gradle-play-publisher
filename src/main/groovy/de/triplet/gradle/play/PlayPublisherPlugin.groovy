@@ -61,7 +61,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             if (StringUtils.isNotEmpty(flavor)) {
                 bootstrapTask.outputFolder = new File(project.getProjectDir(), "src/${flavor}/play")
             } else {
-                bootstrapTask.outputFolder = new File(project.getProjectDir(), "src/main/play")
+                bootstrapTask.outputFolder = new File(project.getProjectDir(), "src/${variant.buildType.name}/play")
             }
             bootstrapTask.description = "Downloads the play store listing for the ${variationName} build. No download of image resources. See #18."
             bootstrapTask.group = PLAY_STORE_GROUP
@@ -69,6 +69,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             // Create and configure task to collect the play store resources.
             def playResourcesTask = project.tasks.create(playResourcesTaskName, GeneratePlayResourcesTask)
             playResourcesTask.inputs.file(new File(project.getProjectDir(), "src/main/play"))
+            playResourcesTask.inputs.file(new File(project.getProjectDir(), "src/${variant.buildType.name}/play"))
             if (StringUtils.isNotEmpty(flavor)) {
                 playResourcesTask.inputs.file(new File(project.getProjectDir(), "src/${flavor}/play"))
             }
