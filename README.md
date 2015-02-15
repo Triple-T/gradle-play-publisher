@@ -27,13 +27,10 @@ buildscript {
     
     dependencies {
     	// ...
-        classpath ('com.github.triplet.gradle:play-publisher:1.0.1') {
-            exclude group: 'com.google.guava'
-        }
+        classpath 'com.github.triplet.gradle:play-publisher:1.0.2'
     }
 }
 ```
-Make sure to exclude the `guava` library that is transitively pulled in by the `google-api-client` as it conflicts with the newer one used by the android plugin. Hopefully, we can drop that extra work once they have updated their dependencies.
 
 Apply it:
 
@@ -158,7 +155,7 @@ In that case the plugin looks for the Play Store images in your `play` folder. S
 
 Note: The plugin currently does not enforce the correct size and file type. If you try to upload invalid files, the Google API will fail with a detailed error message.
 
-Note: We still have some issues when you change the images in those folders.For now you should do a full rebuild whenever you change them.
+Note: We still have some issues when you change the images in those folders. For now you should do a full rebuild whenever you change them.
 
 ## License
 
