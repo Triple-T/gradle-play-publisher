@@ -1,3 +1,10 @@
+**1.0.2 - 2015-02-15**
+
+* Support build type specific resources - #38
+* Bugfix: Trim texts for listing before upload - #41
+* Skip upload of recent changes if play folder does not exist - #40
+* Exclude guava-jdk5 dependency that conflicts with a newer version pulled in by the Android Plugin - #21
+
 **1.0.1 - 2015-02-06**
 
 * Create publish tasks for all non-debuggable build types
