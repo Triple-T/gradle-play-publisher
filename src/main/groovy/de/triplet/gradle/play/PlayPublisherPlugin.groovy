@@ -70,6 +70,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             def playResourcesTask = project.tasks.create(playResourcesTaskName, GeneratePlayResourcesTask)
 
             playResourcesTask.inputs.file(new File(project.getProjectDir(), "src/main/play"))
+            playResourcesTask.inputs.file(new File(project.getProjectDir(), "src/${variant.buildType.name}/play"))
             if (StringUtils.isNotEmpty(flavor)) {
                 playResourcesTask.inputs.file(new File(project.getProjectDir(), "src/${flavor}/play"))
             }
