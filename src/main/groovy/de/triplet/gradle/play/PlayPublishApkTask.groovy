@@ -33,23 +33,27 @@ class PlayPublishApkTask extends PlayPublishTask {
                 .update(applicationId, editId, extension.track, newTrack)
                 .execute()
 
-        // Matches if locale have the correct naming e.g. en-US for play store
-        inputFolder.eachDirMatch(matcher) { dir ->
-            File whatsNewFile = new File(dir, FILE_NAME_FOR_WHATS_NEW_TEXT + "-" + extension.track)
+        if (inputFolder.exists()) {
 
-            if (!whatsNewFile.exists()) {
-                whatsNewFile = new File(dir, FILE_NAME_FOR_WHATS_NEW_TEXT)
+            // Matches if locale have the correct naming e.g. en-US for play store
+            inputFolder.eachDirMatch(matcher) { dir ->
+                File whatsNewFile = new File(dir, FILE_NAME_FOR_WHATS_NEW_TEXT + "-" + extension.track)
+
+                if (!whatsNewFile.exists()) {
+                    whatsNewFile = new File(dir, FILE_NAME_FOR_WHATS_NEW_TEXT)
+                }
+
+                if (whatsNewFile.exists()) {
+                    def whatsNewText = TaskHelper.readAndTrimFile(whatsNewFile, MAX_CHARACTER_LENGTH_FOR_WHATS_NEW_TEXT)
+                    def locale = dir.getName()
+
+                    ApkListing newApkListing = new ApkListing().setRecentChanges(whatsNewText)
+                    edits.apklistings()
+                            .update(applicationId, editId, apk.getVersionCode(), locale, newApkListing)
+                            .execute()
+                }
             }
 
-            if (whatsNewFile.exists()) {
-                def whatsNewText = TaskHelper.readAndTrimFile(whatsNewFile, MAX_CHARACTER_LENGTH_FOR_WHATS_NEW_TEXT)
-                def locale = dir.getName()
-
-                ApkListing newApkListing = new ApkListing().setRecentChanges(whatsNewText)
-                edits.apklistings()
-                        .update(applicationId, editId, apk.getVersionCode(), locale, newApkListing)
-                        .execute()
-            }
         }
 
         edits.commit(applicationId, editId).execute()
