@@ -6,14 +6,15 @@ import com.google.api.client.http.FileContent
 class TaskHelper {
 
     def static readAndTrimFile(File file, int maxCharLength) {
-        def message = ""
         if (file.exists()) {
-            message = file.text
+            def message = file.text
             if (message.length() > maxCharLength) {
-                message.substring(0, maxCharLength)
+                return message.substring(0, maxCharLength)
             }
+            return message
         }
-        return message;
+
+        return ""
     }
 
     def static List<AbstractInputStreamContent> getImageListAsStream(File listingDir, String graphicPath) {
