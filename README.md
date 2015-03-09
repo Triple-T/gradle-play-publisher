@@ -157,6 +157,45 @@ Note: The plugin currently does not enforce the correct size and file type. If y
 
 Note: We still have some issues when you change the images in those folders. For now you should do a full rebuild whenever you change them.
 
+### Making tasks from "play" plugin be dependent on user's script tasks
+
+Sometime it's required to execute some custom tasks from user script right before executing tasks from `play` plugin.
+For example, one can have necessity to download images for store listing from remote 3rd-party server.
+This should be happened before executing task from `play` plugin, that uploads this images to the Google play.
+
+* In order to make dependency one should know name of the tasks. Here they are:
+    * `"generate${variationName}PlayResources"` - this task copies all play resources (images and text) to "output" folder for further publishing.
+    * `"publishApk${variationName}"` - this task upload generated apk + `whatsnew` to Google Play
+    * `"publishListing${variationName}"` - this task uploads text for listing (like description) and images, if required, to Google Play
+    * `"publish${variationName}"` - this task just triggers `"publishListing${variationName}"` and `"publishApk${variationName}"` tasks
+
+    Here `${variationName}` is name of your build variant (one from `buildTypes` for simple build).
+
+    For example, `"generate${variationName}PlayResources"` for `release` build type without any flavor will be `"generateReleasePlayResources"`
+* When one knows name of the task from "play" plugin, then dependency could be added in this way:
+
+
+    ````
+    def generateReleasePlayResources = project.tasks.getByName("generateReleasePlayResources")
+    generateReleasePlayResources.dependsOn loadStoreListing
+    ````
+
+    Here `"loadStoreListing"` task is custom task, that is defined in user's gradle build script.
+
+* Sometimes task from "play" plugin could be not visible after declaration of user's task.
+
+    In order to resolve this issue new dependency have to added after Initialisation phase.
+
+  ````
+    //this work-around is required because generateReleasePlayResources is not defined at time of creation of loadStoreListing task
+    project.afterEvaluate {
+        def generateReleasePlayResources = project.tasks.getByName("generateReleasePlayResources")
+        generateReleasePlayResources.dependsOn loadStoreListing
+    }
+  ````
+
+
+
 ## License
 
 	 The MIT License (MIT)
