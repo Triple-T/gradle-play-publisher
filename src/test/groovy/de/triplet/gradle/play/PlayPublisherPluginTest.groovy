@@ -13,7 +13,7 @@ class PlayPublisherPluginTest {
     @Test(expected = PluginApplicationException.class)
     public void testThrowsOnLibraryProjects() {
         Project project = ProjectBuilder.builder().build()
-        project.apply plugin: 'android-library'
+        project.apply plugin: 'com.android.library'
         project.apply plugin: 'play'
     }
 
