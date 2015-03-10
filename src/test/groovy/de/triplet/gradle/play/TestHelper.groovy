@@ -8,7 +8,7 @@ public class TestHelper {
     public static final File FIXTURE_WORKING_DIR = new File("src/test/fixtures/android_app")
 
     public static Project evaluatableProject() {
-        Project project = ProjectBuilder.builder().withProjectDir(FIXTURE_WORKING_DIR).build();
+        Project project = ProjectBuilder.builder().withProjectDir(FIXTURE_WORKING_DIR).build()
         project.apply plugin: 'android'
         project.apply plugin: 'play'
         project.android {

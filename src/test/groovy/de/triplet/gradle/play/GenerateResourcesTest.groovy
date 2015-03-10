@@ -5,7 +5,7 @@ import org.gradle.api.Project
 import org.junit.Test
 
 import static junit.framework.TestCase.assertEquals
-import static org.junit.Assert.*
+import static org.junit.Assert.assertTrue
 
 class GenerateResourcesTest {
 
