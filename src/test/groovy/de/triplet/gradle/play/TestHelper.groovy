@@ -12,14 +12,14 @@ public class TestHelper {
         project.apply plugin: 'com.android.application'
         project.apply plugin: 'play'
         project.android {
-            compileSdkVersion 21
-            buildToolsVersion '21.1.2'
+            compileSdkVersion 22
+            buildToolsVersion '22.0.1'
 
             defaultConfig {
                 versionCode 1
                 versionName '1.0'
-                minSdkVersion 21
-                targetSdkVersion 21
+                minSdkVersion 22
+                targetSdkVersion 22
             }
 
             buildTypes {
