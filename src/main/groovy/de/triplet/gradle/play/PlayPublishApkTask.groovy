@@ -1,7 +1,5 @@
 package de.triplet.gradle.play
-
 import com.android.build.gradle.api.ApkVariantOutput
-import com.android.build.gradle.api.ApplicationVariant
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.model.Apk
 import com.google.api.services.androidpublisher.model.ApkListing
@@ -13,8 +11,6 @@ class PlayPublishApkTask extends PlayPublishTask {
     static def MAX_CHARACTER_LENGTH_FOR_WHATS_NEW_TEXT = 500
     static def FILE_NAME_FOR_WHATS_NEW_TEXT = "whatsnew"
 
-    ApplicationVariant variant
-
     File inputFolder
 
     @TaskAction
@@ -25,12 +21,12 @@ class PlayPublishApkTask extends PlayPublishTask {
         FileContent newApkFile = new FileContent(AndroidPublisherHelper.MIME_TYPE_APK, apkOutput.outputFile)
 
         Apk apk = edits.apks()
-                .upload(applicationId, editId, newApkFile)
+                .upload(variant.getApplicationId(), editId, newApkFile)
                 .execute()
 
         Track newTrack = new Track().setVersionCodes([apk.getVersionCode()])
         edits.tracks()
-                .update(applicationId, editId, extension.track, newTrack)
+                .update(variant.getApplicationId(), editId, extension.track, newTrack)
                 .execute()
 
         if (inputFolder.exists()) {
@@ -49,14 +45,14 @@ class PlayPublishApkTask extends PlayPublishTask {
 
                     ApkListing newApkListing = new ApkListing().setRecentChanges(whatsNewText)
                     edits.apklistings()
-                            .update(applicationId, editId, apk.getVersionCode(), locale, newApkListing)
+                            .update(variant.getApplicationId(), editId, apk.getVersionCode(), locale, newApkListing)
                             .execute()
                 }
             }
 
         }
 
-        edits.commit(applicationId, editId).execute()
+        edits.commit(variant.getApplicationId(), editId).execute()
     }
 
 }

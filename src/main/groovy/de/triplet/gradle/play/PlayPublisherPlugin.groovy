@@ -36,7 +36,6 @@ class PlayPublisherPlugin implements Plugin<Project> {
             def flavor = StringUtils.uncapitalize(productFlavorName)
 
             def variationName = "${productFlavorName}${buildTypeName}"
-            def variantApplicationId = variant.applicationId
 
             def bootstrapTaskName = "bootstrap${variationName}PlayResources"
             def playResourcesTaskName = "generate${variationName}PlayResources"
@@ -57,7 +56,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             // Create and configure bootstrap task for this variant.
             def bootstrapTask = project.tasks.create(bootstrapTaskName, BootstrapTask)
             bootstrapTask.extension = extension
-            bootstrapTask.applicationId = variantApplicationId
+            bootstrapTask.variant = variant
             if (StringUtils.isNotEmpty(flavor)) {
                 bootstrapTask.outputFolder = new File(project.getProjectDir(), "src/${flavor}/play")
             } else {
@@ -86,7 +85,6 @@ class PlayPublisherPlugin implements Plugin<Project> {
             def publishApkTask = project.tasks.create(publishApkTaskName, PlayPublishApkTask)
             publishApkTask.extension = extension
             publishApkTask.variant = variant
-            publishApkTask.applicationId = variantApplicationId
             publishApkTask.inputFolder = playResourcesTask.outputFolder
             publishApkTask.description = "Uploads the APK for the ${variationName} build"
             publishApkTask.group = PLAY_STORE_GROUP
@@ -94,7 +92,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             // Create and configure publisher meta task for this variant
             def publishListingTask = project.tasks.create(publishListingTaskName, PlayPublishListingTask)
             publishListingTask.extension = extension
-            publishListingTask.applicationId = variantApplicationId
+            publishListingTask.variant = variant
             publishListingTask.inputFolder = playResourcesTask.outputFolder
             publishListingTask.description = "Updates the play store listing for the ${variationName} build"
             publishListingTask.group = PLAY_STORE_GROUP

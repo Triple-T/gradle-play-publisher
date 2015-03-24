@@ -61,7 +61,7 @@ class PlayPublishListingTask extends PlayPublishTask {
 
                 try {
                     edits.listings()
-                            .update(applicationId, editId, locale, listing)
+                            .update(variant.getApplicationId(), editId, locale, listing)
                             .execute()
                 } catch (GoogleJsonResponseException e) {
 
@@ -104,7 +104,7 @@ class PlayPublishListingTask extends PlayPublishTask {
             }
         }
 
-        edits.commit(applicationId, editId).execute()
+        edits.commit(variant.getApplicationId(), editId).execute()
     }
 
     def uploadSingleGraphic(AbstractInputStreamContent contentGraphic, String locale, String imageType) {
@@ -112,10 +112,10 @@ class PlayPublishListingTask extends PlayPublishTask {
             AndroidPublisher.Edits.Images images = edits.images()
 
             // Delete current image in play store
-            images.deleteall(applicationId, editId, locale, imageType).execute()
+            images.deleteall(variant.getApplicationId(), editId, locale, imageType).execute()
 
             // After that upload the new image
-            images.upload(applicationId, editId, locale, imageType, contentGraphic).execute()
+            images.upload(variant.getApplicationId(), editId, locale, imageType, contentGraphic).execute()
         }
     }
 
@@ -124,14 +124,14 @@ class PlayPublishListingTask extends PlayPublishTask {
             AndroidPublisher.Edits.Images images = edits.images()
 
             // Delete all images in play store
-            images.deleteall(applicationId, editId, locale, imageType).execute()
+            images.deleteall(variant.getApplicationId(), editId, locale, imageType).execute()
 
             // After that upload the new images
             if (contentGraphicList.size() > MAX_SCREENSHOTS_SIZE) {
                 logger.error("Sorry! You can only upload 8 screenshots")
             } else {
                 contentGraphicList.each { contentGraphic ->
-                    images.upload(applicationId, editId, locale, imageType, contentGraphic).execute()
+                    images.upload(variant.getApplicationId(), editId, locale, imageType, contentGraphic).execute()
                 }
             }
         }

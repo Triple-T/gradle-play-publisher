@@ -30,7 +30,7 @@ class BootstrapTask extends PlayPublishTask {
 
     def bootstrapListing() {
         List<Listing> listings = edits.listings()
-                .list(applicationId, editId)
+                .list(variant.getApplicationId(), editId)
                 .execute()
                 .getListings()
         if (listings == null) {
@@ -60,7 +60,7 @@ class BootstrapTask extends PlayPublishTask {
 
             for (String imageType : IMAGE_TYPE_ARRAY) {
                 List<Image> images = edits.images()
-                        .list(applicationId, editId, language, imageType)
+                        .list(variant.getApplicationId(), editId, language, imageType)
                         .execute()
                         .getImages()
                 saveImage(listingDir, imageType, images)
@@ -74,7 +74,7 @@ class BootstrapTask extends PlayPublishTask {
 
     def bootstrapWhatsNew() {
         List<Apk> apks = edits.apks()
-                .list(applicationId, editId)
+                .list(variant.getApplicationId(), editId)
                 .execute()
                 .getApks()
         if (apks == null) {
@@ -83,7 +83,7 @@ class BootstrapTask extends PlayPublishTask {
         Integer versionCode = apks.collect { apk -> apk.getVersionCode() }.max()
 
         List<ApkListing> apkListings = edits.apklistings()
-                .list(applicationId, editId, versionCode)
+                .list(variant.getApplicationId(), editId, versionCode)
                 .execute()
                 .getListings()
         if (apkListings == null) {
