@@ -106,4 +106,42 @@ public class PlayPublishTaskTest {
         m = pattern.matcher("de_DE")
         assertFalse(m.find())
     }
+
+    @Test
+    public void testApplicationIdChange() {
+        Project project = TestHelper.evaluatableProject()
+
+        project.android {
+            productFlavors {
+                paid {
+                    applicationId 'com.example.publisher'
+                }
+                free
+            }
+
+            buildTypes {
+                release {
+                    applicationIdSuffix '.release'
+                }
+            }
+
+            applicationVariants.all { variant ->
+                def flavorName = variant.variantData.variantConfiguration.flavorName
+                if (flavorName == 'paid') {
+                    variant.mergedFlavor.applicationId += '.paid'
+                }
+            }
+        }
+
+        project.evaluate()
+
+        // Attach the mock
+        project.tasks.publishApkPaidRelease.service = publisherMock
+
+        // finally run the task we want to check
+        project.tasks.publishApkPaidRelease.publish()
+
+        // verify that we init the connection with the correct application id
+        verify(editsMock).insert("com.example.publisher.paid.release", null)
+    }
 }
