@@ -1,5 +1,6 @@
 package de.triplet.gradle.play
 
+import com.android.build.gradle.api.ApplicationVariant
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.AppEdit
 import org.gradle.api.DefaultTask
@@ -11,7 +12,7 @@ class PlayPublishTask extends DefaultTask {
 
     PlayPublisherPluginExtension extension
 
-    String applicationId
+    ApplicationVariant variant
 
     String editId
 
@@ -28,7 +29,7 @@ class PlayPublishTask extends DefaultTask {
 
         // Create a new edit to make changes to your listing.
         AndroidPublisher.Edits.Insert editRequest = edits.insert(
-                applicationId,
+                variant.getApplicationId(),
                 null /* no content yet */)
         AppEdit edit = editRequest.execute()
 
