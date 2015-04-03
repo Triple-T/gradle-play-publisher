@@ -157,43 +157,25 @@ Note: The plugin currently does not enforce the correct size and file type. If y
 
 Note: We still have some issues when you change the images in those folders. For now you should do a full rebuild whenever you change them.
 
-### Making tasks from "play" plugin be dependent on user's script tasks
+## Advanced Topics
 
-Sometime it's required to execute some custom tasks from user script right before executing tasks from `play` plugin.
-For example, one can have necessity to download images for store listing from remote 3rd-party server.
-This should be happened before executing task from `play` plugin, that uploads this images to the Google play.
+### Run custom tasks before publishing
 
-* In order to make dependency one should know name of the tasks. Here they are:
-    * `"generate${variationName}PlayResources"` - this task copies all play resources (images and text) to "output" folder for further publishing.
-    * `"publishApk${variationName}"` - this task upload generated apk + `whatsnew` to Google Play
-    * `"publishListing${variationName}"` - this task uploads text for listing (like description) and images, if required, to Google Play
-    * `"publish${variationName}"` - this task just triggers `"publishListing${variationName}"` and `"publishApk${variationName}"` tasks
+Sometimes it's required to execute some custom tasks right before executing tasks from the `play` plugin.
 
-    Here `${variationName}` is name of your build variant (one from `buildTypes` for simple build).
+For example, one can have necessity to download images for the store listing from a remote 3rd-party server.
+This should happen before executing the `generateReleasePlayResources` task which is responsible for collecting all the play store assets for upload. 
 
-    For example, `"generate${variationName}PlayResources"` for `release` build type without any flavor will be `"generateReleasePlayResources"`
-* When one knows name of the task from "play" plugin, then dependency could be added in this way:
+Let's assume we have a task called `loadStoreListingFromRemote` that fetches store listing information from a remote server and places it under `src/main/play` as needed by the `play` plugin. Our `generateReleasePlayResources` task should now depend on that other task. In order to do that, we have to add the follwing lines to our build script:
 
-
-    ````
+```groovy
+project.afterEvaluate {
     def generateReleasePlayResources = project.tasks.getByName("generateReleasePlayResources")
-    generateReleasePlayResources.dependsOn loadStoreListing
-    ````
+    generateReleasePlayResources.dependsOn loadStoreListingFromRemote
+}
+```
 
-    Here `"loadStoreListing"` task is custom task, that is defined in user's gradle build script.
-
-* Sometimes task from "play" plugin could be not visible after declaration of user's task.
-
-    In order to resolve this issue new dependency have to added after Initialisation phase.
-
-  ````
-    //this work-around is required because generateReleasePlayResources is not defined at time of creation of loadStoreListing task
-    project.afterEvaluate {
-        def generateReleasePlayResources = project.tasks.getByName("generateReleasePlayResources")
-        generateReleasePlayResources.dependsOn loadStoreListing
-    }
-  ````
-
+Note that we have to wait for the evaluation phase to complete before the `generateReleasePlayResources` task becomes visible.
 
 
 ## License
