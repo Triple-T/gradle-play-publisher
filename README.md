@@ -45,6 +45,8 @@ The plugin creates the following tasks for you:
 * `publishRelease` - Uploads everything.
 * `bootstrapReleasePlayResources` - Fetch all existing data from the Play Store to bootstrap the required files and folders.
 
+Make sure to set a valid `signingConfig` for the release build type. Otherwise, there won't be a publishable APK and the above tasks won't be available.
+
 In case you are using product flavors you will get one of the above tasks for every flavor. E.g. `publishApkPaidRelease` or `publishListingPaidRelease`.
 
 ## Configuration
