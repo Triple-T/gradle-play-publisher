@@ -1,3 +1,8 @@
+**1.0.3 - 2015-04-13**
+
+* Defer retrieval of applicationId to task execution - #54
+* Bugfix: Use UTF-8 encoding in bootstrap task - #59
+
 **1.0.2 - 2015-02-15**
 
 * Support build type specific resources - #38
