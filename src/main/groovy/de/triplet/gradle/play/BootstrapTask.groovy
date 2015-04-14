@@ -41,12 +41,14 @@ class BootstrapTask extends PlayPublishTask {
         String fullDescription
         String shortDescription
         String title
+        String video
 
         for (Listing listing : listings) {
             language = listing.getLanguage()
             fullDescription = listing.getFullDescription()
             shortDescription = listing.getShortDescription()
             title = listing.getTitle()
+            video = listing.getVideo()
 
             File languageDir = new File(outputFolder, language)
             if (!languageDir.exists() && !languageDir.mkdirs()) {
@@ -69,6 +71,7 @@ class BootstrapTask extends PlayPublishTask {
             FileUtils.writeStringToFile(new File(listingDir, PlayPublishListingTask.FILE_NAME_FOR_FULL_DESCRIPTION), fullDescription, "UTF-8")
             FileUtils.writeStringToFile(new File(listingDir, PlayPublishListingTask.FILE_NAME_FOR_SHORT_DESCRIPTION), shortDescription, "UTF-8")
             FileUtils.writeStringToFile(new File(listingDir, PlayPublishListingTask.FILE_NAME_FOR_TITLE), title, "UTF-8")
+            FileUtils.writeStringToFile(new File(listingDir, PlayPublishListingTask.FILE_NAME_FOR_VIDEO), video, "UTF-8")
         }
     }
 

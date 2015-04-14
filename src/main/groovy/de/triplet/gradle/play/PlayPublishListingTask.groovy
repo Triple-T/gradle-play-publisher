@@ -17,6 +17,7 @@ class PlayPublishListingTask extends PlayPublishTask {
     static def FILE_NAME_FOR_TITLE = "title"
     static def FILE_NAME_FOR_SHORT_DESCRIPTION = "shortdescription"
     static def FILE_NAME_FOR_FULL_DESCRIPTION = "fulldescription"
+    static def FILE_NAME_FOR_VIDEO = "video"
     static def LISTING_PATH = "listing/"
 
     static def IMAGE_TYPE_FEATURE_GRAPHIC = "featureGraphic"
@@ -48,6 +49,9 @@ class PlayPublishListingTask extends PlayPublishTask {
                 File fileFullDescription = new File(listingDir, FILE_NAME_FOR_FULL_DESCRIPTION)
                 def fullDescription = TaskHelper.readAndTrimFile(fileFullDescription, MAX_CHARACTER_LENGTH_FOR_FULL_DESCRIPTION)
 
+                File fileVideo = new File(listingDir, FILE_NAME_FOR_VIDEO)
+                def video = TaskHelper.readAndTrimFile(fileVideo, Integer.MAX_VALUE)
+
                 final Listing listing = new Listing()
                 if (StringUtils.isNotEmpty(title)) {
                     listing.setTitle(title)
@@ -57,6 +61,9 @@ class PlayPublishListingTask extends PlayPublishTask {
                 }
                 if (StringUtils.isNotEmpty(fullDescription)) {
                     listing.setFullDescription(fullDescription)
+                }
+                if (StringUtils.isNotEmpty(video)) {
+                    listing.setVideo(video)
                 }
 
                 try {

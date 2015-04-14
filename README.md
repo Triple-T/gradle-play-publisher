@@ -68,7 +68,7 @@ play {
 
 You can also update the Play Store Metadata automatically along with your APK. 
 
-To use this feature, create a special source folder called ```play```. Inside, create a folder for each locale you want to support. Then drop your summary of recent changes into a file called ```whatsnew```. The title,  the description and the short description go into their own files in a subfolder called ```listing```. Once set up, your project should look something like this:
+To use this feature, create a special source folder called ```play```. Inside, create a folder for each locale you want to support. Then drop your summary of recent changes into a file called ```whatsnew```. The title, the description, the short description and the YouTube video url go into their own files in a subfolder called ```listing```. Once set up, your project should look something like this:
 
 ```
 - [src]
@@ -86,6 +86,8 @@ To use this feature, create a special source folder called ```play```. Inside, c
           |   |   + - shortdescription
           |   |   |
           |   |   + - title
+          |   |   |
+          |   |   + - video
           |   |
           |   + - whatsnew
           |
@@ -98,6 +100,8 @@ To use this feature, create a special source folder called ```play```. Inside, c
               |   + - shortdescription
               |   |
               |   + - title
+              |   |
+              |   + - video
               |
               + - whatsnew
 ```
