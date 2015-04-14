@@ -1,3 +1,7 @@
+**1.0.4 - 2015-04-14**
+
+* Bootstrap and upload promo video urls - #60
+
 **1.0.3 - 2015-04-13**
 
 * Defer retrieval of applicationId to task execution - #54
