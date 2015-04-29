@@ -105,9 +105,27 @@ To use this feature, create a special source folder called ```play```. Inside, c
               |
               + - whatsnew
 ```
-Note: Make sure your texts comply to the requirements of the Play Store, that is they do not exceed the allowed lengths of *30 characters* for the title, *80 characters* for the short description, *4000 characters* for the description and *500 characters* for the summary of recent changes.
 
 Note: You can provide different texts for different locales, build types and product flavors. You may even support additional locales for some build types or product flavors.
+
+### Text requirements
+To make sure your texts comply to the requirements of the Play Store, there is a check build-in that causes the build to fail if your text will exceed the allowed lengths.
+
+The limits are:
+
+* Title: *90 characters*
+* Short description: *80 characters*
+* Long description: *4000 characters*
+* Recent changes : *500 characters*
+
+To prevent this check for some reason, you can toggle it with the ```errorOnSizeLimit``` property:
+
+```groovy
+play {
+    // ...
+    errorOnSizeLimit = false
+}
+```
 
 ### Specify the track
 

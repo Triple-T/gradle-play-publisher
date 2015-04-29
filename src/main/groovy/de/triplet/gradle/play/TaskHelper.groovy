@@ -39,4 +39,13 @@ class TaskHelper {
         return null
     }
 
+    def static boolean checkForTextLength(File file, int maxCharLength) {
+        if (file.exists()) {
+            def message = file.text
+            if (message.length() > maxCharLength) {
+                return false
+            }
+        }
+        return true
+    }
 }
