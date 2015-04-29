@@ -45,7 +45,7 @@ class PlayPublishListingTask extends PlayPublishTask {
                 File fileFullDescription = new File(listingDir, FILE_NAME_FOR_FULL_DESCRIPTION)
                 File fileVideo = new File(listingDir, FILE_NAME_FOR_VIDEO)
 
-                if (extension.errorOnExceededTextSizeLimit) {
+                if (extension.errorOnSizeLimit) {
                     if (!TaskHelper.checkForTextLength(fileTitle, MAX_CHARACTER_LENGTH_FOR_TITLE)) {
                         throw new LimitExceededException(fileTitle, MAX_CHARACTER_LENGTH_FOR_TITLE)
                     }

@@ -41,7 +41,7 @@ class PlayPublishApkTask extends PlayPublishTask {
 
                 if (whatsNewFile.exists()) {
 
-                    if (extension.errorOnExceededTextSizeLimit) {
+                    if (extension.errorOnSizeLimit) {
                         if (!TaskHelper.checkForTextLength(whatsNewFile, MAX_CHARACTER_LENGTH_FOR_WHATS_NEW_TEXT)) {
                             throw new LimitExceededException(whatsNewFile, MAX_CHARACTER_LENGTH_FOR_WHATS_NEW_TEXT)
                         }
