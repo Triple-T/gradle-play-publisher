@@ -22,12 +22,12 @@ class PlayPublishApkTask extends PlayPublishTask {
         FileContent newApkFile = new FileContent(AndroidPublisherHelper.MIME_TYPE_APK, apkOutput.outputFile)
 
         Apk apk = edits.apks()
-                .upload(variant.getApplicationId(), editId, newApkFile)
+                .upload(variant.applicationId, editId, newApkFile)
                 .execute()
 
         Track newTrack = new Track().setVersionCodes([apk.getVersionCode()])
         edits.tracks()
-                .update(variant.getApplicationId(), editId, extension.track, newTrack)
+                .update(variant.applicationId, editId, extension.track, newTrack)
                 .execute()
 
         if (inputFolder.exists()) {
@@ -43,18 +43,18 @@ class PlayPublishApkTask extends PlayPublishTask {
                 if (whatsNewFile.exists()) {
 
                     def whatsNewText = TaskHelper.readAndTrimFile(whatsNewFile, MAX_CHARACTER_LENGTH_FOR_WHATS_NEW_TEXT, extension.errorOnSizeLimit)
-                    def locale = dir.getName()
+                    def locale = dir.name
 
                     ApkListing newApkListing = new ApkListing().setRecentChanges(whatsNewText)
                     edits.apklistings()
-                            .update(variant.getApplicationId(), editId, apk.getVersionCode(), locale, newApkListing)
+                            .update(variant.applicationId, editId, apk.getVersionCode(), locale, newApkListing)
                             .execute()
                 }
             }
 
         }
 
-        edits.commit(variant.getApplicationId(), editId).execute()
+        edits.commit(variant.applicationId, editId).execute()
     }
 
 }

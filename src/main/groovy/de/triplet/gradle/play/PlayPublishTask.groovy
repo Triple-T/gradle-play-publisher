@@ -28,9 +28,7 @@ class PlayPublishTask extends DefaultTask {
         edits = service.edits()
 
         // Create a new edit to make changes to your listing.
-        AndroidPublisher.Edits.Insert editRequest = edits.insert(
-                variant.getApplicationId(),
-                null /* no content yet */)
+        AndroidPublisher.Edits.Insert editRequest = edits.insert(variant.applicationId, null /* no content yet */)
         AppEdit edit = editRequest.execute()
 
         editId = edit.getId()
