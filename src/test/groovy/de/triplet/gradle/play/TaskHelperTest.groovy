@@ -30,6 +30,13 @@ class TaskHelperTest {
     }
 
     @Test
+    public void testCloseCorrectTextLength() {
+        boolean correctSize = TaskHelper.checkForTextLength(TESTFILE, 12);
+
+        assertEquals(true, correctSize);
+    }
+
+    @Test
     public void testIncorrectTextLength() {
         boolean correctSize = TaskHelper.checkForTextLength(TESTFILE, 1);
 
