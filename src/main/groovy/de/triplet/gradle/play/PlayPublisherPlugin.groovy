@@ -43,7 +43,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             def publishListingTaskName = "publishListing${variationName}"
             def publishTaskName = "publish${variationName}"
 
-            def outputData = variant.outputs[0]
+            def outputData = variant.outputs.first()
             def zipAlignTask = outputData.zipAlign
             def assembleTask = outputData.assemble
 
