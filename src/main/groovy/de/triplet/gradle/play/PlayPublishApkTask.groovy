@@ -40,6 +40,13 @@ class PlayPublishApkTask extends PlayPublishTask {
                 }
 
                 if (whatsNewFile.exists()) {
+
+                    if (extension.errorOnExceededTextSizeLimit) {
+                        if (!TaskHelper.checkForTextLength(whatsNewFile, MAX_CHARACTER_LENGTH_FOR_WHATS_NEW_TEXT)) {
+                            throw new LimitExceededException(whatsNewFile, MAX_CHARACTER_LENGTH_FOR_WHATS_NEW_TEXT)
+                        }
+                    }
+
                     def whatsNewText = TaskHelper.readAndTrimFile(whatsNewFile, MAX_CHARACTER_LENGTH_FOR_WHATS_NEW_TEXT)
                     def locale = dir.getName()
 
