@@ -6,8 +6,8 @@ class LimitExceededException extends IllegalArgumentException {
     private String message = ""
 
     LimitExceededException(File file, int limit) {
-        String place = file.getParent() + File.pathSeparator + file.getName();
-        message = "File" + place + "has reached the limit of " + limit + "characters."
+        String place = file.getParentFile().getParentFile().getName() + " -> " + file.getName();
+        message = "File \'" + place + "\' has reached the limit of " + limit + " characters."
     }
 
     @Override
