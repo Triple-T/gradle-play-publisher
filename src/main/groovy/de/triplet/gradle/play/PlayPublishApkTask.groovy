@@ -1,4 +1,5 @@
 package de.triplet.gradle.play
+
 import com.android.build.gradle.api.ApkVariantOutput
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.model.Apk
@@ -41,13 +42,7 @@ class PlayPublishApkTask extends PlayPublishTask {
 
                 if (whatsNewFile.exists()) {
 
-                    if (extension.errorOnSizeLimit) {
-                        if (!TaskHelper.checkForTextLength(whatsNewFile, MAX_CHARACTER_LENGTH_FOR_WHATS_NEW_TEXT)) {
-                            throw new LimitExceededException(whatsNewFile, MAX_CHARACTER_LENGTH_FOR_WHATS_NEW_TEXT)
-                        }
-                    }
-
-                    def whatsNewText = TaskHelper.readAndTrimFile(whatsNewFile, MAX_CHARACTER_LENGTH_FOR_WHATS_NEW_TEXT)
+                    def whatsNewText = TaskHelper.readAndTrimFile(whatsNewFile, MAX_CHARACTER_LENGTH_FOR_WHATS_NEW_TEXT, extension.errorOnSizeLimit)
                     def locale = dir.getName()
 
                     ApkListing newApkListing = new ApkListing().setRecentChanges(whatsNewText)

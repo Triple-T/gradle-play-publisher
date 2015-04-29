@@ -10,36 +10,25 @@ class TaskHelperTest {
 
     @Test
     public void testFilesAreCorrectlyTrimmed() {
-        String trimmed = TaskHelper.readAndTrimFile(TESTFILE, 6)
+        def trimmed = TaskHelper.readAndTrimFile(TESTFILE, 6, false)
 
         assertEquals(6, trimmed.length())
     }
 
     @Test
     public void testShortFilesAreNotTrimmed() {
-        String trimmed = TaskHelper.readAndTrimFile(TESTFILE, 100)
+        def trimmed = TaskHelper.readAndTrimFile(TESTFILE, 100, false)
 
         assertEquals(12, trimmed.length())
     }
 
     @Test
     public void testCorrectTextLength() {
-        boolean correctSize = TaskHelper.checkForTextLength(TESTFILE, 50);
-
-        assertEquals(true, correctSize);
+        TaskHelper.readAndTrimFile(TESTFILE, 50, true)
     }
 
-    @Test
-    public void testCloseCorrectTextLength() {
-        boolean correctSize = TaskHelper.checkForTextLength(TESTFILE, 12);
-
-        assertEquals(true, correctSize);
-    }
-
-    @Test
+    @Test(expected = LimitExceededException.class)
     public void testIncorrectTextLength() {
-        boolean correctSize = TaskHelper.checkForTextLength(TESTFILE, 1);
-
-        assertEquals(false, correctSize);
+        TaskHelper.readAndTrimFile(TESTFILE, 1, true)
     }
 }

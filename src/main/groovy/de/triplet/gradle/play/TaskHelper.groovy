@@ -5,10 +5,14 @@ import com.google.api.client.http.FileContent
 
 class TaskHelper {
 
-    def static readAndTrimFile(File file, int maxCharLength) {
+    def static readAndTrimFile(File file, int maxCharLength, boolean errorOnSizeLimit) {
         if (file.exists()) {
             def message = file.text
             if (message.length() > maxCharLength) {
+                if (errorOnSizeLimit) {
+                    throw new LimitExceededException(file, maxCharLength)
+                }
+
                 return message.substring(0, maxCharLength)
             }
             return message
@@ -37,15 +41,5 @@ class TaskHelper {
             }
         }
         return null
-    }
-
-    def static boolean checkForTextLength(File file, int maxCharLength) {
-        if (file.exists()) {
-            def message = file.text
-            if (message.length() > maxCharLength) {
-                return false
-            }
-        }
-        return true
     }
 }
