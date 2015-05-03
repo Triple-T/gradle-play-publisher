@@ -35,7 +35,7 @@ class PlayPublishListingTask extends PlayPublishTask {
 
         // Matches if locale have the correct naming e.g. en-US for play store
         inputFolder.eachDirMatch(matcher) { dir ->
-            def locale = dir.getName()
+            def locale = dir.name
 
             File listingDir = new File(dir, LISTING_PATH)
             // Check if listing directory exist
@@ -66,13 +66,13 @@ class PlayPublishListingTask extends PlayPublishTask {
 
                 try {
                     edits.listings()
-                            .update(variant.getApplicationId(), editId, locale, listing)
+                            .update(variant.applicationId, editId, locale, listing)
                             .execute()
                 } catch (GoogleJsonResponseException e) {
 
                     // In case we are using an unsupported locale Google generates an error that
                     // is not exactly helpful. In that case we just wrap the original exception in our own.
-                    if (e.getMessage() != null && e.getMessage().contains("unsupportedListingLanguage")) {
+                    if (e.message != null && e.message.contains("unsupportedListingLanguage")) {
                         throw new IllegalArgumentException("Unsupported locale " + locale, e);
                     }
 
@@ -109,7 +109,7 @@ class PlayPublishListingTask extends PlayPublishTask {
             }
         }
 
-        edits.commit(variant.getApplicationId(), editId).execute()
+        edits.commit(variant.applicationId, editId).execute()
     }
 
     def uploadSingleGraphic(AbstractInputStreamContent contentGraphic, String locale, String imageType) {
@@ -117,10 +117,10 @@ class PlayPublishListingTask extends PlayPublishTask {
             AndroidPublisher.Edits.Images images = edits.images()
 
             // Delete current image in play store
-            images.deleteall(variant.getApplicationId(), editId, locale, imageType).execute()
+            images.deleteall(variant.applicationId, editId, locale, imageType).execute()
 
             // After that upload the new image
-            images.upload(variant.getApplicationId(), editId, locale, imageType, contentGraphic).execute()
+            images.upload(variant.applicationId, editId, locale, imageType, contentGraphic).execute()
         }
     }
 
@@ -129,14 +129,14 @@ class PlayPublishListingTask extends PlayPublishTask {
             AndroidPublisher.Edits.Images images = edits.images()
 
             // Delete all images in play store
-            images.deleteall(variant.getApplicationId(), editId, locale, imageType).execute()
+            images.deleteall(variant.applicationId, editId, locale, imageType).execute()
 
             // After that upload the new images
             if (contentGraphicList.size() > MAX_SCREENSHOTS_SIZE) {
                 logger.error("Sorry! You can only upload 8 screenshots")
             } else {
                 contentGraphicList.each { contentGraphic ->
-                    images.upload(variant.getApplicationId(), editId, locale, imageType, contentGraphic).execute()
+                    images.upload(variant.applicationId, editId, locale, imageType, contentGraphic).execute()
                 }
             }
         }
