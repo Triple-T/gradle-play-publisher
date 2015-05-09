@@ -10,7 +10,7 @@ public class TestHelper {
     public static Project evaluatableProject() {
         Project project = ProjectBuilder.builder().withProjectDir(FIXTURE_WORKING_DIR).build()
         project.apply plugin: 'com.android.application'
-        project.apply plugin: 'play'
+        project.apply plugin: 'com.github.triplet.play'
         project.android {
             compileSdkVersion 22
             buildToolsVersion '22.0.1'

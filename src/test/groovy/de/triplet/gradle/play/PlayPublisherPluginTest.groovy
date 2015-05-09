@@ -14,7 +14,7 @@ class PlayPublisherPluginTest {
     public void testThrowsOnLibraryProjects() {
         Project project = ProjectBuilder.builder().build()
         project.apply plugin: 'com.android.library'
-        project.apply plugin: 'play'
+        project.apply plugin: 'com.github.triplet.play'
     }
 
     @Test
