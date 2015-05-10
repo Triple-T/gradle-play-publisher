@@ -27,7 +27,7 @@ buildscript {
     
     dependencies {
     	// ...
-        classpath 'com.github.triplet.gradle:play-publisher:1.0.4'
+        classpath 'com.github.triplet.gradle:play-publisher:1.1.0'
     }
 }
 ```
@@ -35,7 +35,7 @@ buildscript {
 Apply it:
 
 ```groovy
-apply plugin: 'play'
+apply plugin: 'com.github.triplet.play'
 ```
 
 The plugin creates the following tasks for you:
