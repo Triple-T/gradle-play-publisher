@@ -1,3 +1,8 @@
+**1.1.0 - 2015-05-09**
+
+* Breaking change: Renamed plugin to `com.github.triplet.play` so it does not collide with gradle's internal play plugin - #50
+* Throw errors if texts exceed the size limits - #66
+
 **1.0.4 - 2015-04-14**
 
 * Bootstrap and upload promo video urls - #60
