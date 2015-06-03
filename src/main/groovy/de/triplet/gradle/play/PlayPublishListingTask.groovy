@@ -26,6 +26,8 @@ class PlayPublishListingTask extends PlayPublishTask {
     static def IMAGE_TYPE_PROMO_GRAPHIC = "promoGraphic"
     static def IMAGE_TYPE_SEVEN_INCH_SCREENSHOTS = "sevenInchScreenshots"
     static def IMAGE_TYPE_TEN_INCH_SCREENSHOTS = "tenInchScreenshots"
+    static def IMAGE_TYPE_TV_BANNER = "tvBanner"
+    static def IMAGE_TYPE_TV_SCREENSHOTS = "tvScreenshots"
 
     File inputFolder
 
@@ -82,17 +84,21 @@ class PlayPublishListingTask extends PlayPublishTask {
 
                 // By default this will be skipped – can be enabled in the play extension
                 if (extension.uploadImages) {
-                    // Only one ContentFile allow for featureGraphic
+                    // Only one ContentFile allowed for featureGraphic
                     AbstractInputStreamContent featureGraphicContent = TaskHelper.getImageAsStream(listingDir, IMAGE_TYPE_FEATURE_GRAPHIC + "/")
                     uploadSingleGraphic(featureGraphicContent, locale, IMAGE_TYPE_FEATURE_GRAPHIC)
 
-                    // Only one ContentFile allow for iconGraphic
+                    // Only one ContentFile allowed for iconGraphic
                     AbstractInputStreamContent iconGraphicContent = TaskHelper.getImageAsStream(listingDir, IMAGE_TYPE_ICON + "/")
                     uploadSingleGraphic(iconGraphicContent, locale, IMAGE_TYPE_ICON)
 
-                    // Only one ContentFile allow for promoGraphic
+                    // Only one ContentFile allowed for promoGraphic
                     AbstractInputStreamContent promoGraphicContent = TaskHelper.getImageAsStream(listingDir, IMAGE_TYPE_PROMO_GRAPHIC + "/")
                     uploadSingleGraphic(promoGraphicContent, locale, IMAGE_TYPE_PROMO_GRAPHIC)
+
+                    // Only one ContentFile allowed for tvBanner
+                    AbstractInputStreamContent tvBannerGraphicContent = TaskHelper.getImageAsStream(listingDir, IMAGE_TYPE_TV_BANNER + "/")
+                    uploadSingleGraphic(tvBannerGraphicContent, locale, IMAGE_TYPE_TV_BANNER)
 
                     // Upload phoneScreenshots
                     List<AbstractInputStreamContent> phoneContentList = TaskHelper.getImageListAsStream(listingDir, IMAGE_TYPE_PHONE_SCREENSHOTS + "/")
@@ -105,6 +111,10 @@ class PlayPublishListingTask extends PlayPublishTask {
                     // Upload tenInchScreenshots
                     List<AbstractInputStreamContent> tenInchContentList = TaskHelper.getImageListAsStream(listingDir, IMAGE_TYPE_TEN_INCH_SCREENSHOTS + "/")
                     uploadScreenshots(tenInchContentList, locale, IMAGE_TYPE_TEN_INCH_SCREENSHOTS)
+
+                    // Upload tvScreenshots
+                    List<AbstractInputStreamContent> tvContentList = TaskHelper.getImageListAsStream(listingDir, IMAGE_TYPE_TV_SCREENSHOTS + "/")
+                    uploadScreenshots(tvContentList, locale, IMAGE_TYPE_TV_SCREENSHOTS)
                 }
             }
         }
