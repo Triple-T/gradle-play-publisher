@@ -3,6 +3,7 @@ package de.triplet.gradle.play
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.AbstractInputStreamContent
 import com.google.api.services.androidpublisher.AndroidPublisher
+import com.google.api.services.androidpublisher.model.AppDetails
 import com.google.api.services.androidpublisher.model.Listing
 import org.apache.commons.lang.StringUtils
 import org.gradle.api.tasks.TaskAction
@@ -13,6 +14,10 @@ class PlayPublishListingTask extends PlayPublishTask {
     static def MAX_CHARACTER_LENGTH_FOR_SHORT_DESCRIPTION = 80
     static def MAX_CHARACTER_LENGTH_FOR_FULL_DESCRIPTION = 4000
     static def MAX_SCREENSHOTS_SIZE = 8
+
+    static def FILE_NAME_FOR_CONTACT_EMAIL = "contactEmail"
+    static def FILE_NAME_FOR_CONTACT_PHONE = "contactPhone"
+    static def FILE_NAME_FOR_CONTACT_WEBSITE = "contactWebsite"
 
     static def FILE_NAME_FOR_TITLE = "title"
     static def FILE_NAME_FOR_SHORT_DESCRIPTION = "shortdescription"
@@ -118,6 +123,27 @@ class PlayPublishListingTask extends PlayPublishTask {
                 }
             }
         }
+
+        if (StringUtils.isNotEmpty(extension.defaultLanguage)) {
+            def fileContactEmail = new File(inputFolder, FILE_NAME_FOR_CONTACT_EMAIL)
+            def email = TaskHelper.readAndTrimFile(fileContactEmail, Integer.MAX_VALUE, false)
+            def fileContactPhone = new File(inputFolder, FILE_NAME_FOR_CONTACT_PHONE)
+            def phone = TaskHelper.readAndTrimFile(fileContactPhone, Integer.MAX_VALUE, false)
+            def fileContactWeb = new File(inputFolder, FILE_NAME_FOR_CONTACT_WEBSITE)
+            def web = TaskHelper.readAndTrimFile(fileContactWeb, Integer.MAX_VALUE, false)
+
+            AppDetails details = new AppDetails()
+
+            details.setContactEmail(email)
+                    .setContactPhone(phone)
+                    .setContactPhone(web)
+                    .setDefaultLanguage(extension.defaultLanguage)
+
+            edits.details()
+                    .update(variant.applicationId, editId, details)
+                    .execute()
+        }
+
 
         edits.commit(variant.applicationId, editId).execute()
     }
