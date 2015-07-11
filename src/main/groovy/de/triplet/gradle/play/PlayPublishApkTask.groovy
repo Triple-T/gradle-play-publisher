@@ -15,14 +15,18 @@ class PlayPublishApkTask extends PlayPublishTask {
     File inputFolder
 
     @TaskAction
-    publishApk() {
+    publishApks() {
         super.publish()
 
-        def apkOutput = variant.outputs.find { variantOutput -> variantOutput instanceof ApkVariantOutput }
-        FileContent newApkFile = new FileContent(AndroidPublisherHelper.MIME_TYPE_APK, apkOutput.outputFile)
+        variant.outputs
+                .findAll { variantOutput -> variantOutput instanceof ApkVariantOutput }
+                .each { variantOutput -> publishApk(new FileContent(AndroidPublisherHelper.MIME_TYPE_APK, variantOutput.outputFile))}
+    }
+
+    def publishApk(apkFile) {
 
         Apk apk = edits.apks()
-                .upload(variant.applicationId, editId, newApkFile)
+                .upload(variant.applicationId, editId, apkFile)
                 .execute()
 
         Track newTrack = new Track().setVersionCodes([apk.getVersionCode()])

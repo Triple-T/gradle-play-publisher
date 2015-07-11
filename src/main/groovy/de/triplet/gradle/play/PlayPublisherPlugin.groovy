@@ -43,9 +43,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             def publishListingTaskName = "publishListing${variationName}"
             def publishTaskName = "publish${variationName}"
 
-            def outputData = variant.outputs.first()
-            def zipAlignTask = outputData.zipAlign
-            def assembleTask = outputData.assemble
+            def zipAlignTask = project.tasks."zipalign${variationName}"
 
             def variantData = variant.variantData
             if (!zipAlignTask || !variantData.zipAlignEnabled) {
@@ -106,7 +104,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             publishTask.dependsOn publishListingTask
             publishListingTask.dependsOn playResourcesTask
             publishApkTask.dependsOn playResourcesTask
-            publishApkTask.dependsOn assembleTask
+            publishApkTask.dependsOn project.tasks."assemble${variationName}"
         }
     }
 
