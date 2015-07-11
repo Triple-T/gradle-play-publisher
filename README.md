@@ -27,7 +27,7 @@ buildscript {
     
     dependencies {
     	// ...
-        classpath 'com.github.triplet.gradle:play-publisher:1.1.0'
+        classpath 'com.github.triplet.gradle:play-publisher:1.1.1'
     }
 }
 ```
@@ -43,7 +43,7 @@ The plugin creates the following tasks for you:
 * `publishApkRelease` - Uploads the APK and the summary of recent changes.
 * `publishListingRelease` - Uploads the descriptions and images for the Play Store listing.
 * `publishRelease` - Uploads everything.
-* `bootstrapReleasePlayResources` - Fetch all existing data from the Play Store to bootstrap the required files and folders.
+* `bootstrapReleasePlayResources` - Fetches all existing data from the Play Store to bootstrap the required files and folders.
 
 Make sure to set a valid `signingConfig` for the release build type. Otherwise, there won't be a publishable APK and the above tasks won't be available.
 
@@ -68,7 +68,7 @@ play {
 
 You can also update the Play Store Metadata automatically along with your APK. 
 
-To use this feature, create a special source folder called ```play```. Inside, create a folder for each locale you want to support. Then drop your summary of recent changes into a file called ```whatsnew```. The title, the description, the short description and the YouTube video url go into their own files in a subfolder called ```listing```. Once set up, your project should look something like this:
+To use this feature, create a special source folder called ```play```. Inside of it, create a folder for each locale you want to support. Then drop your summary of recent changes into a file called ```whatsnew```. The title, the description, the short description and the YouTube video url go into their own files in a subfolder called ```listing```. App details like contact email or the default language have their own files right inside the ```play``` folder as those details are not translated. Once set up, your project should look something like this:
 
 ```
 - [src]
@@ -92,18 +92,26 @@ To use this feature, create a special source folder called ```play```. Inside, c
           |   + - whatsnew
           |
           + - [de-DE]
-              |
-              + - [listing]
-              |   |
-              |   + - fulldescription
-              |   |
-              |   + - shortdescription
-              |   |
-              |   + - title
-              |   |
-              |   + - video
-              |
-              + - whatsnew
+          |   |
+          |   + - [listing]
+          |   |   |
+          |   |   + - fulldescription
+          |   |   |
+          |   |   + - shortdescription
+          |   |   |
+          |   |   + - title
+          |   |   |
+          |   |   + - video
+          |   |
+          |   + - whatsnew
+          |
+          + - contactEmail
+          |
+          + - contactPhone
+          |
+          + - contactWebsite
+          |
+          + - defaultLanguage
 ```
 
 Note: You can provide different texts for different locales, build types and product flavors. You may even support additional locales for some build types or product flavors.
@@ -142,7 +150,7 @@ It is also possible to provide a separate summary of recent changes for each tra
 
 ### Upload Images
 
-Currently images are only uploaded if you explicitly say so:
+To speed things up a little, images are only uploaded if you explicitly say so:
 
 ```groovy
 play {
@@ -175,9 +183,13 @@ In that case the plugin looks for the Play Store images in your `play` folder. S
                   + - [sevenInchScreenshots]
                   |
                   + - [tenInchScreenshots]
+                  |
+                  + - [tvBanner]
+                  |
+                  + - [tvScreenshots]
 ```
 
-Note: The plugin currently does not enforce the correct size and file type. If you try to upload invalid files, the Google API will fail with a detailed error message.
+Note: The plugin does not enforce the correct size and file type. If you try to upload invalid files, the Google API will fail with a detailed error message.
 
 Note: We still have some issues when you change the images in those folders. For now you should do a full rebuild whenever you change them.
 
@@ -200,29 +212,3 @@ project.afterEvaluate {
 ```
 
 Note that we have to wait for the evaluation phase to complete before the `generateReleasePlayResources` task becomes visible.
-
-
-## License
-
-	 The MIT License (MIT)
-	 
-	 Copyright (c) 2015 Christian Becker
-	 Copyright (c) 2015 Björn Hurling
-
-	 Permission is hereby granted, free of charge, to any person obtaining a copy
-	 of this software and associated documentation files (the "Software"), to deal
-	 in the Software without restriction, including without limitation the rights
-	 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-	 copies of the Software, and to permit persons to whom the Software is
-	 furnished to do so, subject to the following conditions:
-
-	 The above copyright notice and this permission notice shall be included in all
-	 copies or substantial portions of the Software.
-
-	 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-	 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-	 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- 	 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-	 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-	 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-	 SOFTWARE.
