@@ -8,7 +8,7 @@ class PlayPublisherPluginExtension {
 
     boolean uploadImages = false
 
-    boolean errorOnSizeLimit = true;
+    boolean errorOnSizeLimit = true
 
     private String track = 'alpha'
 
