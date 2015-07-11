@@ -18,6 +18,7 @@ class PlayPublishListingTask extends PlayPublishTask {
     static def FILE_NAME_FOR_CONTACT_EMAIL = "contactEmail"
     static def FILE_NAME_FOR_CONTACT_PHONE = "contactPhone"
     static def FILE_NAME_FOR_CONTACT_WEBSITE = "contactWebsite"
+    static def FILE_NAME_FOR_DEFAULT_LANGUAGE = "defaultLanguage"
 
     static def FILE_NAME_FOR_TITLE = "title"
     static def FILE_NAME_FOR_SHORT_DESCRIPTION = "shortdescription"
@@ -124,7 +125,10 @@ class PlayPublishListingTask extends PlayPublishTask {
             }
         }
 
-        if (StringUtils.isNotEmpty(extension.defaultLanguage)) {
+        def fileDefaultLanguage = new File(inputFolder, FILE_NAME_FOR_DEFAULT_LANGUAGE)
+        def defaultLanguage = TaskHelper.readAndTrimFile(fileDefaultLanguage, Integer.MAX_VALUE, false)
+
+        if (StringUtils.isNotEmpty(defaultLanguage)) {
             def fileContactEmail = new File(inputFolder, FILE_NAME_FOR_CONTACT_EMAIL)
             def email = TaskHelper.readAndTrimFile(fileContactEmail, Integer.MAX_VALUE, false)
             def fileContactPhone = new File(inputFolder, FILE_NAME_FOR_CONTACT_PHONE)
@@ -137,7 +141,7 @@ class PlayPublishListingTask extends PlayPublishTask {
             details.setContactEmail(email)
                     .setContactPhone(phone)
                     .setContactPhone(web)
-                    .setDefaultLanguage(extension.defaultLanguage)
+                    .setDefaultLanguage(defaultLanguage)
 
             edits.details()
                     .update(variant.applicationId, editId, details)

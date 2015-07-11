@@ -10,8 +10,6 @@ class PlayPublisherPluginExtension {
 
     boolean errorOnSizeLimit = true
 
-    String defaultLanguage
-
     private String track = 'alpha'
 
     void setTrack(String track) {
