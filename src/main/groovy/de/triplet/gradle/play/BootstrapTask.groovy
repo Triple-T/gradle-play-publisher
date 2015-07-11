@@ -28,6 +28,7 @@ class BootstrapTask extends PlayPublishTask {
 
         bootstrapListing()
         bootstrapWhatsNew()
+        bootstrapAppDetails()
     }
 
     def bootstrapListing() {
@@ -109,6 +110,15 @@ class BootstrapTask extends PlayPublishTask {
 
             FileUtils.writeStringToFile(new File(languageDir, PlayPublishApkTask.FILE_NAME_FOR_WHATS_NEW_TEXT), whatsNew, "UTF-8")
         }
+    }
+
+    def bootstrapAppDetails() {
+        def appDetails = edits.details().get(variant.applicationId, editId).execute()
+
+        FileUtils.writeStringToFile(new File(outputFolder, PlayPublishListingTask.FILE_NAME_FOR_CONTACT_EMAIL), appDetails.getContactEmail())
+        FileUtils.writeStringToFile(new File(outputFolder, PlayPublishListingTask.FILE_NAME_FOR_CONTACT_PHONE), appDetails.getContactPhone())
+        FileUtils.writeStringToFile(new File(outputFolder, PlayPublishListingTask.FILE_NAME_FOR_CONTACT_WEBSITE), appDetails.getContactWebsite())
+        FileUtils.writeStringToFile(new File(outputFolder, PlayPublishListingTask.FILE_NAME_FOR_DEFAULT_LANGUAGE), appDetails.getDefaultLanguage())
     }
 
     static def saveImage(File listingDir, String imageFolderName, List<Image> images) {
