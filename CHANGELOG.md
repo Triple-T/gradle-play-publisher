@@ -1,3 +1,9 @@
+**1.1.1 - 2015-07-11**
+
+* Support for tv related images - #77
+* Support for app details - #44
+* Addes some explanation to google's applicationNotFound exception - #75
+
 **1.1.0 - 2015-05-09**
 
 * Breaking change: Renamed plugin to `com.github.triplet.play` so it does not collide with gradle's internal play plugin - #50
