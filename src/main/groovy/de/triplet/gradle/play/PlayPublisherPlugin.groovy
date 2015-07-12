@@ -43,11 +43,8 @@ class PlayPublisherPlugin implements Plugin<Project> {
             def publishListingTaskName = "publishListing${variationName}"
             def publishTaskName = "publish${variationName}"
 
-            def zipAlignTask = project.tasks."zipalign${variationName}"
-
-            def variantData = variant.variantData
-            if (!zipAlignTask || !variantData.zipAlignEnabled) {
-                log.warn("Could not find ZipAlign task. Did you specify a signingConfig for the variation ${variationName}?")
+            if (!variant.variantData.zipAlignEnabled) {
+                log.error("Could not create publisher tasks. Did you specify a signingConfig for the variation ${variationName}?")
                 return
             }
 
@@ -104,7 +101,8 @@ class PlayPublisherPlugin implements Plugin<Project> {
             publishTask.dependsOn publishListingTask
             publishListingTask.dependsOn playResourcesTask
             publishApkTask.dependsOn playResourcesTask
-            publishApkTask.dependsOn project.tasks."assemble${variationName}"
+
+            variant.outputs.each { output -> publishApkTask.dependsOn output.assemble }
         }
     }
 
