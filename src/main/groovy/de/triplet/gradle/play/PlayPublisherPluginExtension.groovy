@@ -13,8 +13,8 @@ class PlayPublisherPluginExtension {
     private String track = 'alpha'
 
     void setTrack(String track) {
-        if (!(track in ['alpha', 'beta', 'production'])) {
-            throw new IllegalArgumentException("Track has to be one of 'alpha', 'beta', or 'production'.")
+        if (!(track in ['alpha', 'beta', 'rollout', 'production'])) {
+            throw new IllegalArgumentException("Track has to be one of 'alpha', 'beta', 'rollout' or 'production'.")
         }
 
         this.track = track
@@ -22,6 +22,16 @@ class PlayPublisherPluginExtension {
 
     def getTrack() {
         return track
+    }
+
+    private Double userFraction = 0.1
+
+    void setUserFraction(Double userFraction) {
+      this.userFraction = userFraction
+    }
+
+    def getUserFraction() {
+      return userFraction
     }
 
 }

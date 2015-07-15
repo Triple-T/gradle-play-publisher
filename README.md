@@ -6,7 +6,7 @@ Gradle plugin to upload your APK and app details to the Google Play Store. Needs
 
 ## Prerequisites
 
-To use the publisher plugin you have to create a service account for your existing Google Play Account. See https://developers.google.com/android-publisher/getting_started for more information. 
+To use the publisher plugin you have to create a service account for your existing Google Play Account. See https://developers.google.com/android-publisher/getting_started for more information.
 
 Due to the way the Google Play Publisher API works, you have to grant at least the following permissions to that service account:
 
@@ -24,7 +24,7 @@ buildscript {
     repositories {
         mavenCentral()
     }
-    
+
     dependencies {
     	// ...
         classpath 'com.github.triplet.gradle:play-publisher:1.1.1'
@@ -66,7 +66,7 @@ play {
 
 ### Play Store Metadata
 
-You can also update the Play Store Metadata automatically along with your APK. 
+You can also update the Play Store Metadata automatically along with your APK.
 
 To use this feature, create a special source folder called ```play```. Inside of it, create a folder for each locale you want to support. Then drop your summary of recent changes into a file called ```whatsnew```. The title, the description, the short description and the YouTube video url go into their own files in a subfolder called ```listing```. App details like contact email or the default language have their own files right inside the ```play``` folder as those details are not translated. Once set up, your project should look something like this:
 
@@ -142,11 +142,14 @@ As a default your APK is published to the alpha track and you can promote it to 
 ```groovy
 play {
     // ...
-    track = 'production' // or 'beta' or 'alpha'
+    track = 'production' // or 'rollout' or 'beta' or 'alpha'
+    userFraction = 0.2 // only necessary for 'rollout', in this case default is 0.1
 }
 ```
 
 It is also possible to provide a separate summary of recent changes for each track. Just drop in a special `whatsnew-alpha` text file alongside your main `whatsnew` file and that one will be used if you publish to the alpha track.
+
+When defining the track as (staged) `rollout` you can also define a ```userFraction``` which is the portion of users who should get the staged rollout version of the APK.
 
 ### Upload Images
 
@@ -200,7 +203,7 @@ Note: We still have some issues when you change the images in those folders. For
 Sometimes it's required to execute some custom tasks right before executing tasks from the `play` plugin.
 
 For example, one can have necessity to download images for the store listing from a remote 3rd-party server.
-This should happen before executing the `generateReleasePlayResources` task which is responsible for collecting all the play store assets for upload. 
+This should happen before executing the `generateReleasePlayResources` task which is responsible for collecting all the play store assets for upload.
 
 Let's assume we have a task called `loadStoreListingFromRemote` that fetches store listing information from a remote server and places it under `src/main/play` as needed by the `play` plugin. Our `generateReleasePlayResources` task should now depend on that other task. In order to do that, we have to add the follwing lines to our build script:
 
