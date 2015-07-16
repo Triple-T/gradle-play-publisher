@@ -1,3 +1,7 @@
+**1.1.2 - 2015-07-16**
+
+* Bugfix: Corretly set contact web parameter - #82
+
 **1.1.1 - 2015-07-11**
 
 * Support for tv related images - #77
