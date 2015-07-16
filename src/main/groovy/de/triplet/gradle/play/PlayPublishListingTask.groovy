@@ -140,7 +140,7 @@ class PlayPublishListingTask extends PlayPublishTask {
 
             details.setContactEmail(email)
                     .setContactPhone(phone)
-                    .setContactPhone(web)
+                    .setContactWebsite(web)
                     .setDefaultLanguage(defaultLanguage)
 
             edits.details()
