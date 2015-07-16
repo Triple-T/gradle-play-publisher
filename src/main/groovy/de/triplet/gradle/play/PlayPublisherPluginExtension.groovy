@@ -24,14 +24,6 @@ class PlayPublisherPluginExtension {
         return track
     }
 
-    private Double userFraction = 0.1
-
-    void setUserFraction(Double userFraction) {
-      this.userFraction = userFraction
-    }
-
-    def getUserFraction() {
-      return userFraction
-    }
+    Double userFraction = 0.1
 
 }
