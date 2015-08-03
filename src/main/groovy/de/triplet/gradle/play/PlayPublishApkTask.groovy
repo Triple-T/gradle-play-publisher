@@ -26,6 +26,9 @@ class PlayPublishApkTask extends PlayPublishTask {
                 .execute()
 
         Track newTrack = new Track().setVersionCodes([apk.getVersionCode()])
+        if (extension.track?.equals("rollout")) {
+            newTrack.setUserFraction(extension.userFraction)
+        }
         edits.tracks()
                 .update(variant.applicationId, editId, extension.track, newTrack)
                 .execute()

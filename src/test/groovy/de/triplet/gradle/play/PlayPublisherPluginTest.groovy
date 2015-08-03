@@ -75,6 +75,19 @@ class PlayPublisherPluginTest {
     }
 
     @Test
+    public void testUserFraction() {
+        Project project = TestHelper.evaluatableProject()
+
+        project.play {
+            userFraction 0.1
+        }
+
+        project.evaluate()
+
+        assertEquals(0.1, project.extensions.findByName("play").userFraction, 0)
+    }
+
+    @Test
     public void testPublishListingTask() {
         Project project = TestHelper.evaluatableProject()
 
