@@ -60,7 +60,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             if (StringUtils.isNotEmpty(flavor)) {
                 bootstrapTask.outputFolder = new File(project.projectDir, "src/${flavor}/play")
             } else {
-                bootstrapTask.outputFolder = new File(project.projectDir, "src/${variant.buildType.name}/play")
+                bootstrapTask.outputFolder = new File(project.projectDir, "src/main/play")
             }
             bootstrapTask.description = "Downloads the play store listing for the ${variationName} build. No download of image resources. See #18."
             bootstrapTask.group = PLAY_STORE_GROUP
