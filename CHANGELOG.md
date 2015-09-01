@@ -1,3 +1,8 @@
+**1.1.3 - 2015-09-01**
+
+* Support staged rollouts - #79, #80
+* Bugfix: Bootstrap into main source set for projects without flavors - #87
+
 **1.1.2 - 2015-07-16**
 
 * Bugfix: Corretly set contact web parameter - #82
