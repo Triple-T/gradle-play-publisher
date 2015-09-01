@@ -4,23 +4,34 @@ Gradle plugin to upload your APK and app details to the Google Play Store. Needs
 
 [![Build Status](https://travis-ci.org/Triple-T/gradle-play-publisher.svg?branch=master)](https://travis-ci.org/Triple-T/gradle-play-publisher)
 
+## Quick Start Guide
+
+1. Upload the first version of your APK using the web interface.
+1. Create a Google Play Service Account (see [Prerequisites](#google-play-service-account)).
+1. Assign a valid `signingConfig` to your release build type.
+1. Add the plugin to your buildscript dependencies (see [Usage](#usage)).
+1. Apply the plugin (see [Usage](#usage)).
+1. Apply your credentials inside the `play` block (see [Credentials](#credentials)).
+
 ## Prerequisites
 
-1.  Your project needs needs the ```com.android.application``` plugin applied in your build.gradle
-1.  You must already have a have a [Google Play Account](https://developers.google.com/android-publisher/getting_started)
-    with the *Service Account email address* and *p12 file* for that account. Be sure the
-    permissions are set correctly (see image below)
-1.  Add the plugin class path (see *Usage* below)
-1.  Add ```apply: 'com.plugin.triplet.play``` to your build.gradle
-1.  Have a signingConfig for the release build type
-1.  Configure the script to load your credentials (see *Credentials* below)
+### Initial Play Store Upload
 
-If you do not have all of the requirements, gradle-play-publisher will not make the publishing
-tasks visible when you run ```:tasks --all```
+The first APK of your App needs to be uploaded via the web interface. This is to register the application id and cannot be done using the Play Developer API. For all subsequent uploads and changes this plugin can be used.
+
+### Google Play Service Account
+
+To use the publisher plugin you have to create a service account for your existing Google Play Account. See https://developers.google.com/android-publisher/getting_started for more information.
 
 Due to the way the Google Play Publisher API works, you have to grant at least the following permissions to that service account:
 
 ![permissions.png](https://cloud.githubusercontent.com/assets/1361086/5045988/95eb902e-6bb9-11e4-9251-30840ba014d3.png)
+
+Once you finished the setup you have a so called *service account email address* and a *p12 key file* that we will use later on.
+
+### Signing Configuration
+
+Please make sure to assign a valid signing configuration to your release build type. Otherwise, there won't be a publishable (signed) APK. In that case, the plugin won't create any of its tasks.
 
 ## Usage
 
