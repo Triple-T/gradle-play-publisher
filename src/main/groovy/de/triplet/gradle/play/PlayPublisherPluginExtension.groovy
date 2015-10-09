@@ -6,6 +6,8 @@ class PlayPublisherPluginExtension {
 
     File pk12File
 
+    File jsonFile
+
     boolean uploadImages = false
 
     boolean errorOnSizeLimit = true

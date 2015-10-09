@@ -24,6 +24,9 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.androidpublisher.AndroidPublisher;
 import com.google.api.services.androidpublisher.AndroidPublisherScopes;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 
 import org.apache.commons.logging.Log;
@@ -54,6 +57,16 @@ public class AndroidPublisherHelper {
     /** Global instance of the HTTP transport. */
     private static HttpTransport HTTP_TRANSPORT;
 
+    private static Credential authorizeWithServiceAccount(PlayPublisherPluginExtension extension)
+            throws GeneralSecurityException, IOException {
+        if (extension.serviceAccountEmail && extension.pk12File) {
+            return authorizeWithServiceAccount(extension.serviceAccountEmail, extension.pk12File);
+        } else if (extension.jsonFile) {
+            return authorizeWithServiceAccount(extension.jsonFile)
+        }
+        throw new IllegalArgumentException("No credentials provided.");
+    }
+
     private static Credential authorizeWithServiceAccount(String serviceAccountEmail, File pk12File)
             throws GeneralSecurityException, IOException {
         log.info(String.format("Authorizing using Service Account: %s", serviceAccountEmail));
@@ -69,6 +82,14 @@ public class AndroidPublisherHelper {
         return credential;
     }
 
+    private static Credential authorizeWithServiceAccount(File jsonFile) throws IOException {
+        Path path = Paths.get(jsonFile.absolutePath);
+        InputStream serviceAccountStream = new ByteArrayInputStream(Files.readAllBytes(path));
+        GoogleCredential credential = GoogleCredential
+                .fromStream(serviceAccountStream, HTTP_TRANSPORT, JSON_FACTORY);
+        return credential.createScoped(Collections.singleton(AndroidPublisherScopes.ANDROIDPUBLISHER));
+    }
+
     /**
      * Performs all necessary setup steps for running requests against the API.
      *
@@ -78,12 +99,12 @@ public class AndroidPublisherHelper {
      * @throws GeneralSecurityException
      * @throws IOException
      */
-    protected static AndroidPublisher init(String serviceAccountEmail, File pk12File)
+    protected static AndroidPublisher init(PlayPublisherPluginExtension extension)
             throws IOException, GeneralSecurityException {
 
         // Authorization.
         newTrustedTransport();
-        Credential credential = authorizeWithServiceAccount(serviceAccountEmail, pk12File);
+        Credential credential = authorizeWithServiceAccount(extension);
 
         // Set up and return API client.
         return new AndroidPublisher.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
