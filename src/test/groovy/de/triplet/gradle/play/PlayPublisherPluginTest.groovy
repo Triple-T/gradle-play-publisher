@@ -88,6 +88,20 @@ class PlayPublisherPluginTest {
     }
 
     @Test
+    public void testJsonFile() {
+        Project project = TestHelper.evaluatableProject()
+
+        project.play {
+            jsonFile new File("key.json");
+        }
+
+        project.evaluate()
+
+        assertEquals("key.json", project.extensions.findByName("play").jsonFile.name)
+    }
+
+
+    @Test
     public void testPublishListingTask() {
         Project project = TestHelper.evaluatableProject()
 
