@@ -1,3 +1,8 @@
+**1.1.4 - 2015-10-14**
+
+* Do not require signingConfig for bootstrap and listing tasks - #100
+* Support JSON file credentials - #97
+
 **1.1.3 - 2015-09-01**
 
 * Support staged rollouts - #79, #80
