@@ -48,10 +48,6 @@ class PlayPublisherPlugin implements Plugin<Project> {
             def assembleTask = outputData.assemble
 
             def variantData = variant.variantData
-            if (!zipAlignTask || !variantData.zipAlignEnabled) {
-                log.warn("Could not find ZipAlign task. Did you specify a signingConfig for the variation ${variationName}?")
-                return
-            }
 
             // Create and configure bootstrap task for this variant.
             def bootstrapTask = project.tasks.create(bootstrapTaskName, BootstrapTask)
@@ -81,14 +77,6 @@ class PlayPublisherPlugin implements Plugin<Project> {
             playResourcesTask.description = "Collects play store resources for the ${variationName} build"
             playResourcesTask.group = PLAY_STORE_GROUP
 
-            // Create and configure publisher apk task for this variant.
-            def publishApkTask = project.tasks.create(publishApkTaskName, PlayPublishApkTask)
-            publishApkTask.extension = extension
-            publishApkTask.variant = variant
-            publishApkTask.inputFolder = playResourcesTask.outputFolder
-            publishApkTask.description = "Uploads the APK for the ${variationName} build"
-            publishApkTask.group = PLAY_STORE_GROUP
-
             // Create and configure publisher meta task for this variant
             def publishListingTask = project.tasks.create(publishListingTaskName, PlayPublishListingTask)
             publishListingTask.extension = extension
@@ -97,16 +85,30 @@ class PlayPublisherPlugin implements Plugin<Project> {
             publishListingTask.description = "Updates the play store listing for the ${variationName} build"
             publishListingTask.group = PLAY_STORE_GROUP
 
-            def publishTask = project.tasks.create(publishTaskName)
-            publishTask.description = "Updates APK and play store listing for the ${variationName} build"
-            publishTask.group = PLAY_STORE_GROUP
-
             // Attach tasks to task graph.
-            publishTask.dependsOn publishApkTask
-            publishTask.dependsOn publishListingTask
             publishListingTask.dependsOn playResourcesTask
-            publishApkTask.dependsOn playResourcesTask
-            publishApkTask.dependsOn assembleTask
+
+            if (zipAlignTask && variantData.zipAlignEnabled) {
+                // Create and configure publisher apk task for this variant.
+                def publishApkTask = project.tasks.create(publishApkTaskName, PlayPublishApkTask)
+                publishApkTask.extension = extension
+                publishApkTask.variant = variant
+                publishApkTask.inputFolder = playResourcesTask.outputFolder
+                publishApkTask.description = "Uploads the APK for the ${variationName} build"
+                publishApkTask.group = PLAY_STORE_GROUP
+
+                def publishTask = project.tasks.create(publishTaskName)
+                publishTask.description = "Updates APK and play store listing for the ${variationName} build"
+                publishTask.group = PLAY_STORE_GROUP
+
+                // Attach tasks to task graph.
+                publishTask.dependsOn publishApkTask
+                publishTask.dependsOn publishListingTask
+                publishApkTask.dependsOn playResourcesTask
+                publishApkTask.dependsOn assembleTask
+            } else {
+                log.warn("Could not find ZipAlign task. Did you specify a signingConfig for the variation ${variationName}?")
+            }
         }
     }
 
