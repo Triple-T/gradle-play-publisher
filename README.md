@@ -83,6 +83,14 @@ play {
 }
 ```
 
+or drop in the JSON file you generated in the API Console.
+
+```groovy
+play {
+    jsonFile = file('keys.json')
+}
+```
+
 ### Play Store Metadata
 
 You can also update the Play Store Metadata automatically along with your APK.
