@@ -7,6 +7,7 @@ import org.junit.Test
 
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
+import static org.junit.Assert.fail
 
 class PlayPublisherPluginTest {
 
@@ -100,6 +101,20 @@ class PlayPublisherPluginTest {
 
         assertNotNull(project.tasks.publishListingFreeRelease)
         assertNotNull(project.tasks.publishListingPaidRelease)
+    }
+
+    @Test
+    public void testNoSigningConfigGenerateTasks() {
+        Project project = TestHelper.noSigningConfigProject()
+
+        project.evaluate()
+
+        assertNotNull(project.tasks.bootstrapReleasePlayResources)
+        assertNotNull(project.tasks.publishListingRelease)
+
+        if (project.tasks.hasProperty('publishApkRelease') || project.tasks.hasProperty('publishRelease')) {
+            fail()
+        }
     }
 
 }
