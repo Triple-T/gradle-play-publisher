@@ -42,6 +42,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             def publishApkTaskName = "publishApk${variationName}"
             def publishListingTaskName = "publishListing${variationName}"
             def publishTaskName = "publish${variationName}"
+            def changeUserFractionTaskName = "change${variationName}UserFraction"
 
             def outputData = variant.outputs.first()
             def zipAlignTask = outputData.zipAlign
@@ -84,6 +85,13 @@ class PlayPublisherPlugin implements Plugin<Project> {
             publishListingTask.inputFolder = playResourcesTask.outputFolder
             publishListingTask.description = "Updates the play store listing for the ${variationName} build"
             publishListingTask.group = PLAY_STORE_GROUP
+
+            // Create change user fraction task for this variant
+            def changeUserFractionTask = project.tasks.create(changeUserFractionTaskName, ChangeUserFractionTask)
+            changeUserFractionTask.description = "Change user fraction for the ${variationName} build"
+            changeUserFractionTask.extension = extension
+            changeUserFractionTask.variant = variant
+            changeUserFractionTask.group = PLAY_STORE_GROUP
 
             // Attach tasks to task graph.
             publishListingTask.dependsOn playResourcesTask
