@@ -135,29 +135,14 @@ class BootstrapTask extends PlayPublishTask {
         /*
         for (Image image : images) {
             try {
-                downloadImageFromUrl(image.getUrl(), new File(imageFolder, image.getId() + ".png"))
+                OutputStream os = new File(imageFolder, image.getId() + '.png').newOutputStream()
+                os << image.getUrl().toURL().openStream()
+                os.close()
             } catch (IOException e) {
                 e.printStackTrace()
             }
         }
         */
     }
-
-    /*
-    static def downloadImageFromUrl(String imageUrl, File destinationFile) throws IOException {
-        InputStream is = imageUrl.toURL().openStream()
-        OutputStream os = new FileOutputStream(destinationFile)
-
-        byte[] b = new byte[2048]
-        int length
-
-        while ((length = is.read(b)) != -1) {
-            os.write(b, 0, length)
-        }
-
-        is.close()
-        os.close()
-    }
-    */
 
 }
