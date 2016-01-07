@@ -42,6 +42,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             def publishApkTaskName = "publishApk${variationName}"
             def publishListingTaskName = "publishListing${variationName}"
             def publishTaskName = "publish${variationName}"
+            def updatePlayVersionName = "update${variationName}PlayVersion"
 
             def outputData = variant.outputs.first()
             def zipAlignTask = outputData.zipAlign
@@ -100,6 +101,18 @@ class PlayPublisherPlugin implements Plugin<Project> {
                 def publishTask = project.tasks.create(publishTaskName)
                 publishTask.description = "Updates APK and play store listing for the ${variationName} build"
                 publishTask.group = PLAY_STORE_GROUP
+
+                if (extension.autoIncrementVersion) {
+                    def updatePlayVersionTask = project.tasks.create(updatePlayVersionName, LatestVersionCodeTask)
+                    updatePlayVersionTask.description = "Gets the latest version code from play store for ${variationName} build and sets the next one"
+                    updatePlayVersionTask.group = PLAY_STORE_GROUP
+                    updatePlayVersionTask.extension = extension
+                    updatePlayVersionTask.variant = variant
+
+                    variant.preBuild.doLast {
+                        updatePlayVersionTask.updateVersion()
+                    }
+                }
 
                 // Attach tasks to task graph.
                 publishTask.dependsOn publishApkTask

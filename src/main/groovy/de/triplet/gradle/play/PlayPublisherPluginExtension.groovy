@@ -12,6 +12,8 @@ class PlayPublisherPluginExtension {
 
     boolean errorOnSizeLimit = true
 
+    boolean autoIncrementVersion = false
+
     private String track = 'alpha'
 
     void setTrack(String track) {
