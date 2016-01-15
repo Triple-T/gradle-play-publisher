@@ -4,6 +4,10 @@ import com.android.build.gradle.AppPlugin
 import org.apache.commons.lang.StringUtils
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.file.FileCollection
+import org.gradle.api.internal.file.CompositeFileCollection
+import org.gradle.api.internal.file.DefaultSourceDirectorySet
+import org.gradle.api.tasks.SourceSet
 
 class PlayPublisherPlugin implements Plugin<Project> {
 
@@ -20,6 +24,10 @@ class PlayPublisherPlugin implements Plugin<Project> {
 
         def extension = project.extensions.create('play', PlayPublisherPluginExtension)
 
+        project.android.sourceSets.all { sourceSet ->
+            sourceSet.extensions.create("play", DefaultSourceDirectorySet, "play", project.fileResolver)
+        }
+
         project.android.applicationVariants.all { variant ->
             if (variant.buildType.isDebuggable()) {
                 log.debug("Skipping debuggable build type ${variant.buildType.name}.")
@@ -33,8 +41,6 @@ class PlayPublisherPlugin implements Plugin<Project> {
                 productFlavorNames = [""]
             }
             def productFlavorName = productFlavorNames.join('')
-            def flavor = StringUtils.uncapitalize(productFlavorName)
-
             def variationName = "${productFlavorName}${buildTypeName}"
 
             def bootstrapTaskName = "bootstrap${variationName}PlayResources"
@@ -49,31 +55,34 @@ class PlayPublisherPlugin implements Plugin<Project> {
 
             def variantData = variant.variantData
 
+            def outputDir = new File(project.buildDir, "outputs/play/${variant.name}")
+
+            FileCollection playDirs = project.files()
+            variant.sourceSets.each { sourceSet ->
+                def playSrcSet = sourceSet.play
+                if(!playSrcSet.srcDirs.empty) {
+                    playDirs.from playSrcSet.srcDirs
+                }
+            }
+            if (playDirs.empty) {
+                playDirs.from("src/${variant.flavorName}/play")
+            }
+
             // Create and configure bootstrap task for this variant.
             def bootstrapTask = project.tasks.create(bootstrapTaskName, BootstrapTask)
             bootstrapTask.extension = extension
             bootstrapTask.variant = variant
-            if (StringUtils.isNotEmpty(flavor)) {
-                bootstrapTask.outputFolder = new File(project.projectDir, "src/${flavor}/play")
-            } else {
-                bootstrapTask.outputFolder = new File(project.projectDir, "src/main/play")
-            }
+            bootstrapTask.outputFolder = outputDir
+
             bootstrapTask.description = "Downloads the play store listing for the ${variationName} build. No download of image resources. See #18."
             bootstrapTask.group = PLAY_STORE_GROUP
 
             // Create and configure task to collect the play store resources.
             def playResourcesTask = project.tasks.create(playResourcesTaskName, GeneratePlayResourcesTask)
 
-            playResourcesTask.inputs.file(new File(project.projectDir, "src/main/play"))
-            if (StringUtils.isNotEmpty(flavor)) {
-                playResourcesTask.inputs.file(new File(project.projectDir, "src/${flavor}/play"))
-            }
-            playResourcesTask.inputs.file(new File(project.projectDir, "src/${variant.buildType.name}/play"))
-            if (StringUtils.isNotEmpty(flavor)) {
-                playResourcesTask.inputs.file(new File(project.projectDir, "src/${variant.name}/play"))
-            }
+            playResourcesTask.inputs.files(playDirs)
 
-            playResourcesTask.outputFolder = new File(project.projectDir, "build/outputs/play/${variant.name}")
+            playResourcesTask.outputFolder = outputDir
             playResourcesTask.description = "Collects play store resources for the ${variationName} build"
             playResourcesTask.group = PLAY_STORE_GROUP
 
@@ -111,5 +120,4 @@ class PlayPublisherPlugin implements Plugin<Project> {
             }
         }
     }
-
 }
