@@ -41,6 +41,11 @@ class PlayPublisherPlugin implements Plugin<Project> {
                 productFlavorNames = [""]
             }
             def productFlavorName = productFlavorNames.join('')
+            def flavor = StringUtils.uncapitalize(productFlavorName)
+            if(StringUtils.isEmpty(flavor)) {
+                flavor = "main"
+            }
+
             def variationName = "${productFlavorName}${buildTypeName}"
 
             def bootstrapTaskName = "bootstrap${variationName}PlayResources"
@@ -62,10 +67,9 @@ class PlayPublisherPlugin implements Plugin<Project> {
                 def playSrcSet = sourceSet.play
                 if(!playSrcSet.srcDirs.empty) {
                     playDirs.from playSrcSet.srcDirs
+                } else {
+                    playDirs.from("src/${sourceSet.name}/play")
                 }
-            }
-            if (playDirs.empty) {
-                playDirs.from("src/${variant.flavorName}/play")
             }
 
             // Create and configure bootstrap task for this variant.
