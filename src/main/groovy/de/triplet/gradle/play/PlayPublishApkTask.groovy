@@ -32,6 +32,12 @@ class PlayPublishApkTask extends PlayPublishTask {
         edits.tracks()
                 .update(variant.applicationId, editId, extension.track, newTrack)
                 .execute()
+        if (extension.track?.equals("beta")) {
+          Track emptyTrack = new Track().setVersionCodes([])
+          edits.tracks()
+                  .update(variant.applicationId, editId, 'alpha', emptyTrack)
+                  .execute();
+        }
 
         if (inputFolder.exists()) {
 
