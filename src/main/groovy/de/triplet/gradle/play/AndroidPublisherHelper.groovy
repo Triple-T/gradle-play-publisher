@@ -20,7 +20,8 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory
+import com.google.api.client.util.SecurityUtils;
 import com.google.api.services.androidpublisher.AndroidPublisher;
 import com.google.api.services.androidpublisher.AndroidPublisherScopes;
 
@@ -60,7 +61,19 @@ public class AndroidPublisherHelper {
     private static Credential authorizeWithServiceAccount(PlayPublisherPluginExtension extension)
             throws GeneralSecurityException, IOException {
         if (extension.serviceAccountEmail && extension.pk12File) {
-            return authorizeWithServiceAccount(extension.serviceAccountEmail, extension.pk12File);
+            if (extension.pk12Password || extension.storePassword) {
+                try {
+                    if (extension.pk12Password) {
+                        return authorizeWithServiceAccount(extension.serviceAccountEmail, extension.pk12File, extension.pk12Password, "privatekey", extension.pk12Password)
+                    } else {
+                        return authorizeWithServiceAccount(extension.serviceAccountEmail, extension.pk12File, extension.storePassword, extension.keyAlias, extension.keyPassword)
+                    }
+                } catch (IOException e) {
+                    throw new IllegalArgumentException(e.message)
+                }
+            } else {
+                return authorizeWithServiceAccount(extension.serviceAccountEmail, extension.pk12File);
+            }
         } else if (extension.jsonFile) {
             return authorizeWithServiceAccount(extension.jsonFile)
         }
@@ -78,6 +91,21 @@ public class AndroidPublisherHelper {
                 .setServiceAccountId(serviceAccountEmail)
                 .setServiceAccountScopes(Collections.singleton(AndroidPublisherScopes.ANDROIDPUBLISHER))
                 .setServiceAccountPrivateKeyFromP12File(pk12File)
+                .build();
+        return credential;
+    }
+
+    private static Credential authorizeWithServiceAccount(String serviceAccountEmail, File pk12File, String storePass, String alias, String keyPass)
+            throws GeneralSecurityException, IOException {
+        log.info(String.format("Authorizing using Service Account: %s", serviceAccountEmail));
+
+        // Build service account credential.
+        GoogleCredential credential = new GoogleCredential.Builder()
+                .setTransport(HTTP_TRANSPORT)
+                .setJsonFactory(JSON_FACTORY)
+                .setServiceAccountId(serviceAccountEmail)
+                .setServiceAccountScopes(Collections.singleton(AndroidPublisherScopes.ANDROIDPUBLISHER))
+                .setServiceAccountPrivateKey(SecurityUtils.loadPrivateKeyFromKeyStore(SecurityUtils.getPkcs12KeyStore(), new FileInputStream(pk12File), storePass, alias, keyPass))
                 .build();
         return credential;
     }

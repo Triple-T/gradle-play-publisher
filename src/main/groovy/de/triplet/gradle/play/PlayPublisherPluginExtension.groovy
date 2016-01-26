@@ -5,6 +5,10 @@ class PlayPublisherPluginExtension {
     String serviceAccountEmail
 
     File pk12File
+    String pk12Password
+    String storePassword
+    String keyAlias
+    String keyPassword
 
     File jsonFile
 
