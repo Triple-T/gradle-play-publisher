@@ -18,6 +18,7 @@ class BootstrapTask extends PlayPublishTask {
             PlayPublishListingTask.IMAGE_TYPE_PROMO_GRAPHIC,
             PlayPublishListingTask.IMAGE_TYPE_TV_BANNER,
             PlayPublishListingTask.IMAGE_TYPE_TV_SCREENSHOTS,
+            PlayPublishListingTask.IMAGE_TYPE_WEAR_SCREENSHOTS,
     ]
 
     File outputFolder

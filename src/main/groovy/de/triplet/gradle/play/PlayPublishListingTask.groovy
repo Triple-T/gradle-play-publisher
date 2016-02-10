@@ -34,6 +34,7 @@ class PlayPublishListingTask extends PlayPublishTask {
     static def IMAGE_TYPE_TEN_INCH_SCREENSHOTS = "tenInchScreenshots"
     static def IMAGE_TYPE_TV_BANNER = "tvBanner"
     static def IMAGE_TYPE_TV_SCREENSHOTS = "tvScreenshots"
+    static def IMAGE_TYPE_WEAR_SCREENSHOTS = "wearScreenshots"
 
     File inputFolder
 
@@ -121,6 +122,10 @@ class PlayPublishListingTask extends PlayPublishTask {
                     // Upload tvScreenshots
                     List<AbstractInputStreamContent> tvContentList = TaskHelper.getImageListAsStream(listingDir, IMAGE_TYPE_TV_SCREENSHOTS + "/")
                     uploadScreenshots(tvContentList, locale, IMAGE_TYPE_TV_SCREENSHOTS)
+
+                    // Upload wearScreenshots
+                    List<AbstractInputStreamContent> wearContentList = TaskHelper.getImageListAsStream(listingDir, IMAGE_TYPE_WEAR_SCREENSHOTS + "/")
+                    uploadScreenshots(wearContentList, locale, IMAGE_TYPE_WEAR_SCREENSHOTS)
                 }
             }
         }
