@@ -74,4 +74,14 @@ class PlayRolloutFractionsExtensionTest extends GroovyTestCase {
         assertEquals(1, nextUserFraction)
     }
 
+    @Test
+    void test_ShouldLaunchAnException_whenInputIs002() {
+        PlayRolloutFractionsExtension extension = new PlayRolloutFractionsExtension()
+        double userFraction = 0.02
+
+        shouldFail(IllegalRolloutException) {
+            extension.getNextUserFraction(userFraction)
+        }
+    }
+
 }
