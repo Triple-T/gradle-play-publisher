@@ -15,9 +15,32 @@ class ImageFileFilterTest extends GroovyTestCase {
     }
 
     @Test
+    void testUppercaseJpg_returnsTrue() {
+        ImageFileFilter filter = new ImageFileFilter()
+
+        File file = new File("banana.JPG");
+
+        boolean result = filter.accept(file);
+
+        assertTrue(result);
+    }
+
+
+    @Test
     void testPng_returnsTrue() {
         ImageFileFilter filter = new ImageFileFilter()
         File file = new File("banana.png");
+
+        boolean result = filter.accept(file);
+
+        assertTrue(result);
+    }
+
+    @Test
+    void testUppercasePng_returnsTrue() {
+        ImageFileFilter filter = new ImageFileFilter()
+
+        File file = new File("banana.PNG");
 
         boolean result = filter.accept(file);
 
