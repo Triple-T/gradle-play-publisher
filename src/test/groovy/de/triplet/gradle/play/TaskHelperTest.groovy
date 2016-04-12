@@ -39,6 +39,6 @@ class TaskHelperTest {
     public void testGetCharacterCount() {
         def message = new String(BYTES_NEW_LINES, Charset.forName("UTF-8"))
         assertEquals(9, message.length())
-        assertEquals(6, TaskHelper.normalizeAndTrimText(null, message, 6, true).length())
+        assertEquals(6, TaskHelper.normalize(message).length())
     }
 }
