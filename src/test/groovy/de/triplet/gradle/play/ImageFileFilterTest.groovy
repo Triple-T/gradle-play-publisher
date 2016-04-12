@@ -2,98 +2,55 @@ package de.triplet.gradle.play
 
 import org.junit.Test
 
-class ImageFileFilterTest extends GroovyTestCase {
+import static org.junit.Assert.assertFalse
+import static org.junit.Assert.assertTrue
+
+class ImageFileFilterTest {
+
+    ImageFileFilter filter = new ImageFileFilter()
 
     @Test
     void testJpg_returnsTrue() {
-        ImageFileFilter filter = new ImageFileFilter()
-        File file = new File("banana.jpg");
-
-        boolean result = filter.accept(file);
-
-        assertTrue(result);
+        assertTrue(filter.accept(new File("banana.jpg")))
     }
 
     @Test
     void testUppercaseJpg_returnsTrue() {
-        ImageFileFilter filter = new ImageFileFilter()
-
-        File file = new File("banana.JPG");
-
-        boolean result = filter.accept(file);
-
-        assertTrue(result);
+        assertTrue(filter.accept(new File("banana.JPG")))
     }
-
 
     @Test
     void testPng_returnsTrue() {
-        ImageFileFilter filter = new ImageFileFilter()
-        File file = new File("banana.png");
-
-        boolean result = filter.accept(file);
-
-        assertTrue(result);
+        assertTrue(filter.accept(new File("banana.png")))
     }
 
     @Test
     void testUppercasePng_returnsTrue() {
-        ImageFileFilter filter = new ImageFileFilter()
-
-        File file = new File("banana.PNG");
-
-        boolean result = filter.accept(file);
-
-        assertTrue(result);
+        assertTrue(filter.accept(new File("banana.PNG")))
     }
 
     @Test
     void testJpeg_returnsFalse() {
-        ImageFileFilter filter = new ImageFileFilter()
-        File file = new File("banana.jpeg");
-
-        boolean result = filter.accept(file);
-
-        assertFalse(result);
+        assertFalse(filter.accept(new File("banana.jpeg")))
     }
 
     @Test
     void testGif_returnsFalse() {
-        ImageFileFilter filter = new ImageFileFilter()
-        File file = new File("banana.gif");
-
-        boolean result = filter.accept(file);
-
-        assertFalse(result);
+        assertFalse(filter.accept(new File("banana.gif")))
     }
 
     @Test
     void testTiff_returnsFalse() {
-        ImageFileFilter filter = new ImageFileFilter()
-        File file = new File("banana.tiff");
-
-        boolean result = filter.accept(file);
-
-        assertFalse(result);
+        assertFalse(filter.accept(new File("banana.tiff")))
     }
 
     @Test
     void testBmp_returnsFalse() {
-        ImageFileFilter filter = new ImageFileFilter()
-        File file = new File("banana.bmp");
-
-        boolean result = filter.accept(file);
-
-        assertFalse(result);
+        assertFalse(filter.accept(new File("banana.bmp")))
     }
 
     @Test
     void testSvg_returnsFalse() {
-        ImageFileFilter filter = new ImageFileFilter()
-        File file = new File("banana.svg");
-
-        boolean result = filter.accept(file);
-
-        assertFalse(result);
+        assertFalse(filter.accept(new File("banana.svg")))
     }
 }
