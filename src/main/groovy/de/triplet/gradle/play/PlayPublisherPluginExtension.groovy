@@ -8,6 +8,8 @@ class PlayPublisherPluginExtension {
 
     File jsonFile
 
+    File metadataRoot
+
     boolean uploadImages = false
 
     boolean errorOnSizeLimit = true
