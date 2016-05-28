@@ -42,6 +42,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             def publishApkTaskName = "publishApk${variationName}"
             def publishListingTaskName = "publishListing${variationName}"
             def publishTaskName = "publish${variationName}"
+            def untrackApkTaskName = "untrackApk${variationName}"
 
             def outputData = variant.outputs.first()
             def zipAlignTask = outputData.zipAlign
@@ -106,6 +107,14 @@ class PlayPublisherPlugin implements Plugin<Project> {
                 publishTask.dependsOn publishListingTask
                 publishApkTask.dependsOn playResourcesTask
                 publishApkTask.dependsOn assembleTask
+
+                // Handle untrack
+                def untrackTask = project.tasks.create(untrackApkTaskName, PlayUntrackTask)
+                untrackTask.description = "Untrack the APK for ${variationName} channel"
+                untrackTask.extension = extension
+                untrackTask.group = PLAY_STORE_GROUP
+                untrackTask.variant = variant
+                publishApkTask.dependsOn untrackTask
             } else {
                 log.warn("Could not find ZipAlign task. Did you specify a signingConfig for the variation ${variationName}?")
             }
