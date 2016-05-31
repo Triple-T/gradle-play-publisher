@@ -148,7 +148,7 @@ To make sure your texts comply to the requirements of the Play Store, there is a
 
 The limits are:
 
-* Title: *90 characters*
+* Title: *30 characters*
 * Short description: *80 characters*
 * Long description: *4000 characters*
 * Recent changes : *500 characters*
