@@ -6,6 +6,7 @@ import com.google.api.client.http.FileContent
 class TaskHelper {
 
     def static readAndTrimFile(File file, int maxCharLength, boolean errorOnSizeLimit) {
+        System.out.println("Listing File Helper: " + file.getName() + " , Exists: " + file.exists())
         if (file.exists()) {
             def message = normalize(file.text)
 
