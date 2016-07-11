@@ -223,7 +223,7 @@ In that case the plugin looks for the Play Store images in your `play` folder. S
 
 Note: The plugin does not enforce the correct size and file type. If you try to upload invalid files, the Google API will fail with a detailed error message.
 
-Note: The plugin copies and merges the contents of the different play folders into a build folder for upload. If there are still images left from a previous build, this might lead to undesired behaviour. Pleas make sure to always do a `./gradlew clean` whenever you rename or delete images in those directories.
+Note: The plugin copies and merges the contents of the different play folders into a build folder for upload. If there are still images left from a previous build, this might lead to undesired behaviour. Please make sure to always do a `./gradlew clean` whenever you rename or delete images in those directories.
 
 ## Advanced Topics
 
