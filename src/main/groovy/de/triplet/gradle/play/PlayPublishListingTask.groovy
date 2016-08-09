@@ -57,7 +57,7 @@ class PlayPublishListingTask extends PlayPublishTask {
                 def title = TaskHelper.readAndTrimFile(fileTitle, MAX_CHARACTER_LENGTH_FOR_TITLE, extension.errorOnSizeLimit)
                 def shortDescription = TaskHelper.readAndTrimFile(fileShortDescription, MAX_CHARACTER_LENGTH_FOR_SHORT_DESCRIPTION, extension.errorOnSizeLimit)
                 def fullDescription = TaskHelper.readAndTrimFile(fileFullDescription, MAX_CHARACTER_LENGTH_FOR_FULL_DESCRIPTION, extension.errorOnSizeLimit)
-                def video = TaskHelper.readAndTrimFile(fileVideo, Integer.MAX_VALUE, extension.errorOnSizeLimit)
+                def video = TaskHelper.readSingleLine(fileVideo)
 
                 final Listing listing = new Listing()
                 if (StringUtils.isNotEmpty(title)) {
@@ -131,15 +131,15 @@ class PlayPublishListingTask extends PlayPublishTask {
         }
 
         def fileDefaultLanguage = new File(inputFolder, FILE_NAME_FOR_DEFAULT_LANGUAGE)
-        def defaultLanguage = TaskHelper.readAndTrimFile(fileDefaultLanguage, Integer.MAX_VALUE, false)
+        def defaultLanguage = TaskHelper.readSingleLine(fileDefaultLanguage)
 
         if (StringUtils.isNotEmpty(defaultLanguage)) {
             def fileContactEmail = new File(inputFolder, FILE_NAME_FOR_CONTACT_EMAIL)
-            def email = TaskHelper.readAndTrimFile(fileContactEmail, Integer.MAX_VALUE, false)
+            def email = TaskHelper.readSingleLine(fileContactEmail)
             def fileContactPhone = new File(inputFolder, FILE_NAME_FOR_CONTACT_PHONE)
-            def phone = TaskHelper.readAndTrimFile(fileContactPhone, Integer.MAX_VALUE, false)
+            def phone = TaskHelper.readSingleLine(fileContactPhone)
             def fileContactWeb = new File(inputFolder, FILE_NAME_FOR_CONTACT_WEBSITE)
-            def web = TaskHelper.readAndTrimFile(fileContactWeb, Integer.MAX_VALUE, false)
+            def web = TaskHelper.readSingleLine(fileContactWeb)
 
             AppDetails details = new AppDetails()
 
