@@ -103,7 +103,13 @@ public class PlayPublishTaskTest {
         m = pattern.matcher("es-419")
         assertTrue(m.find())
 
+        m = pattern.matcher("fil")
+        assertTrue(m.find())
+
         m = pattern.matcher("de_DE")
+        assertFalse(m.find())
+
+        m = pattern.matcher("fil-PH")
         assertFalse(m.find())
     }
 
