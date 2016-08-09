@@ -36,7 +36,7 @@ class PlayPublishApkTask extends PlayPublishTask {
 
         if (extension.untrackOld && !"alpha".equals(extension.track)) {
             def untrackChannels = "beta".equals(extension.track) ? ["alpha"] : ["alpha", "beta"]
-            untrackChannels.forEach { channel ->
+            untrackChannels.each { channel ->
                 Track track = edits.tracks().get(variant.applicationId, editId, channel).execute()
                 track.setVersionCodes(track.getVersionCodes().findAll {
                     it > apk.getVersionCode()
