@@ -62,6 +62,7 @@ The plugin creates the following tasks for you:
 * `publishApkRelease` - Uploads the APK and the summary of recent changes.
 * `publishListingRelease` - Uploads the descriptions and images for the Play Store listing.
 * `publishRelease` - Uploads everything.
+* `untrackApkRelease` - Untrack APK from Play Store
 * `bootstrapReleasePlayResources` - Fetches all existing data from the Play Store to bootstrap the required files and folders.
 
 Make sure to set a valid `signingConfig` for the release build type. Otherwise, there won't be a publishable APK and the above tasks won't be available.
@@ -177,6 +178,24 @@ play {
 It is also possible to provide a separate summary of recent changes for each track. Just drop in a special `whatsnew-alpha` text file alongside your main `whatsnew` file and that one will be used if you publish to the alpha track.
 
 When defining the track as (staged) `rollout` you can also define a ```userFraction``` which is the portion of users who should get the staged rollout version of the APK.
+
+### Specify APK to untrack
+
+By default Google Play Developer API is not allowing us to automatically disable APK in another
+track even though it is allowed through Play Web Console. If you want to publish to another higher
+track and automatically disable from another track, it can be specified via the ```untrack``` and
+```untrackFormat``` properties.
+
+```groovy
+play {
+    // ...
+    track = 'beta'
+    untrack = 'alpha' // we untrack 'alpha' while upload to 'beta'
+    untrackFormat = '^3[0-9]{2}\$' // regex format for customisation of the versions to untrack
+}
+```
+
+It is also possible to untrack all versions by setting the ```untrackFormat``` to `*`.
 
 ### Upload Images
 

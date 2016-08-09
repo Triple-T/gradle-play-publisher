@@ -42,6 +42,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             def publishApkTaskName = "publishApk${variationName}"
             def publishListingTaskName = "publishListing${variationName}"
             def publishTaskName = "publish${variationName}"
+            def untrackApkTaskName = "untrackApk${variationName}"
 
             // Create and configure bootstrap task for this variant.
             def bootstrapTask = project.tasks.create(bootstrapTaskName, BootstrapTask)
@@ -100,6 +101,14 @@ class PlayPublisherPlugin implements Plugin<Project> {
                 publishTask.dependsOn publishListingTask
                 publishApkTask.dependsOn playResourcesTask
                 publishApkTask.dependsOn project.tasks."assemble${variationName}"
+
+                // Handle untrack
+                def untrackTask = project.tasks.create(untrackApkTaskName, PlayUntrackTask)
+                untrackTask.description = "Untrack the APK for ${variationName} channel"
+                untrackTask.extension = extension
+                untrackTask.group = PLAY_STORE_GROUP
+                untrackTask.variant = variant
+                publishApkTask.dependsOn untrackTask
             } else {
                 log.warn("Signing not ready. Did you specify a signingConfig for the variation ${variationName}?")
             }

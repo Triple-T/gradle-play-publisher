@@ -118,6 +118,34 @@ class PlayPublisherPluginTest {
     }
 
     @Test
+    public void testUntrack() {
+        Project project = TestHelper.evaluatableProject()
+        project.play {
+          untrack 'rollout'
+        }
+        project.evaluate()
+
+        assertEquals('rollout', project.extensions.findByName("play").untrack)
+    }
+
+    @Test
+    public void testUntrackTask() {
+        Project project = TestHelper.evaluatableProject()
+        project.evaluate()
+
+        assertNotNull(project.tasks.untrackApkRelease)
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testThrowsOnInvalidUntrack() {
+        Project project = TestHelper.evaluatableProject()
+
+        project.play {
+          untrack 'production'
+        }
+    }
+
+    @Test
     public void testNoSigningConfigGenerateTasks() {
         Project project = TestHelper.noSigningConfigProject()
 
