@@ -33,6 +33,18 @@ class PlayPublishApkTask extends PlayPublishTask {
                 .update(variant.applicationId, editId, extension.track, newTrack)
                 .execute()
 
+        if (extension.untrackOld && !"alpha".equals(extension.track)) {
+            def untrackChannels = "beta".equals(extension.track) ? ["alpha"] : ["alpha", "beta"]
+            untrackChannels.forEach { channel ->
+                Track trackInfo = edits.tracks().get(variant.applicationId, editId, channel).execute()
+                trackInfo.setVersionCodes(trackInfo.getVersionCodes().findAll {
+                    it > apk.getVersionCode()
+                });
+
+                edits.tracks().update(variant.applicationId, editId, channel, trackInfo).execute()
+            }
+        }
+
         if (inputFolder.exists()) {
 
             // Matches if locale have the correct naming e.g. en-US for play store

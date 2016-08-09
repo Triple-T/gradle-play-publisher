@@ -12,11 +12,9 @@ class PlayPublisherPluginExtension {
 
     boolean errorOnSizeLimit = true
 
-    String untrackFormat = ""
-
     private String track = 'alpha'
 
-    private String untrack = 'alpha'
+    boolean untrackOld = false
 
     void setTrack(String track) {
         if (!(track in ['alpha', 'beta', 'rollout', 'production'])) {
@@ -28,18 +26,6 @@ class PlayPublisherPluginExtension {
 
     def getTrack() {
         return track
-    }
-
-    void setUntrack(String untrack) {
-        if (!(untrack in ['alpha', 'beta', 'rollout'])) {
-            throw new IllegalArgumentException("Track has to be one of 'alpha', 'beta' or 'rollout'.")
-        }
-
-        this.untrack = untrack
-    }
-
-    def getUntrack() {
-        return untrack
     }
 
     Double userFraction = 0.1
