@@ -62,7 +62,6 @@ The plugin creates the following tasks for you:
 * `publishApkRelease` - Uploads the APK and the summary of recent changes.
 * `publishListingRelease` - Uploads the descriptions and images for the Play Store listing.
 * `publishRelease` - Uploads everything.
-* `untrackApkRelease` - Untrack APK from Play Store
 * `bootstrapReleasePlayResources` - Fetches all existing data from the Play Store to bootstrap the required files and folders.
 
 Make sure to set a valid `signingConfig` for the release build type. Otherwise, there won't be a publishable APK and the above tasks won't be available.
