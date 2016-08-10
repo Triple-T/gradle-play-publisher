@@ -10,6 +10,10 @@ class PlayPublisherPluginExtension {
 
     boolean uploadImages = false
 
+    boolean uploadObbMain = true
+
+    boolean uploadObbPatch = false
+
     boolean errorOnSizeLimit = true
 
     private String track = 'alpha'
