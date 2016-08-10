@@ -12,7 +12,7 @@ class PlayPublishObbTask extends PlayPublishTask {
     publishObb() {
         super.publish()
 
-        if (!extension.uploadObbMain && extension.uploadObbPatch) {
+        if (!extension.uploadObbMain && !extension.uploadObbPatch) {
             throw new GradleException("You must select at least to upload the main or patch obb file, see the README")
         }
 
