@@ -225,6 +225,20 @@ Note: The plugin does not enforce the correct size and file type. If you try to 
 
 Note: The plugin copies and merges the contents of the different play folders into a build folder for upload. If there are still images left from a previous build, this might lead to undesired behaviour. Please make sure to always do a `./gradlew clean` whenever you rename or delete images in those directories.
 
+### Upload Obb file
+
+The `publishObb` task requires that you place the obb main and/or patch file into the `play/obb` directory, with the name `obb` and `patch`.
+
+You can can select whether to upload the main and patch files in the `play` extension (by default only the main is uploaded):
+
+```groovy
+play {
+    // ...
+    uploadObbMain = true
+    uploadObbPatch = false
+}
+```
+
 ## Advanced Topics
 
 ### Run custom tasks before publishing
