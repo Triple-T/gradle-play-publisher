@@ -147,7 +147,7 @@ public class PlayPublishTaskTest {
         alphaTrack.setVersionCodes(new ArrayList<Integer>([41, 40]))
 
         project.tasks.publishApkRelease.service = publisherMock
-        project.tasks.publishApkRelease.publishApk()
+        project.tasks.publishApkRelease.publishApks()
 
         verify(editTracksMock).update(
                 eq('com.example.publisher'),
@@ -168,7 +168,7 @@ public class PlayPublishTaskTest {
         alphaTrack.setVersionCodes(new ArrayList<Integer>([43]))
 
         project.tasks.publishApkRelease.service = publisherMock
-        project.tasks.publishApkRelease.publishApk()
+        project.tasks.publishApkRelease.publishApks()
 
         verify(editTracksMock).update(
                 eq('com.example.publisher'),
@@ -190,7 +190,7 @@ public class PlayPublishTaskTest {
         betaTrack.setVersionCodes(new ArrayList<Integer>([39]))
 
         project.tasks.publishApkRelease.service = publisherMock
-        project.tasks.publishApkRelease.publishApk()
+        project.tasks.publishApkRelease.publishApks()
 
         verify(editTracksMock).update(
                 eq('com.example.publisher'),
@@ -218,7 +218,7 @@ public class PlayPublishTaskTest {
         betaTrack.setVersionCodes(new ArrayList<Integer>([43]))
 
         project.tasks.publishApkRelease.service = publisherMock
-        project.tasks.publishApkRelease.publishApk()
+        project.tasks.publishApkRelease.publishApks()
 
         verify(editTracksMock).update(
                 eq('com.example.publisher'),

@@ -5,8 +5,10 @@ import org.gradle.api.internal.plugins.PluginApplicationException
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Test
 
+import static de.triplet.gradle.play.DependsOn.dependsOn
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
+import static org.junit.Assert.assertThat
 import static org.junit.Assert.fail
 
 class PlayPublisherPluginTest {
@@ -131,4 +133,25 @@ class PlayPublisherPluginTest {
         }
     }
 
+
+    @Test
+    public void testSplits() {
+        Project project = TestHelper.evaluatableProject()
+
+        project.android {
+            splits {
+                abi {
+                    enable true
+                    reset()
+                    include 'x86', 'armeabi-v7a', 'mips'
+                }
+            }
+        }
+
+        project.evaluate()
+
+        assertThat(project.tasks.publishApkRelease, dependsOn('assembleX86Release'))
+        assertThat(project.tasks.publishApkRelease, dependsOn('assembleArmeabi-v7aRelease'))
+        assertThat(project.tasks.publishApkRelease, dependsOn('assembleMipsRelease'))
+    }
 }
