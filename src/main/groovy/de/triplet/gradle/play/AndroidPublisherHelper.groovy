@@ -47,8 +47,6 @@ public class AndroidPublisherHelper {
 
     private static final String APPLICATION_NAME = "gradle-play-publisher"
 
-    static final String MIME_TYPE_APK = "application/vnd.android.package-archive";
-
     static final String MIME_TYPE_IMAGE= "image/*";
 
     /** Global instance of the JSON factory. */

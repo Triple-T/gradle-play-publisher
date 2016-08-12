@@ -42,6 +42,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             def publishApkTaskName = "publishApk${variationName}"
             def publishListingTaskName = "publishListing${variationName}"
             def publishTaskName = "publish${variationName}"
+            def untrackApkTaskName = "untrackApk${variationName}"
 
             // Create and configure bootstrap task for this variant.
             def bootstrapTask = project.tasks.create(bootstrapTaskName, BootstrapTask)

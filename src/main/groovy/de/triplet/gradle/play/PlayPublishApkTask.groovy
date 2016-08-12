@@ -9,6 +9,7 @@ import org.gradle.api.tasks.TaskAction
 
 class PlayPublishApkTask extends PlayPublishTask {
 
+    static def MIME_TYPE_APK = "application/vnd.android.package-archive"
     static def MAX_CHARACTER_LENGTH_FOR_WHATS_NEW_TEXT = 500
     static def FILE_NAME_FOR_WHATS_NEW_TEXT = "whatsnew"
 
@@ -19,7 +20,7 @@ class PlayPublishApkTask extends PlayPublishTask {
         super.publish()
 
         def apkOutput = variant.outputs.find { variantOutput -> variantOutput instanceof ApkVariantOutput }
-        FileContent newApkFile = new FileContent(AndroidPublisherHelper.MIME_TYPE_APK, apkOutput.outputFile)
+        FileContent newApkFile = new FileContent(MIME_TYPE_APK, apkOutput.outputFile)
 
         Apk apk = edits.apks()
                 .upload(variant.applicationId, editId, newApkFile)
@@ -32,6 +33,18 @@ class PlayPublishApkTask extends PlayPublishTask {
         edits.tracks()
                 .update(variant.applicationId, editId, extension.track, newTrack)
                 .execute()
+
+        if (extension.untrackOld && !"alpha".equals(extension.track)) {
+            def untrackChannels = "beta".equals(extension.track) ? ["alpha"] : ["alpha", "beta"]
+            untrackChannels.each { channel ->
+                Track track = edits.tracks().get(variant.applicationId, editId, channel).execute()
+                track.setVersionCodes(track.getVersionCodes().findAll {
+                    it > apk.getVersionCode()
+                });
+
+                edits.tracks().update(variant.applicationId, editId, channel, track).execute()
+            }
+        }
 
         if (inputFolder.exists()) {
 

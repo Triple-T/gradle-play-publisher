@@ -178,6 +178,24 @@ It is also possible to provide a separate summary of recent changes for each tra
 
 When defining the track as (staged) `rollout` you can also define a ```userFraction``` which is the portion of users who should get the staged rollout version of the APK.
 
+### Untrack conflicting versions
+
+The Google Play Developer API does not allow us to publish a beta version if there is an alpha version with a lower version code. If you want to publish to another higher track and automatically disable from another track, this can be specified by setting the `untrackOld` property to `true`.
+
+```groovy
+play {
+    // ...
+    track = 'beta'
+    untrackOld = true // will untrack 'alpha' while upload to 'beta'
+}
+```
+
+This will untrack whatever versions are currently blocking the publishing process. That is: every APK with a version lower than the one being uploaded in any of the tracks lower than specified by `track`.
+
+Example: Publishing an APK with version 42 to production will untrack versions 41 and lower from alpha and beta. It will not, however untrack versions 43 or higher from those channels because they do not conflict.
+
+Setting that flag to `false` or not setting it at all will stop the publishing process in case of conflicts. Keep that behaviour if you want to manually untrack conflicting versions rather than doing automatic untracking.
+
 ### Upload Images
 
 To speed things up a little, images are only uploaded if you explicitly say so:
