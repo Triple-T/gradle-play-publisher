@@ -14,6 +14,8 @@ class PlayPublishTask extends DefaultTask {
 
     PlayPublisherPluginExtension extension
 
+    PlayAccountConfig playAccountConfig
+
     ApplicationVariant variant
 
     String editId
@@ -24,7 +26,7 @@ class PlayPublishTask extends DefaultTask {
 
     def publish() {
         if (service == null) {
-            service = AndroidPublisherHelper.init(extension)
+            service = AndroidPublisherHelper.init(playAccountConfig)
         }
 
         edits = service.edits()

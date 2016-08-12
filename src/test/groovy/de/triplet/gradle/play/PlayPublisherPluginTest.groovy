@@ -89,20 +89,6 @@ class PlayPublisherPluginTest {
     }
 
     @Test
-    public void testJsonFile() {
-        Project project = TestHelper.evaluatableProject()
-
-        project.play {
-            jsonFile new File("key.json");
-        }
-
-        project.evaluate()
-
-        assertEquals("key.json", project.extensions.findByName("play").jsonFile.name)
-    }
-
-
-    @Test
     public void testPublishListingTask() {
         Project project = TestHelper.evaluatableProject()
 
@@ -129,6 +115,49 @@ class PlayPublisherPluginTest {
         if (project.tasks.hasProperty('publishApkRelease') || project.tasks.hasProperty('publishRelease')) {
             fail()
         }
+    }
+
+    @Test
+    public void testPlaySigningConfigs() {
+        Project project = TestHelper.evaluatableProject()
+
+        project.android {
+            playAccountConfigs {
+                defaultAccountConfig {
+                    serviceAccountEmail = 'default@exmaple.com'
+                    pk12File = project.file('first-secret.pk12')
+                }
+                free {
+                    serviceAccountEmail = 'first-mail@exmaple.com'
+                    pk12File = project.file('secret.pk12')
+                }
+                paid {
+                    serviceAccountEmail = 'another-mail@exmaple.com'
+                    pk12File = project.file('another-secret.pk12')
+                }
+            }
+
+            defaultConfig {
+                playAccountConfig = playAccountConfigs.defaultAccountConfig
+            }
+
+            productFlavors {
+                defaultFlavor {
+
+                }
+                free {
+                    playAccountConfig = playAccountConfigs.free
+                }
+                paid {
+                    playAccountConfig = playAccountConfigs.paid
+                }
+            }
+        }
+        project.evaluate()
+
+        assert project.android.productFlavors.defaultFlavor.playAccountConfig.serviceAccountEmail == 'default@exmaple.com'
+        assert project.android.productFlavors.free.playAccountConfig.serviceAccountEmail == 'first-mail@exmaple.com'
+        assert project.android.productFlavors.paid.playAccountConfig.serviceAccountEmail == 'another-mail@exmaple.com'
     }
 
 }

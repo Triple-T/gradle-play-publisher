@@ -57,12 +57,12 @@ public class AndroidPublisherHelper {
     /** Global instance of the HTTP transport. */
     private static HttpTransport HTTP_TRANSPORT;
 
-    private static Credential authorizeWithServiceAccount(PlayPublisherPluginExtension extension)
+    private static Credential authorizeWithServiceAccount(PlayAccountConfig config)
             throws GeneralSecurityException, IOException {
-        if (extension.serviceAccountEmail && extension.pk12File) {
-            return authorizeWithServiceAccount(extension.serviceAccountEmail, extension.pk12File);
-        } else if (extension.jsonFile) {
-            return authorizeWithServiceAccount(extension.jsonFile)
+        if (config != null && config.serviceAccountEmail && config.pk12File) {
+            return authorizeWithServiceAccount(config.serviceAccountEmail, config.pk12File);
+        } else if (config != null && config.jsonFile) {
+            return authorizeWithServiceAccount(config.jsonFile)
         }
         throw new IllegalArgumentException("No credentials provided.");
     }
@@ -99,12 +99,12 @@ public class AndroidPublisherHelper {
      * @throws GeneralSecurityException
      * @throws IOException
      */
-    protected static AndroidPublisher init(PlayPublisherPluginExtension extension)
+    protected static AndroidPublisher init(PlayAccountConfig config)
             throws IOException, GeneralSecurityException {
 
         // Authorization.
         newTrustedTransport();
-        Credential credential = authorizeWithServiceAccount(extension);
+        Credential credential = authorizeWithServiceAccount(config);
 
         // Set up and return API client.
         return new AndroidPublisher.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)

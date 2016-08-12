@@ -1,13 +1,6 @@
 package de.triplet.gradle.play
 
 class PlayPublisherPluginExtension {
-
-    String serviceAccountEmail
-
-    File pk12File
-
-    File jsonFile
-
     boolean uploadImages = false
 
     boolean errorOnSizeLimit = true

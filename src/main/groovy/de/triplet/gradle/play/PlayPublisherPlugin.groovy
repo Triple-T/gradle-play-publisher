@@ -20,6 +20,14 @@ class PlayPublisherPlugin implements Plugin<Project> {
 
         def extension = project.extensions.create('play', PlayPublisherPluginExtension)
 
+        project.android.extensions.playAccountConfigs = project.container(PlayAccountConfig)
+
+        project.android.defaultConfig.ext.playAccountConfig = null
+
+        project.android.productFlavors.whenObjectAdded { flavor ->
+            flavor.ext.playAccountConfig = flavor.project.android.defaultConfig.ext.playAccountConfig
+        }
+
         project.android.applicationVariants.all { variant ->
             if (variant.buildType.isDebuggable()) {
                 log.debug("Skipping debuggable build type ${variant.buildType.name}.")
@@ -48,6 +56,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             bootstrapTask.extension = extension
             bootstrapTask.variant = variant
             if (StringUtils.isNotEmpty(flavor)) {
+                bootstrapTask.playAccountConfig = project.android.productFlavors[flavor].playAccountConfig
                 bootstrapTask.outputFolder = new File(project.projectDir, "src/${flavor}/play")
             } else {
                 bootstrapTask.outputFolder = new File(project.projectDir, "src/main/play")
@@ -74,6 +83,9 @@ class PlayPublisherPlugin implements Plugin<Project> {
             // Create and configure publisher meta task for this variant
             def publishListingTask = project.tasks.create(publishListingTaskName, PlayPublishListingTask)
             publishListingTask.extension = extension
+            if (StringUtils.isNotEmpty(flavor)) {
+                publishListingTask.playAccountConfig = project.android.productFlavors[flavor].playAccountConfig
+            }
             publishListingTask.variant = variant
             publishListingTask.inputFolder = playResourcesTask.outputFolder
             publishListingTask.description = "Updates the play store listing for the ${variationName} build"
@@ -86,6 +98,9 @@ class PlayPublisherPlugin implements Plugin<Project> {
                 // Create and configure publisher apk task for this variant.
                 def publishApkTask = project.tasks.create(publishApkTaskName, PlayPublishApkTask)
                 publishApkTask.extension = extension
+                if (StringUtils.isNotEmpty(flavor)) {
+                    publishApkTask.playAccountConfig = project.android.productFlavors[flavor].playAccountConfig
+                }
                 publishApkTask.variant = variant
                 publishApkTask.inputFolder = playResourcesTask.outputFolder
                 publishApkTask.description = "Uploads the APK for the ${variationName} build"
