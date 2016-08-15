@@ -180,6 +180,8 @@ When defining the track as (staged) `rollout` you can also define a ```userFract
 
 ### Untrack conflicting versions
 
+Only available in version `1.2.0-beta1`
+
 The Google Play Developer API does not allow us to publish a beta version if there is an alpha version with a lower version code. If you want to publish to another higher track and automatically disable from another track, this can be specified by setting the `untrackOld` property to `true`.
 
 ```groovy
