@@ -155,9 +155,38 @@ class PlayPublisherPluginTest {
         }
         project.evaluate()
 
-        assert project.android.productFlavors.defaultFlavor.playAccountConfig.serviceAccountEmail == 'default@exmaple.com'
-        assert project.android.productFlavors.free.playAccountConfig.serviceAccountEmail == 'first-mail@exmaple.com'
-        assert project.android.productFlavors.paid.playAccountConfig.serviceAccountEmail == 'another-mail@exmaple.com'
+        assert project.tasks.bootstrapDefaultFlavorReleasePlayResources.playAccountConfig.serviceAccountEmail == 'default@exmaple.com'
+        assert project.tasks.bootstrapFreeReleasePlayResources.playAccountConfig.serviceAccountEmail == 'first-mail@exmaple.com'
+        assert project.tasks.bootstrapPaidReleasePlayResources.playAccountConfig.serviceAccountEmail == 'another-mail@exmaple.com'
+
+        assert project.tasks.publishApkDefaultFlavorRelease.playAccountConfig.serviceAccountEmail == 'default@exmaple.com'
+        assert project.tasks.publishApkFreeRelease.playAccountConfig.serviceAccountEmail == 'first-mail@exmaple.com'
+        assert project.tasks.publishApkPaidRelease.playAccountConfig.serviceAccountEmail == 'another-mail@exmaple.com'
+
+        assert project.tasks.publishListingDefaultFlavorRelease.playAccountConfig.serviceAccountEmail == 'default@exmaple.com'
+        assert project.tasks.publishListingFreeRelease.playAccountConfig.serviceAccountEmail == 'first-mail@exmaple.com'
+        assert project.tasks.publishListingPaidRelease.playAccountConfig.serviceAccountEmail == 'another-mail@exmaple.com'
+    }
+
+    @Test
+    public void testNoProductFlavors() {
+        Project project = TestHelper.evaluatableProject()
+
+        project.android {
+            playAccountConfigs {
+                defaultAccountConfig {
+                    serviceAccountEmail = 'default@exmaple.com'
+                    pk12File = project.file('first-secret.pk12')
+                }
+            }
+
+            defaultConfig {
+                playAccountConfig = playAccountConfigs.defaultAccountConfig
+            }
+        }
+        project.evaluate()
+
+        assert project.tasks.publishApkRelease.playAccountConfig.serviceAccountEmail == 'default@exmaple.com'
     }
 
 }

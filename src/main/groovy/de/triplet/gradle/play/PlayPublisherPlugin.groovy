@@ -28,7 +28,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             flavor.ext.playAccountConfig = flavor.project.android.defaultConfig.ext.playAccountConfig
         }
 
-        project.android.applicationVariants.all { variant ->
+        project.android.applicationVariants.whenObjectAdded { variant ->
             if (variant.buildType.isDebuggable()) {
                 log.debug("Skipping debuggable build type ${variant.buildType.name}.")
                 return
@@ -59,6 +59,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
                 bootstrapTask.playAccountConfig = project.android.productFlavors[flavor].playAccountConfig
                 bootstrapTask.outputFolder = new File(project.projectDir, "src/${flavor}/play")
             } else {
+                bootstrapTask.playAccountConfig = project.android.defaultConfig.ext.playAccountConfig
                 bootstrapTask.outputFolder = new File(project.projectDir, "src/main/play")
             }
             bootstrapTask.description = "Downloads the play store listing for the ${variationName} build. No download of image resources. See #18."
@@ -85,6 +86,8 @@ class PlayPublisherPlugin implements Plugin<Project> {
             publishListingTask.extension = extension
             if (StringUtils.isNotEmpty(flavor)) {
                 publishListingTask.playAccountConfig = project.android.productFlavors[flavor].playAccountConfig
+            } else {
+                bootstrapTask.playAccountConfig = project.android.defaultConfig.ext.playAccountConfig
             }
             publishListingTask.variant = variant
             publishListingTask.inputFolder = playResourcesTask.outputFolder
@@ -100,6 +103,8 @@ class PlayPublisherPlugin implements Plugin<Project> {
                 publishApkTask.extension = extension
                 if (StringUtils.isNotEmpty(flavor)) {
                     publishApkTask.playAccountConfig = project.android.productFlavors[flavor].playAccountConfig
+                } else {
+                    publishApkTask.playAccountConfig = project.android.defaultConfig.ext.playAccountConfig
                 }
                 publishApkTask.variant = variant
                 publishApkTask.inputFolder = playResourcesTask.outputFolder
