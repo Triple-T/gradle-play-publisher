@@ -25,7 +25,7 @@ To use the publisher plugin you have to create a service account for your existi
 
 Due to the way the Google Play Publisher API works, you have to grant at least the following permissions to that service account:
 
-![permissions.png](https://cloud.githubusercontent.com/assets/1361086/5045988/95eb902e-6bb9-11e4-9251-30840ba014d3.png)
+![permissions.png](https://cloud.githubusercontent.com/assets/242983/17809992/95ea4eaa-661a-11e6-9879-521df4f14735.png)
 
 Once you finished the setup you have a so called *service account email address* and a *p12 key file* that we will use later on.
 
