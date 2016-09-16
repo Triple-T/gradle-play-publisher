@@ -41,6 +41,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             def playResourcesTaskName = "generate${variationName}PlayResources"
             def publishApkTaskName = "publishApk${variationName}"
             def publishListingTaskName = "publishListing${variationName}"
+            def validateTaskName = "validate${variationName}"
             def publishTaskName = "publish${variationName}"
 
             // Create and configure bootstrap task for this variant.
@@ -81,6 +82,13 @@ class PlayPublisherPlugin implements Plugin<Project> {
 
             // Attach tasks to task graph.
             publishListingTask.dependsOn playResourcesTask
+
+            def validateTask = project.tasks.create(validateTaskName, ValidationTask)
+            validateTask.inputFolder = playResourcesTask.outputFolder
+            validateTask.description = "Validate the play store listing for the ${variationName} build"
+            validateTask.group = PLAY_STORE_GROUP
+
+            validateTask.dependsOn playResourcesTask
 
             if (variant.isSigningReady()) {
                 // Create and configure publisher apk task for this variant.
