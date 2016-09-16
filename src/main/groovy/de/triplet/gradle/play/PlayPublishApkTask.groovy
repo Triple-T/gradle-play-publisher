@@ -9,29 +9,50 @@ import org.gradle.api.tasks.TaskAction
 
 class PlayPublishApkTask extends PlayPublishTask {
 
+    static def MIME_TYPE_APK = "application/vnd.android.package-archive"
     static def MAX_CHARACTER_LENGTH_FOR_WHATS_NEW_TEXT = 500
     static def FILE_NAME_FOR_WHATS_NEW_TEXT = "whatsnew"
 
     File inputFolder
 
     @TaskAction
-    publishApk() {
+    publishApks() {
         super.publish()
 
-        def apkOutput = variant.outputs.find { variantOutput -> variantOutput instanceof ApkVariantOutput }
-        FileContent newApkFile = new FileContent(AndroidPublisherHelper.MIME_TYPE_APK, apkOutput.outputFile)
+        List<Integer> versionCodes = new ArrayList<Integer>()
 
-        Apk apk = edits.apks()
-                .upload(variant.applicationId, editId, newApkFile)
-                .execute()
+        variant.outputs
+            .findAll { variantOutput -> variantOutput instanceof ApkVariantOutput }
+            .each { variantOutput -> versionCodes.add(publishApk(new FileContent(MIME_TYPE_APK, variantOutput.outputFile)).getVersionCode())}
 
-        Track newTrack = new Track().setVersionCodes([apk.getVersionCode()])
+        Track track = new Track().setVersionCodes(versionCodes)
         if (extension.track?.equals("rollout")) {
-            newTrack.setUserFraction(extension.userFraction)
+            track.setUserFraction(extension.userFraction)
         }
         edits.tracks()
-                .update(variant.applicationId, editId, extension.track, newTrack)
+                .update(variant.applicationId, editId, extension.track, track)
                 .execute()
+
+        edits.commit(variant.applicationId, editId).execute()
+    }
+
+    def Apk publishApk(apkFile) {
+
+        Apk apk = edits.apks()
+                .upload(variant.applicationId, editId, apkFile)
+                .execute()
+
+        if (extension.untrackOld && !"alpha".equals(extension.track)) {
+            def untrackChannels = "beta".equals(extension.track) ? ["alpha"] : ["alpha", "beta"]
+            untrackChannels.each { channel ->
+                Track track = edits.tracks().get(variant.applicationId, editId, channel).execute()
+                track.setVersionCodes(track.getVersionCodes().findAll {
+                    it > apk.getVersionCode()
+                });
+
+                edits.tracks().update(variant.applicationId, editId, channel, track).execute()
+            }
+        }
 
         if (inputFolder.exists()) {
 
@@ -54,10 +75,9 @@ class PlayPublishApkTask extends PlayPublishTask {
                             .execute()
                 }
             }
-
         }
 
-        edits.commit(variant.applicationId, editId).execute()
+        return apk
     }
 
 }

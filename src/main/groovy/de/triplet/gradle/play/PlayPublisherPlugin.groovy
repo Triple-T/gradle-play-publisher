@@ -107,7 +107,8 @@ class PlayPublisherPlugin implements Plugin<Project> {
                 publishTask.dependsOn publishApkTask
                 publishTask.dependsOn publishListingTask
                 publishApkTask.dependsOn playResourcesTask
-                publishApkTask.dependsOn project.tasks."assemble${variationName}"
+
+                variant.outputs.each { output -> publishApkTask.dependsOn output.assemble }
             } else {
                 log.warn("Signing not ready. Did you specify a signingConfig for the variation ${variationName}?")
             }

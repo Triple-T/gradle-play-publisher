@@ -1,3 +1,9 @@
+**1.1.5 - 2016-08-09**
+
+* Support Filipino in Metadata - #142
+* Support Screenshots for Wear devices - #127
+* Fixed character count for line breaks on Windows - #136
+
 **1.1.4 - 2015-10-14**
 
 * Do not require signingConfig for bootstrap and listing tasks - #100

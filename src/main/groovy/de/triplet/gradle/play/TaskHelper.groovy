@@ -48,4 +48,10 @@ class TaskHelper {
         }
         return null
     }
+
+    def static readSingleLine(File file) {
+        if (file.exists()) {
+            file.withReader { return it.readLine() }
+        }
+    }
 }
