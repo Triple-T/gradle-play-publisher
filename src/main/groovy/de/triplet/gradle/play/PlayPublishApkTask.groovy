@@ -5,6 +5,7 @@ import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.model.Apk
 import com.google.api.services.androidpublisher.model.ApkListing
 import com.google.api.services.androidpublisher.model.Track
+import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 
 class PlayPublishApkTask extends PlayPublishTask {
@@ -57,7 +58,33 @@ class PlayPublishApkTask extends PlayPublishTask {
 
         }
 
+        if (extension.uploadObbMain) {
+            publishObb("main")
+        }
+
+        if (extension.uploadObbPatch) {
+            publishObb("patch")
+        }
+
         edits.commit(variant.applicationId, editId).execute()
+    }
+
+    private void publishObb(String type) {
+        def obbFile = new File(inputFolder, "obb/${type}")
+
+        if (obbFile.exists()) {
+            def newObbFile = new FileContent("application/octet-stream", obbFile)
+
+            edits.expansionfiles()
+                    .upload(variant.applicationId, editId, variant.versionCode, type, newObbFile)
+                    .execute()
+
+            logger.info("Starting upload of the obb file ({} MB), this may take a while",
+                    obbFile.length() / 1024 / 1024)
+
+        } else {
+            throw new GradleException("Please place a file named `${type}` in the `play/obb/` directory")
+        }
     }
 
 }

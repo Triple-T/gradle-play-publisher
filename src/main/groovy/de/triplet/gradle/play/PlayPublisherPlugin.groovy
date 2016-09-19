@@ -40,7 +40,6 @@ class PlayPublisherPlugin implements Plugin<Project> {
             def bootstrapTaskName = "bootstrap${variationName}PlayResources"
             def playResourcesTaskName = "generate${variationName}PlayResources"
             def publishApkTaskName = "publishApk${variationName}"
-            def publishObbTaskName = "publishObb${variationName}"
             def publishListingTaskName = "publishListing${variationName}"
             def publishTaskName = "publish${variationName}"
 
@@ -92,24 +91,15 @@ class PlayPublisherPlugin implements Plugin<Project> {
                 publishApkTask.description = "Uploads the APK for the ${variationName} build"
                 publishApkTask.group = PLAY_STORE_GROUP
 
-                def publishObbTask = project.tasks.create(publishObbTaskName, PlayPublishObbTask)
-                publishObbTask.extension = extension
-                publishObbTask.variant = variant
-                publishObbTask.inputFolder = playResourcesTask.outputFolder
-                publishObbTask.description = "Uploads the OBB for the ${variationName} build"
-                publishObbTask.group = PLAY_STORE_GROUP
-
                 def publishTask = project.tasks.create(publishTaskName)
                 publishTask.description = "Updates APK and play store listing for the ${variationName} build"
                 publishTask.group = PLAY_STORE_GROUP
 
                 // Attach tasks to task graph.
                 publishTask.dependsOn publishApkTask
-                publishTask.dependsOn publishObbTask
                 publishTask.dependsOn publishListingTask
                 publishApkTask.dependsOn playResourcesTask
                 publishApkTask.dependsOn project.tasks."assemble${variationName}"
-                publishObbTask.dependsOn playResourcesTask
             } else {
                 log.warn("Signing not ready. Did you specify a signingConfig for the variation ${variationName}?")
             }

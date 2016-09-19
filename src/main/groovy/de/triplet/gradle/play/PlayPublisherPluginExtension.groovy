@@ -10,7 +10,7 @@ class PlayPublisherPluginExtension {
 
     boolean uploadImages = false
 
-    boolean uploadObbMain = true
+    boolean uploadObbMain = false
 
     boolean uploadObbPatch = false
 
