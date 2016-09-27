@@ -4,6 +4,7 @@ import com.android.build.gradle.api.ApkVariantOutput
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.model.Apk
 import com.google.api.services.androidpublisher.model.ApkListing
+import com.google.api.services.androidpublisher.model.ExpansionFile
 import com.google.api.services.androidpublisher.model.Track
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
@@ -60,10 +61,14 @@ class PlayPublishApkTask extends PlayPublishTask {
 
         if (extension.uploadObbMain) {
             publishObb("main")
+        } else if (extension.associateObbMain > 0) {
+            associateObb("main", extension.associateObbMain)
         }
 
         if (extension.uploadObbPatch) {
             publishObb("patch")
+        } else if (extension.associateObbPatch > 0) {
+            associateObb("patch", extension.associateObbPatch)
         }
 
         edits.commit(variant.applicationId, editId).execute()
@@ -85,6 +90,14 @@ class PlayPublishApkTask extends PlayPublishTask {
         } else {
             throw new GradleException("Please place a file named `${type}` in the `play/obb/` directory")
         }
+    }
+
+    private void associateObb(String type, int version) {
+        ExpansionFile content = new ExpansionFile()
+        content.setReferencesVersion(version)
+        edits.expansionfiles()
+                .update(variant.applicationId, editId, variant.versionCode, type, content)
+                .execute()
     }
 
 }
