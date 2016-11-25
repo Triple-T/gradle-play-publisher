@@ -47,6 +47,7 @@ public class AndroidPublisherHelper {
 
     private static final String APPLICATION_NAME = "gradle-play-publisher"
 
+    static final String MIME_TYPE_OCTET_STREAM = "application/octet-stream";
     static final String MIME_TYPE_IMAGE= "image/*";
 
     /** Global instance of the JSON factory. */

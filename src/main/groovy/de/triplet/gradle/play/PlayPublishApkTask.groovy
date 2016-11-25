@@ -1,6 +1,7 @@
 package de.triplet.gradle.play
 
 import com.android.build.gradle.api.ApkVariantOutput
+import com.google.api.client.http.AbstractInputStreamContent
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.model.Apk
 import com.google.api.services.androidpublisher.model.ApkListing
@@ -52,6 +53,12 @@ class PlayPublishApkTask extends PlayPublishTask {
 
                 edits.tracks().update(variant.applicationId, editId, channel, track).execute()
             }
+        }
+
+        //Upload Proguard mapping.txt if available
+        if (variant.mappingFile != null && variant.mappingFile.exists()) {
+            AbstractInputStreamContent fileAsStream = new FileContent(AndroidPublisherHelper.MIME_TYPE_OCTET_STREAM, variant.mappingFile)
+            edits.deobfuscationfiles().upload(variant.applicationId, editId, apk.getVersionCode(), "proguard", fileAsStream).execute()
         }
 
         if (inputFolder.exists()) {
