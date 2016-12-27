@@ -105,6 +105,38 @@ public class PlayPublishTaskTest {
     }
 
     @Test
+    public void testAbiSplits() {
+        Project project = TestHelper.evaluatableProject()
+        project.play {
+            track 'production'
+            untrackOld true
+        }
+
+        project.android {
+            splits {
+                abi {
+                    enable true
+                    reset()
+                    include 'armeabi-v7a', 'arm64-v8a', 'mips', 'x86', 'x86_64'
+                    universalApk true
+                }
+            }
+        }
+
+        project.evaluate()
+
+        // Attach the mock
+        project.tasks.publishApkRelease.service = publisherMock
+
+        // finally run the task we want to check
+        project.tasks.publishApkRelease.publishApks()
+
+        // verify that we init the connection with the correct application id
+        verify(editsMock).insert("com.example.publisher", null)
+        verify(apksMock, times(5)).upload(eq('com.example.publisher'), eq('424242'), any(FileContent.class))
+    }
+
+    @Test
     public void testApplicationIdWithFlavorsAndSuffix() {
         Project project = TestHelper.evaluatableProject()
 
