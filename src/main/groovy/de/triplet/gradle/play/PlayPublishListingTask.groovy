@@ -43,7 +43,7 @@ class PlayPublishListingTask extends PlayPublishTask {
         super.publish()
 
         // Matches if locale have the correct naming e.g. en-US for play store
-        inputFolder.eachDirMatch(matcher) { dir ->
+        if (inputFolder.exists()) inputFolder.eachDirMatch(matcher) { dir ->
             def locale = dir.name
 
             File listingDir = new File(dir, LISTING_PATH)
