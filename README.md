@@ -25,7 +25,7 @@ To use the publisher plugin you have to create a service account for your existi
 
 Due to the way the Google Play Publisher API works, you have to grant at least the following permissions to that service account:
 
-![permissions.png](https://cloud.githubusercontent.com/assets/1361086/5045988/95eb902e-6bb9-11e4-9251-30840ba014d3.png)
+![permissions.png](https://cloud.githubusercontent.com/assets/242983/17809992/95ea4eaa-661a-11e6-9879-521df4f14735.png)
 
 Once you finished the setup you have a so called *service account email address* and a *p12 key file* that we will use later on.
 
@@ -177,6 +177,26 @@ play {
 It is also possible to provide a separate summary of recent changes for each track. Just drop in a special `whatsnew-alpha` text file alongside your main `whatsnew` file and that one will be used if you publish to the alpha track.
 
 When defining the track as (staged) `rollout` you can also define a ```userFraction``` which is the portion of users who should get the staged rollout version of the APK.
+
+### Untrack conflicting versions
+
+Only available in version `1.2.0-beta1`
+
+The Google Play Developer API does not allow us to publish a beta version if there is an alpha version with a lower version code. If you want to publish to another higher track and automatically disable from another track, this can be specified by setting the `untrackOld` property to `true`.
+
+```groovy
+play {
+    // ...
+    track = 'beta'
+    untrackOld = true // will untrack 'alpha' while upload to 'beta'
+}
+```
+
+This will untrack whatever versions are currently blocking the publishing process. That is: every APK with a version lower than the one being uploaded in any of the tracks lower than specified by `track`.
+
+Example: Publishing an APK with version 42 to production will untrack versions 41 and lower from alpha and beta. It will not, however untrack versions 43 or higher from those channels because they do not conflict.
+
+Setting that flag to `false` or not setting it at all will stop the publishing process in case of conflicts. Keep that behaviour if you want to manually untrack conflicting versions rather than doing automatic untracking.
 
 ### Upload Images
 

@@ -6,7 +6,7 @@ android:
     - android-23
 
 script:
-  - ./gradlew check --stacktrace
+  - ./gradlew check --debug
 
 sudo: false
 
