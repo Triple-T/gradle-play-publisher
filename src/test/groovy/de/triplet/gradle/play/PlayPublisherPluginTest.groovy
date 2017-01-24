@@ -118,6 +118,34 @@ class PlayPublisherPluginTest {
     }
 
     @Test
+    public void testJsonFileBackwardsCompatibility() {
+        Project project = TestHelper.evaluatableProject()
+
+        project.play {
+            jsonFile new File("key.json");
+        }
+
+        project.evaluate()
+
+        assertEquals("key.json", project.extensions.play.jsonFile.name)
+    }
+
+    @Test
+    public void testPlayAccountBackwardsCompatibility() {
+        Project project = TestHelper.evaluatableProject()
+
+        project.play {
+            serviceAccountEmail = 'service-account@test.com'
+            pk12File = new File("key.p12")
+        }
+
+        project.evaluate()
+
+        project.extensions.play.serviceAccountEmail == 'service-account@test.com'
+        project.extensions.play.pk12File = new File("key.p12")
+    }
+
+    @Test
     public void testPlaySigningConfigs() {
         Project project = TestHelper.evaluatableProject()
 
