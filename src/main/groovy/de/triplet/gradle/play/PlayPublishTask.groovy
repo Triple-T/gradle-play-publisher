@@ -26,7 +26,7 @@ class PlayPublishTask extends DefaultTask {
 
     def publish() {
         if (service == null) {
-            service = AndroidPublisherHelper.init(playAccountConfig)
+            service = AndroidPublisherHelper.init(extension, playAccountConfig)
         }
 
         edits = service.edits()
