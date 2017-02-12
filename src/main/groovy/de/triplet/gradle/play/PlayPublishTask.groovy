@@ -4,6 +4,8 @@ import com.android.build.gradle.api.ApplicationVariant
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.AppEdit
+import com.google.api.services.androidpublisher.model.Track
+import com.google.api.services.androidpublisher.model.TracksListResponse
 import org.gradle.api.DefaultTask
 
 class PlayPublishTask extends DefaultTask {
@@ -46,6 +48,16 @@ class PlayPublishTask extends DefaultTask {
             // Just rethrow everything else.
             throw e;
         }
+    }
+
+    def getTrackByName(String trackName) {
+        TracksListResponse tracksList = edits.tracks().list(variant.applicationId, editId).execute()
+        for (Track track in tracksList.getTracks()) {
+            if (trackName.equals(track.getTrack())) {
+                return track
+            }
+        }
+        return null
     }
 
 }

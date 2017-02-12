@@ -42,6 +42,9 @@ class PlayPublisherPlugin implements Plugin<Project> {
             def publishApkTaskName = "publishApk${variationName}"
             def publishListingTaskName = "publishListing${variationName}"
             def publishTaskName = "publish${variationName}"
+            def promoteAlphaToBetaTaskName = "promote${variationName}AlphaToBeta"
+            def promoteAlphaToProductionTaskName = "promote${variationName}AlphaToProduction"
+            def promoteBetaToProductionTaskName = "promote${variationName}BetaToProduction"
 
             // Create and configure bootstrap task for this variant.
             def bootstrapTask = project.tasks.create(bootstrapTaskName, BootstrapTask)
@@ -81,6 +84,25 @@ class PlayPublisherPlugin implements Plugin<Project> {
 
             // Attach tasks to task graph.
             publishListingTask.dependsOn playResourcesTask
+
+            // Create promote tasks. This tasks do not related to variants.
+            def promoteAlphaToBetaTask = project.tasks.create(promoteAlphaToBetaTaskName, PromoteAlphaToBetaTask)
+            promoteAlphaToBetaTask.description = "Promote Alpha track apk to Beta track for the ${variationName} build"
+            promoteAlphaToBetaTask.extension = extension
+            promoteAlphaToBetaTask.variant = variant
+            promoteAlphaToBetaTask.group = PLAY_STORE_GROUP
+
+            def promoteAlphaToProductionTask = project.tasks.create(promoteAlphaToProductionTaskName, PromoteAlphaToProductionTask)
+            promoteAlphaToProductionTask.description = "Promote Alpha track apk to Production track for the ${variationName} build"
+            promoteAlphaToProductionTask.extension = extension
+            promoteAlphaToProductionTask.variant = variant
+            promoteAlphaToProductionTask.group = PLAY_STORE_GROUP
+
+            def promoteBetaToProductionTask = project.tasks.create(promoteBetaToProductionTaskName, PromoteBetaToProductionTask)
+            promoteBetaToProductionTask.description = "Promote Beta track apk to Production track for the ${variationName} build"
+            promoteBetaToProductionTask.extension = extension
+            promoteBetaToProductionTask.variant = variant
+            promoteBetaToProductionTask.group = PLAY_STORE_GROUP
 
             if (variant.isSigningReady()) {
                 // Create and configure publisher apk task for this variant.
