@@ -47,6 +47,8 @@ class PlayPublishListingTask extends PlayPublishTask {
             def locale = dir.name
 
             File listingDir = new File(dir, LISTING_PATH)
+            System.out.println("Listing Path: " + LISTING_PATH + " , Exixts: " + listingDir.exists())
+            
             // Check if listing directory exist
             if (listingDir.exists()) {
                 File fileTitle = new File(listingDir, FILE_NAME_FOR_TITLE)
