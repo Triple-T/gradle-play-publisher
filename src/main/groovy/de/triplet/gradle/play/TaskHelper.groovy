@@ -24,7 +24,7 @@ class TaskHelper {
     }
 
     def static normalize(String text) {
-        return text.replaceAll("\\r\\n", "\n")
+        return text.replaceAll("\\r\\n", "\n").trim()
     }
 
     def static List<AbstractInputStreamContent> getImageListAsStream(File listingDir, String graphicPath) {
