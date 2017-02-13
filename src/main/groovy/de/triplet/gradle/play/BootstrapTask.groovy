@@ -4,6 +4,7 @@ import com.google.api.services.androidpublisher.model.Apk
 import com.google.api.services.androidpublisher.model.ApkListing
 import com.google.api.services.androidpublisher.model.Image
 import com.google.api.services.androidpublisher.model.Listing
+import com.google.api.services.androidpublisher.model.Track
 import org.apache.commons.io.FileUtils
 import org.gradle.api.tasks.TaskAction
 
@@ -46,6 +47,11 @@ class BootstrapTask extends PlayPublishTask {
         String shortDescription
         String title
         String video
+
+        edits.tracks().list(variant.getApplicationId(), editId).execute().tracks.each { Track track ->
+            FileUtils.writeStringToFile(new File(outputFolder,
+                    "${PlayPublishListingTask.FILE_NAME_FOR_VERSION}-${track.track}"), track.versionCodes.join(','), 'UTF-8')
+        }
 
         for (Listing listing : listings) {
             language = listing.getLanguage()

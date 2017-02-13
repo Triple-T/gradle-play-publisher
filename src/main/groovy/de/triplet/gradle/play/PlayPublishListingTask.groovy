@@ -24,6 +24,7 @@ class PlayPublishListingTask extends PlayPublishTask {
     static def FILE_NAME_FOR_SHORT_DESCRIPTION = "shortdescription"
     static def FILE_NAME_FOR_FULL_DESCRIPTION = "fulldescription"
     static def FILE_NAME_FOR_VIDEO = "video"
+    static def FILE_NAME_FOR_VERSION = "version"
     static def LISTING_PATH = "listing/"
 
     static def IMAGE_TYPE_FEATURE_GRAPHIC = "featureGraphic"
