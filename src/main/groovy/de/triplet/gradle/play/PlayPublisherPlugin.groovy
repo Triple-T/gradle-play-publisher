@@ -34,6 +34,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             }
             def productFlavorName = productFlavorNames.join('')
             def flavor = StringUtils.uncapitalize(productFlavorName)
+            def metadataRoot = extension.metadataRoot
 
             def variationName = "${productFlavorName}${buildTypeName}"
 
@@ -47,7 +48,13 @@ class PlayPublisherPlugin implements Plugin<Project> {
             def bootstrapTask = project.tasks.create(bootstrapTaskName, BootstrapTask)
             bootstrapTask.extension = extension
             bootstrapTask.variant = variant
-            if (StringUtils.isNotEmpty(flavor)) {
+            if(metadataRoot) {
+                if(StringUtils.isNotEmpty(flavor)) {
+                    bootstrapTask.outputFolder = new File(metadataRoot.absolutePath, "${flavor}")
+                } else {
+                    bootstrapTask.outputFolder = new File(metadataRoot.absolutePath, "main")
+                }
+            } else if (StringUtils.isNotEmpty(flavor)) {
                 bootstrapTask.outputFolder = new File(project.projectDir, "src/${flavor}/play")
             } else {
                 bootstrapTask.outputFolder = new File(project.projectDir, "src/main/play")
@@ -58,6 +65,12 @@ class PlayPublisherPlugin implements Plugin<Project> {
             // Create and configure task to collect the play store resources.
             def playResourcesTask = project.tasks.create(playResourcesTaskName, GeneratePlayResourcesTask)
 
+            if(metadataRoot) {
+                playResourcesTask.inputs.file(new File(metadataRoot.absolutePath, "main"))
+                if(StringUtils.isNotEmpty(flavor)) {
+                    playResourcesTask.inputs.file(new File(metadataRoot.absolutePath, "${flavor}"))
+                }
+            }
             playResourcesTask.inputs.file(new File(project.projectDir, "src/main/play"))
             if (StringUtils.isNotEmpty(flavor)) {
                 playResourcesTask.inputs.file(new File(project.projectDir, "src/${flavor}/play"))
