@@ -1,6 +1,5 @@
 package de.triplet.gradle.play
 
-import com.google.api.services.androidpublisher.model.Apk
 import com.google.api.services.androidpublisher.model.ApkListing
 import com.google.api.services.androidpublisher.model.Image
 import com.google.api.services.androidpublisher.model.Listing
@@ -33,7 +32,7 @@ class BootstrapTask extends PlayPublishTask {
     }
 
     def bootstrapListing() {
-        List<Listing> listings = edits.listings()
+        def listings = edits.listings()
                 .list(variant.applicationId, editId)
                 .execute()
                 .getListings()
@@ -41,55 +40,49 @@ class BootstrapTask extends PlayPublishTask {
             return
         }
 
-        String language
-        String fullDescription
-        String shortDescription
-        String title
-        String video
-
         for (Listing listing : listings) {
-            language = listing.getLanguage()
-            fullDescription = listing.getFullDescription()
-            shortDescription = listing.getShortDescription()
-            title = listing.getTitle()
-            video = listing.getVideo()
+            def language = listing.getLanguage()
+            def fullDescription = listing.getFullDescription()
+            def shortDescription = listing.getShortDescription()
+            def title = listing.getTitle()
+            def video = listing.getVideo()
 
-            File languageDir = new File(outputFolder, language)
+            def languageDir = new File(outputFolder, language)
             if (!languageDir.exists() && !languageDir.mkdirs()) {
                 continue
             }
 
-            File listingDir = new File(languageDir, PlayPublishListingTask.LISTING_PATH)
+            def listingDir = new File(languageDir, PlayPublishListingTask.LISTING_PATH)
             if (!listingDir.exists() && !listingDir.mkdirs()) {
                 continue
             }
 
             for (String imageType : IMAGE_TYPE_ARRAY) {
-                List<Image> images = edits.images()
+                def images = edits.images()
                         .list(variant.applicationId, editId, language, imageType)
                         .execute()
                         .getImages()
                 saveImage(listingDir, imageType, images)
             }
 
-            FileUtils.writeStringToFile(new File(listingDir, PlayPublishListingTask.FILE_NAME_FOR_FULL_DESCRIPTION), fullDescription, "UTF-8")
-            FileUtils.writeStringToFile(new File(listingDir, PlayPublishListingTask.FILE_NAME_FOR_SHORT_DESCRIPTION), shortDescription, "UTF-8")
-            FileUtils.writeStringToFile(new File(listingDir, PlayPublishListingTask.FILE_NAME_FOR_TITLE), title, "UTF-8")
-            FileUtils.writeStringToFile(new File(listingDir, PlayPublishListingTask.FILE_NAME_FOR_VIDEO), video, "UTF-8")
+            FileUtils.writeStringToFile(new File(listingDir, PlayPublishListingTask.FILE_NAME_FOR_FULL_DESCRIPTION), fullDescription, 'UTF-8')
+            FileUtils.writeStringToFile(new File(listingDir, PlayPublishListingTask.FILE_NAME_FOR_SHORT_DESCRIPTION), shortDescription, 'UTF-8')
+            FileUtils.writeStringToFile(new File(listingDir, PlayPublishListingTask.FILE_NAME_FOR_TITLE), title, 'UTF-8')
+            FileUtils.writeStringToFile(new File(listingDir, PlayPublishListingTask.FILE_NAME_FOR_VIDEO), video, 'UTF-8')
         }
     }
 
     def bootstrapWhatsNew() {
-        List<Apk> apks = edits.apks()
+        def apks = edits.apks()
                 .list(variant.applicationId, editId)
                 .execute()
                 .getApks()
         if (apks == null) {
             return
         }
-        Integer versionCode = apks.collect { apk -> apk.getVersionCode() }.max()
+        def versionCode = apks.collect { apk -> apk.getVersionCode() }.max()
 
-        List<ApkListing> apkListings = edits.apklistings()
+        def apkListings = edits.apklistings()
                 .list(variant.applicationId, editId, versionCode)
                 .execute()
                 .getListings()
@@ -97,19 +90,16 @@ class BootstrapTask extends PlayPublishTask {
             return
         }
 
-        String language
-        String whatsNew
-
         for (ApkListing apkListing : apkListings) {
-            language = apkListing.getLanguage()
-            whatsNew = apkListing.getRecentChanges()
+            def language = apkListing.getLanguage()
+            def whatsNew = apkListing.getRecentChanges()
 
-            File languageDir = new File(outputFolder, language)
+            def languageDir = new File(outputFolder, language)
             if (!languageDir.exists() && !languageDir.mkdirs()) {
                 continue
             }
 
-            FileUtils.writeStringToFile(new File(languageDir, PlayPublishApkTask.FILE_NAME_FOR_WHATS_NEW_TEXT), whatsNew, "UTF-8")
+            FileUtils.writeStringToFile(new File(languageDir, PlayPublishApkTask.FILE_NAME_FOR_WHATS_NEW_TEXT), whatsNew, 'UTF-8')
         }
     }
 
@@ -123,7 +113,7 @@ class BootstrapTask extends PlayPublishTask {
     }
 
     static def saveImage(File listingDir, String imageFolderName, List<Image> images) {
-        File imageFolder = new File(listingDir, imageFolderName)
+        def imageFolder = new File(listingDir, imageFolderName)
         if (!imageFolder.exists() && !imageFolder.mkdirs()) {
             return
         }

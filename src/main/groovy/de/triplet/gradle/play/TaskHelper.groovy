@@ -20,30 +20,30 @@ class TaskHelper {
             return message
         }
 
-        return ""
+        return ''
     }
 
     def static normalize(String text) {
-        return text.replaceAll("\\r\\n", "\n").trim()
+        return text.replaceAll('\\r\\n', '\n').trim()
     }
 
     def static List<AbstractInputStreamContent> getImageListAsStream(File listingDir, String graphicPath) {
-        File graphicDir = new File(listingDir, graphicPath)
+        def graphicDir = new File(listingDir, graphicPath)
         if (graphicDir.exists()) {
             return graphicDir.listFiles(new ImageFileFilter()).sort().collect { file ->
-                new FileContent(AndroidPublisherHelper.MIME_TYPE_IMAGE, file);
+                new FileContent(AndroidPublisherHelper.MIME_TYPE_IMAGE, file)
             }
         }
         return null
     }
 
     def static AbstractInputStreamContent getImageAsStream(File listingDir, String graphicPath) {
-        File graphicDir = new File(listingDir, graphicPath)
+        def graphicDir = new File(listingDir, graphicPath)
         if (graphicDir.exists()) {
-            File[] files = graphicDir.listFiles(new ImageFileFilter())
+            def files = graphicDir.listFiles(new ImageFileFilter())
             if (files.length > 0) {
-                File graphicFile = files[0]
-                return new FileContent(AndroidPublisherHelper.MIME_TYPE_IMAGE, graphicFile);
+                def graphicFile = files[0]
+                return new FileContent(AndroidPublisherHelper.MIME_TYPE_IMAGE, graphicFile)
             }
         }
         return null

@@ -5,10 +5,10 @@ import org.gradle.testfixtures.ProjectBuilder
 
 public class TestHelper {
 
-    public static final File FIXTURE_WORKING_DIR = new File("src/test/fixtures/android_app")
+    public static final File FIXTURE_WORKING_DIR = new File('src/test/fixtures/android_app')
 
     public static Project evaluatableProject() {
-        Project project = ProjectBuilder.builder().withProjectDir(FIXTURE_WORKING_DIR).build()
+        def project = ProjectBuilder.builder().withProjectDir(FIXTURE_WORKING_DIR).build()
         project.apply plugin: 'com.android.application'
         project.apply plugin: 'com.github.triplet.play'
         project.android {
@@ -33,7 +33,7 @@ public class TestHelper {
     }
 
     public static Project noSigningConfigProject() {
-        Project project = ProjectBuilder.builder().withProjectDir(FIXTURE_WORKING_DIR).build()
+        def project = ProjectBuilder.builder().withProjectDir(FIXTURE_WORKING_DIR).build()
         project.apply plugin: 'com.android.application'
         project.apply plugin: 'com.github.triplet.play'
         project.android {

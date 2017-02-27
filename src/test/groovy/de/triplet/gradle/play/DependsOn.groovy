@@ -18,13 +18,13 @@ public class DependsOn extends TypeSafeMatcher<Task> {
 
     @Override
     protected boolean matchesSafely(Task task) {
-        if ( task.dependsOn == null ) {
+        if (task.dependsOn == null) {
             return false
         }
 
-        for ( Object o : task.dependsOn ) {
-            if ( Task.class.isAssignableFrom(o.class) ) {
-                if ( ((Task)o).name == mDependsOn ) {
+        for (def o : task.dependsOn) {
+            if (Task.class.isAssignableFrom(o.class)) {
+                if (((Task) o).name == mDependsOn) {
                     return true
                 }
             }
@@ -35,11 +35,11 @@ public class DependsOn extends TypeSafeMatcher<Task> {
 
     @Override
     void describeTo(Description description) {
-        description.appendText("Task to depend on ").appendValue(mDependsOn)
+        description.appendText('Task to depend on ').appendValue(mDependsOn)
     }
 
     @Override
     void describeMismatchSafely(Task item, Description description) {
-        description.appendText("doesn't")
+        description.appendText('doesn\'t')
     }
 }

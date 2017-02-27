@@ -7,50 +7,50 @@ import static org.junit.Assert.assertTrue
 
 class ImageFileFilterTest {
 
-    ImageFileFilter filter = new ImageFileFilter()
+    final def filter = new ImageFileFilter()
 
     @Test
     void testJpg_returnsTrue() {
-        assertTrue(filter.accept(new File("banana.jpg")))
+        assertTrue(filter.accept(new File('banana.jpg')))
     }
 
     @Test
     void testUppercaseJpg_returnsTrue() {
-        assertTrue(filter.accept(new File("banana.JPG")))
+        assertTrue(filter.accept(new File('banana.JPG')))
     }
 
     @Test
     void testPng_returnsTrue() {
-        assertTrue(filter.accept(new File("banana.png")))
+        assertTrue(filter.accept(new File('banana.png')))
     }
 
     @Test
     void testUppercasePng_returnsTrue() {
-        assertTrue(filter.accept(new File("banana.PNG")))
+        assertTrue(filter.accept(new File('banana.PNG')))
     }
 
     @Test
     void testJpeg_returnsFalse() {
-        assertFalse(filter.accept(new File("banana.jpeg")))
+        assertFalse(filter.accept(new File('banana.jpeg')))
     }
 
     @Test
     void testGif_returnsFalse() {
-        assertFalse(filter.accept(new File("banana.gif")))
+        assertFalse(filter.accept(new File('banana.gif')))
     }
 
     @Test
     void testTiff_returnsFalse() {
-        assertFalse(filter.accept(new File("banana.tiff")))
+        assertFalse(filter.accept(new File('banana.tiff')))
     }
 
     @Test
     void testBmp_returnsFalse() {
-        assertFalse(filter.accept(new File("banana.bmp")))
+        assertFalse(filter.accept(new File('banana.bmp')))
     }
 
     @Test
     void testSvg_returnsFalse() {
-        assertFalse(filter.accept(new File("banana.svg")))
+        assertFalse(filter.accept(new File('banana.svg')))
     }
 }

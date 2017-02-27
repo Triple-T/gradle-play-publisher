@@ -7,7 +7,7 @@ import org.gradle.api.Project
 
 class PlayPublisherPlugin implements Plugin<Project> {
 
-    public static final String PLAY_STORE_GROUP = "Play Store"
+    public static final String PLAY_STORE_GROUP = 'Play Store'
 
     @Override
     void apply(Project project) {
@@ -15,7 +15,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
 
         def hasAppPlugin = project.plugins.find { p -> p instanceof AppPlugin }
         if (!hasAppPlugin) {
-            throw new IllegalStateException("The 'com.android.application' plugin is required.")
+            throw new IllegalStateException('The \'com.android.application\' plugin is required.')
         }
 
         def extension = project.extensions.create('play', PlayPublisherPluginExtension)
@@ -30,7 +30,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
 
             def productFlavorNames = variant.productFlavors.collect { it.name.capitalize() }
             if (productFlavorNames.isEmpty()) {
-                productFlavorNames = [""]
+                productFlavorNames = ['']
             }
             def productFlavorName = productFlavorNames.join('')
             def flavor = StringUtils.uncapitalize(productFlavorName)
@@ -50,7 +50,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             if (StringUtils.isNotEmpty(flavor)) {
                 bootstrapTask.outputFolder = new File(project.projectDir, "src/${flavor}/play")
             } else {
-                bootstrapTask.outputFolder = new File(project.projectDir, "src/main/play")
+                bootstrapTask.outputFolder = new File(project.projectDir, 'src/main/play')
             }
             bootstrapTask.description = "Downloads the play store listing for the ${variationName} build. No download of image resources. See #18."
             bootstrapTask.group = PLAY_STORE_GROUP
@@ -58,7 +58,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             // Create and configure task to collect the play store resources.
             def playResourcesTask = project.tasks.create(playResourcesTaskName, GeneratePlayResourcesTask)
 
-            playResourcesTask.inputs.file(new File(project.projectDir, "src/main/play"))
+            playResourcesTask.inputs.file(new File(project.projectDir, 'src/main/play'))
             if (StringUtils.isNotEmpty(flavor)) {
                 playResourcesTask.inputs.file(new File(project.projectDir, "src/${flavor}/play"))
             }
