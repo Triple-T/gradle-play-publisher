@@ -1,5 +1,6 @@
 package de.triplet.gradle.play
 
+import com.android.build.OutputFile
 import com.android.build.gradle.api.ApkVariantOutput
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.model.Apk
@@ -22,8 +23,9 @@ class PlayPublishApkTask extends PlayPublishTask {
         def versionCodes = new ArrayList<Integer>()
 
         variant.outputs
-            .findAll { variantOutput -> variantOutput instanceof ApkVariantOutput }
-            .each { variantOutput -> versionCodes.add(publishApk(new FileContent(MIME_TYPE_APK, variantOutput.outputFile)).getVersionCode())}
+                .findAll { variantOutput -> variantOutput instanceof ApkVariantOutput }
+                .findAll { variantOutput -> (variant.outputs.size() == 1) ? true : variantOutput.getFilter(OutputFile.ABI) != null }
+                .each { variantOutput -> versionCodes.add(publishApk(new FileContent(MIME_TYPE_APK, variantOutput.outputFile)).getVersionCode()) }
 
         def track = new Track().setVersionCodes(versionCodes)
         if (extension.track == 'rollout') {
