@@ -12,14 +12,14 @@ class TestHelper {
         project.apply plugin: 'com.android.application'
         project.apply plugin: 'com.github.triplet.play'
         project.android {
-            compileSdkVersion 23
-            buildToolsVersion '23.0.1'
+            compileSdkVersion 25
+            buildToolsVersion '25.0.2'
 
             defaultConfig {
                 versionCode 1
                 versionName '1.0'
-                minSdkVersion 23
-                targetSdkVersion 23
+                minSdkVersion 25
+                targetSdkVersion 25
             }
 
             buildTypes {
@@ -37,14 +37,14 @@ class TestHelper {
         project.apply plugin: 'com.android.application'
         project.apply plugin: 'com.github.triplet.play'
         project.android {
-            compileSdkVersion 23
-            buildToolsVersion '23.0.1'
+            compileSdkVersion 25
+            buildToolsVersion '25.0.2'
 
             defaultConfig {
                 versionCode 1
                 versionName '1.0'
-                minSdkVersion 23
-                targetSdkVersion 23
+                minSdkVersion 25
+                targetSdkVersion 25
             }
 
             buildTypes {
