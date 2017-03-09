@@ -6,7 +6,7 @@ import org.gradle.api.tasks.TaskAction
 
 class GeneratePlayResourcesTask extends DefaultTask {
 
-    File outputFolder;
+    File outputFolder
 
     @TaskAction
     generate() {
