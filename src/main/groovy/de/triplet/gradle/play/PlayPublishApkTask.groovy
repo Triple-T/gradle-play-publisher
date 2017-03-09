@@ -57,8 +57,8 @@ class PlayPublishApkTask extends PlayPublishTask {
 
         //Upload Proguard mapping.txt if available
         if (variant.mappingFile != null && variant.mappingFile.exists()) {
-            AbstractInputStreamContent fileAsStream = new FileContent('application/octet-stream', variant.mappingFile)
-            edits.deobfuscationfiles().upload(variant.applicationId, editId, apk.getVersionCode(), 'proguard', fileAsStream).execute()
+            def fileStream = new FileContent('application/octet-stream', variant.mappingFile)
+            edits.deobfuscationfiles().upload(variant.applicationId, editId, apk.getVersionCode(), 'proguard', fileStream).execute()
         }
 
         if (inputFolder.exists()) {
