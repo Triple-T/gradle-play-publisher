@@ -25,7 +25,7 @@ import static org.mockito.Mockito.times
 import static org.mockito.Mockito.verify
 import static org.mockito.MockitoAnnotations.initMocks
 
-public class PlayPublishTaskTest {
+class PlayPublishTaskTest {
 
     @Mock
     AndroidPublisher publisherMock
@@ -58,13 +58,13 @@ public class PlayPublishTaskTest {
     AndroidPublisher.Edits.Apks.Upload uploadMock
 
     // These are final and not mock able
-    AppEdit appEdit = new AppEdit()
-    Apk apk = new Apk()
-    Track alphaTrack = new Track()
-    Track betaTrack = new Track()
+    final AppEdit appEdit = new AppEdit()
+    final Apk apk = new Apk()
+    final Track alphaTrack = new Track()
+    final Track betaTrack = new Track()
 
     @Before
-    public void setup() {
+    void setup() {
         initMocks(this)
 
         appEdit.setId('424242')
@@ -89,7 +89,7 @@ public class PlayPublishTaskTest {
     }
 
     @Test
-    public void testApplicationId() {
+    void testApplicationId() {
         def project = TestHelper.evaluatableProject()
         project.evaluate()
 
@@ -104,7 +104,7 @@ public class PlayPublishTaskTest {
     }
 
     @Test
-    public void testApplicationIdWithFlavorsAndSuffix() {
+    void testApplicationIdWithFlavorsAndSuffix() {
         def project = TestHelper.evaluatableProject()
 
         project.android {
@@ -135,7 +135,7 @@ public class PlayPublishTaskTest {
     }
 
     @Test
-    public void whenPublishingToBeta_publishApkRelease_removesBlockingVersionsFromAlpha() {
+    void whenPublishingToBeta_publishApkRelease_removesBlockingVersionsFromAlpha() {
         def project = TestHelper.evaluatableProject()
         project.play {
             track 'beta'
@@ -156,7 +156,7 @@ public class PlayPublishTaskTest {
     }
 
     @Test
-    public void whenPublishingToBeta_publishApkRelease_doesNotRemoveNonBlockingVersionsFromAlpha() {
+    void whenPublishingToBeta_publishApkRelease_doesNotRemoveNonBlockingVersionsFromAlpha() {
         def project = TestHelper.evaluatableProject()
         project.play {
             track 'beta'
@@ -177,7 +177,7 @@ public class PlayPublishTaskTest {
     }
 
     @Test
-    public void whenPublishingToProduction_publishApkRelease_removesBlockingVersionFromAlphaAndBeta() {
+    void whenPublishingToProduction_publishApkRelease_removesBlockingVersionFromAlphaAndBeta() {
         def project = TestHelper.evaluatableProject()
         project.play {
             track 'production'
@@ -205,7 +205,7 @@ public class PlayPublishTaskTest {
     }
 
     @Test
-    public void whenPublishingToProduction_publishApkRelease_doesNotRemoveNonBlockingVersionFromAlphaOrBeta() {
+    void whenPublishingToProduction_publishApkRelease_doesNotRemoveNonBlockingVersionFromAlphaOrBeta() {
         def project = TestHelper.evaluatableProject()
         project.play {
             track 'production'
@@ -233,7 +233,7 @@ public class PlayPublishTaskTest {
     }
 
     @Test
-    public void whenFlagNotSet_publishApkRelease_doesNotTouchOtherTracks() {
+    void whenFlagNotSet_publishApkRelease_doesNotTouchOtherTracks() {
         def project = TestHelper.evaluatableProject()
         project.play {
             track 'production'
@@ -246,7 +246,7 @@ public class PlayPublishTaskTest {
     }
 
     @Test
-    public void testMatcher() {
+    void testMatcher() {
         def project = TestHelper.evaluatableProject()
         project.evaluate()
 
@@ -272,7 +272,7 @@ public class PlayPublishTaskTest {
     }
 
     @Test
-    public void testApplicationIdChange() {
+    void testApplicationIdChange() {
         def project = TestHelper.evaluatableProject()
 
         project.android {

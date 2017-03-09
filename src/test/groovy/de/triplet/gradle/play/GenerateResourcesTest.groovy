@@ -1,6 +1,5 @@
 package de.triplet.gradle.play
 
-import org.apache.commons.io.FileUtils
 import org.junit.Test
 
 import static junit.framework.TestCase.assertEquals
@@ -9,7 +8,7 @@ import static org.junit.Assert.assertTrue
 class GenerateResourcesTest {
 
     @Test
-    public void testResourcesAreCopiedIntoOutputFolder() {
+    void testResourcesAreCopiedIntoOutputFolder() {
         def project = TestHelper.evaluatableProject()
 
         project.evaluate()
@@ -22,16 +21,14 @@ class GenerateResourcesTest {
         assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/release/en-US').exists())
         assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/release/fr-FR').exists())
 
-        def content = FileUtils.readFileToString(
-                new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/release/en-US/whatsnew'))
+        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/release/en-US/whatsnew').text
         assertEquals('main english', content)
-        content = FileUtils.readFileToString(
-                new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/release/fr-FR/whatsnew'))
+        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/release/fr-FR/whatsnew').text
         assertEquals('main french', content)
     }
 
     @Test
-    public void testFlavorsOverrideMain() {
+    void testFlavorsOverrideMain() {
         def project = TestHelper.evaluatableProject()
 
         project.android.productFlavors {
@@ -50,31 +47,25 @@ class GenerateResourcesTest {
         assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease/en-US').exists())
         assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease/fr-FR').exists())
 
-        def content = FileUtils.readFileToString(
-                new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease/de-DE/whatsnew'))
+        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease/de-DE/whatsnew').text
         assertEquals('free german', content)
-        content = FileUtils.readFileToString(
-                new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease/fr-FR/whatsnew'))
+        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease/fr-FR/whatsnew').text
         assertEquals('main french', content)
-        content = FileUtils.readFileToString(
-                new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease/en-US/whatsnew'))
+        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease/en-US/whatsnew').text
         assertEquals('main english', content)
 
         project.tasks.generatePaidReleasePlayResources.execute()
 
-        content = FileUtils.readFileToString(
-                new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/paidRelease/de-DE/whatsnew'))
+        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/paidRelease/de-DE/whatsnew').text
         assertEquals('paid german', content)
-        content = FileUtils.readFileToString(
-                new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/paidRelease/fr-FR/whatsnew'))
+        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/paidRelease/fr-FR/whatsnew').text
         assertEquals('main french', content)
-        content = FileUtils.readFileToString(
-                new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/paidRelease/en-US/whatsnew'))
+        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/paidRelease/en-US/whatsnew').text
         assertEquals('paid english', content)
     }
 
     @Test
-    public void testBuildTypeOverridesMain() {
+    void testBuildTypeOverridesMain() {
         def project = TestHelper.evaluatableProject()
 
         project.android {
@@ -88,13 +79,12 @@ class GenerateResourcesTest {
         project.tasks.clean.execute()
         project.tasks.generateDogfoodPlayResources.execute()
 
-        def content = FileUtils.readFileToString(
-                new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/dogfood/en-US/whatsnew'))
+        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/dogfood/en-US/whatsnew').text
         assertEquals('dogfood english', content)
     }
 
     @Test
-    public void testBuildTypeOverridesFlavor() {
+    void testBuildTypeOverridesFlavor() {
         def project = TestHelper.evaluatableProject()
 
         project.android {
@@ -113,13 +103,12 @@ class GenerateResourcesTest {
         project.tasks.clean.execute()
         project.tasks.generatePaidDogfoodPlayResources.execute()
 
-        def content = FileUtils.readFileToString(
-                new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/paidDogfood/en-US/whatsnew'))
+        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/paidDogfood/en-US/whatsnew').text
         assertEquals('dogfood english', content)
     }
 
     @Test
-    public void testVariantOverridesBuildType() {
+    void testVariantOverridesBuildType() {
         def project = TestHelper.evaluatableProject()
 
         project.android {
@@ -138,8 +127,7 @@ class GenerateResourcesTest {
         project.tasks.clean.execute()
         project.tasks.generateFreeDogfoodPlayResources.execute()
 
-        def content = FileUtils.readFileToString(
-                new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeDogfood/en-US/whatsnew'))
+        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeDogfood/en-US/whatsnew').text
         assertEquals('free dogfood english', content)
     }
 

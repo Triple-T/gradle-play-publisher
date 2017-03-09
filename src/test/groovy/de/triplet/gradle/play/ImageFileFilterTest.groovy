@@ -7,7 +7,7 @@ import static org.junit.Assert.assertTrue
 
 class ImageFileFilterTest {
 
-    final def filter = new ImageFileFilter()
+    final filter = new ImageFileFilter()
 
     @Test
     void testJpg_returnsTrue() {

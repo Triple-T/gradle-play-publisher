@@ -4,15 +4,15 @@ import org.gradle.api.Task
 import org.hamcrest.Description
 import org.hamcrest.TypeSafeMatcher
 
-public class DependsOn extends TypeSafeMatcher<Task> {
+class DependsOn extends TypeSafeMatcher<Task> {
 
-    def static dependsOn(String dependsOn) {
+    static dependsOn(String dependsOn) {
         return new DependsOn(dependsOn)
     }
 
-    def mDependsOn
+    final mDependsOn
 
-    def DependsOn(dependsOn) {
+    DependsOn(dependsOn) {
         mDependsOn = dependsOn
     }
 

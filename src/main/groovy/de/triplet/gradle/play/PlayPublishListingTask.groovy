@@ -4,36 +4,35 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.AbstractInputStreamContent
 import com.google.api.services.androidpublisher.model.AppDetails
 import com.google.api.services.androidpublisher.model.Listing
-import org.apache.commons.lang.StringUtils
 import org.gradle.api.tasks.TaskAction
 
 class PlayPublishListingTask extends PlayPublishTask {
 
-    static def MAX_CHARACTER_LENGTH_FOR_TITLE = 30
-    static def MAX_CHARACTER_LENGTH_FOR_SHORT_DESCRIPTION = 80
-    static def MAX_CHARACTER_LENGTH_FOR_FULL_DESCRIPTION = 4000
-    static def MAX_SCREENSHOTS_SIZE = 8
+    static final MAX_CHARACTER_LENGTH_FOR_TITLE = 30
+    static final MAX_CHARACTER_LENGTH_FOR_SHORT_DESCRIPTION = 80
+    static final MAX_CHARACTER_LENGTH_FOR_FULL_DESCRIPTION = 4000
+    static final MAX_SCREENSHOTS_SIZE = 8
 
-    static def FILE_NAME_FOR_CONTACT_EMAIL = 'contactEmail'
-    static def FILE_NAME_FOR_CONTACT_PHONE = 'contactPhone'
-    static def FILE_NAME_FOR_CONTACT_WEBSITE = 'contactWebsite'
-    static def FILE_NAME_FOR_DEFAULT_LANGUAGE = 'defaultLanguage'
+    static final FILE_NAME_FOR_CONTACT_EMAIL = 'contactEmail'
+    static final FILE_NAME_FOR_CONTACT_PHONE = 'contactPhone'
+    static final FILE_NAME_FOR_CONTACT_WEBSITE = 'contactWebsite'
+    static final FILE_NAME_FOR_DEFAULT_LANGUAGE = 'defaultLanguage'
 
-    static def FILE_NAME_FOR_TITLE = 'title'
-    static def FILE_NAME_FOR_SHORT_DESCRIPTION = 'shortdescription'
-    static def FILE_NAME_FOR_FULL_DESCRIPTION = 'fulldescription'
-    static def FILE_NAME_FOR_VIDEO = 'video'
-    static def LISTING_PATH = 'listing/'
+    static final FILE_NAME_FOR_TITLE = 'title'
+    static final FILE_NAME_FOR_SHORT_DESCRIPTION = 'shortdescription'
+    static final FILE_NAME_FOR_FULL_DESCRIPTION = 'fulldescription'
+    static final FILE_NAME_FOR_VIDEO = 'video'
+    static final LISTING_PATH = 'listing/'
 
-    static def IMAGE_TYPE_FEATURE_GRAPHIC = 'featureGraphic'
-    static def IMAGE_TYPE_ICON = 'icon'
-    static def IMAGE_TYPE_PHONE_SCREENSHOTS = 'phoneScreenshots'
-    static def IMAGE_TYPE_PROMO_GRAPHIC = 'promoGraphic'
-    static def IMAGE_TYPE_SEVEN_INCH_SCREENSHOTS = 'sevenInchScreenshots'
-    static def IMAGE_TYPE_TEN_INCH_SCREENSHOTS = 'tenInchScreenshots'
-    static def IMAGE_TYPE_TV_BANNER = 'tvBanner'
-    static def IMAGE_TYPE_TV_SCREENSHOTS = 'tvScreenshots'
-    static def IMAGE_TYPE_WEAR_SCREENSHOTS = 'wearScreenshots'
+    static final IMAGE_TYPE_FEATURE_GRAPHIC = 'featureGraphic'
+    static final IMAGE_TYPE_ICON = 'icon'
+    static final IMAGE_TYPE_PHONE_SCREENSHOTS = 'phoneScreenshots'
+    static final IMAGE_TYPE_PROMO_GRAPHIC = 'promoGraphic'
+    static final IMAGE_TYPE_SEVEN_INCH_SCREENSHOTS = 'sevenInchScreenshots'
+    static final IMAGE_TYPE_TEN_INCH_SCREENSHOTS = 'tenInchScreenshots'
+    static final IMAGE_TYPE_TV_BANNER = 'tvBanner'
+    static final IMAGE_TYPE_TV_SCREENSHOTS = 'tvScreenshots'
+    static final IMAGE_TYPE_WEAR_SCREENSHOTS = 'wearScreenshots'
 
     File inputFolder
 
@@ -58,17 +57,17 @@ class PlayPublishListingTask extends PlayPublishTask {
                 def fullDescription = TaskHelper.readAndTrimFile(fileFullDescription, MAX_CHARACTER_LENGTH_FOR_FULL_DESCRIPTION, extension.errorOnSizeLimit)
                 def video = TaskHelper.readSingleLine(fileVideo)
 
-                final Listing listing = new Listing()
-                if (StringUtils.isNotEmpty(title)) {
+                final listing = new Listing()
+                if (!title?.isEmpty()) {
                     listing.setTitle(title)
                 }
-                if (StringUtils.isNotEmpty(shortDescription)) {
+                if (!shortDescription?.isEmpty()) {
                     listing.setShortDescription(shortDescription)
                 }
-                if (StringUtils.isNotEmpty(fullDescription)) {
+                if (!fullDescription?.isEmpty()) {
                     listing.setFullDescription(fullDescription)
                 }
-                if (StringUtils.isNotEmpty(video)) {
+                if (!video?.isEmpty()) {
                     listing.setVideo(video)
                 }
 
@@ -132,7 +131,7 @@ class PlayPublishListingTask extends PlayPublishTask {
         def fileDefaultLanguage = new File(inputFolder, FILE_NAME_FOR_DEFAULT_LANGUAGE)
         def defaultLanguage = TaskHelper.readSingleLine(fileDefaultLanguage)
 
-        if (StringUtils.isNotEmpty(defaultLanguage)) {
+        if (!defaultLanguage?.isEmpty()) {
             def fileContactEmail = new File(inputFolder, FILE_NAME_FOR_CONTACT_EMAIL)
             def email = TaskHelper.readSingleLine(fileContactEmail)
             def fileContactPhone = new File(inputFolder, FILE_NAME_FOR_CONTACT_PHONE)

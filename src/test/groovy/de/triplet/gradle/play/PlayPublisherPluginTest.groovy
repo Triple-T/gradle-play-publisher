@@ -13,14 +13,14 @@ import static org.junit.Assert.fail
 class PlayPublisherPluginTest {
 
     @Test(expected = PluginApplicationException.class)
-    public void testThrowsOnLibraryProjects() {
+    void testThrowsOnLibraryProjects() {
         def project = ProjectBuilder.builder().build()
         project.apply plugin: 'com.android.library'
         project.apply plugin: 'com.github.triplet.play'
     }
 
     @Test
-    public void testCreatesDefaultTask() {
+    void testCreatesDefaultTask() {
         def project = TestHelper.evaluatableProject()
         project.evaluate()
 
@@ -29,7 +29,7 @@ class PlayPublisherPluginTest {
     }
 
     @Test
-    public void testCreatesFlavorTasks() {
+    void testCreatesFlavorTasks() {
         def project = TestHelper.evaluatableProject()
 
         project.android.productFlavors {
@@ -47,7 +47,7 @@ class PlayPublisherPluginTest {
     }
 
     @Test
-    public void testDefaultTrack() {
+    void testDefaultTrack() {
         def project = TestHelper.evaluatableProject()
         project.evaluate()
 
@@ -55,7 +55,7 @@ class PlayPublisherPluginTest {
     }
 
     @Test
-    public void testTrack() {
+    void testTrack() {
         def project = TestHelper.evaluatableProject()
 
         project.play {
@@ -68,7 +68,7 @@ class PlayPublisherPluginTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testThrowsOnInvalidTrack() {
+    void testThrowsOnInvalidTrack() {
         def project = TestHelper.evaluatableProject()
 
         project.play {
@@ -77,7 +77,7 @@ class PlayPublisherPluginTest {
     }
 
     @Test
-    public void testUserFraction() {
+    void testUserFraction() {
         def project = TestHelper.evaluatableProject()
 
         project.play {
@@ -90,7 +90,7 @@ class PlayPublisherPluginTest {
     }
 
     @Test
-    public void testJsonFile() {
+    void testJsonFile() {
         def project = TestHelper.evaluatableProject()
 
         project.play {
@@ -104,7 +104,7 @@ class PlayPublisherPluginTest {
 
 
     @Test
-    public void testPublishListingTask() {
+    void testPublishListingTask() {
         def project = TestHelper.evaluatableProject()
 
         project.android.productFlavors {
@@ -119,7 +119,7 @@ class PlayPublisherPluginTest {
     }
 
     @Test
-    public void testNoSigningConfigGenerateTasks() {
+    void testNoSigningConfigGenerateTasks() {
         def project = TestHelper.noSigningConfigProject()
 
         project.evaluate()
@@ -134,7 +134,7 @@ class PlayPublisherPluginTest {
 
 
     @Test
-    public void testSplits() {
+    void testSplits() {
         def project = TestHelper.evaluatableProject()
 
         project.android {

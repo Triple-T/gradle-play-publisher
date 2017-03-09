@@ -7,7 +7,7 @@ import org.gradle.api.Project
 
 class PlayPublisherPlugin implements Plugin<Project> {
 
-    public static final String PLAY_STORE_GROUP = 'Play Store'
+    public static final PLAY_STORE_GROUP = 'Play Store'
 
     @Override
     void apply(Project project) {
@@ -47,7 +47,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             def bootstrapTask = project.tasks.create(bootstrapTaskName, BootstrapTask)
             bootstrapTask.extension = extension
             bootstrapTask.variant = variant
-            if (StringUtils.isNotEmpty(flavor)) {
+            if (!flavor?.isEmpty()) {
                 bootstrapTask.outputFolder = new File(project.projectDir, "src/${flavor}/play")
             } else {
                 bootstrapTask.outputFolder = new File(project.projectDir, 'src/main/play')
@@ -59,11 +59,11 @@ class PlayPublisherPlugin implements Plugin<Project> {
             def playResourcesTask = project.tasks.create(playResourcesTaskName, GeneratePlayResourcesTask)
 
             playResourcesTask.inputs.file(new File(project.projectDir, 'src/main/play'))
-            if (StringUtils.isNotEmpty(flavor)) {
+            if (!flavor?.isEmpty()) {
                 playResourcesTask.inputs.file(new File(project.projectDir, "src/${flavor}/play"))
             }
             playResourcesTask.inputs.file(new File(project.projectDir, "src/${variant.buildType.name}/play"))
-            if (StringUtils.isNotEmpty(flavor)) {
+            if (!flavor?.isEmpty()) {
                 playResourcesTask.inputs.file(new File(project.projectDir, "src/${variant.name}/play"))
             }
 
