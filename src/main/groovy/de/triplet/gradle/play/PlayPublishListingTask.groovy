@@ -38,11 +38,11 @@ class PlayPublishListingTask extends PlayPublishTask {
 
     @TaskAction
     publishListing() {
-        super.publish()
-
         if (!inputFolder.exists()) {
             return
         }
+
+        super.publish()
 
         // Matches if locale have the correct naming e.g. en-US for play store
         inputFolder.eachDirMatch(matcher) { dir ->
