@@ -38,6 +38,10 @@ class PlayPublishListingTask extends PlayPublishTask {
 
     @TaskAction
     publishListing() {
+        if (!inputFolder.exists()) {
+            return
+        }
+
         super.publish()
 
         // Matches if locale have the correct naming e.g. en-US for play store
