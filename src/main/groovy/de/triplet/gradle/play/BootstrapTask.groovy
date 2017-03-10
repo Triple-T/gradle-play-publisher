@@ -56,7 +56,7 @@ class BootstrapTask extends PlayPublishTask {
                 continue
             }
 
-            for (String imageType : IMAGE_TYPE_ARRAY) {
+            for (def imageType : IMAGE_TYPE_ARRAY) {
                 def images = edits.images()
                         .list(variant.applicationId, editId, language, imageType)
                         .execute()

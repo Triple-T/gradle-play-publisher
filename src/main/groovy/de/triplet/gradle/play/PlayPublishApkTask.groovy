@@ -1,7 +1,6 @@
 package de.triplet.gradle.play
 
 import com.android.build.gradle.api.ApkVariantOutput
-import com.google.api.client.http.AbstractInputStreamContent
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.model.Apk
 import com.google.api.services.androidpublisher.model.ApkListing
@@ -10,9 +9,9 @@ import org.gradle.api.tasks.TaskAction
 
 class PlayPublishApkTask extends PlayPublishTask {
 
-    static def MIME_TYPE_APK = 'application/vnd.android.package-archive'
-    static def MAX_CHARACTER_LENGTH_FOR_WHATS_NEW_TEXT = 500
-    static def FILE_NAME_FOR_WHATS_NEW_TEXT = 'whatsnew'
+    static MIME_TYPE_APK = 'application/vnd.android.package-archive'
+    static MAX_CHARACTER_LENGTH_FOR_WHATS_NEW_TEXT = 500
+    static FILE_NAME_FOR_WHATS_NEW_TEXT = 'whatsnew'
 
     File inputFolder
 
@@ -37,7 +36,7 @@ class PlayPublishApkTask extends PlayPublishTask {
         edits.commit(variant.applicationId, editId).execute()
     }
 
-    def Apk publishApk(apkFile) {
+    Apk publishApk(apkFile) {
 
         def apk = edits.apks()
                 .upload(variant.applicationId, editId, apkFile)
@@ -46,7 +45,7 @@ class PlayPublishApkTask extends PlayPublishTask {
         if (extension.untrackOld && extension.track != 'alpha') {
             def untrackChannels = extension.track == 'beta' ? ['alpha'] : ['alpha', 'beta']
             untrackChannels.each { channel ->
-                Track track = edits.tracks().get(variant.applicationId, editId, channel).execute()
+                def track = edits.tracks().get(variant.applicationId, editId, channel).execute()
                 track.setVersionCodes(track.getVersionCodes().findAll {
                     it > apk.getVersionCode()
                 })
@@ -55,7 +54,7 @@ class PlayPublishApkTask extends PlayPublishTask {
             }
         }
 
-        //Upload Proguard mapping.txt if available
+        // Upload Proguard mapping.txt if available
         if (variant.mappingFile?.exists()) {
             def fileStream = new FileContent('application/octet-stream', variant.mappingFile)
             edits.deobfuscationfiles().upload(variant.applicationId, editId, apk.getVersionCode(), 'proguard', fileStream).execute()
