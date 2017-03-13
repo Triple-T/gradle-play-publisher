@@ -4,16 +4,22 @@ language: android
 android:
   components:
     - tools
-    - platform-tools
     - tools
+    - platform-tools
     - build-tools-25.0.2
     - android-25
 
+jdk:
+  - oraclejdk8
+
 script:
-  - ./gradlew check --debug
+  - ./gradlew check
 
 sudo: false
 
 cache:
   directories:
-    - $HOME/.gradle
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - $HOME/.gradle/native/
+    - $HOME/.gradle/daemon/native/
