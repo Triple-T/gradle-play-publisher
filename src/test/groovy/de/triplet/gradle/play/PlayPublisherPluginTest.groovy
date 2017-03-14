@@ -1,6 +1,5 @@
 package de.triplet.gradle.play
 
-import org.gradle.api.Project
 import org.gradle.api.internal.plugins.PluginApplicationException
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Test
@@ -14,15 +13,15 @@ import static org.junit.Assert.fail
 class PlayPublisherPluginTest {
 
     @Test(expected = PluginApplicationException.class)
-    public void testThrowsOnLibraryProjects() {
-        Project project = ProjectBuilder.builder().build()
+    void testThrowsOnLibraryProjects() {
+        def project = ProjectBuilder.builder().build()
         project.apply plugin: 'com.android.library'
         project.apply plugin: 'com.github.triplet.play'
     }
 
     @Test
-    public void testCreatesDefaultTask() {
-        Project project = TestHelper.evaluatableProject()
+    void testCreatesDefaultTask() {
+        def project = TestHelper.evaluatableProject()
         project.evaluate()
 
         assertNotNull(project.tasks.publishRelease)
@@ -30,8 +29,8 @@ class PlayPublisherPluginTest {
     }
 
     @Test
-    public void testCreatesFlavorTasks() {
-        Project project = TestHelper.evaluatableProject()
+    void testCreatesFlavorTasks() {
+        def project = TestHelper.evaluatableProject()
 
         project.android.productFlavors {
             free
@@ -48,16 +47,16 @@ class PlayPublisherPluginTest {
     }
 
     @Test
-    public void testDefaultTrack() {
-        Project project = TestHelper.evaluatableProject()
+    void testDefaultTrack() {
+        def project = TestHelper.evaluatableProject()
         project.evaluate()
 
-        assertEquals('alpha', project.extensions.findByName("play").track)
+        assertEquals('alpha', project.extensions.findByName('play').track)
     }
 
     @Test
-    public void testTrack() {
-        Project project = TestHelper.evaluatableProject()
+    void testTrack() {
+        def project = TestHelper.evaluatableProject()
 
         project.play {
             track 'production'
@@ -65,12 +64,12 @@ class PlayPublisherPluginTest {
 
         project.evaluate()
 
-        assertEquals('production', project.extensions.findByName("play").track)
+        assertEquals('production', project.extensions.findByName('play').track)
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testThrowsOnInvalidTrack() {
-        Project project = TestHelper.evaluatableProject()
+    void testThrowsOnInvalidTrack() {
+        def project = TestHelper.evaluatableProject()
 
         project.play {
             track 'gamma'
@@ -78,8 +77,8 @@ class PlayPublisherPluginTest {
     }
 
     @Test
-    public void testUserFraction() {
-        Project project = TestHelper.evaluatableProject()
+    void testUserFraction() {
+        def project = TestHelper.evaluatableProject()
 
         project.play {
             userFraction 0.1
@@ -87,12 +86,26 @@ class PlayPublisherPluginTest {
 
         project.evaluate()
 
-        assertEquals(0.1, project.extensions.findByName("play").userFraction, 0)
+        assertEquals(0.1, project.extensions.findByName('play').userFraction, 0)
     }
 
     @Test
-    public void testPublishListingTask() {
-        Project project = TestHelper.evaluatableProject()
+    void testJsonFile() {
+        def project = TestHelper.evaluatableProject()
+
+        project.play {
+            jsonFile new File('key.json')
+        }
+
+        project.evaluate()
+
+        assertEquals('key.json', project.extensions.findByName('play').jsonFile.name)
+    }
+
+
+    @Test
+    void testPublishListingTask() {
+        def project = TestHelper.evaluatableProject()
 
         project.android.productFlavors {
             free
@@ -106,8 +119,8 @@ class PlayPublisherPluginTest {
     }
 
     @Test
-    public void testNoSigningConfigGenerateTasks() {
-        Project project = TestHelper.noSigningConfigProject()
+    void testNoSigningConfigGenerateTasks() {
+        def project = TestHelper.noSigningConfigProject()
 
         project.evaluate()
 
@@ -221,8 +234,8 @@ class PlayPublisherPluginTest {
 
 
     @Test
-    public void testSplits() {
-        Project project = TestHelper.evaluatableProject()
+    void testSplits() {
+        def project = TestHelper.evaluatableProject()
 
         project.android {
             splits {

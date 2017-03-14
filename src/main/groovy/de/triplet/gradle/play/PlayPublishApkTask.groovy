@@ -1,6 +1,7 @@
 package de.triplet.gradle.play
 
 import com.android.build.gradle.api.ApkVariantOutput
+import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.model.Apk
 import com.google.api.services.androidpublisher.model.ApkListing
@@ -9,9 +10,9 @@ import org.gradle.api.tasks.TaskAction
 
 class PlayPublishApkTask extends PlayPublishTask {
 
-    static def MIME_TYPE_APK = "application/vnd.android.package-archive"
-    static def MAX_CHARACTER_LENGTH_FOR_WHATS_NEW_TEXT = 500
-    static def FILE_NAME_FOR_WHATS_NEW_TEXT = "whatsnew"
+    static MIME_TYPE_APK = 'application/vnd.android.package-archive'
+    static MAX_CHARACTER_LENGTH_FOR_WHATS_NEW_TEXT = 500
+    static FILE_NAME_FOR_WHATS_NEW_TEXT = 'whatsnew'
 
     File inputFolder
 
@@ -19,14 +20,14 @@ class PlayPublishApkTask extends PlayPublishTask {
     publishApks() {
         super.publish()
 
-        List<Integer> versionCodes = new ArrayList<Integer>()
+        def versionCodes = new ArrayList<Integer>()
 
         variant.outputs
-            .findAll { variantOutput -> variantOutput instanceof ApkVariantOutput }
-            .each { variantOutput -> versionCodes.add(publishApk(new FileContent(MIME_TYPE_APK, variantOutput.outputFile)).getVersionCode())}
+                .findAll { variantOutput -> variantOutput instanceof ApkVariantOutput }
+                .each { variantOutput -> versionCodes.add(publishApk(new FileContent(MIME_TYPE_APK, variantOutput.outputFile)).getVersionCode()) }
 
-        Track track = new Track().setVersionCodes(versionCodes)
-        if (extension.track?.equals("rollout")) {
+        def track = new Track().setVersionCodes(versionCodes)
+        if (extension.track == 'rollout') {
             track.setUserFraction(extension.userFraction)
         }
         edits.tracks()
@@ -36,29 +37,42 @@ class PlayPublishApkTask extends PlayPublishTask {
         edits.commit(variant.applicationId, editId).execute()
     }
 
-    def Apk publishApk(apkFile) {
+    Apk publishApk(apkFile) {
 
-        Apk apk = edits.apks()
+        def apk = edits.apks()
                 .upload(variant.applicationId, editId, apkFile)
                 .execute()
 
-        if (extension.untrackOld && !"alpha".equals(extension.track)) {
-            def untrackChannels = "beta".equals(extension.track) ? ["alpha"] : ["alpha", "beta"]
+        if (extension.untrackOld && extension.track != 'alpha') {
+            def untrackChannels = extension.track == 'beta' ? ['alpha'] : ['alpha', 'beta']
             untrackChannels.each { channel ->
-                Track track = edits.tracks().get(variant.applicationId, editId, channel).execute()
-                track.setVersionCodes(track.getVersionCodes().findAll {
-                    it > apk.getVersionCode()
-                });
+                try {
+                    def track = edits.tracks().get(variant.applicationId, editId, channel).execute()
+                    track.setVersionCodes(track.getVersionCodes().findAll {
+                        it > apk.getVersionCode()
+                    })
 
-                edits.tracks().update(variant.applicationId, editId, channel, track).execute()
+                    edits.tracks().update(variant.applicationId, editId, channel, track).execute()
+                } catch (GoogleJsonResponseException e) {
+                    // Just skip if there is no version in track
+                    if (e.details.getCode() != 404) {
+                        throw e
+                    }
+                }
             }
+        }
+
+        // Upload Proguard mapping.txt if available
+        if (variant.mappingFile?.exists()) {
+            def fileStream = new FileContent('application/octet-stream', variant.mappingFile)
+            edits.deobfuscationfiles().upload(variant.applicationId, editId, apk.getVersionCode(), 'proguard', fileStream).execute()
         }
 
         if (inputFolder.exists()) {
 
             // Matches if locale have the correct naming e.g. en-US for play store
             inputFolder.eachDirMatch(matcher) { dir ->
-                File whatsNewFile = new File(dir, FILE_NAME_FOR_WHATS_NEW_TEXT + "-" + extension.track)
+                def whatsNewFile = new File(dir, FILE_NAME_FOR_WHATS_NEW_TEXT + '-' + extension.track)
 
                 if (!whatsNewFile.exists()) {
                     whatsNewFile = new File(dir, FILE_NAME_FOR_WHATS_NEW_TEXT)
@@ -69,7 +83,7 @@ class PlayPublishApkTask extends PlayPublishTask {
                     def whatsNewText = TaskHelper.readAndTrimFile(whatsNewFile, MAX_CHARACTER_LENGTH_FOR_WHATS_NEW_TEXT, extension.errorOnSizeLimit)
                     def locale = dir.name
 
-                    ApkListing newApkListing = new ApkListing().setRecentChanges(whatsNewText)
+                    def newApkListing = new ApkListing().setRecentChanges(whatsNewText)
                     edits.apklistings()
                             .update(variant.applicationId, editId, apk.getVersionCode(), locale, newApkListing)
                             .execute()

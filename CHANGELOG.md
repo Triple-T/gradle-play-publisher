@@ -1,3 +1,11 @@
+**1.2.0-beta2 - 2017-03-13**
+
+* Support ABI splits - #39
+* Support for uploading proguard mapping files - #132
+* Automatically untrack older versions in other channels during upload - #121
+* Make sure to only read the first line for items that expect a single line string - #143
+* Remove trailing linebreaks - #187
+
 **1.1.5 - 2016-08-09**
 
 * Support Filipino in Metadata - #142

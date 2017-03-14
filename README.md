@@ -3,6 +3,7 @@
 Gradle plugin to upload your APK and app details to the Google Play Store. Needs the ```com.android.application``` plugin applied. Supports the Android Application Plugin as of version ```1.0.0```.
 
 [![Build Status](https://travis-ci.org/Triple-T/gradle-play-publisher.svg?branch=master)](https://travis-ci.org/Triple-T/gradle-play-publisher)
+[![Latest Version](https://maven-badges.herokuapp.com/maven-central/com.github.triplet.gradle/play-publisher/badge.svg)](https://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.github.triplet.gradle%22%20AND%20a%3A%22play-publisher%22)
 
 ## Quick Start Guide
 

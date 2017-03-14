@@ -1,15 +1,25 @@
 language: android
 
+# https://github.com/travis-ci/travis-ci/issues/6040#issuecomment-219367943
 android:
   components:
-    - build-tools-23.0.1
-    - android-23
+    - tools
+    - tools
+    - platform-tools
+    - build-tools-25.0.2
+    - android-25
+
+jdk:
+  - oraclejdk8
 
 script:
-  - ./gradlew check --debug
+  - ./gradlew check
 
 sudo: false
 
 cache:
   directories:
-    - $HOME/.gradle
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - $HOME/.gradle/native/
+    - $HOME/.gradle/daemon/native/
