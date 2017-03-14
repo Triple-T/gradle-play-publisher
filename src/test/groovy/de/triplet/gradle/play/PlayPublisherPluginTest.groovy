@@ -121,7 +121,7 @@ class PlayPublisherPluginTest {
 
     @Test
     public void testJsonFileBackwardsCompatibility() {
-        Project project = TestHelper.evaluatableProject()
+        def project = TestHelper.evaluatableProject()
 
         project.play {
             jsonFile new File("key.json");
@@ -134,7 +134,7 @@ class PlayPublisherPluginTest {
 
     @Test
     public void testPlayAccountBackwardsCompatibility() {
-        Project project = TestHelper.evaluatableProject()
+        def project = TestHelper.evaluatableProject()
 
         project.play {
             serviceAccountEmail = 'service-account@test.com'
@@ -149,7 +149,7 @@ class PlayPublisherPluginTest {
 
     @Test
     public void testPlaySigningConfigs() {
-        Project project = TestHelper.evaluatableProject()
+        def project = TestHelper.evaluatableProject()
 
         project.android {
             playAccountConfigs {
@@ -185,22 +185,22 @@ class PlayPublisherPluginTest {
         }
         project.evaluate()
 
-        assert project.tasks.bootstrapDefaultFlavorReleasePlayResources.playAccountConfig.serviceAccountEmail == 'default@exmaple.com'
-        assert project.tasks.bootstrapFreeReleasePlayResources.playAccountConfig.serviceAccountEmail == 'first-mail@exmaple.com'
-        assert project.tasks.bootstrapPaidReleasePlayResources.playAccountConfig.serviceAccountEmail == 'another-mail@exmaple.com'
+        assertEquals('default@exmaple.com', project.tasks.bootstrapDefaultFlavorReleasePlayResources.playAccountConfig.serviceAccountEmail)
+        assertEquals('first-mail@exmaple.com', project.tasks.bootstrapFreeReleasePlayResources.playAccountConfig.serviceAccountEmail)
+        assertEquals('another-mail@exmaple.com', project.tasks.bootstrapPaidReleasePlayResources.playAccountConfig.serviceAccountEmail)
 
-        assert project.tasks.publishApkDefaultFlavorRelease.playAccountConfig.serviceAccountEmail == 'default@exmaple.com'
-        assert project.tasks.publishApkFreeRelease.playAccountConfig.serviceAccountEmail == 'first-mail@exmaple.com'
-        assert project.tasks.publishApkPaidRelease.playAccountConfig.serviceAccountEmail == 'another-mail@exmaple.com'
+        assertEquals('default@exmaple.com', project.tasks.publishApkDefaultFlavorRelease.playAccountConfig.serviceAccountEmail)
+        assertEquals('first-mail@exmaple.com', project.tasks.publishApkFreeRelease.playAccountConfig.serviceAccountEmail)
+        assertEquals('another-mail@exmaple.com', project.tasks.publishApkPaidRelease.playAccountConfig.serviceAccountEmail)
 
-        assert project.tasks.publishListingDefaultFlavorRelease.playAccountConfig.serviceAccountEmail == 'default@exmaple.com'
-        assert project.tasks.publishListingFreeRelease.playAccountConfig.serviceAccountEmail == 'first-mail@exmaple.com'
-        assert project.tasks.publishListingPaidRelease.playAccountConfig.serviceAccountEmail == 'another-mail@exmaple.com'
+        assertEquals('default@exmaple.com', project.tasks.publishListingDefaultFlavorRelease.playAccountConfig.serviceAccountEmail)
+        assertEquals('first-mail@exmaple.com', project.tasks.publishListingFreeRelease.playAccountConfig.serviceAccountEmail)
+        assertEquals('another-mail@exmaple.com', project.tasks.publishListingPaidRelease.playAccountConfig.serviceAccountEmail)
     }
 
     @Test
     public void testNoProductFlavors() {
-        Project project = TestHelper.evaluatableProject()
+        def project = TestHelper.evaluatableProject()
 
         project.android {
             playAccountConfigs {
@@ -216,7 +216,7 @@ class PlayPublisherPluginTest {
         }
         project.evaluate()
 
-        assert project.tasks.publishApkRelease.playAccountConfig.serviceAccountEmail == 'default@exmaple.com'
+        assertEquals('default@exmaple.com', project.tasks.publishApkRelease.playAccountConfig.serviceAccountEmail)
     }
 
 
