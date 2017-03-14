@@ -90,20 +90,6 @@ class PlayPublisherPluginTest {
     }
 
     @Test
-    void testJsonFile() {
-        def project = TestHelper.evaluatableProject()
-
-        project.play {
-            jsonFile new File('key.json')
-        }
-
-        project.evaluate()
-
-        assertEquals('key.json', project.extensions.findByName('play').jsonFile.name)
-    }
-
-
-    @Test
     void testPublishListingTask() {
         def project = TestHelper.evaluatableProject()
 
@@ -130,6 +116,106 @@ class PlayPublisherPluginTest {
         if (project.tasks.hasProperty('publishApkRelease') || project.tasks.hasProperty('publishRelease')) {
             fail()
         }
+    }
+
+    @Test
+    public void testJsonFileBackwardsCompatibility() {
+        def project = TestHelper.evaluatableProject()
+
+        project.play {
+            jsonFile new File('key.json')
+        }
+
+        project.evaluate()
+
+        assertEquals('key.json', project.extensions.play.jsonFile.name)
+    }
+
+    @Test
+    public void testPlayAccountBackwardsCompatibility() {
+        def project = TestHelper.evaluatableProject()
+
+        project.play {
+            serviceAccountEmail = 'service-account@test.com'
+            pk12File = new File('key.p12')
+        }
+
+        project.evaluate()
+
+        project.extensions.play.serviceAccountEmail == 'service-account@test.com'
+        project.extensions.play.pk12File = new File('key.p12')
+    }
+
+    @Test
+    public void testPlaySigningConfigs() {
+        def project = TestHelper.evaluatableProject()
+
+        project.android {
+            playAccountConfigs {
+                defaultAccountConfig {
+                    serviceAccountEmail = 'default@exmaple.com'
+                    pk12File = project.file('first-secret.pk12')
+                }
+                free {
+                    serviceAccountEmail = 'first-mail@exmaple.com'
+                    pk12File = project.file('secret.pk12')
+                }
+                paid {
+                    serviceAccountEmail = 'another-mail@exmaple.com'
+                    pk12File = project.file('another-secret.pk12')
+                }
+            }
+
+            defaultConfig {
+                playAccountConfig = playAccountConfigs.defaultAccountConfig
+            }
+
+            productFlavors {
+                defaultFlavor {
+
+                }
+                free {
+                    playAccountConfig = playAccountConfigs.free
+                }
+                paid {
+                    playAccountConfig = playAccountConfigs.paid
+                }
+            }
+        }
+        project.evaluate()
+
+        assertEquals('default@exmaple.com', project.tasks.bootstrapDefaultFlavorReleasePlayResources.playAccountConfig.serviceAccountEmail)
+        assertEquals('first-mail@exmaple.com', project.tasks.bootstrapFreeReleasePlayResources.playAccountConfig.serviceAccountEmail)
+        assertEquals('another-mail@exmaple.com', project.tasks.bootstrapPaidReleasePlayResources.playAccountConfig.serviceAccountEmail)
+
+        assertEquals('default@exmaple.com', project.tasks.publishApkDefaultFlavorRelease.playAccountConfig.serviceAccountEmail)
+        assertEquals('first-mail@exmaple.com', project.tasks.publishApkFreeRelease.playAccountConfig.serviceAccountEmail)
+        assertEquals('another-mail@exmaple.com', project.tasks.publishApkPaidRelease.playAccountConfig.serviceAccountEmail)
+
+        assertEquals('default@exmaple.com', project.tasks.publishListingDefaultFlavorRelease.playAccountConfig.serviceAccountEmail)
+        assertEquals('first-mail@exmaple.com', project.tasks.publishListingFreeRelease.playAccountConfig.serviceAccountEmail)
+        assertEquals('another-mail@exmaple.com', project.tasks.publishListingPaidRelease.playAccountConfig.serviceAccountEmail)
+    }
+
+    @Test
+    public void testNoProductFlavors() {
+        def project = TestHelper.evaluatableProject()
+
+        project.android {
+            playAccountConfigs {
+                defaultAccountConfig {
+                    serviceAccountEmail = 'default@exmaple.com'
+                    pk12File = project.file('first-secret.pk12')
+                }
+            }
+
+            defaultConfig {
+                playAccountConfig = playAccountConfigs.defaultAccountConfig
+            }
+        }
+        project.evaluate()
+
+        assertEquals('default@exmaple.com', project.tasks.publishApkRelease.playAccountConfig.serviceAccountEmail)
     }
 
 
