@@ -1,5 +1,6 @@
-**1.2.0-beta2 - 2017-03-13**
+**1.2.0-beta3 - 2017-03-14**
 
+* Support for multiple service accounts - #76, #161
 * Support ABI splits - #39
 * Support for uploading proguard mapping files - #132
 * Automatically untrack older versions in other channels during upload - #121
