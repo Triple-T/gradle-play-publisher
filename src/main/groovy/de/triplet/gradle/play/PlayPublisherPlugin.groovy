@@ -43,7 +43,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             bootstrapTask.extension = extension
             bootstrapTask.variant = variant
             if (!variant.flavorName.isEmpty()) {
-                bootstrapTask.playAccountConfig = project.android.productFlavors[flavor].playAccountConfig
+                bootstrapTask.playAccountConfig = project.android.productFlavors[variant.flavorName].playAccountConfig
                 bootstrapTask.outputFolder = new File(project.projectDir, "src/${variant.flavorName}/play")
             } else {
                 bootstrapTask.playAccountConfig = project.android.defaultConfig.ext.playAccountConfig
@@ -69,8 +69,8 @@ class PlayPublisherPlugin implements Plugin<Project> {
             // Create and configure publisher meta task for this variant
             def publishListingTask = project.tasks.create(publishListingTaskName, PlayPublishListingTask)
             publishListingTask.extension = extension
-            if (StringUtils.isNotEmpty(flavor)) {
-                publishListingTask.playAccountConfig = project.android.productFlavors[flavor].playAccountConfig
+            if (!variant.flavorName.isEmpty()) {
+                publishListingTask.playAccountConfig = project.android.productFlavors[variant.flavorName].playAccountConfig
             } else {
                 bootstrapTask.playAccountConfig = project.android.defaultConfig.ext.playAccountConfig
             }
@@ -86,8 +86,8 @@ class PlayPublisherPlugin implements Plugin<Project> {
                 // Create and configure publisher apk task for this variant.
                 def publishApkTask = project.tasks.create(publishApkTaskName, PlayPublishApkTask)
                 publishApkTask.extension = extension
-                if (StringUtils.isNotEmpty(flavor)) {
-                    publishApkTask.playAccountConfig = project.android.productFlavors[flavor].playAccountConfig
+                if (!variant.flavorName.isEmpty()) {
+                    publishApkTask.playAccountConfig = project.android.productFlavors[variant.flavorName].playAccountConfig
                 } else {
                     publishApkTask.playAccountConfig = project.android.defaultConfig.ext.playAccountConfig
                 }

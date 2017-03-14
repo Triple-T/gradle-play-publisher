@@ -90,20 +90,6 @@ class PlayPublisherPluginTest {
     }
 
     @Test
-    void testJsonFile() {
-        def project = TestHelper.evaluatableProject()
-
-        project.play {
-            jsonFile new File('key.json')
-        }
-
-        project.evaluate()
-
-        assertEquals('key.json', project.extensions.findByName('play').jsonFile.name)
-    }
-
-
-    @Test
     void testPublishListingTask() {
         def project = TestHelper.evaluatableProject()
 
@@ -137,12 +123,12 @@ class PlayPublisherPluginTest {
         def project = TestHelper.evaluatableProject()
 
         project.play {
-            jsonFile new File("key.json");
+            jsonFile new File('key.json')
         }
 
         project.evaluate()
 
-        assertEquals("key.json", project.extensions.play.jsonFile.name)
+        assertEquals('key.json', project.extensions.play.jsonFile.name)
     }
 
     @Test
@@ -151,13 +137,13 @@ class PlayPublisherPluginTest {
 
         project.play {
             serviceAccountEmail = 'service-account@test.com'
-            pk12File = new File("key.p12")
+            pk12File = new File('key.p12')
         }
 
         project.evaluate()
 
         project.extensions.play.serviceAccountEmail == 'service-account@test.com'
-        project.extensions.play.pk12File = new File("key.p12")
+        project.extensions.play.pk12File = new File('key.p12')
     }
 
     @Test
