@@ -215,9 +215,10 @@ class PlayPublisherPluginTest {
         }
         project.evaluate()
 
+        assertEquals('default@exmaple.com', project.tasks.bootstrapReleasePlayResources.playAccountConfig.serviceAccountEmail)
         assertEquals('default@exmaple.com', project.tasks.publishApkRelease.playAccountConfig.serviceAccountEmail)
+        assertEquals('default@exmaple.com', project.tasks.publishListingRelease.playAccountConfig.serviceAccountEmail)
     }
-
 
     @Test
     void testSplits() {

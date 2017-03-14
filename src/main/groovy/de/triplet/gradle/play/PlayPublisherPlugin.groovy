@@ -72,7 +72,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             if (!variant.flavorName.isEmpty()) {
                 publishListingTask.playAccountConfig = project.android.productFlavors[variant.flavorName].playAccountConfig
             } else {
-                bootstrapTask.playAccountConfig = project.android.defaultConfig.ext.playAccountConfig
+                publishListingTask.playAccountConfig = project.android.defaultConfig.ext.playAccountConfig
             }
             publishListingTask.variant = variant
             publishListingTask.inputFolder = playResourcesTask.outputFolder
