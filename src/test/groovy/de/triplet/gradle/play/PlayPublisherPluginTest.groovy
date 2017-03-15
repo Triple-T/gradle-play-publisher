@@ -47,6 +47,37 @@ class PlayPublisherPluginTest {
     }
 
     @Test
+    void testCreatesTasksForMultipleDimensions() {
+        def project = TestHelper.evaluatableProject()
+
+        project.android {
+            flavorDimensions "mock", "server"
+
+            productFlavors {
+                mock {
+                    dimension "mock"
+                }
+                remote {
+                    dimension "mock"
+                }
+                local {
+                    dimension "server"
+                }
+                prod {
+                    dimension "server"
+                }
+            }
+        }
+
+        project.evaluate()
+
+        assertNotNull(project.tasks.publishMockProdRelease)
+        assertNotNull(project.tasks.publishRemoteProdRelease)
+        assertNotNull(project.tasks.publishMockLocalRelease)
+        assertNotNull(project.tasks.publishRemoteLocalRelease)
+    }
+
+    @Test
     void testDefaultTrack() {
         def project = TestHelper.evaluatableProject()
         project.evaluate()
