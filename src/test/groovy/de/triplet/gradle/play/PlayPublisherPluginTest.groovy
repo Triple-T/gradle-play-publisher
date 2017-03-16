@@ -198,6 +198,50 @@ class PlayPublisherPluginTest {
     }
 
     @Test
+    public void testPlaySigningConfigsDimensions() {
+        def project = TestHelper.evaluatableProject()
+
+        project.android {
+
+            flavorDimensions "mode", "variant"
+
+            playAccountConfigs {
+                free {
+                    serviceAccountEmail = 'free@exmaple.com'
+                    pk12File = project.file('secret.pk12')
+                }
+                paid {
+                    serviceAccountEmail = 'paid@exmaple.com'
+                    pk12File = project.file('another-secret.pk12')
+                }
+            }
+
+            productFlavors {
+                demo {
+                    dimension = "mode"
+                }
+                production {
+                    dimension = "mode"
+                }
+                free {
+                    dimension = "variant"
+                    playAccountConfig = playAccountConfigs.free
+                }
+                paid {
+                    dimension = "variant"
+                    playAccountConfig = playAccountConfigs.paid
+                }
+            }
+        }
+        project.evaluate()
+
+        assertEquals('free@exmaple.com', project.tasks.bootstrapDemoFreeReleasePlayResources.playAccountConfig.serviceAccountEmail)
+        assertEquals('paid@exmaple.com', project.tasks.bootstrapDemoPaidReleasePlayResources.playAccountConfig.serviceAccountEmail)
+        assertEquals('free@exmaple.com', project.tasks.bootstrapProductionFreeReleasePlayResources.playAccountConfig.serviceAccountEmail)
+        assertEquals('paid@exmaple.com', project.tasks.bootstrapProductionPaidReleasePlayResources.playAccountConfig.serviceAccountEmail)
+    }
+
+    @Test
     public void testNoProductFlavors() {
         def project = TestHelper.evaluatableProject()
 
