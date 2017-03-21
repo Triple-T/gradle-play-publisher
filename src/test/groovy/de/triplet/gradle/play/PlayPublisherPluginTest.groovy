@@ -280,8 +280,10 @@ class PlayPublisherPluginTest {
 
         project.evaluate()
 
-        assertThat(project.tasks.publishApkRelease, dependsOn('assembleX86Release'))
-        assertThat(project.tasks.publishApkRelease, dependsOn('assembleArmeabi-v7aRelease'))
-        assertThat(project.tasks.publishApkRelease, dependsOn('assembleMipsRelease'))
+        assertThat(project.tasks.assembleRelease, dependsOn('assembleX86Release'))
+        assertThat(project.tasks.assembleRelease, dependsOn('assembleArmeabi-v7aRelease'))
+        assertThat(project.tasks.assembleRelease, dependsOn('assembleMipsRelease'))
+
+        assertThat(project.tasks.publishApkRelease, dependsOn('assembleRelease'))
     }
 }
