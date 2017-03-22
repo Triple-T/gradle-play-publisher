@@ -11,9 +11,6 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 
-import java.util.regex.Matcher
-import java.util.regex.Pattern
-
 import static org.junit.Assert.assertFalse
 import static org.junit.Assert.assertTrue
 import static org.mockito.Matchers.any
@@ -247,28 +244,15 @@ class PlayPublishTaskTest {
 
     @Test
     void testMatcher() {
-        def project = TestHelper.evaluatableProject()
-        project.evaluate()
+        def pattern = PlayPublishTask.matcher
 
-        Pattern pattern = project.tasks.publishApkRelease.matcher
+        assertTrue(pattern.matcher('de-DE').find())
+        assertTrue(pattern.matcher('de').find())
+        assertTrue(pattern.matcher('es-419').find())
+        assertTrue(pattern.matcher('fil').find())
 
-        Matcher m = pattern.matcher('de-DE')
-        assertTrue(m.find())
-
-        m = pattern.matcher('de')
-        assertTrue(m.find())
-
-        m = pattern.matcher('es-419')
-        assertTrue(m.find())
-
-        m = pattern.matcher('fil')
-        assertTrue(m.find())
-
-        m = pattern.matcher('de_DE')
-        assertFalse(m.find())
-
-        m = pattern.matcher('fil-PH')
-        assertFalse(m.find())
+        assertFalse(pattern.matcher('de_DE').find())
+        assertFalse(pattern.matcher('fil-PH').find())
     }
 
     @Test

@@ -9,7 +9,7 @@ class PlayPublishTask extends DefaultTask {
 
     // region '419' is a special case in the play store that represents latin america
     // 'fil' is a special case in the play store that represents Filipino
-    def matcher = ~'^(fil|[a-z]{2}(-([A-Z]{2}|419))?)\\z'
+    static final matcher = ~'^(fil|[a-z]{2}(-([A-Z]{2}|419))?)\\z'
 
     PlayPublisherPluginExtension extension
 

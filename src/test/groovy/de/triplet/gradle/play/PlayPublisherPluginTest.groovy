@@ -119,7 +119,7 @@ class PlayPublisherPluginTest {
     }
 
     @Test
-    public void testJsonFileBackwardsCompatibility() {
+    void testJsonFileBackwardsCompatibility() {
         def project = TestHelper.evaluatableProject()
 
         project.play {
@@ -132,7 +132,7 @@ class PlayPublisherPluginTest {
     }
 
     @Test
-    public void testPlayAccountBackwardsCompatibility() {
+    void testPlayAccountBackwardsCompatibility() {
         def project = TestHelper.evaluatableProject()
 
         project.play {
@@ -147,7 +147,7 @@ class PlayPublisherPluginTest {
     }
 
     @Test
-    public void testPlaySigningConfigs() {
+    void testPlaySigningConfigs() {
         def project = TestHelper.evaluatableProject()
 
         project.android {
@@ -198,7 +198,7 @@ class PlayPublisherPluginTest {
     }
 
     @Test
-    public void testPlaySigningConfigsDimensions() {
+    void testPlaySigningConfigsDimensions() {
         def project = TestHelper.evaluatableProject()
 
         project.android {
@@ -242,7 +242,7 @@ class PlayPublisherPluginTest {
     }
 
     @Test
-    public void testNoProductFlavors() {
+    void testNoProductFlavors() {
         def project = TestHelper.evaluatableProject()
 
         project.android {

@@ -7,8 +7,12 @@ class TestHelper {
 
     static final FIXTURE_WORKING_DIR = new File('src/test/fixtures/android_app')
 
+    static Project fixtureProject() {
+        return ProjectBuilder.builder().withProjectDir(FIXTURE_WORKING_DIR).build()
+    }
+
     static Project evaluatableProject() {
-        def project = ProjectBuilder.builder().withProjectDir(FIXTURE_WORKING_DIR).build()
+        def project = fixtureProject()
         project.apply plugin: 'com.android.application'
         project.apply plugin: 'com.github.triplet.play'
         project.android {
@@ -33,7 +37,7 @@ class TestHelper {
     }
 
     static Project noSigningConfigProject() {
-        def project = ProjectBuilder.builder().withProjectDir(FIXTURE_WORKING_DIR).build()
+        def project = fixtureProject()
         project.apply plugin: 'com.android.application'
         project.apply plugin: 'com.github.triplet.play'
         project.android {

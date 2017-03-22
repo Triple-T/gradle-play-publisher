@@ -13,7 +13,7 @@ class TaskHelper {
 
             if (message.length() > maxCharLength) {
                 if (errorOnSizeLimit) {
-                    throw new LimitExceededException(file, maxCharLength)
+                    throw new IllegalArgumentException("File '${file.parentFile.parentFile.name} -> ${file.name}' has reached the limit of ${maxCharLength} characters")
                 }
 
                 return message.substring(0, maxCharLength)

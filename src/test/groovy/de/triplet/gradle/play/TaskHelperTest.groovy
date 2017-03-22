@@ -2,29 +2,26 @@ package de.triplet.gradle.play
 
 import org.junit.Test
 
-import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
 
-import static org.junit.Assert.assertEquals
+import static org.assertj.core.api.Assertions.assertThat
+import static org.junit.Assert.fail
 
 class TaskHelperTest {
 
-    private static final File TESTFILE = new File('src/test/fixtures/android_app/src/main/play/en-US/whatsnew')
-    private static final File TESTFILE_WITH_LINEBREAK = new File('src/test/fixtures/android_app/src/main/play/en-US/listing/shortdescription')
-    private static final File BROKEN_SINGLE_LINE = new File('src/test/fixtures/android_app/src/main/play/defaultLanguage')
+    private static final TESTFILE = new File('src/test/fixtures/android_app/src/main/play/en-US/whatsnew')
+    private static final TESTFILE_WITH_LINEBREAK = new File('src/test/fixtures/android_app/src/main/play/en-US/listing/shortdescription')
+    private static final BROKEN_SINGLE_LINE = new File('src/test/fixtures/android_app/src/main/play/defaultLanguage')
     private static final byte[] BYTES_NEW_LINES = [97, 13, 10, 98, 13, 10, 99, 13, 10, 97]
 
     @Test
     void testFilesAreCorrectlyTrimmed() {
-        def trimmed = TaskHelper.readAndTrimFile(TESTFILE, 6, false)
-
-        assertEquals(6, trimmed.length())
+        assertThat(TaskHelper.readAndTrimFile(TESTFILE, 6, false)).hasSize(6)
     }
 
     @Test
     void testShortFilesAreNotTrimmed() {
-        def trimmed = TaskHelper.readAndTrimFile(TESTFILE, 100, false)
-
-        assertEquals(12, trimmed.length())
+        assertThat(TaskHelper.readAndTrimFile(TESTFILE, 100, false)).hasSize(12)
     }
 
     @Test
@@ -32,9 +29,14 @@ class TaskHelperTest {
         TaskHelper.readAndTrimFile(TESTFILE, 50, true)
     }
 
-    @Test(expected = LimitExceededException.class)
+    @Test
     void testIncorrectTextLength() {
-        TaskHelper.readAndTrimFile(TESTFILE, 1, true)
+        try {
+            TaskHelper.readAndTrimFile(TESTFILE, 1, true)
+            fail()
+        } catch (IllegalArgumentException e) {
+            assertThat(e).hasMessageMatching('File \'.+\' has reached the limit of 1 characters')
+        }
     }
 
     @Test
@@ -44,13 +46,13 @@ class TaskHelperTest {
 
     @Test
     void testGetCharacterCount() {
-        def message = new String(BYTES_NEW_LINES, Charset.forName('UTF-8'))
-        assertEquals(10, message.length())
-        assertEquals(7, TaskHelper.normalize(message).length())
+        def message = new String(BYTES_NEW_LINES, StandardCharsets.UTF_8)
+        assertThat(message).hasSize(10)
+        assertThat(TaskHelper.normalize(message)).hasSize(7)
     }
 
     @Test
     void testReadSingleLine() {
-        assertEquals('en-US', TaskHelper.readSingleLine(BROKEN_SINGLE_LINE))
+        assertThat(TaskHelper.readSingleLine(BROKEN_SINGLE_LINE)).isEqualTo('en-US')
     }
 }
