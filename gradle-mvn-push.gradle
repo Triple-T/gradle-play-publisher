@@ -17,6 +17,9 @@
 apply plugin: 'maven'
 apply plugin: 'signing'
 
+version = VERSION_NAME
+group = GROUP
+
 def isReleaseBuild() {
     return VERSION_NAME.contains('SNAPSHOT') == false
 }
@@ -86,18 +89,18 @@ afterEvaluate { project ->
         sign configurations.archives
     }
 
-    task javadocsJar(type: Jar, dependsOn: javadoc) {
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
         classifier = 'javadoc'
         from javadoc.destinationDir
     }
 
-    task sourcesJar(type: Jar) {
-        classifier = 'sources'
-        from sourceSets.main.allGroovy
-    }
-
     artifacts {
         archives sourcesJar
-        archives javadocsJar
+        archives javadocJar
     }
 }

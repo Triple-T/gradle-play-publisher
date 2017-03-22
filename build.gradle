@@ -4,9 +4,6 @@ plugins {
 
 apply from: 'gradle-mvn-push.gradle'
 
-group = GROUP
-version = VERSION_NAME
-
 sourceCompatibility = JavaVersion.VERSION_1_7
 targetCompatibility = JavaVersion.VERSION_1_7
 
