@@ -18,23 +18,17 @@ class DependsOn extends TypeSafeMatcher<Task> {
 
     @Override
     protected boolean matchesSafely(Task task) {
-        if (task.dependsOn == null) {
+        return task.dependsOn.any {
+            if (it instanceof Task && (it as Task).name == mDependsOn) {
+                return true
+            }
+
+            if (it instanceof String && it == mDependsOn) {
+                return true
+            }
+
             return false
         }
-
-        for (def o : task.dependsOn) {
-            if (Task.class.isAssignableFrom(o.class)) {
-                if (((Task) o).name == mDependsOn) {
-                    return true
-                }
-            } else if (String.class.isAssignableFrom(o.class)) {
-                if (((String) o) == mDependsOn) {
-                    return true
-                }
-            }
-        }
-
-        return false
     }
 
     @Override
