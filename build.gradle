@@ -1,13 +1,6 @@
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.3'
-    }
+plugins {
+    id 'groovy'
 }
-
-apply plugin: 'groovy'
 
 apply from: 'gradle-mvn-push.gradle'
 
