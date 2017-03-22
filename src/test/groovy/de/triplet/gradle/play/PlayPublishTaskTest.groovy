@@ -11,8 +11,6 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 
-import static org.junit.Assert.assertFalse
-import static org.junit.Assert.assertTrue
 import static org.mockito.Matchers.any
 import static org.mockito.Matchers.anyString
 import static org.mockito.Matchers.argThat
@@ -248,19 +246,6 @@ class PlayPublishTaskTest {
     }
 
     @Test
-    void testMatcher() {
-        def pattern = PlayPublishTask.matcher
-
-        assertTrue(pattern.matcher('de-DE').find())
-        assertTrue(pattern.matcher('de').find())
-        assertTrue(pattern.matcher('es-419').find())
-        assertTrue(pattern.matcher('fil').find())
-
-        assertFalse(pattern.matcher('de_DE').find())
-        assertFalse(pattern.matcher('fil-PH').find())
-    }
-
-    @Test
     void testApplicationIdChange() {
         def project = TestHelper.evaluatableProject()
 
@@ -307,7 +292,7 @@ class PlayPublishTaskTest {
         return argThat(new TypeSafeMatcher<Track>() {
             @Override
             protected boolean matchesSafely(Track track) {
-                return track.getVersionCodes().size() == 0
+                return track.getVersionCodes().isEmpty()
             }
 
             @Override
