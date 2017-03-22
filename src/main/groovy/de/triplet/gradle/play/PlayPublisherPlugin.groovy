@@ -6,7 +6,8 @@ import org.gradle.api.Project
 
 class PlayPublisherPlugin implements Plugin<Project> {
 
-    public static final PLAY_STORE_GROUP = 'Play Store'
+    static final PLAY_STORE_GROUP = 'Play Store'
+    static final RESOURCES_OUTPUT_PATH = 'build/outputs/play'
 
     @Override
     void apply(Project project) {
@@ -42,7 +43,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             def bootstrapTask = project.tasks.create(bootstrapTaskName, BootstrapTask)
             bootstrapTask.extension = extension
             bootstrapTask.variant = variant
-            def accountConfigForFlavor = variant.productFlavors.find {it.playAccountConfig}?.playAccountConfig
+            def accountConfigForFlavor = variant.productFlavors.find { it.playAccountConfig }?.playAccountConfig
             def defaultAccountConfig = project.android.defaultConfig.ext.playAccountConfig
             if (!variant.flavorName.isEmpty()) {
                 bootstrapTask.outputFolder = new File(project.projectDir, "src/${variant.flavorName}/play")
@@ -63,7 +64,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             playResourcesTask.inputs.file(new File(project.projectDir, "src/${variant.buildType.name}/play"))
             playResourcesTask.inputs.file(new File(project.projectDir, "src/${variant.name}/play"))
 
-            playResourcesTask.outputFolder = new File(project.projectDir, "build/outputs/play/${variant.name}")
+            playResourcesTask.outputFolder = new File(project.projectDir, "${RESOURCES_OUTPUT_PATH}/${variant.name}")
             playResourcesTask.description = "Collects play store resources for the ${variant.name.capitalize()} build"
             playResourcesTask.group = PLAY_STORE_GROUP
 
