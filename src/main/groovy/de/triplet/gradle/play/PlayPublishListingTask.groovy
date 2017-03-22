@@ -42,7 +42,7 @@ class PlayPublishListingTask extends PlayPublishTask {
             return
         }
 
-        super.publish()
+        publish()
 
         // Matches if locale have the correct naming e.g. en-US for play store
         inputFolder.eachDirMatch(matcher) { dir ->

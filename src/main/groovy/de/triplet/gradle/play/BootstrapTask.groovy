@@ -23,7 +23,7 @@ class BootstrapTask extends PlayPublishTask {
 
     @TaskAction
     bootstrap() {
-        super.publish()
+        publish()
 
         bootstrapListing()
         bootstrapWhatsNew()

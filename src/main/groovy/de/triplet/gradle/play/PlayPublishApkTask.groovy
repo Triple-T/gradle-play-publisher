@@ -18,7 +18,7 @@ class PlayPublishApkTask extends PlayPublishTask {
 
     @TaskAction
     publishApks() {
-        super.publish()
+        publish()
 
         def versionCodes = new ArrayList<Integer>()
 
