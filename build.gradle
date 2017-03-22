@@ -1,5 +1,6 @@
 plugins {
     id 'groovy'
+    id 'org.jetbrains.kotlin.jvm' version '1.2.31'
     id 'java-gradle-plugin'
 }
 
@@ -17,7 +18,7 @@ dependencies {
     compile('com.google.apis:google-api-services-androidpublisher:v2-rev41-1.22.0') {
         exclude group: 'com.google.guava', module: 'guava-jdk5'
     }
-    compile 'commons-io:commons-io:2.4'
+    compile 'org.jetbrains.kotlin:kotlin-stdlib-jre7:1.2.31'
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.assertj:assertj-core:3.6.2'
@@ -59,4 +60,12 @@ afterEvaluate { project ->
             }
         }
     }
+}
+
+// Compile Kotlin then Groovy
+afterEvaluate {
+    compileKotlin.dependsOn.remove(compileJava)
+    compileGroovy.dependsOn compileKotlin
+    compileGroovy.classpath += files(compileKotlin.destinationDir)
+    classes.dependsOn compileGroovy
 }
