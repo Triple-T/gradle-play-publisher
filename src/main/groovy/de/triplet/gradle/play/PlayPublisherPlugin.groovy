@@ -1,5 +1,6 @@
 package de.triplet.gradle.play
 
+import com.android.build.gradle.AppExtension
 import com.android.build.gradle.AppPlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -17,17 +18,18 @@ class PlayPublisherPlugin implements Plugin<Project> {
             throw new IllegalStateException('The \'com.android.application\' plugin is required.')
         }
 
+        def android = project.extensions.getByType(AppExtension)
         def extension = project.extensions.create('play', PlayPublisherPluginExtension)
 
-        project.android.extensions.playAccountConfigs = project.container(PlayAccountConfig)
+        android.extensions.playAccountConfigs = project.container(PlayAccountConfig)
 
-        project.android.defaultConfig.ext.playAccountConfig = null
+        android.defaultConfig.ext.playAccountConfig = null
 
-        project.android.productFlavors.whenObjectAdded { flavor ->
-            flavor.ext.playAccountConfig = flavor.project.android.defaultConfig.ext.playAccountConfig
+        android.productFlavors.whenObjectAdded { flavor ->
+            flavor.ext.playAccountConfig = android.defaultConfig.ext.playAccountConfig
         }
 
-        project.android.applicationVariants.whenObjectAdded { variant ->
+        android.applicationVariants.whenObjectAdded { variant ->
             if (variant.buildType.isDebuggable()) {
                 log.debug("Skipping debuggable build type ${variant.buildType.name}.")
                 return
@@ -44,11 +46,11 @@ class PlayPublisherPlugin implements Plugin<Project> {
             bootstrapTask.extension = extension
             bootstrapTask.variant = variant
             def accountConfigForFlavor = variant.productFlavors.find { it.playAccountConfig }?.playAccountConfig
-            def defaultAccountConfig = project.android.defaultConfig.ext.playAccountConfig
+            def defaultAccountConfig = android.defaultConfig.ext.playAccountConfig
             if (!variant.flavorName.isEmpty()) {
-                bootstrapTask.outputFolder = new File(project.projectDir, "src/${variant.flavorName}/play")
+                bootstrapTask.outputFolder = project.file("src/${variant.flavorName}/play")
             } else {
-                bootstrapTask.outputFolder = new File(project.projectDir, 'src/main/play')
+                bootstrapTask.outputFolder = project.file('src/main/play')
             }
             bootstrapTask.playAccountConfig = accountConfigForFlavor ?: defaultAccountConfig
             bootstrapTask.description = "Downloads the play store listing for the ${variant.name.capitalize()} build. No download of image resources. See #18."
@@ -57,14 +59,14 @@ class PlayPublisherPlugin implements Plugin<Project> {
             // Create and configure task to collect the play store resources.
             def playResourcesTask = project.tasks.create(playResourcesTaskName, GeneratePlayResourcesTask)
 
-            playResourcesTask.inputs.file(new File(project.projectDir, 'src/main/play'))
+            playResourcesTask.inputs.file(project.file('src/main/play'))
             if (!variant.flavorName.isEmpty()) {
-                playResourcesTask.inputs.file(new File(project.projectDir, "src/${variant.flavorName}/play"))
+                playResourcesTask.inputs.file(project.file("src/${variant.flavorName}/play"))
             }
-            playResourcesTask.inputs.file(new File(project.projectDir, "src/${variant.buildType.name}/play"))
-            playResourcesTask.inputs.file(new File(project.projectDir, "src/${variant.name}/play"))
+            playResourcesTask.inputs.file(project.file("src/${variant.buildType.name}/play"))
+            playResourcesTask.inputs.file(project.file("src/${variant.name}/play"))
 
-            playResourcesTask.outputFolder = new File(project.projectDir, "${RESOURCES_OUTPUT_PATH}/${variant.name}")
+            playResourcesTask.outputFolder = project.file("${RESOURCES_OUTPUT_PATH}/${variant.name}")
             playResourcesTask.description = "Collects play store resources for the ${variant.name.capitalize()} build"
             playResourcesTask.group = PLAY_STORE_GROUP
 
@@ -98,8 +100,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
                 publishTask.dependsOn publishApkTask
                 publishTask.dependsOn publishListingTask
                 publishApkTask.dependsOn playResourcesTask
-
-                publishApkTask.dependsOn(variant.assemble)
+                publishApkTask.dependsOn variant.assemble
             } else {
                 log.warn("Signing not ready. Did you specify a signingConfig for the variation ${variant.name.capitalize()}?")
             }
