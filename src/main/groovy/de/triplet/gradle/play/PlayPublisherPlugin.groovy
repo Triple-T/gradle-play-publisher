@@ -35,6 +35,10 @@ class PlayPublisherPlugin implements Plugin<Project> {
                 return
             }
 
+            def flavorAccountConfig = variant.productFlavors.find { it.playAccountConfig }?.playAccountConfig
+            def defaultAccountConfig = android.defaultConfig.ext.playAccountConfig
+            def playAccountConfig = flavorAccountConfig ?: defaultAccountConfig
+
             def bootstrapTaskName = "bootstrap${variant.name.capitalize()}PlayResources"
             def playResourcesTaskName = "generate${variant.name.capitalize()}PlayResources"
             def publishApkTaskName = "publishApk${variant.name.capitalize()}"
@@ -45,27 +49,23 @@ class PlayPublisherPlugin implements Plugin<Project> {
             def bootstrapTask = project.tasks.create(bootstrapTaskName, BootstrapTask)
             bootstrapTask.extension = extension
             bootstrapTask.variant = variant
-            def accountConfigForFlavor = variant.productFlavors.find { it.playAccountConfig }?.playAccountConfig
-            def defaultAccountConfig = android.defaultConfig.ext.playAccountConfig
             if (!variant.flavorName.isEmpty()) {
                 bootstrapTask.outputFolder = project.file("src/${variant.flavorName}/play")
             } else {
                 bootstrapTask.outputFolder = project.file('src/main/play')
             }
-            bootstrapTask.playAccountConfig = accountConfigForFlavor ?: defaultAccountConfig
+            bootstrapTask.playAccountConfig = playAccountConfig
             bootstrapTask.description = "Downloads the play store listing for the ${variant.name.capitalize()} build. No download of image resources. See #18."
             bootstrapTask.group = PLAY_STORE_GROUP
 
             // Create and configure task to collect the play store resources.
             def playResourcesTask = project.tasks.create(playResourcesTaskName, GeneratePlayResourcesTask)
-
             playResourcesTask.inputs.file(project.file('src/main/play'))
             if (!variant.flavorName.isEmpty()) {
                 playResourcesTask.inputs.file(project.file("src/${variant.flavorName}/play"))
             }
             playResourcesTask.inputs.file(project.file("src/${variant.buildType.name}/play"))
             playResourcesTask.inputs.file(project.file("src/${variant.name}/play"))
-
             playResourcesTask.outputFolder = project.file("${RESOURCES_OUTPUT_PATH}/${variant.name}")
             playResourcesTask.description = "Collects play store resources for the ${variant.name.capitalize()} build"
             playResourcesTask.group = PLAY_STORE_GROUP
@@ -73,7 +73,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             // Create and configure publisher meta task for this variant
             def publishListingTask = project.tasks.create(publishListingTaskName, PlayPublishListingTask)
             publishListingTask.extension = extension
-            publishListingTask.playAccountConfig = accountConfigForFlavor ?: defaultAccountConfig
+            publishListingTask.playAccountConfig = playAccountConfig
             publishListingTask.variant = variant
             publishListingTask.inputFolder = playResourcesTask.outputFolder
             publishListingTask.description = "Updates the play store listing for the ${variant.name.capitalize()} build"
@@ -86,7 +86,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
                 // Create and configure publisher apk task for this variant.
                 def publishApkTask = project.tasks.create(publishApkTaskName, PlayPublishApkTask)
                 publishApkTask.extension = extension
-                publishApkTask.playAccountConfig = accountConfigForFlavor ?: defaultAccountConfig
+                publishApkTask.playAccountConfig = playAccountConfig
                 publishApkTask.variant = variant
                 publishApkTask.inputFolder = playResourcesTask.outputFolder
                 publishApkTask.description = "Uploads the APK for the ${variant.name.capitalize()} build"
