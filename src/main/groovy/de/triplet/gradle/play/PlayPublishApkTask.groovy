@@ -20,11 +20,10 @@ class PlayPublishApkTask extends PlayPublishTask {
     publishApks() {
         publish()
 
-        def versionCodes = new ArrayList<Integer>()
-
-        variant.outputs
+        def versionCodes = variant.outputs
                 .findAll { variantOutput -> variantOutput instanceof ApkVariantOutput }
-                .each { variantOutput -> versionCodes.add(publishApk(new FileContent(MIME_TYPE_APK, variantOutput.outputFile)).getVersionCode()) }
+                .collect { variantOutput -> publishApk(new FileContent(MIME_TYPE_APK, variantOutput.outputFile)) }
+                .collect { apk -> apk.getVersionCode() }
 
         def track = new Track().setVersionCodes(versionCodes)
         if (extension.track == 'rollout') {
@@ -34,7 +33,8 @@ class PlayPublishApkTask extends PlayPublishTask {
                 .update(variant.applicationId, editId, extension.track, track)
                 .execute()
 
-        edits.commit(variant.applicationId, editId).execute()
+        edits.commit(variant.applicationId, editId)
+                .execute()
     }
 
     Apk publishApk(apkFile) {
