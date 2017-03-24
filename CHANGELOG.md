@@ -1,4 +1,4 @@
-**1.2.0-beta3 - 2017-03-14**
+**1.2.0 - 2017-03-23**
 
 * Support for multiple service accounts - #76, #161
 * Support ABI splits - #39
