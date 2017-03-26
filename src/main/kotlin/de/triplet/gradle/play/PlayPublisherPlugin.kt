@@ -5,6 +5,7 @@ import com.android.build.gradle.AppExtension
 import com.android.build.gradle.AppPlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.plugins.ExtensionAware
 
 class PlayPublisherPlugin : Plugin<Project> {
     override fun apply(project: Project) {
@@ -17,19 +18,33 @@ class PlayPublisherPlugin : Plugin<Project> {
         val android = project.extensions.getByType(AppExtension::class.java)
         val extension = project.extensions.create("play", PlayPublisherPluginExtension::class.java)
 
-        android.extensions.playAccountConfigs = project.container(PlayAccountConfig::class.java)
+        //android.extensions.playAccountConfigs = project.container(PlayAccountConfig::class.java)
+        (android as ExtensionAware).extensions.add("playAccountConfigs", project.container(PlayAccountConfig::class.java))
 
-        android.defaultConfig.ext.playAccountConfig = null
+        //android.defaultConfig.ext.playAccountConfig = null
+        (android.defaultConfig as ExtensionAware).extensions.add("playAccountConfig", PlayAccountConfig::class.java)
 
         android.productFlavors.whenObjectAdded { flavor ->
-            flavor.ext.playAccountConfig = android.defaultConfig.ext.playAccountConfig)
+            //flavor.ext.playAccountConfig = android.defaultConfig.ext.playAccountConfig
+            (flavor as ExtensionAware).extensions.add("playAccountConfig", PlayAccountConfig::class.java)
         }
 
         android.applicationVariants.whenObjectAdded { variant ->
-            if (variant.buildType.isDebuggable()) {
+            if (variant.buildType.isDebuggable) {
                 log.debug("Skipping debuggable build type ${variant.buildType.name}.")
                 return@whenObjectAdded
             }
+
+            //val flavorAccountConfig = variant.productFlavors.find { it.playAccountConfig }?.playAccountConfig
+            //val defaultAccountConfig = android.defaultConfig.ext.playAccountConfig
+            //val playAccountConfig = flavorAccountConfig ?: defaultAccountConfig
+
+            val flavorAccountConfig = variant.productFlavors
+                    .map { it as ExtensionAware }
+                    .mapNotNull { it.extensions.getByName("playAccountConfig") }
+                    .firstOrNull() as? PlayAccountConfig
+            val defaultAccountConfig = (android.defaultConfig as ExtensionAware).extensions.getByName("playAccountConfig") as? PlayAccountConfig
+            val playAccountConfig = flavorAccountConfig ?: defaultAccountConfig
 
             val bootstrapTaskName = "bootstrap${variant.name.capitalize()}PlayResources"
             val playResourcesTaskName = "generate${variant.name.capitalize()}PlayResources"
@@ -41,14 +56,12 @@ class PlayPublisherPlugin : Plugin<Project> {
             val bootstrapTask = project.tasks.create(bootstrapTaskName, BootstrapTask::class.java)
             bootstrapTask.extension = extension
             bootstrapTask.variant = variant
-            val accountConfigForFlavor = variant.productFlavors.firstOrNull { it.playAccountConfig != null }?.playAccountConfig
-            val defaultAccountConfig = android.defaultConfig.ext.playAccountConfig
             if (!variant.flavorName.isEmpty()) {
                 bootstrapTask.outputFolder = project.file("src/${variant.flavorName}/play")
             } else {
                 bootstrapTask.outputFolder = project.file("src/main/play")
             }
-            bootstrapTask.playAccountConfig = accountConfigForFlavor ?: defaultAccountConfig
+            bootstrapTask.playAccountConfig = playAccountConfig
             bootstrapTask.description = "Downloads the play store listing for the ${variant.name.capitalize()} build. No download of image resources. See #18."
             bootstrapTask.group = PLAY_STORE_GROUP
 
@@ -69,7 +82,7 @@ class PlayPublisherPlugin : Plugin<Project> {
             // Create and configure publisher meta task for this variant
             val publishListingTask = project.tasks.create(publishListingTaskName, PlayPublishListingTask::class.java)
             publishListingTask.extension = extension
-            publishListingTask.playAccountConfig = accountConfigForFlavor ?: defaultAccountConfig
+            publishListingTask.playAccountConfig = playAccountConfig
             publishListingTask.variant = variant
             publishListingTask.inputFolder = playResourcesTask.outputFolder
             publishListingTask.description = "Updates the play store listing for the ${variant.name.capitalize()} build"
@@ -78,11 +91,11 @@ class PlayPublisherPlugin : Plugin<Project> {
             // Attach tasks to task graph.
             publishListingTask.dependsOn(playResourcesTask)
 
-            if (variant.isSigningReady()) {
+            if (variant.isSigningReady) {
                 // Create and configure publisher apk task for this variant.
                 val publishApkTask = project.tasks.create(publishApkTaskName, PlayPublishApkTask::class.java)
                 publishApkTask.extension = extension
-                publishApkTask.playAccountConfig = accountConfigForFlavor ?: defaultAccountConfig
+                publishApkTask.playAccountConfig = playAccountConfig
                 publishApkTask.variant = variant
                 publishApkTask.inputFolder = playResourcesTask.outputFolder
                 publishApkTask.description = "Uploads the APK for the ${variant.name.capitalize()} build"
