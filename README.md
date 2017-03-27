@@ -36,13 +36,13 @@ Please make sure to assign a valid signing configuration to your release build t
 
 ## Usage
 
-Add it to your buildscript dependencies(top-level build.gradle file):
+Add it to your buildscript dependencies (top-level build.gradle file):
 
 ```groovy
 buildscript {
 
     repositories {
-        mavenCentral() // or maybe jcenter() depends your project's configuration
+        mavenCentral()
     }
 
     dependencies {
@@ -79,10 +79,10 @@ Similar to Android's `signingConfigs` you need to setup so called `playAccountCo
 ```groovy
 android {
     playAccountConfigs {
-       defaultAccountConfig{
-           serviceAccountEmail = 'your-service-account-email'
-           pk12File = file('key.p12')
-       }
+        defaultAccountConfig {
+            serviceAccountEmail = 'your-service-account-email'
+            pk12File = file('key.p12')
+        }
     }
     
     defaultConfig {
@@ -98,7 +98,7 @@ Alternatively you can use a JSON file that can be generated in the API Console.
 ```groovy
 android {
     playAccountConfigs {
-        defaultAccountConfig{
+        defaultAccountConfig {
             jsonFile = file('keys.json')
         }
     }
