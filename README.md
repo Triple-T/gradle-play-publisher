@@ -36,7 +36,7 @@ Please make sure to assign a valid signing configuration to your release build t
 
 ## Usage
 
-Add it to your buildscript dependencies:
+Add it to your buildscript dependencies (top-level build.gradle file):
 
 ```groovy
 buildscript {
@@ -54,9 +54,10 @@ buildscript {
 
 [![Latest Version](https://maven-badges.herokuapp.com/maven-central/com.github.triplet.gradle/play-publisher/badge.svg)](https://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.github.triplet.gradle%22%20AND%20a%3A%22play-publisher%22)
 
-Apply it:
+Apply it to your app-level build.gradle file as following below
 
 ```groovy
+apply plugin:'com.android.application'
 apply plugin: 'com.github.triplet.play'
 ```
 
@@ -78,8 +79,10 @@ Similar to Android's `signingConfigs` you need to setup so called `playAccountCo
 ```groovy
 android {
     playAccountConfigs {
-        serviceAccountEmail = 'your-service-account-email'
-        pk12File = file('key.p12')
+        defaultAccountConfig {
+            serviceAccountEmail = 'your-service-account-email'
+            pk12File = file('key.p12')
+        }
     }
     
     defaultConfig {
@@ -95,7 +98,9 @@ Alternatively you can use a JSON file that can be generated in the API Console.
 ```groovy
 android {
     playAccountConfigs {
-        jsonFile = file('keys.json')
+        defaultAccountConfig {
+            jsonFile = file('keys.json')
+        }
     }
     
     defaultConfig {
