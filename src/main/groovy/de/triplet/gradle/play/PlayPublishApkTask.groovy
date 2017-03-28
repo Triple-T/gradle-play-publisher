@@ -42,6 +42,12 @@ class PlayPublishApkTask extends PlayPublishTask {
         def apk = edits.apks()
                 .upload(variant.applicationId, editId, apkFile)
                 .execute()
+        if (extension.track?.equals("beta")) {
+          Track emptyTrack = new Track().setVersionCodes([])
+          edits.tracks()
+                  .update(variant.applicationId, editId, 'alpha', emptyTrack)
+                  .execute();
+        }
 
         if (extension.untrackOld && extension.track != 'alpha') {
             def untrackChannels = extension.track == 'beta' ? ['alpha'] : ['alpha', 'beta']
