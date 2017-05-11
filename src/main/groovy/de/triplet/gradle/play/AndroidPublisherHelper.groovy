@@ -93,9 +93,13 @@ class AndroidPublisherHelper {
         }
 
         // Set up and return API client.
-        return new AndroidPublisher.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
+        def client = new AndroidPublisher.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
                 .setApplicationName(APPLICATION_NAME)
-                .build()
+        if (config && config.rootUrl) {
+          client.setRootUrl(config.rootUrl)
+        }
+
+        return client.build()
     }
 
     private static void newTrustedTransport() throws GeneralSecurityException,
