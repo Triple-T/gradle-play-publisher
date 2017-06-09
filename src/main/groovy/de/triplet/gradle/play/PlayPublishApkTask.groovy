@@ -22,7 +22,7 @@ class PlayPublishApkTask extends PlayPublishTask {
 
         def versionCodes = variant.outputs
                 .findAll { variantOutput -> variantOutput instanceof ApkVariantOutput }
-                .collect { variantOutput -> publishApk(new FileContent(MIME_TYPE_APK, variantOutput.outputFile)) }
+                .collect { variantOutput -> publishApk(new FileContent(MIME_TYPE_APK, new File(variantOutput.getApkData().getOutputFileName()))) }
                 .collect { apk -> apk.getVersionCode() }
 
         def track = new Track().setVersionCodes(versionCodes)
