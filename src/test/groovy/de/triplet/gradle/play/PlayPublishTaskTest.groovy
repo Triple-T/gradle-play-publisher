@@ -105,11 +105,16 @@ class PlayPublishTaskTest {
         def project = TestHelper.evaluatableProject()
 
         project.android {
+            flavorDimensions 'pricing'
+
             productFlavors {
                 paid {
+                    dimension 'pricing'
                     applicationId 'com.example.publisher.paid'
                 }
-                free
+                free {
+                    dimension 'pricing'
+                }
             }
 
             buildTypes {
@@ -260,11 +265,16 @@ class PlayPublishTaskTest {
         def project = TestHelper.evaluatableProject()
 
         project.android {
+            flavorDimensions 'pricing'
+
             productFlavors {
                 paid {
+                    dimension 'pricing'
                     applicationId 'com.example.publisher'
                 }
-                free
+                free {
+                    dimension 'pricing'
+                }
             }
 
             buildTypes {
