@@ -32,9 +32,17 @@ class PlayPublisherPluginTest {
     void testCreatesFlavorTasks() {
         def project = TestHelper.evaluatableProject()
 
-        project.android.productFlavors {
-            free
-            paid
+        project.android{
+            flavorDimensions "pricing"
+
+            productFlavors {
+                free {
+                    dimension "pricing"
+                }
+                paid {
+                    dimension "pricing"
+                }
+            }
         }
 
         project.evaluate()
@@ -93,9 +101,17 @@ class PlayPublisherPluginTest {
     void testPublishListingTask() {
         def project = TestHelper.evaluatableProject()
 
-        project.android.productFlavors {
-            free
-            paid
+        project.android{
+            flavorDimensions "pricing"
+
+            productFlavors {
+                free {
+                    dimension "pricing"
+                }
+                paid {
+                    dimension "pricing"
+                }
+            }
         }
 
         project.evaluate()
@@ -170,14 +186,18 @@ class PlayPublisherPluginTest {
                 playAccountConfig = playAccountConfigs.defaultAccountConfig
             }
 
+            flavorDimensions "pricing"
+
             productFlavors {
                 defaultFlavor {
-
+                    dimension "pricing"
                 }
                 free {
+                    dimension "pricing"
                     playAccountConfig = playAccountConfigs.free
                 }
                 paid {
+                    dimension "pricing"
                     playAccountConfig = playAccountConfigs.paid
                 }
             }
