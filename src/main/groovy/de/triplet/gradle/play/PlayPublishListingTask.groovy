@@ -8,7 +8,7 @@ import org.gradle.api.tasks.TaskAction
 
 class PlayPublishListingTask extends PlayPublishTask {
 
-    static final MAX_CHARACTER_LENGTH_FOR_TITLE = 30
+    static final MAX_CHARACTER_LENGTH_FOR_TITLE = 50
     static final MAX_CHARACTER_LENGTH_FOR_SHORT_DESCRIPTION = 80
     static final MAX_CHARACTER_LENGTH_FOR_FULL_DESCRIPTION = 4000
     static final MAX_SCREENSHOTS_SIZE = 8
