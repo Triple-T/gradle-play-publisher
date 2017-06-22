@@ -19,10 +19,10 @@ class PlayPublishApkTask extends PlayPublishTask {
     @TaskAction
     publishApks() {
         publish()
-        def apkDir = new File(inputFolder.parentFile.parentFile, "apk/${variant.dirName}")
+
         def versionCodes = variant.outputs
                 .findAll { variantOutput -> variantOutput instanceof ApkVariantOutput }
-                .collect { variantOutput -> publishApk(new FileContent(MIME_TYPE_APK, new File(apkDir, variantOutput.apkData.outputFileName))) }
+                .collect { variantOutput -> publishApk(new FileContent(MIME_TYPE_APK, variantOutput.outputFile)) }
                 .collect { apk -> apk.getVersionCode() }
 
         def track = new Track().setVersionCodes(versionCodes)
