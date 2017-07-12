@@ -16,6 +16,8 @@ class PlayPublisherPluginExtension {
 
     boolean untrackOld = false
 
+    int timeout = 3 * 60000;
+
     void setTrack(String track) {
         if (!(track in ['alpha', 'beta', 'rollout', 'production'])) {
             throw new IllegalArgumentException('Track has to be one of \'alpha\', \'beta\', \'rollout\' or \'production\'.')

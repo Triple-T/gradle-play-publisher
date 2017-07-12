@@ -69,13 +69,13 @@ class AndroidPublisherHelper {
         return credential.createScoped(Collections.singleton(AndroidPublisherScopes.ANDROIDPUBLISHER))
     }
 
-    private HttpRequestInitializer setHttpTimeout(final HttpRequestInitializer requestInitializer) {
+    private HttpRequestInitializer setHttpTimeout(final HttpRequestInitializer requestInitializer, int timeout) {
         return new HttpRequestInitializer() {
             @Override
             public void initialize(HttpRequest httpRequest) throws IOException {
                 requestInitializer.initialize(httpRequest);
-                httpRequest.setConnectTimeout(3 * 60000);  // 3 minutes connect timeout
-                httpRequest.setReadTimeout(3 * 60000);  // 3 minutes read timeout
+                httpRequest.setConnectTimeout(timeout); 
+                httpRequest.setReadTimeout(timeout);
             }
         };
     }
@@ -106,7 +106,7 @@ class AndroidPublisherHelper {
         }
 
         // Set up and return API client.
-        return new AndroidPublisher.Builder(HTTP_TRANSPORT, JSON_FACTORY, setHttpTimeout(credential))
+        return new AndroidPublisher.Builder(HTTP_TRANSPORT, JSON_FACTORY, setHttpTimeout(credential, extension.timeout))
                 .setApplicationName(APPLICATION_NAME)
                 .build()
     }
