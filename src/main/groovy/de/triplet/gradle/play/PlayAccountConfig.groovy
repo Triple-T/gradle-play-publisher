@@ -11,6 +11,12 @@ class PlayAccountConfig {
 
     File pk12File
 
+    String storePassword
+
+    String keyAlias
+
+    String keyPassword
+
     File jsonFile
 
     PlayAccountConfig(@NonNull String name) {
@@ -19,6 +25,6 @@ class PlayAccountConfig {
 
     @NonNull
     public String getName() {
-        return mName;
+        return mName
     }
 }

@@ -20,12 +20,14 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.http.HttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
+import com.google.api.client.util.SecurityUtils
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.AndroidPublisherScopes
 
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.security.GeneralSecurityException
+import java.security.PrivateKey
 
 class AndroidPublisherHelper {
 
@@ -40,24 +42,49 @@ class AndroidPublisherHelper {
     private static Credential authorizeWithServiceAccount(PlayAccountConfig config)
             throws GeneralSecurityException, IOException {
         if (config != null && config.serviceAccountEmail && config.pk12File) {
-            return authorizeWithServiceAccount(config.serviceAccountEmail, config.pk12File);
+            return authorizeWithServiceAccount(
+                    config.serviceAccountEmail,
+                    config.pk12File,
+                    config.storePassword,
+                    config.keyAlias,
+                    config.keyPassword
+            )
         } else if (config != null && config.jsonFile) {
             return authorizeWithServiceAccount(config.jsonFile)
         }
         throw new IllegalArgumentException('No credentials provided.')
     }
 
-    private static Credential authorizeWithServiceAccount(String serviceAccountEmail, File pk12File)
-            throws GeneralSecurityException, IOException {
-        // Build service account credential.
+    private static Credential authorizeWithServiceAccount(
+            String serviceAccountEmail,
+            File pk12File,
+            String storePass,
+            String alias,
+            String keyPass
+    ) throws GeneralSecurityException, IOException {
         def credential = new GoogleCredential.Builder()
                 .setTransport(HTTP_TRANSPORT)
                 .setJsonFactory(JSON_FACTORY)
                 .setServiceAccountId(serviceAccountEmail)
                 .setServiceAccountScopes(Collections.singleton(AndroidPublisherScopes.ANDROIDPUBLISHER))
-                .setServiceAccountPrivateKeyFromP12File(pk12File)
+                .setServiceAccountPrivateKey(loadPrivateKeyFromKeyStore(pk12File, storePass, alias, keyPass))
                 .build()
         return credential
+    }
+
+    private static PrivateKey loadPrivateKeyFromKeyStore(
+            File pk12File,
+            String storePass,
+            String alias,
+            String keyPass
+    ) {
+        return SecurityUtils.loadPrivateKeyFromKeyStore(
+                SecurityUtils.getPkcs12KeyStore(),
+                new FileInputStream(pk12File),
+                storePass ?: "notasecret",
+                alias ?: "privatekey",
+                keyPass ?: "notasecret"
+        )
     }
 
     private static Credential authorizeWithServiceAccount(File jsonFile) throws IOException {
@@ -87,7 +114,13 @@ class AndroidPublisherHelper {
         } else if (extension.jsonFile) {
             credential = authorizeWithServiceAccount(extension.jsonFile)
         } else if (extension.serviceAccountEmail && extension.pk12File) {
-            credential = authorizeWithServiceAccount(extension.serviceAccountEmail, extension.pk12File)
+            credential = authorizeWithServiceAccount(
+                    extension.serviceAccountEmail,
+                    extension.pk12File,
+                    extension.storePassword,
+                    extension.keyAlias,
+                    extension.keyPassword
+            )
         } else {
             throw new IllegalArgumentException('No credentials provided.')
         }
