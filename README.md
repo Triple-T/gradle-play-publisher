@@ -76,7 +76,7 @@ In case you are using product flavors you will get one of the above tasks for ev
 
 Similar to Android's `signingConfigs` you need to setup so called `playAccountConfigs` to authorize your requests.
 Drop in your service account email address and the p12 key file you generated in the API Console here.
-You can optionally specify the key store password, key password and key alias if [you have changed them from the defaults](#Change your p12 password).
+You can optionally specify the key store password, key password and key alias if [you have changed them from the defaults](#change-your-p12-password).
 If you haven't changed the p12 certificate, you don't need to specify them.
  
 
