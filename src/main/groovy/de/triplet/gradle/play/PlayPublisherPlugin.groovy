@@ -29,6 +29,19 @@ class PlayPublisherPlugin implements Plugin<Project> {
             flavor.ext.playAccountConfig = android.defaultConfig.ext.playAccountConfig
         }
 
+        def publishAllTask = project.task("publishAll") {
+            description = "Updates APK and play store listing for all initiated variants build"
+            group = PLAY_STORE_GROUP
+        }
+        def publishApkAllTask = project.task("publishApkAll") {
+            description = "Uploads the APK for all initiated variants build"
+            group = PLAY_STORE_GROUP
+        }
+        def publishListingAllTask = project.task("publishListingAll") {
+            description = "Updates the play store listing for all initiated variants build"
+            group = PLAY_STORE_GROUP
+        }
+
         android.applicationVariants.whenObjectAdded { variant ->
             if (variant.buildType.isDebuggable()) {
                 log.debug("Skipping debuggable build type ${variant.buildType.name}.")
@@ -81,6 +94,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
 
             // Attach tasks to task graph.
             publishListingTask.dependsOn playResourcesTask
+            publishListingAllTask.dependsOn publishListingTask
 
             if (variant.isSigningReady()) {
                 // Create and configure publisher apk task for this variant.
@@ -99,8 +113,10 @@ class PlayPublisherPlugin implements Plugin<Project> {
                 // Attach tasks to task graph.
                 publishTask.dependsOn publishApkTask
                 publishTask.dependsOn publishListingTask
+                publishApkAllTask.dependsOn publishApkTask
                 publishApkTask.dependsOn playResourcesTask
                 publishApkTask.dependsOn variant.assemble
+                publishAllTask.dependsOn publishTask
             } else {
                 log.warn("Signing not ready. Did you specify a signingConfig for the variation ${variant.name.capitalize()}?")
             }
