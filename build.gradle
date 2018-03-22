@@ -10,9 +10,10 @@ targetCompatibility = JavaVersion.VERSION_1_7
 
 repositories {
     jcenter()
+    maven { url 'https://maven.google.com' }
 }
 dependencies {
-    compile 'com.android.tools.build:gradle:2.3.0'
+    compile 'com.android.tools.build:gradle:3.0.0-alpha4'
     compile('com.google.apis:google-api-services-androidpublisher:v2-rev41-1.22.0') {
         exclude group: 'com.google.guava', module: 'guava-jdk5'
     }
