@@ -1,13 +1,11 @@
 language: android
 
-# https://github.com/travis-ci/travis-ci/issues/6040#issuecomment-219367943
 android:
   components:
     - tools
-    - tools
     - platform-tools
-    - build-tools-25.0.2
-    - android-25
+    - build-tools-27.0.3
+    - android-27
 
 jdk:
   - oraclejdk8
@@ -17,9 +15,11 @@ script:
 
 sudo: false
 
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
 cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
-    - $HOME/.gradle/native/
-    - $HOME/.gradle/daemon/native/
+    - $HOME/.android/build-cache

@@ -31,9 +31,17 @@ class GenerateResourcesTest {
     void testFlavorsOverrideMain() {
         def project = TestHelper.evaluatableProject()
 
-        project.android.productFlavors {
-            free
-            paid
+        project.android{
+            flavorDimensions 'pricing'
+
+            productFlavors {
+                free {
+                    dimension 'pricing'
+                }
+                paid {
+                    dimension 'pricing'
+                }
+            }
         }
 
         project.evaluate()
@@ -88,9 +96,15 @@ class GenerateResourcesTest {
         def project = TestHelper.evaluatableProject()
 
         project.android {
+            flavorDimensions 'pricing'
+
             productFlavors {
-                free
-                paid
+                free {
+                    dimension 'pricing'
+                }
+                paid {
+                    dimension 'pricing'
+                }
             }
 
             buildTypes {
@@ -112,9 +126,15 @@ class GenerateResourcesTest {
         def project = TestHelper.evaluatableProject()
 
         project.android {
+            flavorDimensions 'pricing'
+
             productFlavors {
-                free
-                paid
+                free {
+                    dimension 'pricing'
+                }
+                paid {
+                    dimension 'pricing'
+                }
             }
 
             buildTypes {
