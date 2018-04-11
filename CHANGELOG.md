@@ -1,3 +1,10 @@
+**1.2.1-beta1 - 2018-04-11**
+
+* More descriptive error message when texts exceed allowed length - #172
+* Update character limit for app title to 50 characters - #224, #229
+* Support for internal test track - #253
+* Support for Android gradle plugin 3.x - #256
+
 **1.2.0 - 2017-03-23**
 
 * Support for multiple service accounts - #76, #161
