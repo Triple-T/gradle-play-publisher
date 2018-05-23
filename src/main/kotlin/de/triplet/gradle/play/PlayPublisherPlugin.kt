@@ -5,7 +5,6 @@ import com.android.builder.model.BaseConfig
 import groovy.lang.GroovyObject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.plugins.ExtensionAware
 
 class PlayPublisherPlugin : Plugin<Project> {
     override fun apply(project: Project) {
@@ -14,14 +13,13 @@ class PlayPublisherPlugin : Plugin<Project> {
                 ?: throw IllegalStateException("The 'com.android.application' plugin is required.")
         val extension = project.extensions.create("play", PlayPublisherPluginExtension::class.java)
 
+        android.extensions.add("playAccountConfigs", project.container(PlayAccountConfig::class.java))
 
-        (android as ExtensionAware).extensions.add("playAccountConfigs", project.container(PlayAccountConfig::class.java))
-
-        android.defaultConfig.setExtra("playAccountConfig", null)
+        android.defaultConfig.extras.set("playAccountConfig", null)
 
         android.productFlavors.whenObjectAdded { flavor ->
             //flavor.ext.playAccountConfig = android.defaultConfig.ext.playAccountConfig
-            flavor.setExtra("playAccountConfig", android.defaultConfig.getExtra("playAccountConfig"))
+            flavor.extras.set("playAccountConfig", android.defaultConfig.extras.get("playAccountConfig"))
         }
 
         android.applicationVariants.whenObjectAdded { variant ->
@@ -34,7 +32,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                     .map { it as BaseConfig as GroovyObject }
                     .mapNotNull { it.getProperty("playAccountConfig") }
                     .firstOrNull() as? PlayAccountConfig
-            val defaultAccountConfig = android.defaultConfig.getExtra<PlayAccountConfig>("playAccountConfig")
+            val defaultAccountConfig = android.defaultConfig.extras.get("playAccountConfig") as? PlayAccountConfig
             val playAccountConfig = flavorAccountConfig ?: defaultAccountConfig ?: PlayAccountConfig()
 
             val bootstrapTaskName = "bootstrap${variant.name.capitalize()}PlayResources"

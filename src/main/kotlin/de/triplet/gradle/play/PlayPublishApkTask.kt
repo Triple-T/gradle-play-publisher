@@ -76,18 +76,15 @@ open class PlayPublishApkTask : PlayPublishTask() {
     }
 
     private fun updateWhatsNew(apk: Apk, locale: File) {
-        var whatsNewFile = File(locale, "$FILE_NAME_FOR_WHATS_NEW_TEXT-${extension.track}")
+        var whatsNewFile = File(locale, "${ListingDetails.WhatsNew.fileName}-${extension.track}")
 
         if (!whatsNewFile.exists()) {
-            whatsNewFile = File(locale, FILE_NAME_FOR_WHATS_NEW_TEXT)
+            whatsNewFile = File(locale, ListingDetails.WhatsNew.fileName)
         }
 
-        if (whatsNewFile.exists()) {
-            val whatsNewText = whatsNewFile.readAndTrim(project, MAX_CHARACTER_LENGTH_FOR_WHATS_NEW_TEXT, extension.errorOnSizeLimit)
-
-            val newApkListing = ApkListing().setRecentChanges(whatsNewText)
+        whatsNewFile.toApkListing(extension.errorOnSizeLimit, project.file(RESOURCES_OUTPUT_PATH))?.let {
             edits.apklistings()
-                    .update(variant.applicationId, editId, apk.versionCode, locale.name, newApkListing)
+                    .update(variant.applicationId, editId, apk.versionCode, locale.name, it)
                     .execute()
         }
     }

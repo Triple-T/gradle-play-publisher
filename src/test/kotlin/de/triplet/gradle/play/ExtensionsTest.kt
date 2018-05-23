@@ -26,23 +26,23 @@ class ExtensionsTest {
 
     @Test
     fun testFilesAreCorrectlyTrimmed() {
-        assertThat(project.file(TESTFILE).readAndTrim(project, 6, false)).hasSize(6)
+        assertThat(project.file(TESTFILE).readAndTrim(6, false, project.file(RESOURCES_OUTPUT_PATH))).hasSize(6)
     }
 
     @Test
     fun testShortFilesAreNotTrimmed() {
-        assertThat(project.file(TESTFILE).readAndTrim(project, 100, false)).hasSize(12)
+        assertThat(project.file(TESTFILE).readAndTrim(100, false, project.file(RESOURCES_OUTPUT_PATH))).hasSize(12)
     }
 
     @Test
     fun testCorrectTextLength() {
-        project.file(TESTFILE).readAndTrim(project, 50, true)
+        project.file(TESTFILE).readAndTrim(50, true, project.file(RESOURCES_OUTPUT_PATH))
     }
 
     @Test
     fun testIncorrectTextLength() {
         try {
-            project.file(TESTFILE).readAndTrim(project, 1, true)
+            project.file(TESTFILE).readAndTrim(1, true, project.file(RESOURCES_OUTPUT_PATH))
             fail()
         } catch (e: IllegalArgumentException) {
             assertThat(e).hasMessageMatching("File \'.+\' has reached the limit of 1 characters")
@@ -51,7 +51,7 @@ class ExtensionsTest {
 
     @Test
     fun testTrailingLinebreakIsCutOff() {
-        project.file(TESTFILE_WITH_LINEBREAK).readAndTrim(project, 28, true)
+        project.file(TESTFILE_WITH_LINEBREAK).readAndTrim(28, true, project.file(RESOURCES_OUTPUT_PATH))
     }
 
     @Test

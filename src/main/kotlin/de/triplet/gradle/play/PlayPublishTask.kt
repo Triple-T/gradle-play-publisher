@@ -18,12 +18,12 @@ open class PlayPublishTask : DefaultTask() {
     var playAccountConfig: PlayAccountConfig? = null
 
     var service: AndroidPublisher? = null
-
-    fun publish() {
-        if (service == null) {
-            service = AndroidPublisherHelper.init(extension, playAccountConfig)
+        get () {
+            return field ?: AndroidPublisherHelper.init(extension, playAccountConfig)
         }
 
+
+    fun publish() {
         edits = service!!.edits()
 
         // Create a new edit to make changes to your listing.

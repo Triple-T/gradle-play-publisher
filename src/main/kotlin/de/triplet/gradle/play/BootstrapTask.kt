@@ -1,6 +1,5 @@
 package de.triplet.gradle.play
 
-import com.google.api.services.androidpublisher.model.Image
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 
@@ -22,29 +21,18 @@ open class BootstrapTask : PlayPublishTask() {
                 .execute()
                 .listings ?: return
 
-        for (listing in listings) {
-            val languageDir = File(outputFolder, listing.language)
-            if (!languageDir.exists() && !languageDir.mkdirs()) {
-                continue
-            }
+        listings.forEach { listing ->
+            val listingDir = outputFolder.validSubFolder(listing.language, LISTING_PATH) ?: return@forEach
 
-            val listingDir = File(languageDir, LISTING_PATH)
-            if (!listingDir.exists() && !listingDir.mkdirs()) {
-                continue
-            }
-
-            for (imageType in IMAGE_TYPES) {
+            ImageTypes.values().forEach { imageType ->
                 val images = edits.images()
-                        .list(variant.applicationId, editId, listing.language, imageType)
+                        .list(variant.applicationId, editId, listing.language, imageType.fileName)
                         .execute()
                         .images
-                saveImage(listingDir, imageType, images)
+                imageType.saveImages(listingDir, images)
             }
 
-            File(listingDir, FILE_NAME_FOR_FULL_DESCRIPTION).writeText(listing.fullDescription)
-            File(listingDir, FILE_NAME_FOR_SHORT_DESCRIPTION).writeText(listing.shortDescription)
-            File(listingDir, FILE_NAME_FOR_TITLE).writeText(listing.title)
-            File(listingDir, FILE_NAME_FOR_VIDEO).writeText(listing.video)
+            listing.saveText(listingDir)
         }
     }
 
@@ -60,44 +48,16 @@ open class BootstrapTask : PlayPublishTask() {
                 .execute()
                 .listings ?: return
 
-        for (apkListing in apkListings) {
-            val languageDir = File(outputFolder, apkListing.language)
-            if (!languageDir.exists() && !languageDir.mkdirs()) {
-                continue
+        apkListings.forEach { apkListing ->
+            outputFolder.validSubFolder(apkListing.language)?.let { languageDir ->
+                File(languageDir, ListingDetails.WhatsNew.fileName).writeText(apkListing.recentChanges)
             }
-
-            File(languageDir, FILE_NAME_FOR_WHATS_NEW_TEXT).writeText(apkListing.recentChanges)
         }
     }
 
     private fun bootstrapAppDetails() {
-        val appDetails = edits.details()
+        edits.details()
                 .get(variant.applicationId, editId)
-                .execute()
-
-        File(outputFolder, FILE_NAME_FOR_CONTACT_EMAIL).writeText(appDetails.contactEmail)
-        File(outputFolder, FILE_NAME_FOR_CONTACT_PHONE).writeText(appDetails.contactPhone)
-        File(outputFolder, FILE_NAME_FOR_CONTACT_WEBSITE).writeText(appDetails.contactWebsite)
-        File(outputFolder, FILE_NAME_FOR_DEFAULT_LANGUAGE).writeText(appDetails.defaultLanguage)
-    }
-
-    private fun saveImage(listingDir: File, imageFolderName: String, images: List<Image>?) {
-        val imageFolder = File(listingDir, imageFolderName)
-        if (!imageFolder.exists() && !imageFolder.mkdirs()) {
-            return
-        }
-
-        if (images == null) {
-            return
-        }
-
-        // TODO: Disabled for now as we have only access to preview-versions with the current API.
-        /*
-        for (image in images) {
-            File(imageFolder, "${image.id}.png").outputStream().use { os ->
-                URL(image.url).openStream().use { it.copyTo(os) }
-            }
-        }
-        */
+                .execute().saveText(outputFolder)
     }
 }

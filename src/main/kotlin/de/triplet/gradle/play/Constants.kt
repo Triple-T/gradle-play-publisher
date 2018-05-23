@@ -1,7 +1,11 @@
 package de.triplet.gradle.play
 
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
+import com.google.api.client.http.AbstractInputStreamContent
+import com.google.api.client.http.FileContent
 import com.google.api.client.json.jackson2.JacksonFactory
+import com.google.api.services.androidpublisher.model.Image
+import java.io.File
 
 internal const val APPLICATION_NAME = "gradle-play-publisher"
 internal const val PLAY_STORE_GROUP = "Play Store"
@@ -14,31 +18,19 @@ internal const val RESOURCES_OUTPUT_PATH = "build/outputs/play"
 
 internal const val MAX_SCREENSHOTS_SIZE = 8
 
-internal const val MAX_CHARACTER_LENGTH_FOR_TITLE = 50
-internal const val MAX_CHARACTER_LENGTH_FOR_SHORT_DESCRIPTION = 80
-internal const val MAX_CHARACTER_LENGTH_FOR_FULL_DESCRIPTION = 4000
-internal const val MAX_CHARACTER_LENGTH_FOR_WHATS_NEW_TEXT = 500
+internal enum class ListingDetails(val fileName: String, val maxLength: Int = -1) {
+    ContactEmail("contactEmail"),
+    ContactPhone("contactPhone"),
+    ContactWebsite("contactWebsite"),
+    DefaultLanguage("defaultLanguage"),
+    Title("title", 50),
+    ShortDescription("shortdescription", 80),
+    FullDescription("fulldescription", 4000),
+    Video("video"),
+    WhatsNew("whatsnew", 500);
 
-internal const val FILE_NAME_FOR_CONTACT_EMAIL = "contactEmail"
-internal const val FILE_NAME_FOR_CONTACT_PHONE = "contactPhone"
-internal const val FILE_NAME_FOR_CONTACT_WEBSITE = "contactWebsite"
-internal const val FILE_NAME_FOR_DEFAULT_LANGUAGE = "defaultLanguage"
-
-internal const val FILE_NAME_FOR_TITLE = "title"
-internal const val FILE_NAME_FOR_SHORT_DESCRIPTION = "shortdescription"
-internal const val FILE_NAME_FOR_FULL_DESCRIPTION = "fulldescription"
-internal const val FILE_NAME_FOR_VIDEO = "video"
-internal const val FILE_NAME_FOR_WHATS_NEW_TEXT = "whatsnew"
-
-internal const val IMAGE_TYPE_FEATURE_GRAPHIC = "featureGraphic"
-internal const val IMAGE_TYPE_ICON = "icon"
-internal const val IMAGE_TYPE_PHONE_SCREENSHOTS = "phoneScreenshots"
-internal const val IMAGE_TYPE_PROMO_GRAPHIC = "promoGraphic"
-internal const val IMAGE_TYPE_SEVEN_INCH_SCREENSHOTS = "sevenInchScreenshots"
-internal const val IMAGE_TYPE_TEN_INCH_SCREENSHOTS = "tenInchScreenshots"
-internal const val IMAGE_TYPE_TV_BANNER = "tvBanner"
-internal const val IMAGE_TYPE_TV_SCREENSHOTS = "tvScreenshots"
-internal const val IMAGE_TYPE_WEAR_SCREENSHOTS = "wearScreenshots"
+    fun saveText(dir: File, value: String) = File(dir, fileName).writeText(value)
+}
 
 internal val JSON_FACTORY by lazy { JacksonFactory.getDefaultInstance() }
 internal val HTTP_TRANSPORT by lazy { GoogleNetHttpTransport.newTrustedTransport() }
@@ -46,17 +38,48 @@ internal val HTTP_TRANSPORT by lazy { GoogleNetHttpTransport.newTrustedTransport
 internal val TRACKS = arrayOf("alpha", "beta", "rollout", "production")
 internal val IMAGE_EXTENSIONS = arrayOf("png", "jpg")
 
-internal val IMAGE_TYPES = arrayOf(
-        IMAGE_TYPE_ICON,
-        IMAGE_TYPE_FEATURE_GRAPHIC,
-        IMAGE_TYPE_PHONE_SCREENSHOTS,
-        IMAGE_TYPE_SEVEN_INCH_SCREENSHOTS,
-        IMAGE_TYPE_TEN_INCH_SCREENSHOTS,
-        IMAGE_TYPE_PROMO_GRAPHIC,
-        IMAGE_TYPE_TV_BANNER,
-        IMAGE_TYPE_TV_SCREENSHOTS,
-        IMAGE_TYPE_WEAR_SCREENSHOTS
-)
+internal enum class ImageTypes(val fileName: String, val max: Int = MAX_SCREENSHOTS_SIZE) {
+    Icon("icon", 1),
+    FeatureGraphic("featureGraphic", 1),
+    PhoneScreenshots("phoneScreenshots"),
+    SevenInchScreenshots("sevenInchScreenshots"),
+    TenInchScreenshots("tenInchScreenshots"),
+    PromoGraphic("promoGraphic", 1),
+    TVBanner("tvBanner", 1),
+    TVScreenshots("tvScreenshots"),
+    WearScreenshots("wearScreenshots");
+
+    fun getImages(listingDir: File): List<AbstractInputStreamContent>? {
+        val graphicDir = File(listingDir, fileName)
+        if (graphicDir.exists()) {
+            return graphicDir.listFiles(ImageFileFilter())
+                    .asList()
+                    .sorted()
+                    .map { FileContent(MIME_TYPE_IMAGE, it) }
+        }
+        return null
+    }
+
+    fun saveImages(listingDir: File, images: List<Image>?) {
+        @Suppress("UNUSED_VARIABLE")
+        val imageFolder = listingDir.validSubFolder(fileName) ?: return
+
+        if (images == null) {
+            return
+        }
+
+        // TODO: Disabled for now as we have only access to preview-versions with the current API.
+        /*
+        for (image in images) {
+            File(imageFolder, "${image.id}.png").outputStream().use { os ->
+                URL(image.url).openStream().use { it.copyTo(os) }
+            }
+        }
+        */
+    }
+
+
+}
 
 // region '419' is a special case in the play store that represents latin america
 // 'fil' is a special case in the play store that represents Filipino
