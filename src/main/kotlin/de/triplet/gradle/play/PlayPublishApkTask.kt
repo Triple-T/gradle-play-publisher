@@ -4,7 +4,6 @@ import com.android.build.gradle.api.ApkVariantOutput
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.model.Apk
-import com.google.api.services.androidpublisher.model.ApkListing
 import com.google.api.services.androidpublisher.model.Track
 import org.gradle.api.tasks.TaskAction
 import java.io.File

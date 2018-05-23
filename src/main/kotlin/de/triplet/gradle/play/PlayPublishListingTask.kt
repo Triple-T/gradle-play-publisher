@@ -2,7 +2,6 @@ package de.triplet.gradle.play
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.AbstractInputStreamContent
-import com.google.api.services.androidpublisher.model.AppDetails
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 
