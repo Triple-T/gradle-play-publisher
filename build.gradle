@@ -18,7 +18,7 @@ dependencies {
     compile('com.google.apis:google-api-services-androidpublisher:v2-rev41-1.22.0') {
         exclude group: 'com.google.guava', module: 'guava-jdk5'
     }
-    compile 'org.jetbrains.kotlin:kotlin-stdlib-jre7:1.2.31'
+    compile 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.2.31'
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.assertj:assertj-core:3.6.2'
