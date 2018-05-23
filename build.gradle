@@ -14,7 +14,7 @@ repositories {
 }
 dependencies {
     compile 'com.android.tools.build:gradle:2.3.0'
-    compile('com.google.apis:google-api-services-androidpublisher:v2-rev41-1.22.0') {
+    compile('com.google.apis:google-api-services-androidpublisher:v2-rev77-1.23.0') {
         exclude group: 'com.google.guava', module: 'guava-jdk5'
     }
     compile 'commons-io:commons-io:2.4'
