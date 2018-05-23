@@ -1,8 +1,8 @@
 package de.triplet.gradle.play
 
-/*
 import com.android.build.gradle.AppExtension
-import com.android.build.gradle.AppPlugin
+import com.android.builder.model.BaseConfig
+import groovy.lang.GroovyObject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
@@ -10,23 +10,18 @@ import org.gradle.api.plugins.ExtensionAware
 class PlayPublisherPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         val log = project.logger
-
-        if (!project.plugins.any { p -> p is AppPlugin }) {
-            throw IllegalStateException("The 'com.android.application' plugin is required.")
-        }
-
         val android = project.extensions.getByType(AppExtension::class.java)
+                ?: throw IllegalStateException("The 'com.android.application' plugin is required.")
         val extension = project.extensions.create("play", PlayPublisherPluginExtension::class.java)
 
-        //android.extensions.playAccountConfigs = project.container(PlayAccountConfig::class.java)
+
         (android as ExtensionAware).extensions.add("playAccountConfigs", project.container(PlayAccountConfig::class.java))
 
-        //android.defaultConfig.ext.playAccountConfig = null
-        (android.defaultConfig as ExtensionAware).extensions.add("playAccountConfig", PlayAccountConfig::class.java)
+        android.defaultConfig.setExtra("playAccountConfig", null)
 
         android.productFlavors.whenObjectAdded { flavor ->
             //flavor.ext.playAccountConfig = android.defaultConfig.ext.playAccountConfig
-            (flavor as ExtensionAware).extensions.add("playAccountConfig", PlayAccountConfig::class.java)
+            flavor.setExtra("playAccountConfig", android.defaultConfig.getExtra("playAccountConfig"))
         }
 
         android.applicationVariants.whenObjectAdded { variant ->
@@ -35,16 +30,12 @@ class PlayPublisherPlugin : Plugin<Project> {
                 return@whenObjectAdded
             }
 
-            //val flavorAccountConfig = variant.productFlavors.find { it.playAccountConfig }?.playAccountConfig
-            //val defaultAccountConfig = android.defaultConfig.ext.playAccountConfig
-            //val playAccountConfig = flavorAccountConfig ?: defaultAccountConfig
-
             val flavorAccountConfig = variant.productFlavors
-                    .map { it as ExtensionAware }
-                    .mapNotNull { it.extensions.getByName("playAccountConfig") }
+                    .map { it as BaseConfig as GroovyObject }
+                    .mapNotNull { it.getProperty("playAccountConfig") }
                     .firstOrNull() as? PlayAccountConfig
-            val defaultAccountConfig = (android.defaultConfig as ExtensionAware).extensions.getByName("playAccountConfig") as? PlayAccountConfig
-            val playAccountConfig = flavorAccountConfig ?: defaultAccountConfig
+            val defaultAccountConfig = android.defaultConfig.getExtra<PlayAccountConfig>("playAccountConfig")
+            val playAccountConfig = flavorAccountConfig ?: defaultAccountConfig ?: PlayAccountConfig()
 
             val bootstrapTaskName = "bootstrap${variant.name.capitalize()}PlayResources"
             val playResourcesTaskName = "generate${variant.name.capitalize()}PlayResources"
@@ -116,4 +107,3 @@ class PlayPublisherPlugin : Plugin<Project> {
         }
     }
 }
-*/
