@@ -49,6 +49,10 @@ afterEvaluate { project ->
                             id 'ChristianBecker'
                             name 'Christian Becker'
                         }
+                        developer {
+                            id 'gtcompscientist'
+                            name 'Charles Anderson'
+                        }
                     }
                 }
 
