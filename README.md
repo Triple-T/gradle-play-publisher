@@ -122,7 +122,7 @@ As a default your APK is published to the alpha track and you can promote it to 
 ```groovy
 play {
     // ...
-    track = 'production' // or 'rollout' or 'beta' or 'alpha'
+    track = 'production' // or any of 'rollout', 'beta', 'alpha' or 'internal'
     userFraction = 0.2 // only necessary for 'rollout', in this case default is 0.1 (10% of the target)
 }
 ```
