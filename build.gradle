@@ -21,6 +21,7 @@ dependencies {
     }
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.2.41'
 
+    testImplementation "org.jetbrains.kotlin:kotlin-test:1.2.41"
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.assertj:assertj-core:3.6.2'
     testImplementation 'org.mockito:mockito-core:1.10.19'
