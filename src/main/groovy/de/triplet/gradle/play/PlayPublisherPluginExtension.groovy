@@ -6,6 +6,12 @@ class PlayPublisherPluginExtension {
 
     File pk12File
 
+    String storePassword
+
+    String keyAlias
+
+    String keyPassword
+
     File jsonFile
 
     boolean uploadImages = false

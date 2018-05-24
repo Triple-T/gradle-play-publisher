@@ -74,7 +74,11 @@ In case you are using product flavors you will get one of the above tasks for ev
 
 ## Authentication
 
-Similar to Android's `signingConfigs` you need to setup so called `playAccountConfigs` to authorize your requests. Drop in your service account email address and the p12 key file you generated in the API Console here.
+Similar to Android's `signingConfigs` you need to setup so called `playAccountConfigs` to authorize your requests.
+Drop in your service account email address and the p12 key file you generated in the API Console here.
+You can optionally specify the key store password, key password and key alias if [you have changed them from the defaults](#change-your-p12-password).
+If you haven't changed the p12 certificate, you don't need to specify them.
+ 
 
 ```groovy
 android {
@@ -82,6 +86,9 @@ android {
         defaultAccountConfig {
             serviceAccountEmail = 'your-service-account-email'
             pk12File = file('key.p12')
+            storePassword = 'your-key-store-password' // default value is "notasecret"
+            keyPassword = 'your-key-password' // default value is "notasecret"
+            keyAlias = 'your-key-alias' // default value is "privatekey"
         }
     }
     
@@ -314,3 +321,21 @@ project.afterEvaluate {
 ```
 
 Note that we have to wait for the evaluation phase to complete before the `generateReleasePlayResources` task becomes visible.
+
+### Change your p12 password
+
+The p12 file downloaded from the Google Play API console uses default values for the key store password and key password.
+If your p12 file is checked into your repository for your build server, you should change the passwords. In order to do this:  
+
+```
+openssl pkcs12 -in google-play-api-key.p12 -out google-play-api-key-no-password.pem -nodes
+# When prompted with "Enter Import Password:" enter "notasecret"
+openssl pkcs12 -export -out google-play-api-key-secure.p12 -in google-play-api-key-no-password.pem -name "privatekey"
+# When prompted with "Enter Export Password:" enter your secret password
+# When prompted with "Verifying - Enter Export Password:" enter your secret password again
+
+rm google-play-api-key-no-password.pem
+```
+
+The key store password and key password in the new p12 have the same value.
+You will need to specify them in your `playAccountConfigs`.
