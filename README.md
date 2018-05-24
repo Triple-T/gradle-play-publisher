@@ -1,162 +1,168 @@
-# gradle-play-publisher
-
-Gradle plugin to upload your APK and app details to the Google Play Store.
+# Gradle Play Publisher
 
 [![Build Status](https://travis-ci.org/Triple-T/gradle-play-publisher.svg?branch=master)](https://travis-ci.org/Triple-T/gradle-play-publisher)
 [![Latest Version](https://maven-badges.herokuapp.com/maven-central/com.github.triplet.gradle/play-publisher/badge.svg)](https://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.github.triplet.gradle%22%20AND%20a%3A%22play-publisher%22)
 
-## Quick Start Guide
+Gradle Play Publisher is a Gradle plugin that allows you to upload your APK and other app details to
+the Google Play Store from a continous integration server or anywhere you have a command line.
 
-1. Upload the first version of your APK using the web interface.
-1. Create a Google Play Service Account (see [Prerequisites](#google-play-service-account)).
-1. Assign a valid `signingConfig` to your release build type.
-1. Add the plugin to your buildscript dependencies (see [Usage](#usage)).
-1. Apply the plugin (see [Usage](#usage)).
-1. Create `playAccountConfigs` and add them to your build (see [Authentication](#authentication)).
+## Table of contents
+
+1. [Quick start guide](#quick-start-guide)
+1. [Prerequisites](#prerequisites)
+   1. [Initial Play Store upload](#initial-play-store-upload)
+   1. [Service Account](#service-account)
+1. [Usage](#usage)
+   1. [Installation](#installation)
+   1. [Sample tasks](#sample-tasks)
+   1. [Authenticating the plugin](#authenticating-the-plugin)
+1. [Configuration](#configuration)
+   1. [Specify the track](#specify-the-track)
+   1. [Untrack conflicting versions](#untrack-conflicting-versions)
+   1. [Play Store metadata](#play-store-metadata)
+   1. [Uploading images](#uploading-images)
+   1. [Using multiple Service Accounts](#using-multiple-service-accounts)
+   1. [Running custom tasks before publishing](#running-custom-tasks-before-publishing)
+
+## Quick start guide
+
+1. Upload the first version of your APK or App Bundle using the
+   [Google Play Console](https://play.google.com/apps/publish)
+1. [Create a Google Play Service Account](#google-play-service-account)
+1. [Sign your release builds](https://developer.android.com/studio/publish/app-signing#gradle-sign)
+   with a valid `signingConfig`
+1. [Add and apply the plugin](#installation)
+1. [Authenticate the plugin](#authenticating-the-plugin)
 
 ## Prerequisites
 
-### Initial Play Store Upload
+### Initial Play Store upload
 
-The first APK of your App needs to be uploaded via the web interface. This is to register the application id and cannot be done using the Play Developer API. For all subsequent uploads and changes this plugin can be used.
+The first APK or App Bundle needs to be uploaded via the Google Play Console because registering the
+app with the Play Store cannot be done using the Play Developer API. For all subsequent uploads and
+changes this plugin can be used.
 
-### Google Play Service Account
+### Service Account
 
-To use the publisher plugin you have to create a service account for your existing Google Play Account. See https://developers.google.com/android-publisher/getting_started for more information.
-
-Due to the way the Google Play Publisher API works, you have to grant at least the following permissions to that service account:
+To use this plugin, you must create a service account with access to the Play Developer API. You'll
+find a guide to setting up the service account
+[here](https://developers.google.com/android-publisher/getting_started#using_a_service_account).
+Once that's done, you'll need to grant the following permissions to your service account for this
+plugin to work (go to Settings -> Developer account -> API access -> Service Accounts):
 
 ![permissions.png](https://cloud.githubusercontent.com/assets/242983/17809992/95ea4eaa-661a-11e6-9879-521df4f14735.png)
 
-Once you finished the setup you have a so called *service account email address* and a *p12 key file* that we will use later on.
-
-### Signing Configuration
-
-Please make sure to assign a valid signing configuration to your release build type. Otherwise, there won't be a publishable (signed) APK. In that case, the plugin won't create any of its tasks.
-
 ## Usage
 
-Add it to your buildscript dependencies (top-level build.gradle file):
+### Installation
+
+In your root `build.gradle(.kts)` file, add the Gradle Play Publisher dependency:
 
 ```groovy
 buildscript {
-
     repositories {
-        mavenCentral()
+        // ...
+        jcenter()
     }
 
     dependencies {
-    	// ...
+        // ...
         classpath 'com.github.triplet.gradle:play-publisher:1.2.1'
     }
 }
 ```
 
-[![Latest Version](https://maven-badges.herokuapp.com/maven-central/com.github.triplet.gradle/play-publisher/badge.svg)](https://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.github.triplet.gradle%22%20AND%20a%3A%22play-publisher%22)
-
-Apply it to your app-level build.gradle file as following below
+Then apply it to each individual `com.android.application` module where you want to use this plugin.
+For example, `app/build.gradle(.kts)` is a common app module:
 
 ```groovy
-apply plugin:'com.android.application'
+apply plugin: 'com.android.application'
 apply plugin: 'com.github.triplet.play'
 ```
 
-The plugin creates the following tasks for you:
+### Sample tasks
+
+Here are some example tasks the plugin might create:
 
 * `publishApkRelease` - Uploads the APK and the summary of recent changes.
 * `publishListingRelease` - Uploads the descriptions and images for the Play Store listing.
 * `publishRelease` - Uploads everything.
 * `bootstrapReleasePlayResources` - Fetches all existing data from the Play Store to bootstrap the required files and folders.
 
-Make sure to set a valid `signingConfig` for the release build type. Otherwise, there won't be a publishable APK and the above tasks won't be available.
+Should you choose to use product flavors, there will be an apporpriately named task for each flavor.
+E.g. `publishApkPaidRelease` or `publishListingPaidRelease`.
 
-In case you are using product flavors you will get one of the above tasks for every flavor. E.g. `publishApkPaidRelease` or `publishListingPaidRelease`.
+## Authenticating the plugin
 
-## Authentication
-
-Similar to Android's `signingConfigs` you need to setup so called `playAccountConfigs` to authorize your requests. Drop in your service account email address and the p12 key file you generated in the API Console here.
-
-```groovy
-android {
-    playAccountConfigs {
-        defaultAccountConfig {
-            serviceAccountEmail = 'your-service-account-email'
-            pk12File = file('key.p12')
-        }
-    }
-    
-    defaultConfig {
-        // ...
-        
-        playAccountConfig = playAccountConfigs.defaultAccountConfig
-    }
-}
-```
-
-Alternatively you can use a JSON file that can be generated in the API Console.
+After you've gone though the [Service Account setup](#service-account), you should have a JSON file
+with your private key. Add a `play` block alongside your `android` one with the JSON file's
+location:
 
 ```groovy
-android {
-    playAccountConfigs {
-        defaultAccountConfig {
-            jsonFile = file('keys.json')
-        }
-    }
-    
-    defaultConfig {
-        // ...
-        
-        playAccountConfig = playAccountConfigs.defaultAccountConfig
-    }
+play {
+    jsonFile = file('your-key.json')
 }
 ```
 
 ## Configuration
 
-Once you have applied this plugin to your android application project you can configure it via the ```play``` block.
+Once you've setup the plugin, you can continue to configure it through the `play` block.
 
 ### Specify the track
 
-As a default your APK is published to the alpha track and you can promote it to beta or production manually. If you want to directly publish to another track you can specify it via the ```track``` property:
+By default, your app is plublished to the `alpha` channel where you can promote it to the beta or
+stable channels later from the Play Console. However, the Gradle Play Publisher plugin lets you
+choose another `track` if needed:
 
 ```groovy
 play {
     // ...
-    track = 'production' // or any of 'rollout', 'beta', 'alpha' or 'internal'
-    userFraction = 0.2 // only necessary for 'rollout', in this case default is 0.1 (10% of the target)
+    track = 'production' // Or any of 'rollout', 'beta', 'alpha' or 'internal'
+    userFraction = 0.2 // Only necessary for 'rollout'. The default is 0.1 (10%).
 }
 ```
 
-When defining the track as (staged) `rollout` you can also define a ```userFraction``` which is the portion of users who should get the staged rollout version of the APK.
+When initiating a staged release (`rollout`), the `userFraction` property will decide what
+percentage of your users should start recieving the update.
 
 ### Untrack conflicting versions
 
-The Google Play Developer API does not allow us to publish a beta version if there is an alpha version with a lower version code. If you want to publish to higher track and automatically disable conflicting APKs from a lower track, this can be specified by setting the `untrackOld` property to `true`.
+The Google Play Developer API does not allow a beta version to be published while there is an alpha
+version. If you want to automatically publish to a higher track and disable conflicting APKs from
+lower tracks, simply set the `untrackOld` property to `true`:
 
 ```groovy
 play {
     // ...
     track = 'beta'
-    untrackOld = true // will untrack 'alpha' while upload to 'beta'
+    untrackOld = true // Will untrack 'alpha' if needed to upload to 'beta'
 }
 ```
 
-This will untrack whatever versions are currently blocking the publishing process. That is: every APK with a version lower than the one being uploaded in any of the tracks lower than specified by `track`.
+`untrackOld` will untrack all versions blocking a publication: that is, every APK with a version
+code lower than the one being uploaded _and_ a lower track will be untracked. Example: publishing an
+APK with version code 42 to the beta channel will untrack versions 41 and lower from alpha and
+above. However, it will not untrack the stable channel or any alpha and above chanel with version
+code 43 or higher.
 
-Example: Publishing an APK with version 42 to production will untrack versions 41 and lower from alpha and beta. It will not, however untrack versions 43 or higher from those channels because they do not conflict.
+By default, `untrackOld` is false and will stop the publishing process in the event of a conflict.
+Keep the default behaviour if you want to manually untrack conflicting versions.
 
-Setting that flag to `false` or not setting it at all will stop the publishing process in case of conflicts. Keep that behaviour if you want to manually untrack conflicting versions rather than doing automatic untracking.
+### Play Store metadata
 
-### Play Store Metadata
+The Gradle Play Publisher plugin also lets you automatically upload Play Store metadata such as the
+app title, description, etc.
 
-You can also update the Play Store Metadata automatically along with your APK.
+To use this feature, create a special source folder called `play` under your main source sets.
+Inside of it, create a folder for each locale you want to support, within which you will place your
+app's metadata filed by locale.
 
-To use this feature, create a special source folder called ```play```. Inside of it, create a folder for each locale you want to support. Then drop your summary of recent changes into a file called ```whatsnew```. The title, the description, the short description and the YouTube video url go into their own files in a subfolder called ```listing```. App details like contact email or the default language have their own files right inside the ```play``` folder as those details are not translated. Once set up, your project should look something like this:
+Legend: `[folder]`, `filename`
 
 ```
 - [src]
   |
-  + - [main]
+  + - [main] // Or a variant like `paid`
       |
       + - [play]
           |
@@ -164,54 +170,43 @@ To use this feature, create a special source folder called ```play```. Inside of
           |   |
           |   + - [listing]
           |   |   |
-          |   |   + - fulldescription
+          |   |   + - title // App title
           |   |   |
-          |   |   + - shortdescription
+          |   |   + - video // Youtube product video
           |   |   |
-          |   |   + - title
+          |   |   + - shortdescription // Tagline
           |   |   |
-          |   |   + - video
+          |   |   + - fulldescription // Expanded description
           |   |
-          |   + - whatsnew
+          |   + - whatsnew // Summary of recent changes
+          |   |
+          |   + - whatsnew-alpha // Optional, allows specifing the recent changes for a specific channel
           |
           + - [de-DE]
           |   |
-          |   + - [listing]
-          |   |   |
-          |   |   + - fulldescription
-          |   |   |
-          |   |   + - shortdescription
-          |   |   |
-          |   |   + - title
-          |   |   |
-          |   |   + - video
-          |   |
-          |   + - whatsnew
+          |   + ...
           |
-          + - contactEmail
+          + - contactEmail // Developer email
           |
-          + - contactPhone
+          + - contactPhone // Developer phone
           |
-          + - contactWebsite
+          + - contactWebsite // Developer website
           |
           + - defaultLanguage
 ```
 
-Note: You can provide different texts for different locales, build types and product flavors. You may even support additional locales for some build types or product flavors.
+#### Requirements
 
-It is also possible to provide a separate summary of recent changes for each track. Just drop in a special `whatsnew-alpha` text file alongside your main `whatsnew` file and that one will be used if you publish to the alpha track.
+Because the Play Store limits the length of your metadata, the plugin will fail your build if the
+following requirements aren't met:
 
-### Text requirements
-To make sure your texts comply to the requirements of the Play Store, there is built-in a check that causes the build to fail if your texts exceed the allowed lengths.
+* Title: 50 characters
+* Short description: 80 characters
+* Full description: 4000 characters
+* Recent changes: 500 characters
 
-The limits are:
-
-* Title: *30 characters*
-* Short description: *80 characters*
-* Long description: *4000 characters*
-* Recent changes : *500 characters*
-
-To prevent this check from failing the build, you can toggle it with the ```errorOnSizeLimit``` property:
+If you'd rather not fail the build when one of those conditions aren't met, set the
+`errorOnSizeLimit` property to false:
 
 ```groovy
 play {
@@ -220,7 +215,7 @@ play {
 }
 ```
 
-### Upload Images
+### Uploading images
 
 To speed things up a little, images are only uploaded if you explicitly say so:
 
@@ -231,7 +226,7 @@ play {
 }
 ```
 
-In that case the plugin looks for the Play Store images in your `play` folder. So just drop all your images into a folder structure similar to:
+Images are filed by locale as before:
 
 ```
 - [src]
@@ -263,26 +258,29 @@ In that case the plugin looks for the Play Store images in your `play` folder. S
                   + - [wearScreenshots]
 ```
 
-Note: The plugin does not enforce the correct size and file type. If you try to upload invalid files, the Google API will fail with a detailed error message.
+Note: the plugin does not validate uploaded files. Should the file be invalid, the Play Publisher
+API will fail with a detailed error message.
 
-Note: The plugin copies and merges the contents of the different play folders into a build folder for upload. If there are still images left from a previous build, this might lead to undesired behaviour. Please make sure to always do a `./gradlew clean` whenever you rename or delete images in those directories.
+Note: the plugin copies and merges the contents of the different play folders into a build folder
+for upload. If there are still images left from a previous build, this might lead to undesired
+behaviour. Please make sure to always do a `./gradlew clean` whenever you rename or delete images in
+those directories.
 
-## Advanced Topics
+### Using multiple Service Accounts
 
-### Multiple service accounts
-
-If you are developing for several customers you might run into a situation where each build flavor needs to be published into a separate Play Store Account. The plugin supports these use cases by defining separate `playAccountConfigs` and attach them to the flavors:
+If you are developing for several customers, you might run into a situation where each build flavor
+needs to be published into a separate Play Store account. Should that be the case, Gradle Play
+Publisher supports flavor specific `playAccountConfigs`:
 
 ```groovy
 android {
     playAccountConfigs {
         firstCustomerAccount {
-            serviceAccountEmail = 'first-mail@exmaple.com'
-            pk12File = project.file('secret.pk12')
+            jsonFile = file('customer-one-key.json')
         }
+
         secondCustomerAccount {
-            serviceAccountEmail = 'another-mail@exmaple.com'
-            pk12File = project.file('another-secret.pk12')
+            jsonFile = file('customer-two-key.json')
         }
     }
 
@@ -290,6 +288,7 @@ android {
         firstCustomer {
             playAccountConfig = playAccountConfigs.firstCustomerAccount
         }
+
         secondCustomer {
             playAccountConfig = playAccountConfigs.secondCustomerAccount
         }
@@ -297,20 +296,20 @@ android {
 }
 ```
 
-### Run custom tasks before publishing
+### Running custom tasks before publishing
 
-Sometimes it's required to execute some custom tasks right before executing tasks from the `play` plugin.
-
-For example, one can have necessity to download images for the store listing from a remote 3rd-party server.
-This should happen before executing the `generateReleasePlayResources` task which is responsible for collecting all the play store assets for upload.
-
-Let's assume we have a task called `loadStoreListingFromRemote` that fetches store listing information from a remote server and places it under `src/main/play` as needed by the `play` plugin. Our `generateReleasePlayResources` task should now depend on that other task. In order to do that, we have to add the follwing lines to our build script:
+Sometimes custom tasks may need to execute right before those in the Gradle Play Publisher plugin.
+For example, downloading images from a remote server for the store listing should happen before
+executing the `generateReleasePlayResources` task (which is responsible for collecting all Play
+Store assets for upload). Let's assume we have a task called `loadStoreListingFromRemote` that
+fetches store listing information from a remote server. Our `generateReleasePlayResources` task
+should now depend on that other task like so:
 
 ```groovy
 project.afterEvaluate {
-    def generateReleasePlayResources = project.tasks.getByName("generateReleasePlayResources")
     generateReleasePlayResources.dependsOn loadStoreListingFromRemote
 }
 ```
 
-Note that we have to wait for the evaluation phase to complete before the `generateReleasePlayResources` task becomes visible.
+Note that we have to wait for the evaluation phase to complete before the
+`generateReleasePlayResources` task becomes visible.
