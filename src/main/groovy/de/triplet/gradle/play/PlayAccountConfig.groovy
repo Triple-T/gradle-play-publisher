@@ -13,6 +13,8 @@ class PlayAccountConfig {
 
     File jsonFile
 
+    String rootUrl
+
     PlayAccountConfig(@NonNull String name) {
         mName = name
     }
