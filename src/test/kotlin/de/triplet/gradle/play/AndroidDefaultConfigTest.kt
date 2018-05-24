@@ -3,20 +3,31 @@ package de.triplet.gradle.play
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.GradleRunner
+import org.gradle.testkit.runner.UnexpectedBuildFailure
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import java.io.File
-import java.io.StringWriter
+import kotlin.test.*
 
+@Ignore("Should only run these as strictly necessary, they are high overhead")
 class AndroidDefaultConfigTest {
-    private lateinit var pluginProject: Project
+    private lateinit var kotlinProject: Project
+    private lateinit var groovyProject: Project
     private lateinit var testProject: Project
+
+    private val GradleVersion = "4.6"
+
+    private val gradleVersions = arrayOf("2.2.3", "2.3.0", "3.0.1", "3.1.0", "3.2.0-alpha15")
 
     @Before
     fun setup() {
-        pluginProject = ProjectBuilder.builder()
-                .withProjectDir(File("src/test/fixtures/plugin"))
+        kotlinProject = ProjectBuilder.builder()
+                .withProjectDir(File("src/test/fixtures/plugin_kotlin"))
+                .build()
+        groovyProject = ProjectBuilder.builder()
+                .withProjectDir(File("src/test/fixtures/plugin_groovy"))
                 .build()
         testProject = ProjectBuilder.builder()
                 .withProjectDir(File("src/test/fixtures/android_app"))
@@ -24,24 +35,145 @@ class AndroidDefaultConfigTest {
     }
 
     @After
-    fun teardown() {
-        File(pluginProject.projectDir, "build.gradle").delete()
+    fun cleanup() {
+        File(kotlinProject.projectDir, "build.gradle").delete()
+        File(groovyProject.projectDir, "build.gradle").delete()
         File(testProject.projectDir, "build.gradle").delete()
     }
 
-    @Test(expected = org.gradle.testkit.runner.UnexpectedBuildFailure::class)
-    fun `test android plugin 2_3_0 fails to find defaultConfig`() {
-        pluginTest("2.3.0")
+    @Test
+    fun `Test Android plugin defaultConfig for Kotlin`() {
+        assertFailsWith(UnexpectedBuildFailure::class) {
+            pluginTest(kotlinProject, gradleVersions[0], gradleVersions[0])
+        }
+        cleanup()
+        assert(
+            pluginTest(kotlinProject, gradleVersions[0], gradleVersions[1])
+        )
+        cleanup()
+        assertFailsWith(UnexpectedBuildFailure::class) {
+            pluginTest(kotlinProject, gradleVersions[0], gradleVersions[2])
+        }
+        cleanup()
+        assertFailsWith(UnexpectedBuildFailure::class) {
+            pluginTest(kotlinProject, gradleVersions[0], gradleVersions[3])
+        }
+        cleanup()
+        assertFailsWith(UnexpectedBuildFailure::class) {
+            pluginTest(kotlinProject, gradleVersions[0], gradleVersions[4])
+        }
+        cleanup()
+        assert(
+            pluginTest(kotlinProject, gradleVersions[1], gradleVersions[1])
+        )
+        cleanup()
+        assertFailsWith(UnexpectedBuildFailure::class) {
+            pluginTest(kotlinProject, gradleVersions[1], gradleVersions[2])
+        }
+        cleanup()
+        assertFailsWith(UnexpectedBuildFailure::class) {
+            pluginTest(kotlinProject, gradleVersions[1], gradleVersions[3])
+        }
+        cleanup()
+        assertFailsWith(UnexpectedBuildFailure::class) {
+            pluginTest(kotlinProject, gradleVersions[1], gradleVersions[4])
+        }
+        cleanup()
+        assert(
+            pluginTest(kotlinProject, gradleVersions[2], gradleVersions[2])
+        )
+        cleanup()
+        assert(
+            pluginTest(kotlinProject, gradleVersions[2], gradleVersions[3])
+        )
+        cleanup()
+        assert(
+            pluginTest(kotlinProject, gradleVersions[2], gradleVersions[4])
+        )
+        cleanup()
+        assert(
+            pluginTest(kotlinProject, gradleVersions[3], gradleVersions[3])
+        )
+        cleanup()
+        assert(
+            pluginTest(kotlinProject, gradleVersions[3], gradleVersions[4])
+        )
+        cleanup()
+        assert(
+            pluginTest(kotlinProject, gradleVersions[4], gradleVersions[4])
+        )
+        cleanup()
     }
 
     @Test
-    fun `test android plugin 3_1_0 succeeds finding defaultConfig`() {
-        pluginTest("3.1.0")
+    fun `Test Android plugin defaultConfig for Groovy`() {
+        //This fails because of an Android problem, not an incompatiblity like the Kotlin tests
+        assertFailsWith(UnexpectedBuildFailure::class) {
+            pluginTest(groovyProject, gradleVersions[0], gradleVersions[0])
+        }
+        cleanup()
+        assert(
+                pluginTest(groovyProject, gradleVersions[0], gradleVersions[1])
+        )
+        cleanup()
+        assert(
+            pluginTest(groovyProject, gradleVersions[0], gradleVersions[2])
+        )
+        cleanup()
+        assert(
+            pluginTest(groovyProject, gradleVersions[0], gradleVersions[3])
+        )
+        cleanup()
+        assert(
+            pluginTest(groovyProject, gradleVersions[0], gradleVersions[4])
+        )
+        cleanup()
+        assert(
+            pluginTest(groovyProject, gradleVersions[1], gradleVersions[1])
+        )
+        cleanup()
+        assert(
+            pluginTest(groovyProject, gradleVersions[1], gradleVersions[2])
+        )
+        cleanup()
+        assert(
+            pluginTest(groovyProject, gradleVersions[1], gradleVersions[3])
+        )
+        cleanup()
+        assert(
+            pluginTest(groovyProject, gradleVersions[1], gradleVersions[4])
+        )
+        cleanup()
+        assert(
+            pluginTest(groovyProject, gradleVersions[2], gradleVersions[2])
+        )
+        cleanup()
+        assert(
+            pluginTest(groovyProject, gradleVersions[2], gradleVersions[3])
+        )
+        cleanup()
+        assert(
+            pluginTest(groovyProject, gradleVersions[2], gradleVersions[4])
+        )
+        cleanup()
+        assert(
+            pluginTest(groovyProject, gradleVersions[3], gradleVersions[3])
+        )
+        cleanup()
+        assert(
+            pluginTest(groovyProject, gradleVersions[3], gradleVersions[4])
+        )
+        cleanup()
+        assert(
+            pluginTest(groovyProject, gradleVersions[4], gradleVersions[4])
+        )
+        cleanup()
     }
 
-    private fun pluginTest(pluginVersion: String) {
+    private fun pluginTest(pluginProject: Project, pluginVersion: String, appVersion: String): Boolean {
         File(pluginProject.projectDir, "build.gradle").writeText("""
         |plugins {
+        |    id 'groovy'
         |    id 'org.jetbrains.kotlin.jvm' version '1.2.41'
         |    id 'java-gradle-plugin'
         |}
@@ -65,7 +197,7 @@ class AndroidDefaultConfigTest {
 
         GradleRunner.create()
                 .withPluginClasspath()
-                .withGradleVersion("4.4")
+                .withGradleVersion(GradleVersion)
                 .withProjectDir(pluginProject.projectDir)
                 .withArguments("assemble")
                 .build()
@@ -79,7 +211,7 @@ class AndroidDefaultConfigTest {
         |        jcenter()
         |    }
         |    dependencies {
-        |        classpath 'com.android.tools.build:gradle:3.1.0'
+        |        classpath 'com.android.tools.build:gradle:$appVersion'
         |        classpath files("$pluginJar")
         |    }
         |}
@@ -88,11 +220,12 @@ class AndroidDefaultConfigTest {
         |apply plugin: 'com.github.triplet.play.test'
         |
         |android {
+        |    compileSdkVersion 27
+        |    buildToolsVersion '27.0.3'
         |    lintOptions {
         |        abortOnError false
         |    }
         |
-        |    compileSdkVersion 27
         |    defaultConfig {
         |        applicationId "de.triplet.gradle.play.test"
         |        minSdkVersion 21
@@ -106,23 +239,23 @@ class AndroidDefaultConfigTest {
 
         GradleRunner.create()
                 .withPluginClasspath()
-                .withGradleVersion("4.4")
+                .withGradleVersion(GradleVersion)
                 .withProjectDir(testProject.projectDir)
                 .withArguments("tasks")
                 .build()
 
         GradleRunner.create()
                 .withPluginClasspath()
-                .withGradleVersion("4.4")
+                .withGradleVersion(GradleVersion)
                 .withProjectDir(testProject.projectDir)
                 .withArguments("clean")
                 .build()
         GradleRunner.create()
                 .withPluginClasspath()
-                .withGradleVersion("4.4")
+                .withGradleVersion(GradleVersion)
                 .withProjectDir(pluginProject.projectDir)
                 .withArguments("clean")
                 .build()
-
+        return true
     }
 }
