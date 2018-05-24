@@ -44,6 +44,7 @@ class PlayPublisherPlugin implements Plugin<Project> {
             def publishApkTaskName = "publishApk${variant.name.capitalize()}"
             def publishListingTaskName = "publishListing${variant.name.capitalize()}"
             def publishTaskName = "publish${variant.name.capitalize()}"
+            def updatePlayVersionName = "update${variant.name.capitalize()}PlayVersion"
 
             // Create and configure bootstrap task for this variant.
             def bootstrapTask = project.tasks.create(bootstrapTaskName, BootstrapTask)
@@ -81,6 +82,16 @@ class PlayPublisherPlugin implements Plugin<Project> {
 
             // Attach tasks to task graph.
             publishListingTask.dependsOn playResourcesTask
+
+            // Create and configure version code update task for this variant
+            def updatePlayVersionTask = project.tasks.create(updatePlayVersionName, LatestVersionCodeTask)
+            updatePlayVersionTask.description = "Gets the latest version code from play store for ${variant.name.capitalize()} build and sets the next one"
+            updatePlayVersionTask.extension = extension
+            updatePlayVersionTask.playAccountConfig = playAccountConfig
+            updatePlayVersionTask.variant = variant
+            updatePlayVersionTask.group = PLAY_STORE_GROUP
+            updatePlayVersionTask.setOnlyIf({ extension.autoIncrementVersion})
+            variant.preBuild.dependsOn updatePlayVersionTask
 
             if (variant.isSigningReady()) {
                 // Create and configure publisher apk task for this variant.
