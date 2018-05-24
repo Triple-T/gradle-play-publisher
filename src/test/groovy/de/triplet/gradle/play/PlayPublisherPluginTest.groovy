@@ -99,6 +99,24 @@ class PlayPublisherPluginTest {
     }
 
     @Test
+    void testConnectionTimeout() {
+        def defaultProject = TestHelper.evaluatableProject()
+        defaultProject.evaluate()
+
+        assertEquals(100_000, defaultProject.extensions.findByName('play').connectionTimeout, 100_000)
+
+        def project = TestHelper.evaluatableProject()
+
+        project.play {
+            connectionTimeout = 1_000
+        }
+
+        project.evaluate()
+
+        assertEquals(1_000, project.extensions.findByName('play').connectionTimeout, 100_000)
+    }
+
+    @Test
     void testPublishListingTask() {
         def project = TestHelper.evaluatableProject()
 

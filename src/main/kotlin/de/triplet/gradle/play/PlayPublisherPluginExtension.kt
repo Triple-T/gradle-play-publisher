@@ -24,4 +24,6 @@ open class PlayPublisherPluginExtension {
     var untrackOld = false
 
     var userFraction = 0.1
+
+    var connectionTimeout = 100_000
 }
