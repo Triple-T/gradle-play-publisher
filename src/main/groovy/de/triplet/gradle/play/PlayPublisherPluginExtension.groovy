@@ -12,7 +12,7 @@ class PlayPublisherPluginExtension {
 
     boolean errorOnSizeLimit = true
 
-    private String track = 'alpha'
+    private String track = 'internal'
 
     boolean untrackOld = false
 
