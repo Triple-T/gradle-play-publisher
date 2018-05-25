@@ -1,4 +1,4 @@
-**1.2.2-beta1 - 2018-05-23**
+**1.2.2 - 2018-05-23**
 
 * Convert plugin to Kotlin
 * Bump Android Publisher plugin v2 version
