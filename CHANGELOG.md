@@ -1,3 +1,8 @@
+**2.0.0 - to be released**
+
+* Convert plugin to Kotlin
+* Bump Android Publisher plugin v2 version
+
 **1.2.2 - 2018-05-24**
 
 * More descriptive error message when texts exceed allowed length - #172
