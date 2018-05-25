@@ -63,6 +63,10 @@ class AndroidDefaultConfigTest {
             pluginTest(kotlinProject, gradleVersions[0], gradleVersions[4])
         }
         cleanup()
+        assertFailsWith(UnexpectedBuildFailure::class) {
+            pluginTest(kotlinProject, gradleVersions[1], gradleVersions[0])
+        }
+        cleanup()
         assert(
             pluginTest(kotlinProject, gradleVersions[1], gradleVersions[1])
         )
@@ -79,6 +83,14 @@ class AndroidDefaultConfigTest {
             pluginTest(kotlinProject, gradleVersions[1], gradleVersions[4])
         }
         cleanup()
+        assertFailsWith(UnexpectedBuildFailure::class) {
+            pluginTest(kotlinProject, gradleVersions[2], gradleVersions[0])
+        }
+        cleanup()
+        assertFailsWith(UnexpectedBuildFailure::class) {
+            pluginTest(kotlinProject, gradleVersions[2], gradleVersions[1])
+        }
+        cleanup()
         assert(
             pluginTest(kotlinProject, gradleVersions[2], gradleVersions[2])
         )
@@ -91,12 +103,40 @@ class AndroidDefaultConfigTest {
             pluginTest(kotlinProject, gradleVersions[2], gradleVersions[4])
         )
         cleanup()
+        assertFailsWith(UnexpectedBuildFailure::class) {
+            pluginTest(kotlinProject, gradleVersions[3], gradleVersions[0])
+        }
+        cleanup()
+        assertFailsWith(UnexpectedBuildFailure::class) {
+            pluginTest(kotlinProject, gradleVersions[3], gradleVersions[1])
+        }
+        cleanup()
+        assert(
+            pluginTest(kotlinProject, gradleVersions[3], gradleVersions[2])
+        )
+        cleanup()
         assert(
             pluginTest(kotlinProject, gradleVersions[3], gradleVersions[3])
         )
         cleanup()
         assert(
             pluginTest(kotlinProject, gradleVersions[3], gradleVersions[4])
+        )
+        cleanup()
+        assertFailsWith(UnexpectedBuildFailure::class) {
+            pluginTest(kotlinProject, gradleVersions[4], gradleVersions[0])
+        }
+        cleanup()
+        assertFailsWith(UnexpectedBuildFailure::class) {
+            pluginTest(kotlinProject, gradleVersions[4], gradleVersions[1])
+        }
+        cleanup()
+        assert(
+            pluginTest(kotlinProject, gradleVersions[4], gradleVersions[2])
+        )
+        cleanup()
+        assert(
+            pluginTest(kotlinProject, gradleVersions[4], gradleVersions[3])
         )
         cleanup()
         assert(
