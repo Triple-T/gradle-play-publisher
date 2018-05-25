@@ -32,6 +32,7 @@ internal fun File.readAndTrim(maxLength: Int, errorOnSizeLimit: Boolean, relativ
 }
 
 internal fun String?.textOrNull() = if (isNullOrEmpty()) null else this
+internal fun String?.orDefault(default: String) = this ?: default
 
 internal fun File.firstLine() = if (exists())
     bufferedReader().lineSequence().first()
