@@ -113,7 +113,7 @@ play {
 }
 ```
 
-### Using a PKCS12 key instead
+#### Using a PKCS12 key instead
 
 ```groovy
 play {
