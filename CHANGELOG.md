@@ -1,13 +1,17 @@
-**1.2.2 - 2018-05-23**
+**2.0.0 - to be released**
 
 * Convert plugin to Kotlin
 * Bump Android Publisher plugin v2 version
 
-**1.2.1 - 2018-05-23**
+**1.2.2 - 2018-05-24**
 
 * More descriptive error message when texts exceed allowed length - #172
 * Update character limit for app title to 50 characters - #224, #229
 * Support for internal test track - #253
+
+**1.2.1 - 2018-05-23**
+
+*Broken artifact on MavenCentral*
 
 **1.2.0 - 2017-03-23**
 
