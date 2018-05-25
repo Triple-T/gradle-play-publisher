@@ -285,6 +285,92 @@ class PlayPublisherPluginTest {
         assertEquals('default@exmaple.com', project.tasks.publishListingRelease.playAccountConfig.serviceAccountEmail)
     }
 
+    @Test
+    void allTasksExist_AndDependOnBaseTasks_WithNoProductFlavor() {
+        def project = TestHelper.evaluatableProject()
+
+        project.android {
+            playAccountConfigs {
+                defaultAccountConfig {
+                    serviceAccountEmail = 'default@exmaple.com'
+                    pk12File = project.file('first-secret.pk12')
+                }
+            }
+
+            defaultConfig {
+                playAccountConfig = playAccountConfigs.defaultAccountConfig
+            }
+        }
+        project.evaluate()
+
+        assertThat(project.tasks.bootstrapAll, dependsOn('bootstrapReleasePlayResources'))
+        assertThat(project.tasks.generateAll, dependsOn('generateReleasePlayResources'))
+        assertThat(project.tasks.publishAll, dependsOn('publishRelease'))
+        assertThat(project.tasks.publishApkAll, dependsOn('publishApkRelease'))
+        assertThat(project.tasks.publishListingAll, dependsOn('publishListingRelease'))
+    }
+
+    @Test
+    void allTasksExist_AndDependOnBaseTasks_ForAllProductFlavor() {
+        def project = TestHelper.evaluatableProject()
+
+        project.android {
+            playAccountConfigs {
+                defaultAccountConfig {
+                    serviceAccountEmail = 'default@exmaple.com'
+                    pk12File = project.file('first-secret.pk12')
+                }
+            }
+
+            defaultConfig {
+                playAccountConfig = playAccountConfigs.defaultAccountConfig
+            }
+
+            flavorDimensions "mode", "variant"
+
+            productFlavors {
+                demo {
+                    dimension = "mode"
+                }
+                production {
+                    dimension = "mode"
+                }
+                free {
+                    dimension = "variant"
+                }
+                paid {
+                    dimension = "variant"
+                }
+            }
+
+        }
+        project.evaluate()
+
+        assertThat(project.tasks.bootstrapAll, dependsOn('bootstrapDemoFreeReleasePlayResources'))
+        assertThat(project.tasks.generateAll, dependsOn('generateDemoFreeReleasePlayResources'))
+        assertThat(project.tasks.publishAll, dependsOn('publishDemoFreeRelease'))
+        assertThat(project.tasks.publishApkAll, dependsOn('publishApkDemoFreeRelease'))
+        assertThat(project.tasks.publishListingAll, dependsOn('publishListingDemoFreeRelease'))
+
+        assertThat(project.tasks.bootstrapAll, dependsOn('bootstrapDemoPaidReleasePlayResources'))
+        assertThat(project.tasks.generateAll, dependsOn('generateDemoPaidReleasePlayResources'))
+        assertThat(project.tasks.publishAll, dependsOn('publishDemoPaidRelease'))
+        assertThat(project.tasks.publishApkAll, dependsOn('publishApkDemoPaidRelease'))
+        assertThat(project.tasks.publishListingAll, dependsOn('publishListingDemoPaidRelease'))
+
+        assertThat(project.tasks.bootstrapAll, dependsOn('bootstrapProductionFreeReleasePlayResources'))
+        assertThat(project.tasks.generateAll, dependsOn('generateProductionFreeReleasePlayResources'))
+        assertThat(project.tasks.publishAll, dependsOn('publishProductionFreeRelease'))
+        assertThat(project.tasks.publishApkAll, dependsOn('publishApkProductionFreeRelease'))
+        assertThat(project.tasks.publishListingAll, dependsOn('publishListingProductionFreeRelease'))
+
+        assertThat(project.tasks.bootstrapAll, dependsOn('bootstrapProductionPaidReleasePlayResources'))
+        assertThat(project.tasks.generateAll, dependsOn('generateProductionPaidReleasePlayResources'))
+        assertThat(project.tasks.publishAll, dependsOn('publishProductionPaidRelease'))
+        assertThat(project.tasks.publishApkAll, dependsOn('publishApkProductionPaidRelease'))
+        assertThat(project.tasks.publishListingAll, dependsOn('publishListingProductionPaidRelease'))
+    }
+
     @Ignore("These test is not plugin specific and failing with the latest Android Gradle plugin")
     @Test
     void testSplits() {
