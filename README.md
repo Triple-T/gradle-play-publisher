@@ -4,13 +4,14 @@
 [![Latest Version](https://maven-badges.herokuapp.com/maven-central/com.github.triplet.gradle/play-publisher/badge.svg)](https://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.github.triplet.gradle%22%20AND%20a%3A%22play-publisher%22)
 
 Gradle Play Publisher is a Gradle plugin that allows you to upload your APK and other app details to
-the Google Play Store from a continous integration server or anywhere you have a command line.
+the Google Play Store from a continuous integration server or anywhere you have a command line.
 
 ## Table of contents
 
 1. [Quick start guide](#quick-start-guide)
 1. [Prerequisites](#prerequisites)
    1. [Initial Play Store upload](#initial-play-store-upload)
+   1. [Signing configuration](#signing-configuration)
    1. [Service Account](#service-account)
 1. [Usage](#usage)
    1. [Installation](#installation)
@@ -41,6 +42,12 @@ the Google Play Store from a continous integration server or anywhere you have a
 The first APK or App Bundle needs to be uploaded via the Google Play Console because registering the
 app with the Play Store cannot be done using the Play Developer API. For all subsequent uploads and
 changes this plugin can be used.
+
+### Signing configuration
+
+If the plugin didn't create any tasks, you most likely haven't added a valid signing configuration
+to your release builds. Be sure to
+[add one](https://developer.android.com/studio/publish/app-signing#gradle-sign).
 
 ### Service Account
 
@@ -89,18 +96,29 @@ Here are some example tasks the plugin might create:
 * `publishRelease` - Uploads everything.
 * `bootstrapReleasePlayResources` - Fetches all existing data from the Play Store to bootstrap the required files and folders.
 
-Should you choose to use product flavors, there will be an apporpriately named task for each flavor.
+Should you choose to use product flavors, there will be an appropriately named task for each flavor.
 E.g. `publishApkPaidRelease` or `publishListingPaidRelease`.
 
-## Authenticating the plugin
+### Authenticating the plugin
 
-After you've gone though the [Service Account setup](#service-account), you should have a JSON file
+After you've gone through the [Service Account setup](#service-account), you should have a JSON file
 with your private key. Add a `play` block alongside your `android` one with the JSON file's
 location:
 
 ```groovy
+android { ... }
+
 play {
     jsonFile = file('your-key.json')
+}
+```
+
+### Using a PKCS12 key instead
+
+```groovy
+play {
+    serviceAccountEmail = 'service-account-name@project-id.iam.gserviceaccount.com'
+    pk12File = file('your-key.p12')
 }
 ```
 
@@ -110,7 +128,7 @@ Once you've setup the plugin, you can continue to configure it through the `play
 
 ### Specify the track
 
-By default, your app is plublished to the `alpha` channel where you can promote it to the beta or
+By default, your app is published to the `alpha` channel where you can promote it to the beta or
 stable channels later from the Play Console. However, the Gradle Play Publisher plugin lets you
 choose another `track` if needed:
 
@@ -123,7 +141,7 @@ play {
 ```
 
 When initiating a staged release (`rollout`), the `userFraction` property will decide what
-percentage of your users should start recieving the update.
+percentage of your users should start receiving the update.
 
 ### Untrack conflicting versions
 
@@ -142,8 +160,8 @@ play {
 `untrackOld` will untrack all versions blocking a publication: that is, every APK with a version
 code lower than the one being uploaded _and_ a lower track will be untracked. Example: publishing an
 APK with version code 42 to the beta channel will untrack versions 41 and lower from alpha and
-above. However, it will not untrack the stable channel or any alpha and above chanel with version
-code 43 or higher.
+above. However, it will not untrack the stable channel or the alpha channel as long as its version
+code is 43 or higher.
 
 By default, `untrackOld` is false and will stop the publishing process in the event of a conflict.
 Keep the default behaviour if you want to manually untrack conflicting versions.
@@ -180,7 +198,7 @@ Legend: `[folder]`, `filename`
           |   |
           |   + - whatsnew // Summary of recent changes
           |   |
-          |   + - whatsnew-alpha // Optional, allows specifing the recent changes for a specific channel
+          |   + - whatsnew-alpha // Optional, allows specifying the recent changes for a specific channel
           |
           + - [de-DE]
           |   |
