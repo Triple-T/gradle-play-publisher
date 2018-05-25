@@ -43,7 +43,7 @@ internal fun File.validSubFolder(vararg path: String): File? {
     var workingFile = this
     path.forEach {
         workingFile = File(workingFile, it)
-        if (!workingFile.exists() || !workingFile.mkdirs())
+        if (!workingFile.exists() && !workingFile.mkdirs())
             return null
     }
     return workingFile
