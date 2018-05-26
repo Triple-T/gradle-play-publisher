@@ -22,6 +22,28 @@ class PlayPublisherPlugin : Plugin<Project> {
             flavor.extras.set("playAccountConfig", android.defaultConfig.extras.get("playAccountConfig"))
         }
 
+        val bootstrapAllTask = project.task("bootstrapAll").apply {
+            description = "Downloads the play store listing for all initiated variants. No download of image resources. See #18."
+            group = PLAY_STORE_GROUP
+        }
+        val playResourcesAllTask = project.task("generateAll").apply {
+            description = "Collects play store resources for all initiated variants."
+            group = PLAY_STORE_GROUP
+        }
+        val publishAllTask = project.task("publishAll").apply {
+            description = "Updates APK and play store listing for all initiated variants"
+            group = PLAY_STORE_GROUP
+        }
+        val publishApkAllTask = project.task("publishApkAll").apply {
+            description = "Uploads the APK for all initiated variants"
+            group = PLAY_STORE_GROUP
+        }
+        val publishListingAllTask = project.task("publishListingAll").apply {
+            description = "Updates the play store listing for all initiated variants"
+            group = PLAY_STORE_GROUP
+        }
+
+
         android.applicationVariants.whenObjectAdded { variant ->
             if (variant.buildType.isDebuggable) {
                 log.debug("Skipping debuggable build type ${variant.buildType.name}.")
@@ -34,73 +56,80 @@ class PlayPublisherPlugin : Plugin<Project> {
                     .firstOrNull() as? PlayAccountConfig
             val defaultAccountConfig = android.defaultConfig.extras.get("playAccountConfig") as? PlayAccountConfig
             val playAccountConfig = flavorAccountConfig ?: defaultAccountConfig ?: PlayAccountConfig()
+            val capName = variant.name.capitalize()
 
-            val bootstrapTaskName = "bootstrap${variant.name.capitalize()}PlayResources"
-            val playResourcesTaskName = "generate${variant.name.capitalize()}PlayResources"
-            val publishApkTaskName = "publishApk${variant.name.capitalize()}"
-            val publishListingTaskName = "publishListing${variant.name.capitalize()}"
-            val publishTaskName = "publish${variant.name.capitalize()}"
+            val bootstrapTaskName = "bootstrap${capName}PlayResources"
+            val playResourcesTaskName = "generate${capName}PlayResources"
+            val publishApkTaskName = "publishApk$capName"
+            val publishListingTaskName = "publishListing$capName"
+            val publishTaskName = "publish$capName"
 
             // Create and configure bootstrap task for this variant.
-            val bootstrapTask = project.tasks.create(bootstrapTaskName, BootstrapTask::class.java)
-            bootstrapTask.extension = extension
-            bootstrapTask.variant = variant
-            if (!variant.flavorName.isEmpty()) {
-                bootstrapTask.outputFolder = project.file("src/${variant.flavorName}/play")
-            } else {
-                bootstrapTask.outputFolder = project.file("src/main/play")
+            val bootstrapTask = project.tasks.create(bootstrapTaskName, BootstrapTask::class.java).apply {
+                this.extension = extension
+                this.variant = variant
+                this.playAccountConfig = playAccountConfig
+                group = PLAY_STORE_GROUP
+                description = "Downloads the play store listing for the $capName build. No download of image resources. See #18."
+                outputFolder = project.file("src/${variant.flavorName.orDefault("main")}/play")
             }
-            bootstrapTask.playAccountConfig = playAccountConfig
-            bootstrapTask.description = "Downloads the play store listing for the ${variant.name.capitalize()} build. No download of image resources. See #18."
-            bootstrapTask.group = PLAY_STORE_GROUP
+            bootstrapAllTask.dependsOn(bootstrapTask)
 
             // Create and configure task to collect the play store resources.
-            val playResourcesTask = project.tasks.create(playResourcesTaskName, GeneratePlayResourcesTask::class.java)
+            val playResourcesTask = project.tasks.create(playResourcesTaskName, GeneratePlayResourcesTask::class.java).apply {
+                inputs.file(project.file("src/main/play"))
+                if (!variant.flavorName.isEmpty()) {
+                    inputs.file(project.file("src/${variant.flavorName}/play"))
+                }
+                inputs.file(project.file("src/${variant.buildType.name}/play"))
+                inputs.file(project.file("src/${variant.name}/play"))
 
-            playResourcesTask.inputs.file(project.file("src/main/play"))
-            if (!variant.flavorName.isEmpty()) {
-                playResourcesTask.inputs.file(project.file("src/${variant.flavorName}/play"))
+                outputFolder = project.file("$RESOURCES_OUTPUT_PATH/${variant.name}")
+                description = "Collects play store resources for the $capName build"
+                group = PLAY_STORE_GROUP
             }
-            playResourcesTask.inputs.file(project.file("src/${variant.buildType.name}/play"))
-            playResourcesTask.inputs.file(project.file("src/${variant.name}/play"))
-
-            playResourcesTask.outputFolder = project.file("$RESOURCES_OUTPUT_PATH/${variant.name}")
-            playResourcesTask.description = "Collects play store resources for the ${variant.name.capitalize()} build"
-            playResourcesTask.group = PLAY_STORE_GROUP
+            playResourcesAllTask.dependsOn(playResourcesTask)
 
             // Create and configure publisher meta task for this variant
-            val publishListingTask = project.tasks.create(publishListingTaskName, PlayPublishListingTask::class.java)
-            publishListingTask.extension = extension
-            publishListingTask.playAccountConfig = playAccountConfig
-            publishListingTask.variant = variant
-            publishListingTask.inputFolder = playResourcesTask.outputFolder
-            publishListingTask.description = "Updates the play store listing for the ${variant.name.capitalize()} build"
-            publishListingTask.group = PLAY_STORE_GROUP
+            val publishListingTask = project.tasks.create(publishListingTaskName, PlayPublishListingTask::class.java).apply {
+                this.extension = extension
+                this.playAccountConfig = playAccountConfig
+                this.variant = variant
+                inputFolder = playResourcesTask.outputFolder
+                description = "Updates the play store listing for the $capName build"
+                group = PLAY_STORE_GROUP
+            }
 
             // Attach tasks to task graph.
             publishListingTask.dependsOn(playResourcesTask)
+            publishListingAllTask.dependsOn(publishListingTask)
 
             if (variant.isSigningReady) {
                 // Create and configure publisher apk task for this variant.
-                val publishApkTask = project.tasks.create(publishApkTaskName, PlayPublishApkTask::class.java)
-                publishApkTask.extension = extension
-                publishApkTask.playAccountConfig = playAccountConfig
-                publishApkTask.variant = variant
-                publishApkTask.inputFolder = playResourcesTask.outputFolder
-                publishApkTask.description = "Uploads the APK for the ${variant.name.capitalize()} build"
-                publishApkTask.group = PLAY_STORE_GROUP
+                val publishApkTask = project.tasks.create(publishApkTaskName, PlayPublishApkTask::class.java).apply {
+                    this.extension = extension
+                    this.playAccountConfig = playAccountConfig
+                    this.variant = variant
+                    inputFolder = playResourcesTask.outputFolder
+                    description = "Uploads the APK for the $capName build"
+                    group = PLAY_STORE_GROUP
+                }
 
-                val publishTask = project.tasks.create(publishTaskName)
-                publishTask.description = "Updates APK and play store listing for the ${variant.name.capitalize()} build"
-                publishTask.group = PLAY_STORE_GROUP
+                val publishTask = project.tasks.create(publishTaskName).apply {
+                    description = "Updates APK and play store listing for the $capName build"
+                    group = PLAY_STORE_GROUP
+                }
 
                 // Attach tasks to task graph.
                 publishTask.dependsOn(publishApkTask)
                 publishTask.dependsOn(publishListingTask)
+                publishAllTask.dependsOn(publishTask)
+
                 publishApkTask.dependsOn(playResourcesTask)
                 publishApkTask.dependsOn(variant.assemble)
+                publishApkAllTask.dependsOn(publishApkTask)
             } else {
-                log.warn("Signing not ready. Did you specify a signingConfig for the variation ${variant.name.capitalize()}?")
+                log.warn("Signing not ready. Did you specify a signingConfig for the variation $capName?")
             }
         }
     }

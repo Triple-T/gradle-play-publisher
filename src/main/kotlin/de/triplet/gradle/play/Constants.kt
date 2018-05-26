@@ -29,7 +29,7 @@ internal enum class ListingDetails(val fileName: String, val maxLength: Int = -1
     Video("video"),
     WhatsNew("whatsnew", 500);
 
-    fun saveText(dir: File, value: String) = File(dir, fileName).writeText(value)
+    fun saveText(dir: File, value: String) = File(dir.apply { mkdirs() }, fileName).writeText(value)
 }
 
 internal val JSON_FACTORY by lazy { JacksonFactory.getDefaultInstance() }

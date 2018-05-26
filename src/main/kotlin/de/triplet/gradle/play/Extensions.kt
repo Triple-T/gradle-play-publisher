@@ -32,6 +32,7 @@ internal fun File.readAndTrim(maxLength: Int, errorOnSizeLimit: Boolean, relativ
 }
 
 internal fun String?.textOrNull() = if (isNullOrEmpty()) null else this
+internal fun String?.orDefault(default: String) = this ?: default
 
 internal fun File.firstLine() = if (exists())
     bufferedReader().lineSequence().first()
@@ -42,7 +43,7 @@ internal fun File.validSubFolder(vararg path: String): File? {
     var workingFile = this
     path.forEach {
         workingFile = File(workingFile, it)
-        if (!workingFile.exists() || !workingFile.mkdirs())
+        if (!workingFile.exists() && !workingFile.mkdirs())
             return null
     }
     return workingFile
