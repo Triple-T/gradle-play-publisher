@@ -17,6 +17,7 @@ package de.triplet.gradle.play
 
 import com.google.api.client.auth.oauth2.Credential
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
+import com.google.api.client.http.HttpRequestInitializer
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.AndroidPublisherScopes
 import java.io.File
@@ -36,7 +37,12 @@ internal object AndroidPublisherHelper {
         }
 
         // Set up and return API client.
-        return AndroidPublisher.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
+        return AndroidPublisher.Builder(HTTP_TRANSPORT, JSON_FACTORY, HttpRequestInitializer {
+            credential.initialize(it.apply {
+                connectTimeout = 100_000
+                readTimeout = 100_000
+            })
+        })
                 .setApplicationName(APPLICATION_NAME)
                 .build()
     }
