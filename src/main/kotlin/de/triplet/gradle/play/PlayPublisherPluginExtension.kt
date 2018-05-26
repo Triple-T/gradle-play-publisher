@@ -1,14 +1,6 @@
 package de.triplet.gradle.play
 
-import java.io.File
-
-open class PlayPublisherPluginExtension {
-    var serviceAccountEmail: String? = null
-
-    var pk12File: File? = null
-
-    var jsonFile: File? = null
-
+open class PlayPublisherPluginExtension : CredentialProvider() {
     var uploadImages = false
 
     var errorOnSizeLimit = true
