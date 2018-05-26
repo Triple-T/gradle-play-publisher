@@ -23,6 +23,7 @@ the Google Play Store from a continuous integration server or anywhere you have 
    1. [Play Store metadata](#play-store-metadata)
    1. [Uploading images](#uploading-images)
    1. [Using multiple Service Accounts](#using-multiple-service-accounts)
+   1. [Encrypting Service Account keys](#encrypting-service-account-keys)
    1. [Running custom tasks before publishing](#running-custom-tasks-before-publishing)
 
 ## Quick start guide
@@ -313,6 +314,19 @@ android {
     }
 }
 ```
+
+### Encrypting Service Account keys
+
+In many cases, you will want to publish your app from a continuous integration server. However, you
+can't commit unencrypted Service Account keys or you run the risk of letting anyone access your
+Google Play account. To circumvent this issue, many CI servers support encrypting files while
+keeping fake versions in public source control. Here is a set of
+[common fake files](https://github.com/SUPERCILEX/Robot-Scouter/tree/467f23681c3a422d3342d408ce16ae6d0ff441cf/travis-dummies)
+you might need and ways to encrypt your real keys for a few common CI servers:
+
+- [Travis CI](https://docs.travis-ci.com/user/encrypting-files/)
+- [CircleCI](https://github.com/circleci/encrypted-files)
+- [Jenkins](https://github.com/samrocketman/jervis/wiki/Secure-secrets-in-repositories)
 
 ### Running custom tasks before publishing
 
