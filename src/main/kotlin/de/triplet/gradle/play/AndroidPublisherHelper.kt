@@ -38,11 +38,10 @@ internal object AndroidPublisherHelper {
 
         // Set up and return API client.
         return AndroidPublisher.Builder(HTTP_TRANSPORT, JSON_FACTORY, HttpRequestInitializer {
-            it.apply {
+            credential.initialize(it.apply {
                 connectTimeout = 100_000
                 readTimeout = 100_000
-            }
-            credential.initialize(it)
+            })
         })
                 .setApplicationName(APPLICATION_NAME)
                 .build()
