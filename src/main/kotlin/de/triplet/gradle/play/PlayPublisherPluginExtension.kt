@@ -13,7 +13,7 @@ open class PlayPublisherPluginExtension {
 
     var errorOnSizeLimit = true
 
-    var track = "alpha"
+    var track = HIGHEST_TRACK
         set(value) {
             if (!(TRACKS.contains(value)))
                 throw IllegalArgumentException("Track has to be one of 'internal', 'beta', 'rollout' or 'production")

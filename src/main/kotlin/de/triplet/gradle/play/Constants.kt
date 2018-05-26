@@ -35,7 +35,8 @@ internal enum class ListingDetails(val fileName: String, val maxLength: Int = -1
 internal val JSON_FACTORY by lazy { JacksonFactory.getDefaultInstance() }
 internal val HTTP_TRANSPORT by lazy { GoogleNetHttpTransport.newTrustedTransport() }
 
-internal val TRACKS = arrayOf("alpha", "beta", "rollout", "production")
+internal val TRACKS = arrayOf("internal", "alpha", "beta", "rollout", "production")
+internal val HIGHEST_TRACK = "internal"
 internal val IMAGE_EXTENSIONS = arrayOf("png", "jpg")
 
 internal enum class ImageTypes(val fileName: String, val max: Int = MAX_SCREENSHOTS_SIZE) {

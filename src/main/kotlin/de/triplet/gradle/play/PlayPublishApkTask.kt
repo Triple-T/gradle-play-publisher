@@ -37,9 +37,8 @@ open class PlayPublishApkTask : PlayPublishTask() {
                 .upload(variant.applicationId, editId, apkFile)
                 .execute()
 
-        if (extension.untrackOld && extension.track != "alpha") {
-            val untrackChannels = if (extension.track == "beta") arrayOf("alpha") else arrayOf("alpha", "beta")
-            untrackChannels.forEach { channel ->
+        if (extension.untrackOld && extension.track != HIGHEST_TRACK) {
+            TRACKS.take(TRACKS.indexOf(extension.track)).forEach { channel ->
                 try {
                     val track = edits.tracks()
                             .get(variant.applicationId, editId, channel)
