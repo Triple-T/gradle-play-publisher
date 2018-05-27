@@ -60,6 +60,7 @@ class PlayPublisherPlugin : Plugin<Project> {
 
             val bootstrapTaskName = "bootstrap${capName}PlayResources"
             val playResourcesTaskName = "generate${capName}PlayResources"
+            val autoIncrementVersionCodeTaskName = "autoIncrement${capName}VersionCode"
             val publishApkTaskName = "publishApk$capName"
             val publishListingTaskName = "publishListing$capName"
             val publishTaskName = "publish$capName"
@@ -89,6 +90,18 @@ class PlayPublisherPlugin : Plugin<Project> {
                 group = PLAY_STORE_GROUP
             }
             playResourcesAllTask.dependsOn(playResourcesTask)
+
+            // Create and configure task to auto increment the play store version code
+            val autoIncrementVersionCodeTask = project.tasks.create(
+                    autoIncrementVersionCodeTaskName, AutoIncrementVersionCodeTask::class.java).apply {
+                this.extension = extension
+                this.playAccountConfig = playAccountConfig
+                this.variant = variant
+                setOnlyIf({ extension.autoIncrementVersion })
+                description = "Retrieves the latest play store version code, increments and then adds it to the $capName build."
+                group = PLAY_STORE_GROUP
+            }
+            variant.preBuild.dependsOn(autoIncrementVersionCodeTask)
 
             // Create and configure publisher meta task for this variant
             val publishListingTask = project.tasks.create(publishListingTaskName, PlayPublishListingTask::class.java).apply {
