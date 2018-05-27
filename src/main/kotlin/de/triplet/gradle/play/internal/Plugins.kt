@@ -10,9 +10,9 @@ import org.gradle.api.plugins.ExtraPropertiesExtension
 private val ProductFlavor.extras
     get() = requireNotNull((this as ExtensionAware).extensions.get<ExtraPropertiesExtension>())
 
-inline fun <reified T> ExtensionContainer.get() = findByType(T::class.java)
+internal inline fun <reified T> ExtensionContainer.get() = findByType(T::class.java)
 
-inline fun <reified T : Task> Project.newTask(
+internal inline fun <reified T : Task> Project.newTask(
         name: String,
         description: String,
         group: String = PLUGIN_GROUP,
@@ -23,8 +23,8 @@ inline fun <reified T : Task> Project.newTask(
     block()
 }
 
-operator fun ProductFlavor.get(name: String) = extras[name]
+internal operator fun ProductFlavor.get(name: String) = extras[name]
 
-operator fun ProductFlavor.set(name: String, value: Any?) {
+internal operator fun ProductFlavor.set(name: String, value: Any?) {
     extras[name] = value
 }

@@ -3,18 +3,18 @@ package de.triplet.gradle.play.internal
 import java.io.File
 import java.io.FileFilter
 
-object LocaleFileFilter : FileFilter {
+internal object LocaleFileFilter : FileFilter {
     // region '419' is a special case in the Play Store that represents latin america
     // 'fil' is a special case in the Play Store that represents Filipino
     override fun accept(file: File) =
             file.name.matches(Regex("^(fil|[a-z]{2}(-([A-Z]{2}|419))?)\\z"))
 }
 
-object ImageFileFilter : FileFilter {
+internal object ImageFileFilter : FileFilter {
     override fun accept(file: File) = file.extension.toLowerCase() in imageExtensions
 }
 
-enum class ListingDetail(val fileName: String, val maxLength: Int = Int.MAX_VALUE) {
+internal enum class ListingDetail(val fileName: String, val maxLength: Int = Int.MAX_VALUE) {
     TITLE("title", 50),
     SHORT_DESCRIPTION("shortdescription", 80),
     FULL_DESCRIPTION("fulldescription", 4000),
@@ -28,7 +28,7 @@ enum class ListingDetail(val fileName: String, val maxLength: Int = Int.MAX_VALU
     DEFAULT_LANGUAGE("defaultLanguage");
 }
 
-enum class ImageType(val fileName: String, val maxNum: Int = 8) {
+internal enum class ImageType(val fileName: String, val maxNum: Int = 8) {
     ICON("icon", 1),
     FEATURE_GRAPHIC("featureGraphic", 1),
     PROMO_GRAPHIC("promoGraphic", 1),
