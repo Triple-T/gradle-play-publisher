@@ -12,7 +12,9 @@ repositories {
 
 dependencies {
     compile("com.android.tools.build:gradle:3.0.1")
-    compile("com.google.apis:google-api-services-androidpublisher:v2-rev77-1.23.0")
+    compile("com.google.apis:google-api-services-androidpublisher:v2-rev77-1.23.0") {
+        exclude("com.google.guava", "guava-jdk5") // Remove when upgrading to AGP 3.1+
+    }
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.2.41")
 
     testImplementation("org.jetbrains.kotlin:kotlin-test:1.2.41")
