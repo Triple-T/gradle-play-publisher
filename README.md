@@ -87,6 +87,25 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.github.triplet.play'
 ```
 
+#### Snapshot builds
+
+If you're prepared to cut yourself on the bleeding edge of this plugin, snapshot builds are
+available through JitPack:
+
+```groovy
+buildscript {
+    repositories {
+        // ...
+        maven { url 'https://jitpack.io' }
+    }
+
+    dependencies {
+        // ...
+        implementation 'com.github.Triple-T:gradle-play-publisher:commitId' // E.g. 75bed587f8
+    }
+}
+```
+
 ### Sample tasks
 
 Here are some example tasks the plugin might create:
