@@ -78,8 +78,32 @@ afterEvaluate { project ->
                             distribution POM_LICENCE_DIST
                         }
                     }
+
+                    developers {
+                        developer {
+                            id "bhurling"
+                            name "Bjoern Hurling"
+                        }
+                        developer {
+                            id "ChristianBecker"
+                            name "Christian Becker"
+                        }
+                        developer {
+                            id 'gtcompscientist'
+                            name 'Charles Anderson'
+                        }
+                        developer {
+                            id 'SUPERCILEX'
+                            name 'Alex Saveau'
+                        }
+                    }
                 }
 
+                pom.whenConfigured { pom ->
+                    pom.dependencies = pom.dependencies.findAll { dep ->
+                        dep.scope != "test"
+                    }
+                }
             }
         }
     }
