@@ -1,40 +1,44 @@
 package de.triplet.gradle.play
 
+import de.triplet.gradle.play.internal.LocaleFileFilter
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
 
 class LocaleFileFilterTest {
-    private val filter = LocaleFileFilter()
-
     @Test
-    fun testLanguage_returnsTrue() {
-        assertTrue(filter.accept(File("de")))
+    fun `Language is valid`() {
+        assertTrue(LocaleFileFilter.accept(File("de")))
     }
 
     @Test
-    fun testLanguageCountry_returnsTrue() {
-        assertTrue(filter.accept(File("de-DE")))
+    fun `Language + country are valid`() {
+        assertTrue(LocaleFileFilter.accept(File("de-DE")))
     }
 
     @Test
-    fun testSpecialCase1_returnsTrue() {
-        assertTrue(filter.accept(File("es-419")))
+    fun `'es' special case is valid`() {
+        assertTrue(LocaleFileFilter.accept(File("es-419")))
     }
 
     @Test
-    fun testSpecialCase2_returnsTrue() {
-        assertTrue(filter.accept(File("fil")))
+    fun `'file' special case is valid`() {
+        assertTrue(LocaleFileFilter.accept(File("fil")))
     }
 
     @Test
-    fun testUnderscore_returnsFalse() {
-        assertFalse(filter.accept(File("de_DE")))
+    fun `Underscore is invalid`() {
+        assertFalse(LocaleFileFilter.accept(File("de_DE")))
     }
 
     @Test
-    fun testInvalidLength_returnsFalse() {
-        assertFalse(filter.accept(File("fil-PH")))
+    fun `Too long is invalid`() {
+        assertFalse(LocaleFileFilter.accept(File("fil-PH")))
+    }
+
+    @Test
+    fun `Too short is invalid`() {
+        assertFalse(LocaleFileFilter.accept(File("a")))
     }
 }
