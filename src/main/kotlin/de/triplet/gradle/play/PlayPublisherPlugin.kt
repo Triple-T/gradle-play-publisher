@@ -3,6 +3,7 @@ package de.triplet.gradle.play
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.api.ApplicationVariant
 import de.triplet.gradle.play.internal.ACCOUNT_CONFIG
+import de.triplet.gradle.play.internal.AccountConfig
 import de.triplet.gradle.play.internal.PLAY_PATH
 import de.triplet.gradle.play.internal.PlayPublishTaskBase
 import de.triplet.gradle.play.internal.RESOURCES_OUTPUT_PATH
@@ -126,18 +127,18 @@ class PlayPublisherPlugin : Plugin<Project> {
 
     private fun Project.initPlayAccountConfigs(android: AppExtension) {
         (android as ExtensionAware).extensions.add(
-                "playAccountConfigs", container(PlayAccountConfig::class.java))
+                "playAccountConfigs", container(PlayAccountConfigExtension::class.java))
         android.defaultConfig[ACCOUNT_CONFIG] = null
         android.productFlavors.whenObjectAdded {
             it[ACCOUNT_CONFIG] = android.defaultConfig[ACCOUNT_CONFIG]
         }
     }
 
-    private fun AppExtension.getAccountConfig(variant: ApplicationVariant): PlayAccountConfig? {
+    private fun AppExtension.getAccountConfig(variant: ApplicationVariant): AccountConfig? {
         val flavorAccountConfig = variant.productFlavors
                 .mapNotNull { (it as GroovyObject).getProperty(ACCOUNT_CONFIG) }
-                .singleOrNull() as? PlayAccountConfig
-        val defaultAccountConfig = defaultConfig[ACCOUNT_CONFIG] as? PlayAccountConfig
+                .singleOrNull() as? AccountConfig
+        val defaultAccountConfig = defaultConfig[ACCOUNT_CONFIG] as? AccountConfig
 
         return flavorAccountConfig ?: defaultAccountConfig
     }

@@ -6,14 +6,13 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.AndroidPublisherScopes
-import de.triplet.gradle.play.PlayAccountConfig
 import de.triplet.gradle.play.PlayPublisherExtension
 import org.gradle.api.DefaultTask
 
 abstract class PlayPublishTaskBase : DefaultTask() {
     lateinit var extension: PlayPublisherExtension
     lateinit var variant: ApplicationVariant
-    lateinit var accountConfig: PlayAccountConfig
+    lateinit var accountConfig: AccountConfig
 
     private val publisher by lazy {
         val credential = accountConfig.run {
