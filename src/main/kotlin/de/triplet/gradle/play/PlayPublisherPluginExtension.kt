@@ -1,19 +1,39 @@
 package de.triplet.gradle.play
 
-open class PlayPublisherPluginExtension : CredentialProvider() {
-    var uploadImages = false
+import de.triplet.gradle.play.internal.Track
+import de.triplet.gradle.play.internal.publishedName
 
-    var errorOnSizeLimit = true
-
-    var track = "alpha"
+open class PlayPublisherPluginExtension {
+    var jsonFile
+        get() = accountConfig.jsonFile
         set(value) {
-            if (!(TRACKS.contains(value)))
-                throw IllegalArgumentException("Track has to be one of 'internal', 'beta', 'rollout' or 'production")
-
-            field = value
+            accountConfig.jsonFile = value
+        }
+    var pk12File
+        get() = accountConfig.pk12File
+        set(value) {
+            accountConfig.pk12File = value
+        }
+    var serviceAccountEmail
+        get() = accountConfig.serviceAccountEmail
+        set(value) {
+            accountConfig.serviceAccountEmail = value
         }
 
+    internal var _track = Track.INTERNAL
+    var track
+        get() = _track.publishedName
+        set(value) {
+            requireNotNull(Track.values().find { it.name.equals(value, true) }) {
+                "Track has to be one of ${Track.values().joinToString { "'${it.publishedName}'" }}"
+            }
+            _track = Track.valueOf(value.toUpperCase())
+        }
     var untrackOld = false
-
     var userFraction = 0.1
+
+    var uploadImages = false
+    var errorOnSizeLimit = true
+
+    internal val accountConfig = PlayAccountConfig()
 }

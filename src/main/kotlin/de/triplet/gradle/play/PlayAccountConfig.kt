@@ -1,3 +1,11 @@
 package de.triplet.gradle.play
 
-open class PlayAccountConfig(var name: String = "") : CredentialProvider()
+import java.io.File
+
+data class PlayAccountConfig @JvmOverloads constructor(
+        val name: String = "", // Needed for Gradle
+
+        var jsonFile: File? = null,
+        var pk12File: File? = null,
+        var serviceAccountEmail: String? = null
+)
