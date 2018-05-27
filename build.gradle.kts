@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    compile("com.android.tools.build:gradle:3.1.2")
+    compile("com.android.tools.build:gradle:3.0.1")
     compile("com.google.apis:google-api-services-androidpublisher:v2-rev77-1.23.0")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.2.41")
 
