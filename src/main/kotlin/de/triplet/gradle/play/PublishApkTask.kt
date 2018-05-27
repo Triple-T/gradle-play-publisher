@@ -12,7 +12,6 @@ import de.triplet.gradle.play.internal.LocaleFileFilter
 import de.triplet.gradle.play.internal.PlayPublishTaskBase
 import de.triplet.gradle.play.internal.Track.INTERNAL
 import de.triplet.gradle.play.internal.orNull
-import de.triplet.gradle.play.internal.publishedName
 import de.triplet.gradle.play.internal.readProcessed
 import de.triplet.gradle.play.internal.superiors
 import org.gradle.api.tasks.TaskAction
@@ -42,7 +41,7 @@ open class PublishApkTask : PlayPublishTaskBase() {
     private fun AndroidPublisher.Edits.publishApk(editId: String, apkFile: FileContent): Apk {
         val apk = apks().upload(variant.applicationId, editId, apkFile).execute()
 
-        fun AndroidPublisher.Edits.updateWhatsNew(locale: File) {
+        fun updateWhatsNew(locale: File) {
             val fileName = ListingDetail.WHATS_NEW.fileName
             val file = run {
                 var file = File(locale, "$fileName-${extension.track}").orNull()

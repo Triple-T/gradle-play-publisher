@@ -3,7 +3,6 @@ package de.triplet.gradle.play
 import de.triplet.gradle.play.internal.AccountConfig
 import de.triplet.gradle.play.internal.Alias
 import de.triplet.gradle.play.internal.Track
-import de.triplet.gradle.play.internal.publishedName
 
 open class PlayPublisherExtension : AccountConfig {
     internal val accountConfig = PlayAccountConfigExtension()
@@ -19,10 +18,9 @@ open class PlayPublisherExtension : AccountConfig {
     var track
         get() = _track.publishedName
         set(value) {
-            requireNotNull(Track.values().find { it.name.equals(value, true) }) {
+            _track = requireNotNull(Track.values().find { it.name.equals(value, true) }) {
                 "Track must be one of ${Track.values().joinToString { "'${it.publishedName}'" }}"
             }
-            _track = Track.valueOf(value.toUpperCase())
         }
     /**
      * Choose whether or not to untrack superseded versions automatically. See
