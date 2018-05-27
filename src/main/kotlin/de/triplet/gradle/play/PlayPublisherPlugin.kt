@@ -4,7 +4,7 @@ import com.android.build.gradle.AppExtension
 import com.android.build.gradle.api.ApplicationVariant
 import de.triplet.gradle.play.internal.ACCOUNT_CONFIG
 import de.triplet.gradle.play.internal.PLAY_PATH
-import de.triplet.gradle.play.internal.PlayPublishTask
+import de.triplet.gradle.play.internal.PlayPublishTaskBase
 import de.triplet.gradle.play.internal.RESOURCES_OUTPUT_PATH
 import de.triplet.gradle.play.internal.get
 import de.triplet.gradle.play.internal.newTask
@@ -17,12 +17,11 @@ import org.gradle.api.plugins.ExtensionAware
 
 class PlayPublisherPlugin : Plugin<Project> {
     override fun apply(project: Project) {
-        val logger = project.logger
         val android = requireNotNull(project.extensions.get<AppExtension>()) {
             "The 'com.android.application' plugin is required."
         }
         val extension =
-                project.extensions.create(PLAY_PATH, PlayPublisherPluginExtension::class.java)
+                project.extensions.create(PLAY_PATH, PlayPublisherExtension::class.java)
 
         val bootstrapAllTask = project.newTask<Task>(
                 "bootstrapAll",
@@ -48,14 +47,14 @@ class PlayPublisherPlugin : Plugin<Project> {
         project.initPlayAccountConfigs(android)
         android.applicationVariants.whenObjectAdded { variant ->
             if (variant.buildType.isDebuggable) {
-                logger.info("Skipping debuggable build type ${variant.buildType.name}.")
+                project.logger.info("Skipping debuggable build type ${variant.buildType.name}.")
                 return@whenObjectAdded
             }
 
             val accountConfig = android.getAccountConfig(variant)
             val variantName = variant.name.capitalize()
 
-            fun PlayPublishTask.init() {
+            fun PlayPublishTaskBase.init() {
                 this.extension = extension
                 this.variant = variant
                 this.accountConfig = accountConfig ?: extension.accountConfig
@@ -66,8 +65,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "Downloads the Play Store listing metadata for $variantName."
             ) {
                 init()
-                outputFolder =
-                        project.file("src/${variant.flavorName ?: "main"}/$PLAY_PATH")
+                outputFolder = project.file("src/${variant.flavorName ?: "main"}/$PLAY_PATH")
 
                 bootstrapAllTask.dependsOn(this)
             }
@@ -120,7 +118,8 @@ class PlayPublisherPlugin : Plugin<Project> {
                     publishAllTask.dependsOn(this)
                 }
             } else {
-                logger.warn("Signing not ready. Did you specify a signingConfig for the variation $variantName?")
+                project.logger.error(
+                        "Signing not ready. Be sure to specify a signingConfig for $variantName?")
             }
         }
     }

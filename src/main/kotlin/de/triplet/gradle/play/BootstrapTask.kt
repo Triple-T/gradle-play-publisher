@@ -4,12 +4,12 @@ import com.google.api.services.androidpublisher.AndroidPublisher
 import de.triplet.gradle.play.internal.ImageType
 import de.triplet.gradle.play.internal.LISTING_PATH
 import de.triplet.gradle.play.internal.ListingDetail
-import de.triplet.gradle.play.internal.PlayPublishTask
+import de.triplet.gradle.play.internal.PlayPublishTaskBase
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 import java.net.URL
 
-open class BootstrapTask : PlayPublishTask() {
+open class BootstrapTask : PlayPublishTaskBase() {
     lateinit var outputFolder: File
 
     @TaskAction

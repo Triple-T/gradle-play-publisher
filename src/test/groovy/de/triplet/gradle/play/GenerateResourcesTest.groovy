@@ -31,7 +31,7 @@ class GenerateResourcesTest {
     void testFlavorsOverrideMain() {
         def project = TestHelper.evaluatableProject()
 
-        project.android{
+        project.android {
             flavorDimensions 'pricing'
 
             productFlavors {

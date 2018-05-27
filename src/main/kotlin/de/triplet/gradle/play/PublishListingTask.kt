@@ -10,13 +10,13 @@ import de.triplet.gradle.play.internal.ImageType
 import de.triplet.gradle.play.internal.LISTING_PATH
 import de.triplet.gradle.play.internal.ListingDetail
 import de.triplet.gradle.play.internal.LocaleFileFilter
-import de.triplet.gradle.play.internal.PlayPublishTask
+import de.triplet.gradle.play.internal.PlayPublishTaskBase
 import de.triplet.gradle.play.internal.orNull
 import de.triplet.gradle.play.internal.readProcessed
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 
-open class PublishListingTask : PlayPublishTask() {
+open class PublishListingTask : PlayPublishTaskBase() {
     lateinit var inputFolder: File
 
     @TaskAction
@@ -33,7 +33,7 @@ open class PublishListingTask : PlayPublishTask() {
     }
 
     private fun AndroidPublisher.Edits.updateListings(editId: String) {
-        // Matches if locale have the correct naming e.g. en-US for Play Store
+        // Matches valid locales e.g. en-US for Play Store
         inputFolder.listFiles(LocaleFileFilter).forEach { updateListing(editId, it) }
     }
 
@@ -84,7 +84,7 @@ open class PublishListingTask : PlayPublishTask() {
                 listings().update(variant.applicationId, editId, locale, listing).execute()
             } catch (e: GoogleJsonResponseException) {
                 if (e.details.errors.any { it.reason == "unsupportedListingLanguage" }) {
-                    // Rethrow unsupported listing exceptions to improve clarity
+                    // Rethrow for clarity
                     throw IllegalArgumentException("Unsupported locale $locale", e)
                 } else {
                     throw e

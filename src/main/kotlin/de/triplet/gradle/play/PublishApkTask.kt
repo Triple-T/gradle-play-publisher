@@ -9,7 +9,7 @@ import com.google.api.services.androidpublisher.model.ApkListing
 import com.google.api.services.androidpublisher.model.Track
 import de.triplet.gradle.play.internal.ListingDetail
 import de.triplet.gradle.play.internal.LocaleFileFilter
-import de.triplet.gradle.play.internal.PlayPublishTask
+import de.triplet.gradle.play.internal.PlayPublishTaskBase
 import de.triplet.gradle.play.internal.Track.INTERNAL
 import de.triplet.gradle.play.internal.orNull
 import de.triplet.gradle.play.internal.publishedName
@@ -18,7 +18,7 @@ import de.triplet.gradle.play.internal.superiors
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 
-open class PublishApkTask : PlayPublishTask() {
+open class PublishApkTask : PlayPublishTaskBase() {
     lateinit var inputFolder: File
 
     @TaskAction
@@ -27,11 +27,9 @@ open class PublishApkTask : PlayPublishTask() {
         updateTracks(editId, publishedApks)
     }
 
-    private fun AndroidPublisher.Edits.publishApks(editId: String): List<Apk> {
-        return variant.outputs
-                .filter { it is ApkVariantOutput }
-                .map { publishApk(editId, FileContent(MIME_TYPE_APK, it.outputFile)) }
-    }
+    private fun AndroidPublisher.Edits.publishApks(editId: String) = variant.outputs
+            .filter { it is ApkVariantOutput }
+            .map { publishApk(editId, FileContent(MIME_TYPE_APK, it.outputFile)) }
 
     private fun AndroidPublisher.Edits.updateTracks(editId: String, publishedApks: List<Apk>) {
         tracks()
@@ -68,7 +66,9 @@ open class PublishApkTask : PlayPublishTask() {
             extension._track.superiors.map { it.publishedName }.forEach { channel ->
                 try {
                     val track = tracks().get(
-                            variant.applicationId, editId, channel
+                            variant.applicationId,
+                            editId,
+                            channel
                     ).execute().apply {
                         versionCodes = versionCodes.filter { it > apk.versionCode }
                     }
@@ -76,9 +76,7 @@ open class PublishApkTask : PlayPublishTask() {
                     tracks().update(variant.applicationId, editId, channel, track).execute()
                 } catch (e: GoogleJsonResponseException) {
                     // Just skip if there is no version in track
-                    if (e.details.code != 404) {
-                        throw e
-                    }
+                    if (e.details.code != 404) throw e
                 }
             }
         }
@@ -92,7 +90,7 @@ open class PublishApkTask : PlayPublishTask() {
         }
 
         if (inputFolder.exists()) {
-            // Matches if locale have the correct naming e.g. en-US for Play Store
+            // Matches valid locales e.g. en-US for Play Store
             inputFolder.listFiles(LocaleFileFilter).forEach { updateWhatsNew(it) }
         }
 

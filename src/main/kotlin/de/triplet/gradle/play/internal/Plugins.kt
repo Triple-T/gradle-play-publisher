@@ -8,7 +8,7 @@ import org.gradle.api.plugins.ExtensionContainer
 import org.gradle.api.plugins.ExtraPropertiesExtension
 
 private val ProductFlavor.extras
-    get() = (this as ExtensionAware).extensions.getByName("ext") as ExtraPropertiesExtension
+    get() = requireNotNull((this as ExtensionAware).extensions.get<ExtraPropertiesExtension>())
 
 inline fun <reified T> ExtensionContainer.get() = findByType(T::class.java)
 

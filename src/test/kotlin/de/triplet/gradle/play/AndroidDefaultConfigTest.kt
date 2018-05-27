@@ -236,9 +236,10 @@ class AndroidDefaultConfigTest {
                 .withArguments("assemble")
                 .build()
 
-        val pluginJar =
-                File(pluginProject.buildDir, "/libs").listFiles().first { it.name.endsWith("jar") }
-                        .absolutePath
+        val pluginJar = File(pluginProject.buildDir, "/libs")
+                .listFiles()
+                .first { it.name.endsWith("jar") }
+                .absolutePath
 
         File(testProject.projectDir, "build.gradle").writeText("""
         buildscript {

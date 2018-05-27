@@ -13,8 +13,13 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 
-import static org.mockito.Matchers.*
-import static org.mockito.Mockito.*
+import static org.mockito.Matchers.any
+import static org.mockito.Matchers.anyString
+import static org.mockito.Matchers.argThat
+import static org.mockito.Matchers.eq
+import static org.mockito.Mockito.doReturn
+import static org.mockito.Mockito.times
+import static org.mockito.Mockito.verify
 import static org.mockito.MockitoAnnotations.initMocks
 
 class PlayPublishTaskTest {

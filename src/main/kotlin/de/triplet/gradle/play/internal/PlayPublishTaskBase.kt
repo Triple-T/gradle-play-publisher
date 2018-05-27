@@ -7,11 +7,11 @@ import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.AndroidPublisherScopes
 import de.triplet.gradle.play.PlayAccountConfig
-import de.triplet.gradle.play.PlayPublisherPluginExtension
+import de.triplet.gradle.play.PlayPublisherExtension
 import org.gradle.api.DefaultTask
 
-abstract class PlayPublishTask : DefaultTask() {
-    lateinit var extension: PlayPublisherPluginExtension
+abstract class PlayPublishTaskBase : DefaultTask() {
+    lateinit var extension: PlayPublisherExtension
     lateinit var variant: ApplicationVariant
     lateinit var accountConfig: PlayAccountConfig
 
@@ -23,8 +23,7 @@ abstract class PlayPublishTask : DefaultTask() {
             val factory = JacksonFactory.getDefaultInstance()
 
             if (jsonFile != null) {
-                GoogleCredential.fromStream(jsonFile.inputStream(),
-                                            transport, factory)
+                GoogleCredential.fromStream(jsonFile.inputStream(), transport, factory)
                         .createScoped(listOf(AndroidPublisherScopes.ANDROIDPUBLISHER))
             } else if (pk12File != null && serviceAccountEmail != null) {
                 GoogleCredential.Builder()
@@ -55,6 +54,7 @@ abstract class PlayPublishTask : DefaultTask() {
             request.execute().id
         } catch (e: GoogleJsonResponseException) {
             if (e.details.errors.any { it.reason == "applicationNotFound" }) {
+                // Rethrow for clarity
                 throw IllegalArgumentException(
                         "No application found for the package name ${variant.applicationId}. " +
                                 "The first version of your app must be uploaded via the " +
@@ -67,7 +67,9 @@ abstract class PlayPublishTask : DefaultTask() {
         edits.block(id)
     }
 
-    protected fun write(block: AndroidPublisher.Edits.(editId: String) -> Unit) = read {
+    protected inline fun write(
+            crossinline block: AndroidPublisher.Edits.(editId: String) -> Unit
+    ) = read {
         block(it)
         commit(variant.applicationId, it).execute()
     }
