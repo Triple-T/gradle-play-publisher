@@ -82,7 +82,7 @@ open class PublishApkTask : PlayPublishTaskBase() {
 
         // Upload Proguard mapping.txt if available
         if (variant.mappingFile?.exists() == true) {
-            val content = FileContent("application/octet-stream", variant.mappingFile)
+            val content = FileContent(MIME_TYPE_STREAM, variant.mappingFile)
             deobfuscationfiles()
                     .upload(variant.applicationId, editId, apk.versionCode, "proguard", content)
                     .execute()
@@ -98,5 +98,6 @@ open class PublishApkTask : PlayPublishTaskBase() {
 
     private companion object {
         const val MIME_TYPE_APK = "application/vnd.android.package-archive"
+        const val MIME_TYPE_STREAM = "application/octet-stream"
     }
 }
