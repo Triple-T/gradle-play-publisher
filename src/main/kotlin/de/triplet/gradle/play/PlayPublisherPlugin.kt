@@ -58,7 +58,7 @@ class PlayPublisherPlugin : Plugin<Project> {
             fun PlayPublishTaskBase.init() {
                 this.extension = extension
                 this.variant = variant
-                this.accountConfig = accountConfig ?: extension.accountConfig
+                this.accountConfig = accountConfig ?: extension
             }
 
             project.newTask<BootstrapTask>(

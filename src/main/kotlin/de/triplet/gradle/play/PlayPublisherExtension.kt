@@ -1,15 +1,9 @@
 package de.triplet.gradle.play
 
 import de.triplet.gradle.play.internal.AccountConfig
-import de.triplet.gradle.play.internal.Alias
 import de.triplet.gradle.play.internal.Track
 
-open class PlayPublisherExtension : AccountConfig {
-    internal val accountConfig = PlayAccountConfigExtension()
-    override var jsonFile by Alias(accountConfig::jsonFile)
-    override var pk12File by Alias(accountConfig::pk12File)
-    override var serviceAccountEmail by Alias(accountConfig::serviceAccountEmail)
-
+open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension() {
     internal var _track = Track.INTERNAL
     /**
      * Specify the track in which to upload your app. May be one of internal, alpha, beta, rollout,
