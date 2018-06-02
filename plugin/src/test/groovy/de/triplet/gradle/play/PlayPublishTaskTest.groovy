@@ -5,6 +5,7 @@ import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.Apk
 import com.google.api.services.androidpublisher.model.AppEdit
 import com.google.api.services.androidpublisher.model.Track
+import de.triplet.gradle.play.internal.PlayPublishTaskBase
 import kotlin.LazyKt
 import org.gradle.api.Task
 import org.junit.Before
@@ -300,9 +301,17 @@ class PlayPublishTaskTest {
     }
 
     private void setMockPublisher(Task task) {
-        def field = task.class.superclass.superclass.getDeclaredField("publisher\$delegate")
+        def field = findBaseTask(task.class).getDeclaredField("publisher\$delegate")
         field.setAccessible(true)
         field.set(task, LazyKt.lazy { publisherMock })
+    }
+
+    private Class<PlayPublishTaskBase> findBaseTask(Class<? super Task> clazz) {
+        if (clazz == PlayPublishTaskBase.class) {
+            return clazz as Class<PlayPublishTaskBase>
+        } else {
+            return findBaseTask(clazz.superclass)
+        }
     }
 
     static Track emptyTrack() {
