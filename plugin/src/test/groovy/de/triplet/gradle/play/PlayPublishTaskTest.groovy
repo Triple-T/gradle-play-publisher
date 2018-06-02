@@ -7,16 +7,15 @@ import com.google.api.services.androidpublisher.model.AppEdit
 import com.google.api.services.androidpublisher.model.Track
 import kotlin.LazyKt
 import org.gradle.api.Task
-import org.hamcrest.Description
-import org.hamcrest.TypeSafeMatcher
 import org.junit.Before
 import org.junit.Test
+import org.mockito.ArgumentMatcher
 import org.mockito.Mock
 
-import static org.mockito.Matchers.any
-import static org.mockito.Matchers.anyString
-import static org.mockito.Matchers.argThat
-import static org.mockito.Matchers.eq
+import static org.mockito.ArgumentMatchers.anyString
+import static org.mockito.ArgumentMatchers.argThat
+import static org.mockito.ArgumentMatchers.eq
+import static org.mockito.ArgumentMatchers.nullable
 import static org.mockito.Mockito.doReturn
 import static org.mockito.Mockito.times
 import static org.mockito.Mockito.verify
@@ -72,11 +71,11 @@ class PlayPublishTaskTest {
         apk.setVersionCode(42)
 
         doReturn(editsMock).when(publisherMock).edits()
-        doReturn(insertMock).when(editsMock).insert(anyString(), any(AppEdit.class))
+        doReturn(insertMock).when(editsMock).insert(anyString(), nullable(AppEdit.class))
         doReturn(appEdit).when(insertMock).execute()
 
         doReturn(apksMock).when(editsMock).apks()
-        doReturn(uploadMock).when(apksMock).upload(anyString(), anyString(), any(FileContent.class))
+        doReturn(uploadMock).when(apksMock).upload(anyString(), anyString(), nullable(FileContent.class))
         doReturn(apk).when(uploadMock).execute()
 
         doReturn(editTracksMock).when(editsMock).tracks()
@@ -87,7 +86,7 @@ class PlayPublishTaskTest {
         doReturn(getBetaTrackMock).when(editTracksMock).get(anyString(), anyString(), eq('beta'))
         doReturn(betaTrack).when(getBetaTrackMock).execute()
 
-        doReturn(tracksUpdateMock).when(editTracksMock).update(anyString(), anyString(), anyString(), any(Track.class))
+        doReturn(tracksUpdateMock).when(editTracksMock).update(anyString(), anyString(), anyString(), nullable(Track.class))
         doReturn(editCommitMock).when(editsMock).commit(anyString(), anyString())
     }
 
@@ -253,8 +252,8 @@ class PlayPublishTaskTest {
         }
         project.evaluate()
 
-        verify(editTracksMock, times(0)).update(anyString(), anyString(), eq('alpha'), any(Track.class))
-        verify(editTracksMock, times(0)).update(anyString(), anyString(), eq('beta'), any(Track.class))
+        verify(editTracksMock, times(0)).update(anyString(), anyString(), eq('alpha'), nullable(Track.class))
+        verify(editTracksMock, times(0)).update(anyString(), anyString(), eq('beta'), nullable(Track.class))
     }
 
     @Test
@@ -307,29 +306,19 @@ class PlayPublishTaskTest {
     }
 
     static Track emptyTrack() {
-        return argThat(new TypeSafeMatcher<Track>() {
+        return argThat(new ArgumentMatcher<Track>() {
             @Override
-            protected boolean matchesSafely(Track track) {
+            boolean matches(Track track) {
                 return track.getVersionCodes().isEmpty()
-            }
-
-            @Override
-            void describeTo(Description description) {
-
             }
         })
     }
 
     static Track trackThatContains(final int code) {
-        return argThat(new TypeSafeMatcher<Track>() {
+        return argThat(new ArgumentMatcher<Track>() {
             @Override
-            protected boolean matchesSafely(Track track) {
+            boolean matches(Track track) {
                 return track.getVersionCodes().contains(code)
-            }
-
-            @Override
-            void describeTo(Description description) {
-
             }
         })
     }

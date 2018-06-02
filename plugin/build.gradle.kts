@@ -13,7 +13,7 @@ dependencies {
 
     testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
     testImplementation("junit:junit:4.12")
-    testImplementation("org.mockito:mockito-core:1.10.19")
+    testImplementation("org.mockito:mockito-core:2.18.3")
     testImplementation("org.assertj:assertj-core:3.6.2")
 }
 
