@@ -2,6 +2,7 @@ plugins {
     id("org.jetbrains.kotlin.jvm")
     id("groovy")
     id("java-gradle-plugin")
+    id("com.vanniktech.maven.publish")
 }
 
 dependencies {
