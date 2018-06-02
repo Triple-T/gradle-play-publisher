@@ -5,13 +5,13 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.Apk
-import de.triplet.gradle.play.internal.PlayPublishTaskBase
+import de.triplet.gradle.play.internal.PlayPublishPackageBase
 import de.triplet.gradle.play.internal.TrackType.INTERNAL
 import de.triplet.gradle.play.internal.superiors
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 
-open class PublishApkTask : PlayPublishTaskBase() {
+open class PublishApkTask : PlayPublishPackageBase() {
     lateinit var inputFolder: File
 
     @TaskAction
