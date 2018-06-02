@@ -10,9 +10,9 @@ dependencies {
     implementation("com.google.apis:google-api-services-androidpublisher:v2-rev77-1.23.0") {
         exclude("com.google.guava", "guava-jdk5") // Remove when upgrading to AGP 3.1+
     }
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion")
+    implementation(kotlin("stdlib-jdk7"))
 
-    testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
+    testImplementation(kotlin("test"))
     testImplementation("junit:junit:4.12")
     testImplementation("org.mockito:mockito-core:2.18.3")
     testImplementation("org.assertj:assertj-core:3.6.2")
