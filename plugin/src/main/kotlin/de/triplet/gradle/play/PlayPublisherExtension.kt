@@ -52,12 +52,4 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
                 "Release Status must be one of ${ReleaseStatus.values().joinToString { "'${it.status}'" }}"
             }
         }
-
-    /**
-     * Specify any default modifiers for adjusting releases after publication. (see [ModifyTrackTask])
-     *
-     * Note: Function is required for the Gradle DSL to work
-     */
-    internal var releaseModifiers: PlayReleaseModifiers? = null
-
 }
