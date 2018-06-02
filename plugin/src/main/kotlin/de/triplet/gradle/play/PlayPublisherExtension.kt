@@ -1,10 +1,11 @@
 package de.triplet.gradle.play
 
 import de.triplet.gradle.play.internal.AccountConfig
-import de.triplet.gradle.play.internal.Track
+import de.triplet.gradle.play.internal.ReleaseStatus
+import de.triplet.gradle.play.internal.TrackType
 
 open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension() {
-    internal var _track = Track.INTERNAL
+    internal var _track = TrackType.INTERNAL
     /**
      * Specify the track in which to upload your app. May be one of internal, alpha, beta, rollout,
      * or production. Default is internal.
@@ -12,8 +13,8 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
     var track
         get() = _track.publishedName
         set(value) {
-            _track = requireNotNull(Track.values().find { it.name.equals(value, true) }) {
-                "Track must be one of ${Track.values().joinToString { "'${it.publishedName}'" }}"
+            _track = requireNotNull(TrackType.values().find { it.name.equals(value, true) }) {
+                "Track must be one of ${TrackType.values().joinToString { "'${it.publishedName}'" }}"
             }
         }
     /**
@@ -38,4 +39,25 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
      * simply trim it. Default throws.
      */
     var errorOnSizeLimit = true
+
+    internal var _releaseStatus = ReleaseStatus.COMPLETED
+    /**
+     * Specify the status to apply to the uploaded app release. May be one of completed, draft,
+     * halted, or inProgress. Default is completed.
+     */
+    var releaseStatus: String
+        get() = _releaseStatus.status
+        set(value) {
+            _releaseStatus = requireNotNull(ReleaseStatus.values().find { it.name.equals(value, true) }) {
+                "Release Status must be one of ${ReleaseStatus.values().joinToString { "'${it.status}'" }}"
+            }
+        }
+
+    /**
+     * Specify any default modifiers for adjusting releases after publication. (see [ModifyTrackTask])
+     *
+     * Note: Function is required for the Gradle DSL to work
+     */
+    internal var releaseModifiers: PlayReleaseModifiers? = null
+
 }
