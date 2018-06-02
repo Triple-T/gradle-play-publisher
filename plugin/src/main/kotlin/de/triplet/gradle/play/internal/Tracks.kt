@@ -9,7 +9,7 @@ internal enum class TrackType(val publishedName: String) {
     BETA("beta"),
     ROLLOUT("rollout"),
     PRODUCTION("production");
-    
+
     companion object {
         fun fromString(value: String) = values().first { it.publishedName.equals(value, true) }
     }
