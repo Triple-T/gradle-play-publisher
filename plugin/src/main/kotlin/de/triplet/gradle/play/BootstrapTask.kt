@@ -63,7 +63,7 @@ open class BootstrapTask : PlayPublishTaskBase() {
         val maxTrack = tracks()
                 .list(variant.applicationId, editId)
                 .execute().tracks
-                ?.maxBy { TrackType.valueOf(it.track) } ?: return
+                ?.maxBy { TrackType.fromString(it.track) } ?: return
 
         maxTrack.releases
                 .maxBy { it.versionCodes.max() ?: Long.MIN_VALUE }

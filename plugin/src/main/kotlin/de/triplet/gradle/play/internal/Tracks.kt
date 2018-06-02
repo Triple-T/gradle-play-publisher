@@ -11,9 +11,7 @@ internal enum class TrackType(val publishedName: String) {
     PRODUCTION("production");
 
     companion object {
-        fun fromString(value: String): TrackType {
-            return values().first { it.publishedName.equals(value, true) }
-        }
+        fun fromString(value: String) = values().first { it.publishedName.equals(value, true) }
     }
 }
 
@@ -23,4 +21,3 @@ internal enum class ReleaseStatus(val status: String) {
     HALTED("halted"),
     INPROGRESS("inProgress");
 }
-
