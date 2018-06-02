@@ -1,55 +1,54 @@
 package de.triplet.gradle.play
 
+import de.triplet.gradle.play.internal.ImageFileFilter
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
 
 class ImageFileFilterTest {
-    private val filter = ImageFileFilter()
-
     @Test
-    fun testJpg_returnsTrue() {
-        assertTrue(filter.accept(File("banana.jpg")))
+    fun `'jpg' is valid`() {
+        assertTrue(ImageFileFilter.accept(File("banana.jpg")))
     }
 
     @Test
-    fun testUppercaseJpg_returnsTrue() {
-        assertTrue(filter.accept(File("banana.JPG")))
+    fun `'JPG' is valid`() {
+        assertTrue(ImageFileFilter.accept(File("banana.JPG")))
     }
 
     @Test
-    fun testPng_returnsTrue() {
-        assertTrue(filter.accept(File("banana.png")))
+    fun `'png' is valid`() {
+        assertTrue(ImageFileFilter.accept(File("banana.png")))
     }
 
     @Test
-    fun testUppercasePng_returnsTrue() {
-        assertTrue(filter.accept(File("banana.PNG")))
+    fun `'PNG' is valid`() {
+        assertTrue(ImageFileFilter.accept(File("banana.PNG")))
     }
 
     @Test
-    fun testJpeg_returnsFalse() {
-        assertFalse(filter.accept(File("banana.jpeg")))
+    fun `'jpeg' is invalid`() {
+        assertFalse(ImageFileFilter.accept(File("banana.jpeg")))
     }
 
     @Test
-    fun testGif_returnsFalse() {
-        assertFalse(filter.accept(File("banana.gif")))
+    fun `'gif' is invalid`() {
+        assertFalse(ImageFileFilter.accept(File("banana.gif")))
     }
 
     @Test
-    fun testTiff_returnsFalse() {
-        assertFalse(filter.accept(File("banana.tiff")))
+    fun `'tiff' is invalid`() {
+        assertFalse(ImageFileFilter.accept(File("banana.tiff")))
     }
 
     @Test
-    fun testBmp_returnsFalse() {
-        assertFalse(filter.accept(File("banana.bmp")))
+    fun `'bmp' is invalid`() {
+        assertFalse(ImageFileFilter.accept(File("banana.bmp")))
     }
 
     @Test
-    fun testSvg_returnsFalse() {
-        assertFalse(filter.accept(File("banana.svg")))
+    fun `'svg' is invalid`() {
+        assertFalse(ImageFileFilter.accept(File("banana.svg")))
     }
 }

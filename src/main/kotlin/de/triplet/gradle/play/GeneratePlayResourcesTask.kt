@@ -9,7 +9,7 @@ open class GeneratePlayResourcesTask : DefaultTask() {
 
     @TaskAction
     fun generate() {
-        inputs.files.files
+        inputs.files
                 .filter(File::exists)
                 .forEach { it.copyRecursively(outputFolder, true) }
     }

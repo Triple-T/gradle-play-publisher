@@ -60,7 +60,7 @@ class PlayPublisherPluginTest {
         def project = TestHelper.evaluatableProject()
         project.evaluate()
 
-        assertEquals('alpha', project.extensions.findByName('play').track)
+        assertEquals('internal', project.extensions.findByName('play').track)
     }
 
     @Test
@@ -205,17 +205,17 @@ class PlayPublisherPluginTest {
         }
         project.evaluate()
 
-        assertEquals('default@exmaple.com', project.tasks.bootstrapDefaultFlavorReleasePlayResources.playAccountConfig.serviceAccountEmail)
-        assertEquals('first-mail@exmaple.com', project.tasks.bootstrapFreeReleasePlayResources.playAccountConfig.serviceAccountEmail)
-        assertEquals('another-mail@exmaple.com', project.tasks.bootstrapPaidReleasePlayResources.playAccountConfig.serviceAccountEmail)
+        assertEquals('default@exmaple.com', project.tasks.bootstrapDefaultFlavorReleasePlayResources.accountConfig.serviceAccountEmail)
+        assertEquals('first-mail@exmaple.com', project.tasks.bootstrapFreeReleasePlayResources.accountConfig.serviceAccountEmail)
+        assertEquals('another-mail@exmaple.com', project.tasks.bootstrapPaidReleasePlayResources.accountConfig.serviceAccountEmail)
 
-        assertEquals('default@exmaple.com', project.tasks.publishApkDefaultFlavorRelease.playAccountConfig.serviceAccountEmail)
-        assertEquals('first-mail@exmaple.com', project.tasks.publishApkFreeRelease.playAccountConfig.serviceAccountEmail)
-        assertEquals('another-mail@exmaple.com', project.tasks.publishApkPaidRelease.playAccountConfig.serviceAccountEmail)
+        assertEquals('default@exmaple.com', project.tasks.publishApkDefaultFlavorRelease.accountConfig.serviceAccountEmail)
+        assertEquals('first-mail@exmaple.com', project.tasks.publishApkFreeRelease.accountConfig.serviceAccountEmail)
+        assertEquals('another-mail@exmaple.com', project.tasks.publishApkPaidRelease.accountConfig.serviceAccountEmail)
 
-        assertEquals('default@exmaple.com', project.tasks.publishListingDefaultFlavorRelease.playAccountConfig.serviceAccountEmail)
-        assertEquals('first-mail@exmaple.com', project.tasks.publishListingFreeRelease.playAccountConfig.serviceAccountEmail)
-        assertEquals('another-mail@exmaple.com', project.tasks.publishListingPaidRelease.playAccountConfig.serviceAccountEmail)
+        assertEquals('default@exmaple.com', project.tasks.publishListingDefaultFlavorRelease.accountConfig.serviceAccountEmail)
+        assertEquals('first-mail@exmaple.com', project.tasks.publishListingFreeRelease.accountConfig.serviceAccountEmail)
+        assertEquals('another-mail@exmaple.com', project.tasks.publishListingPaidRelease.accountConfig.serviceAccountEmail)
     }
 
     @Test
@@ -256,10 +256,10 @@ class PlayPublisherPluginTest {
         }
         project.evaluate()
 
-        assertEquals('free@exmaple.com', project.tasks.bootstrapDemoFreeReleasePlayResources.playAccountConfig.serviceAccountEmail)
-        assertEquals('paid@exmaple.com', project.tasks.bootstrapDemoPaidReleasePlayResources.playAccountConfig.serviceAccountEmail)
-        assertEquals('free@exmaple.com', project.tasks.bootstrapProductionFreeReleasePlayResources.playAccountConfig.serviceAccountEmail)
-        assertEquals('paid@exmaple.com', project.tasks.bootstrapProductionPaidReleasePlayResources.playAccountConfig.serviceAccountEmail)
+        assertEquals('free@exmaple.com', project.tasks.bootstrapDemoFreeReleasePlayResources.accountConfig.serviceAccountEmail)
+        assertEquals('paid@exmaple.com', project.tasks.bootstrapDemoPaidReleasePlayResources.accountConfig.serviceAccountEmail)
+        assertEquals('free@exmaple.com', project.tasks.bootstrapProductionFreeReleasePlayResources.accountConfig.serviceAccountEmail)
+        assertEquals('paid@exmaple.com', project.tasks.bootstrapProductionPaidReleasePlayResources.accountConfig.serviceAccountEmail)
     }
 
     @Test
@@ -280,9 +280,9 @@ class PlayPublisherPluginTest {
         }
         project.evaluate()
 
-        assertEquals('default@exmaple.com', project.tasks.bootstrapReleasePlayResources.playAccountConfig.serviceAccountEmail)
-        assertEquals('default@exmaple.com', project.tasks.publishApkRelease.playAccountConfig.serviceAccountEmail)
-        assertEquals('default@exmaple.com', project.tasks.publishListingRelease.playAccountConfig.serviceAccountEmail)
+        assertEquals('default@exmaple.com', project.tasks.bootstrapReleasePlayResources.accountConfig.serviceAccountEmail)
+        assertEquals('default@exmaple.com', project.tasks.publishApkRelease.accountConfig.serviceAccountEmail)
+        assertEquals('default@exmaple.com', project.tasks.publishListingRelease.accountConfig.serviceAccountEmail)
     }
 
     @Test

@@ -5,6 +5,8 @@ import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.Apk
 import com.google.api.services.androidpublisher.model.AppEdit
 import com.google.api.services.androidpublisher.model.Track
+import kotlin.LazyKt
+import org.gradle.api.Task
 import org.hamcrest.Description
 import org.hamcrest.TypeSafeMatcher
 import org.junit.Before
@@ -41,6 +43,9 @@ class PlayPublishTaskTest {
     AndroidPublisher.Edits.Tracks.Update tracksUpdateMock
 
     @Mock
+    AndroidPublisher.Edits.Tracks.Get getInternalTrackMock
+
+    @Mock
     AndroidPublisher.Edits.Tracks.Get getAlphaTrackMock
 
     @Mock
@@ -55,6 +60,7 @@ class PlayPublishTaskTest {
     // These are final and not mock able
     final AppEdit appEdit = new AppEdit()
     final Apk apk = new Apk()
+    final Track internalTrack = new Track()
     final Track alphaTrack = new Track()
     final Track betaTrack = new Track()
 
@@ -74,6 +80,8 @@ class PlayPublishTaskTest {
         doReturn(apk).when(uploadMock).execute()
 
         doReturn(editTracksMock).when(editsMock).tracks()
+        doReturn(getInternalTrackMock).when(editTracksMock).get(anyString(), anyString(), eq('internal'))
+        doReturn(internalTrack).when(getInternalTrackMock).execute()
         doReturn(getAlphaTrackMock).when(editTracksMock).get(anyString(), anyString(), eq('alpha'))
         doReturn(alphaTrack).when(getAlphaTrackMock).execute()
         doReturn(getBetaTrackMock).when(editTracksMock).get(anyString(), anyString(), eq('beta'))
@@ -89,10 +97,10 @@ class PlayPublishTaskTest {
         project.evaluate()
 
         // Attach the mock
-        project.tasks.publishApkRelease.service = publisherMock
+        setMockPublisher(project.tasks.publishApkRelease)
 
         // finally run the task we want to check
-        project.tasks.publishApkRelease.publish()
+        project.tasks.publishApkRelease.publishApks()
 
         // verify that we init the connection with the correct application id
         verify(editsMock).insert('com.example.publisher', null)
@@ -125,10 +133,10 @@ class PlayPublishTaskTest {
         project.evaluate()
 
         // Attach the mock
-        project.tasks.publishApkPaidRelease.service = publisherMock
+        setMockPublisher(project.tasks.publishApkPaidRelease)
 
         // finally run the task we want to check
-        project.tasks.publishApkPaidRelease.publish()
+        project.tasks.publishApkPaidRelease.publishApks()
 
         // verify that we init the connection with the correct application id
         verify(editsMock).insert('com.example.publisher.paid.release', null)
@@ -143,9 +151,10 @@ class PlayPublishTaskTest {
         }
         project.evaluate()
 
+        internalTrack.setVersionCodes([42])
         alphaTrack.setVersionCodes([41, 40])
 
-        project.tasks.publishApkRelease.service = publisherMock
+        setMockPublisher(project.tasks.publishApkRelease)
         project.tasks.publishApkRelease.publishApks()
 
         verify(editTracksMock).update(
@@ -164,9 +173,10 @@ class PlayPublishTaskTest {
         }
         project.evaluate()
 
+        internalTrack.setVersionCodes([44])
         alphaTrack.setVersionCodes([43])
 
-        project.tasks.publishApkRelease.service = publisherMock
+        setMockPublisher(project.tasks.publishApkRelease)
         project.tasks.publishApkRelease.publishApks()
 
         verify(editTracksMock).update(
@@ -185,10 +195,11 @@ class PlayPublishTaskTest {
         }
         project.evaluate()
 
+        internalTrack.setVersionCodes([42])
         alphaTrack.setVersionCodes([40, 41])
         betaTrack.setVersionCodes([39])
 
-        project.tasks.publishApkRelease.service = publisherMock
+        setMockPublisher(project.tasks.publishApkRelease)
         project.tasks.publishApkRelease.publishApks()
 
         verify(editTracksMock).update(
@@ -213,10 +224,11 @@ class PlayPublishTaskTest {
         }
         project.evaluate()
 
+        internalTrack.setVersionCodes([45])
         alphaTrack.setVersionCodes([44])
         betaTrack.setVersionCodes([43])
 
-        project.tasks.publishApkRelease.service = publisherMock
+        setMockPublisher(project.tasks.publishApkRelease)
         project.tasks.publishApkRelease.publishApks()
 
         verify(editTracksMock).update(
@@ -279,13 +291,19 @@ class PlayPublishTaskTest {
         project.evaluate()
 
         // Attach the mock
-        project.tasks.publishApkPaidRelease.service = publisherMock
+        setMockPublisher(project.tasks.publishApkPaidRelease)
 
         // finally run the task we want to check
-        project.tasks.publishApkPaidRelease.publish()
+        project.tasks.publishApkPaidRelease.publishApks()
 
         // verify that we init the connection with the correct application id
         verify(editsMock).insert('com.example.publisher.paid.release', null)
+    }
+
+    private void setMockPublisher(Task task) {
+        def field = task.class.superclass.superclass.getDeclaredField("publisher\$delegate")
+        field.setAccessible(true)
+        field.set(task, LazyKt.lazy { publisherMock })
     }
 
     static Track emptyTrack() {

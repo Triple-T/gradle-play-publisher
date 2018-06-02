@@ -1,20 +1,16 @@
 package de.triplet.gradle.play
 
+import de.triplet.gradle.play.internal.normalized
+import de.triplet.gradle.play.internal.readProcessed
 import org.assertj.core.api.Assertions.assertThat
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
-import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import java.io.File
 import java.nio.charset.StandardCharsets
 
 class ExtensionsTest {
-    private val TESTFILE = "src/main/play/en-US/whatsnew"
-    private val TESTFILE_WITH_LINEBREAK = "src/main/play/en-US/listing/shortdescription"
-    private val BROKEN_SINGLE_LINE = "src/main/play/defaultLanguage"
-    private val BYTES_NEW_LINES = byteArrayOf(97, 13, 10, 98, 13, 10, 99, 13, 10, 97)
-
     private lateinit var project: Project
 
     @Before
@@ -25,44 +21,41 @@ class ExtensionsTest {
     }
 
     @Test
-    fun testFilesAreCorrectlyTrimmed() {
-        assertThat(project.file(TESTFILE).readAndTrim(6, false, project.file(RESOURCES_OUTPUT_PATH))).hasSize(6)
+    fun `Long files are trimmed`() {
+        assertThat(project.file(TEST_FILE).readProcessed(6, false)).hasSize(6)
     }
 
     @Test
-    fun testShortFilesAreNotTrimmed() {
-        assertThat(project.file(TESTFILE).readAndTrim(100, false, project.file(RESOURCES_OUTPUT_PATH))).hasSize(12)
+    fun `Files on the edge are trimmed correctly`() {
+        assertThat(project.file(TEST_FILE).readProcessed(12, false)).hasSize(12)
     }
 
     @Test
-    fun testCorrectTextLength() {
-        project.file(TESTFILE).readAndTrim(50, true, project.file(RESOURCES_OUTPUT_PATH))
+    fun `Short files aren't trimmed`() {
+        assertThat(project.file(TEST_FILE).readProcessed(100, false)).hasSize(12)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `Throws on overflow`() {
+        project.file(TEST_FILE).readProcessed(1, true)
     }
 
     @Test
-    fun testIncorrectTextLength() {
-        try {
-            project.file(TESTFILE).readAndTrim(1, true, project.file(RESOURCES_OUTPUT_PATH))
-            fail()
-        } catch (e: IllegalArgumentException) {
-            assertThat(e).hasMessageMatching("File \'.+\' has reached the limit of 1 characters")
-        }
+    fun `File is trimmed`() {
+        project.file(FILE_WITH_LINEBREAK).readProcessed(28, true)
     }
 
     @Test
-    fun testTrailingLinebreakIsCutOff() {
-        project.file(TESTFILE_WITH_LINEBREAK).readAndTrim(28, true, project.file(RESOURCES_OUTPUT_PATH))
+    fun `Character counts are valid`() {
+        assertThat(newLine).hasSize(10)
+        assertThat(newLine.normalized()).hasSize(7)
     }
 
-    @Test
-    fun testGetCharacterCount() {
-        val message = String(BYTES_NEW_LINES, StandardCharsets.UTF_8)
-        assertThat(message).hasSize(10)
-        assertThat(message.normalize()).hasSize(7)
-    }
+    private companion object {
+        const val TEST_FILE = "src/main/play/en-US/whatsnew"
+        const val FILE_WITH_LINEBREAK = "src/main/play/en-US/listing/shortdescription"
 
-    @Test
-    fun testReadSingleLine() {
-        assertThat(project.file(BROKEN_SINGLE_LINE).firstLine()).isEqualTo("en-US")
+        val newLine = byteArrayOf(97, 13, 10, 98, 13, 10, 99, 13, 10, 97)
+                .toString(StandardCharsets.UTF_8)
     }
 }

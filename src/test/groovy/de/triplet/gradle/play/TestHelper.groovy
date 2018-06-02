@@ -17,7 +17,6 @@ class TestHelper {
         project.apply plugin: 'com.github.triplet.play'
         project.android {
             compileSdkVersion 27
-            buildToolsVersion '27.0.3'
 
             defaultConfig {
                 versionCode 1
@@ -42,7 +41,6 @@ class TestHelper {
         project.apply plugin: 'com.github.triplet.play'
         project.android {
             compileSdkVersion 27
-            buildToolsVersion '27.0.3'
 
             defaultConfig {
                 versionCode 1
