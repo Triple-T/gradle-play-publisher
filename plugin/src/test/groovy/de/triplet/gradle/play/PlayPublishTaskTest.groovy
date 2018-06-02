@@ -316,7 +316,7 @@ class PlayPublishTaskTest {
     }
 
     private void setMockPublisher(Task task) {
-        def field = task.class.superclass.superclass.getDeclaredField("publisher\$delegate")
+        def field = task.class.superclass.superclass.superclass.getDeclaredField("publisher\$delegate")
         field.setAccessible(true)
         field.set(task, LazyKt.lazy { publisherMock })
     }
