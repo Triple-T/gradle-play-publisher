@@ -5,6 +5,9 @@ import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.Apk
 import com.google.api.services.androidpublisher.model.AppEdit
 import com.google.api.services.androidpublisher.model.Track
+import com.google.api.services.androidpublisher.model.TrackRelease
+import com.google.api.services.androidpublisher.model.TracksListResponse
+import de.triplet.gradle.play.internal.TrackType
 import kotlin.LazyKt
 import org.gradle.api.Task
 import org.junit.Before
@@ -36,6 +39,9 @@ class PlayPublishTaskTest {
     AndroidPublisher.Edits.Tracks editTracksMock
 
     @Mock
+    AndroidPublisher.Edits.Tracks.List editTracksListMock
+
+    @Mock
     AndroidPublisher.Edits.Commit editCommitMock
 
     @Mock
@@ -62,6 +68,13 @@ class PlayPublishTaskTest {
     final Track internalTrack = new Track()
     final Track alphaTrack = new Track()
     final Track betaTrack = new Track()
+    final List<Track> tracksList = [
+            new Track().setTrack(TrackType.INTERNAL.publishedName),
+            new Track().setTrack(TrackType.ALPHA.publishedName),
+            new Track().setTrack(TrackType.BETA.publishedName),
+            new Track().setTrack(TrackType.PRODUCTION.publishedName)
+    ]
+    final TracksListResponse tracksListResponse = new TracksListResponse().setTracks(tracksList)
 
     @Before
     void setup() {
@@ -73,6 +86,9 @@ class PlayPublishTaskTest {
         doReturn(editsMock).when(publisherMock).edits()
         doReturn(insertMock).when(editsMock).insert(anyString(), nullable(AppEdit.class))
         doReturn(appEdit).when(insertMock).execute()
+
+        doReturn(editTracksListMock).when(editTracksMock).list(anyString(), anyString())
+        doReturn(tracksListResponse).when(editTracksListMock).execute()
 
         doReturn(apksMock).when(editsMock).apks()
         doReturn(uploadMock).when(apksMock).upload(anyString(), anyString(), nullable(FileContent.class))
@@ -150,8 +166,8 @@ class PlayPublishTaskTest {
         }
         project.evaluate()
 
-        internalTrack.setVersionCodes([42])
-        alphaTrack.setVersionCodes([41, 40])
+        internalTrack.setReleases([new TrackRelease().setVersionCodes([42L])])
+        alphaTrack.setReleases([new TrackRelease().setVersionCodes([41L, 40L])])
 
         setMockPublisher(project.tasks.publishApkRelease)
         project.tasks.publishApkRelease.publishApks()
@@ -172,8 +188,8 @@ class PlayPublishTaskTest {
         }
         project.evaluate()
 
-        internalTrack.setVersionCodes([44])
-        alphaTrack.setVersionCodes([43])
+        internalTrack.setReleases([new TrackRelease().setVersionCodes([44L])])
+        alphaTrack.setReleases([new TrackRelease().setVersionCodes([43L])])
 
         setMockPublisher(project.tasks.publishApkRelease)
         project.tasks.publishApkRelease.publishApks()
@@ -182,7 +198,7 @@ class PlayPublishTaskTest {
                 eq('com.example.publisher'),
                 eq('424242'),
                 eq('alpha'),
-                trackThatContains(43))
+                trackThatContains(43L))
     }
 
     @Test
@@ -194,9 +210,9 @@ class PlayPublishTaskTest {
         }
         project.evaluate()
 
-        internalTrack.setVersionCodes([42])
-        alphaTrack.setVersionCodes([40, 41])
-        betaTrack.setVersionCodes([39])
+        internalTrack.setReleases([new TrackRelease().setVersionCodes([42L])])
+        alphaTrack.setReleases([new TrackRelease().setVersionCodes([40L, 41L])])
+        betaTrack.setReleases([new TrackRelease().setVersionCodes([39L])])
 
         setMockPublisher(project.tasks.publishApkRelease)
         project.tasks.publishApkRelease.publishApks()
@@ -223,9 +239,9 @@ class PlayPublishTaskTest {
         }
         project.evaluate()
 
-        internalTrack.setVersionCodes([45])
-        alphaTrack.setVersionCodes([44])
-        betaTrack.setVersionCodes([43])
+        internalTrack.setReleases([new TrackRelease().setVersionCodes([45L])])
+        alphaTrack.setReleases([new TrackRelease().setVersionCodes([44L])])
+        betaTrack.setReleases([new TrackRelease().setVersionCodes([43L])])
 
         setMockPublisher(project.tasks.publishApkRelease)
         project.tasks.publishApkRelease.publishApks()
@@ -234,13 +250,13 @@ class PlayPublishTaskTest {
                 eq('com.example.publisher'),
                 eq('424242'),
                 eq('alpha'),
-                trackThatContains(44))
+                trackThatContains(44L))
 
         verify(editTracksMock).update(
                 eq('com.example.publisher'),
                 eq('424242'),
                 eq('beta'),
-                trackThatContains(43))
+                trackThatContains(43L))
     }
 
     @Test
@@ -309,16 +325,16 @@ class PlayPublishTaskTest {
         return argThat(new ArgumentMatcher<Track>() {
             @Override
             boolean matches(Track track) {
-                return track.getVersionCodes().isEmpty()
+                return track.getReleases().sum { (it as TrackRelease).getVersionCodes().size() } == 0
             }
         })
     }
 
-    static Track trackThatContains(final int code) {
+    static Track trackThatContains(final Long code) {
         return argThat(new ArgumentMatcher<Track>() {
             @Override
             boolean matches(Track track) {
-                return track.getVersionCodes().contains(code)
+                return track.getReleases().find {it.getVersionCodes().contains(code)} != null
             }
         })
     }

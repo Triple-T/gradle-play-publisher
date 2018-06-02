@@ -1,10 +1,7 @@
 package de.triplet.gradle.play
 
 import com.google.api.services.androidpublisher.AndroidPublisher
-import de.triplet.gradle.play.internal.ImageType
-import de.triplet.gradle.play.internal.LISTING_PATH
-import de.triplet.gradle.play.internal.ListingDetail
-import de.triplet.gradle.play.internal.PlayPublishTaskBase
+import de.triplet.gradle.play.internal.*
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 import java.net.URL
@@ -59,19 +56,16 @@ open class BootstrapTask : PlayPublishTaskBase() {
     }
 
     private fun AndroidPublisher.Edits.bootstrapWhatsNew(editId: String) {
-        val versionCode = apks()
+        val maxTrack = tracks()
                 .list(variant.applicationId, editId)
-                .execute().apks
-                ?.map { it.versionCode }
-                ?.max() ?: return
-        val apkListings = apklistings()
-                .list(variant.applicationId, editId, versionCode)
-                .execute()
-                .listings ?: return
+                .execute().tracks
+                ?.maxBy { TrackType.valueOf(it.track) } ?: return
 
-        for (listing in apkListings) {
-            File(outputFolder, "${listing.language}/${ListingDetail.WHATS_NEW.fileName}")
-                    .writeText(listing.recentChanges)
+        maxTrack.releases
+                .maxBy { it.versionCodes.max() ?: Long.MIN_VALUE }
+                ?.releaseNotes?.forEach {
+            File(outputFolder, "${it.language}/${ListingDetail.WHATS_NEW.fileName}")
+                    .writeText(it.text)
         }
     }
 
