@@ -25,6 +25,8 @@ the Google Play Store from a continuous integration server or anywhere you have 
    1. [Using multiple Service Accounts](#using-multiple-service-accounts)
    1. [Encrypting Service Account keys](#encrypting-service-account-keys)
    1. [Running custom tasks before publishing](#running-custom-tasks-before-publishing)
+1. [Advanced](#advanced)
+   1. [Using Alternate Build Folder](#alternate-build-folder)
 
 ## Quick start guide
 
@@ -364,3 +366,22 @@ project.afterEvaluate {
 
 Note that we have to wait for the evaluation phase to complete before the
 `generateReleasePlayResources` task becomes visible.
+
+## Advanced
+
+Options and configurations that are unusual, but available for advanced use-cases.
+
+### Alternate Build Folder
+
+If you use an external tool to process your APK file, you will need to override the standard
+publish process. With this enabled, the standard output will be ignored, and any `.apk` files
+in the provided folder will uploaded instead. If you have multiple flavors with different
+`applicationId`s you will need to use a property and override for each application you are
+uploading.
+
+```groovy
+play {
+    // ...
+    overrideBuildOutput = file('alternate-output-folder')
+}
+```
