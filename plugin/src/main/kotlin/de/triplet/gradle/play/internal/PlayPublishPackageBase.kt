@@ -7,32 +7,35 @@ import com.google.api.services.androidpublisher.model.TrackRelease
 import java.io.File
 
 abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
-    internal fun AndroidPublisher.Edits.updateTracks(
+    protected fun AndroidPublisher.Edits.updateTracks(
             editId: String,
             inputFolder: File,
             releaseStatus: String,
             versions: List<Long>,
             trackType: String,
-            userPercent: Double) {
+            userPercent: Double
+    ) {
         val track = tracks()
                 .list(variant.applicationId, editId)
-                .execute().tracks?.firstOrNull { it.track == trackType }
-                ?: Track()
+                .execute().tracks
+                ?.firstOrNull { it.track == trackType } ?: Track()
 
-        var releaseTexts: List<LocalizedText>? = null
-        if (inputFolder.exists()) {
-            releaseTexts = inputFolder.listFiles(LocaleFileFilter).map { locale ->
+        val releaseTexts = if (inputFolder.exists()) {
+            inputFolder.listFiles(LocaleFileFilter).mapNotNull { locale ->
                 val fileName = ListingDetail.WHATS_NEW.fileName
                 val file = run {
                     File(locale, "$fileName-${extension.track}").orNull()
-                        ?: File(locale, fileName).orNull()
-                } ?: return@map null
+                            ?: File(locale, fileName).orNull()
+                } ?: return@mapNotNull null
+
                 val recentChanges = File(file, fileName).readProcessed(
                         ListingDetail.WHATS_NEW.maxLength,
                         extension.errorOnSizeLimit
                 )
                 LocalizedText().setLanguage(locale.name).setText(recentChanges)
-            }.filterNotNull()
+            }
+        } else {
+            null
         }
         val trackRelease = TrackRelease().apply {
             releaseNotes = releaseTexts
