@@ -13,7 +13,7 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
     var track
         get() = _track.publishedName
         set(value) {
-            _track = requireNotNull(TrackType.values().find { it.name.equals(value, true) }) {
+            _track = requireNotNull(TrackType.values().find { it.publishedName == value }) {
                 "Track must be one of ${TrackType.values().joinToString { "'${it.publishedName}'" }}"
             }
         }
@@ -48,9 +48,7 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
     var releaseStatus
         get() = _releaseStatus.status
         set(value) {
-            _releaseStatus = requireNotNull(
-                    ReleaseStatus.values().find { it.name.equals(value, true) }
-            ) {
+            _releaseStatus = requireNotNull(ReleaseStatus.values().find { it.status == value }) {
                 "Release Status must be one of " +
                         ReleaseStatus.values().joinToString { "'${it.status}'" }
             }

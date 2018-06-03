@@ -13,11 +13,11 @@ private val rolloutStatuses = listOf(ReleaseStatus.IN_PROGRESS, ReleaseStatus.HA
 internal fun PlayPublisherExtension.validate() {
     val usesRolloutStatues = rolloutStatuses.contains(_releaseStatus)
     if (_track == TrackType.ROLLOUT) {
-        require(usesRolloutStatues) {
+        check(usesRolloutStatues) {
             "'rollout' track must use the 'inProgress' or 'halted' statues."
         }
     } else {
-        require(!usesRolloutStatues) {
+        check(!usesRolloutStatues) {
             "Track must be of type 'rollout' to use 'inProgress' or 'halted' statues."
         }
     }
