@@ -19,6 +19,7 @@ the Google Play Store from a continuous integration server or anywhere you have 
    1. [Authenticating the plugin](#authenticating-the-plugin)
 1. [Configuration](#configuration)
    1. [Specify the track](#specify-the-track)
+   1. [Specify the release status](#specify-the-release-status)
    1. [Untrack conflicting versions](#untrack-conflicting-versions)
    1. [Play Store metadata](#play-store-metadata)
    1. [Uploading images](#uploading-images)
@@ -162,6 +163,21 @@ play {
 
 When initiating a staged release (`rollout`), the `userFraction` property will decide what
 percentage of your users should start receiving the update.
+
+### Specify the release status
+
+By default, your app is published using the `completed` status, to the specified channel. The `draft`
+status will only upload the APK and related files, but will not release that version to the channel.
+As of now `halted` status can't be used because it requires an `inProgress` release to be published
+and the modification of existing releases is not yet supported. When a `rollout` track is specified,
+the `releaseStatus` defaults to `inProgress`.
+
+```groovy
+play {
+    // ...
+    releaseStatus = 'completed' // Or any of 'draft', 'inProgress', or 'halted'
+}
+```
 
 ### Untrack conflicting versions
 
