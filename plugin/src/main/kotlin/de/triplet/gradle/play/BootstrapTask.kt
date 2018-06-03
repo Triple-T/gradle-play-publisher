@@ -59,19 +59,16 @@ open class BootstrapTask : PlayPublishTaskBase() {
         }
     }
 
-    private fun AndroidPublisher.Edits.bootstrapWhatsNew(editId: String) {
-        val maxTrack = tracks()
-                .list(variant.applicationId, editId)
-                .execute().tracks
-                ?.maxBy { TrackType.fromString(it.track) } ?: return
-
-        maxTrack.releases
-                .maxBy { it.versionCodes.max() ?: Long.MIN_VALUE }
-                ?.releaseNotes?.forEach {
-            File(outputFolder, "${it.language}/${ListingDetail.WHATS_NEW.fileName}")
+    private fun AndroidPublisher.Edits.bootstrapWhatsNew(editId: String) = tracks()
+            .list(variant.applicationId, editId)
+            .execute().tracks
+            ?.maxBy { TrackType.fromString(it.track) }
+            ?.releases
+            ?.maxBy { it.versionCodes.max() ?: Long.MIN_VALUE }
+            ?.releaseNotes?.forEach {
+                File(outputFolder, "${it.language}/${ListingDetail.WHATS_NEW.fileName}")
                     .writeText(it.text)
-        }
-    }
+            }
 
     private fun AndroidPublisher.Edits.bootstrapAppDetails(editId: String) {
         fun String.write(detail: ListingDetail) = write(outputFolder, detail)

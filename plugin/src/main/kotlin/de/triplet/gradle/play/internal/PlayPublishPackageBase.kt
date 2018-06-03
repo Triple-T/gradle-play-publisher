@@ -19,14 +19,13 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
                 .execute().tracks?.firstOrNull { it.track == trackType }
                 ?: Track()
 
-        var releaseText: List<LocalizedText>? = null
+        var releaseTexts: List<LocalizedText>? = null
         if (inputFolder.exists()) {
-            releaseText = inputFolder.listFiles(LocaleFileFilter).map { locale ->
+            releaseTexts = inputFolder.listFiles(LocaleFileFilter).map { locale ->
                 val fileName = ListingDetail.WHATS_NEW.fileName
                 val file = run {
-                    var file = File(locale, "$fileName-${extension.track}").orNull()
-                    if (file == null) file = File(locale, fileName).orNull()
-                    file
+                    File(locale, "$fileName-${extension.track}").orNull()
+                        ?: File(locale, fileName).orNull()
                 } ?: return@map null
                 val recentChanges = File(file, fileName).readProcessed(
                         ListingDetail.WHATS_NEW.maxLength,
@@ -36,7 +35,7 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
             }.filterNotNull()
         }
         val trackRelease = TrackRelease().apply {
-            releaseNotes = releaseText
+            releaseNotes = releaseTexts
             status = releaseStatus
             userFraction = if (status == ReleaseStatus.INPROGRESS.status) userPercent else 0.0
             versionCodes = versions
