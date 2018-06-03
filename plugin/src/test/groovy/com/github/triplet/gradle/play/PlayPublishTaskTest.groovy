@@ -1,5 +1,7 @@
 package com.github.triplet.gradle.play
 
+import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
+import com.github.triplet.gradle.play.internal.TrackType
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.Apk
@@ -7,8 +9,6 @@ import com.google.api.services.androidpublisher.model.AppEdit
 import com.google.api.services.androidpublisher.model.Track
 import com.google.api.services.androidpublisher.model.TrackRelease
 import com.google.api.services.androidpublisher.model.TracksListResponse
-import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
-import com.github.triplet.gradle.play.internal.TrackType
 import kotlin.LazyKt
 import org.gradle.api.Task
 import org.junit.Before
@@ -343,7 +343,7 @@ class PlayPublishTaskTest {
         return argThat(new ArgumentMatcher<Track>() {
             @Override
             boolean matches(Track track) {
-                return track.getReleases().find {it.getVersionCodes().contains(code)} != null
+                return track.getReleases().find { it.getVersionCodes().contains(code) } != null
             }
         })
     }

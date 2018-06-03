@@ -1,14 +1,16 @@
 package com.github.triplet.gradle.play
 
 import com.android.build.gradle.api.ApkVariantOutput
+import com.github.triplet.gradle.play.internal.PlayPublishPackageBase
+import com.github.triplet.gradle.play.internal.TrackType.INTERNAL
+import com.github.triplet.gradle.play.internal.initProgressLogger
+import com.github.triplet.gradle.play.internal.superiors
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.Apk
-import com.github.triplet.gradle.play.internal.PlayPublishPackageBase
-import com.github.triplet.gradle.play.internal.TrackType.INTERNAL
-import com.github.triplet.gradle.play.internal.superiors
 import org.gradle.api.tasks.TaskAction
+import org.gradle.internal.logging.progress.ProgressLoggerFactory
 import java.io.File
 
 open class PublishApkTask : PlayPublishPackageBase() {
@@ -32,7 +34,12 @@ open class PublishApkTask : PlayPublishPackageBase() {
                 .map { publishApk(editId, FileContent(MIME_TYPE_APK, it.outputFile)) }
 
     private fun AndroidPublisher.Edits.publishApk(editId: String, apkFile: FileContent): Apk {
-        val apk = apks().upload(variant.applicationId, editId, apkFile).execute()
+        val apk = apks().upload(variant.applicationId, editId, apkFile).apply {
+            val logger = services[ProgressLoggerFactory::class.java]
+                    .newOperation(this@PublishApkTask.javaClass)
+            logger.description = "Uploading APK for variant ${variant.name}"
+            initProgressLogger(logger)
+        }.execute()
 
         if (extension.untrackOld && extension._track != INTERNAL) {
             extension._track.superiors.map { it.publishedName }.forEach { channel ->

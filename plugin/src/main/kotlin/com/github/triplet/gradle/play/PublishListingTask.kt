@@ -1,19 +1,21 @@
 package com.github.triplet.gradle.play
 
-import com.google.api.client.googleapis.json.GoogleJsonResponseException
-import com.google.api.client.http.FileContent
-import com.google.api.services.androidpublisher.AndroidPublisher
-import com.google.api.services.androidpublisher.model.AppDetails
-import com.google.api.services.androidpublisher.model.Listing
 import com.github.triplet.gradle.play.internal.ImageFileFilter
 import com.github.triplet.gradle.play.internal.ImageType
 import com.github.triplet.gradle.play.internal.LISTING_PATH
 import com.github.triplet.gradle.play.internal.ListingDetail
 import com.github.triplet.gradle.play.internal.LocaleFileFilter
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
+import com.github.triplet.gradle.play.internal.initProgressLogger
 import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.internal.readProcessed
+import com.google.api.client.googleapis.json.GoogleJsonResponseException
+import com.google.api.client.http.FileContent
+import com.google.api.services.androidpublisher.AndroidPublisher
+import com.google.api.services.androidpublisher.model.AppDetails
+import com.google.api.services.androidpublisher.model.Listing
 import org.gradle.api.tasks.TaskAction
+import org.gradle.internal.logging.progress.ProgressLoggerFactory
 import java.io.File
 
 open class PublishListingTask : PlayPublishTaskBase() {
@@ -21,9 +23,8 @@ open class PublishListingTask : PlayPublishTaskBase() {
 
     @TaskAction
     fun publishListing() {
-        if (!inputFolder.exists()) {
-            logger.info("Skipping listing upload: $inputFolder does not exist.")
-            return
+        check(inputFolder.exists()) {
+            "No files found, $inputFolder does not exist"
         }
 
         write { editId ->
@@ -93,24 +94,31 @@ open class PublishListingTask : PlayPublishTaskBase() {
         }
 
         fun updateImages() {
+            val logger = services[ProgressLoggerFactory::class.java]
+                    .newOperation(this@PublishListingTask.javaClass)
+            logger.start(
+                    "Uploading Play Store listing images for variant ${variant.name}", null)
+
             for (imageType in ImageType.values()) {
                 val typeName = imageType.fileName
                 val files = File(listingDir, typeName).listFiles(ImageFileFilter)
                         .sorted()
                         .map { FileContent(MIME_TYPE_IMAGE, it) }
 
-                if (files.isEmpty()) return
+                check(files.size <= imageType.maxNum) {
+                    "You can only upload ${imageType.maxNum} graphic(s) for the $typeName"
+                }
 
+                logger.progress("Processing $imageType", false)
                 images().deleteall(variant.applicationId, editId, locale, typeName).execute()
-                if (files.size <= imageType.maxNum) {
-                    for (file in files) {
-                        images()
-                                .upload(variant.applicationId, editId, locale, typeName, file)
-                                .execute()
-                    }
-                } else {
-                    logger.error(
-                            "You can only upload ${imageType.maxNum} graphic(s) for the $typeName")
+                for (file in files) {
+                    images().upload(
+                            variant.applicationId, editId, locale, typeName, file).apply {
+                        val childLogger = services[ProgressLoggerFactory::class.java]
+                                .newOperation(this@PublishListingTask.javaClass, logger)
+                        childLogger.description = "Uploading ${file.file.name}"
+                        initProgressLogger(childLogger)
+                    }.execute()
                 }
             }
         }

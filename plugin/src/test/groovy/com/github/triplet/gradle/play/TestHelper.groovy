@@ -31,28 +31,8 @@ class TestHelper {
                 }
             }
         }
-
-        return project
-    }
-
-    static Project noSigningConfigProject() {
-        def project = fixtureProject()
-        project.apply plugin: 'com.android.application'
-        project.apply plugin: 'com.github.triplet.play'
-        project.android {
-            compileSdkVersion 27
-
-            defaultConfig {
-                versionCode 1
-                versionName '1.0'
-                minSdkVersion 27
-                targetSdkVersion 27
-            }
-
-            buildTypes {
-                release {
-                }
-            }
+        project.play {
+            jsonFile = new File("Fake")
         }
 
         return project

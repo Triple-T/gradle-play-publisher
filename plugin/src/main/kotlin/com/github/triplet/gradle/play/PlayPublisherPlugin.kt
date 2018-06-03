@@ -21,7 +21,7 @@ class PlayPublisherPlugin : Plugin<Project> {
         val android = requireNotNull(project.extensions.get<AppExtension>()) {
             "The 'com.android.application' plugin is required."
         }
-        val extension =
+        val extension: PlayPublisherExtension =
                 project.extensions.create(PLAY_PATH, PlayPublisherExtension::class.java)
 
         val bootstrapAllTask = project.newTask<Task>(
@@ -52,13 +52,23 @@ class PlayPublisherPlugin : Plugin<Project> {
                 return@whenObjectAdded
             }
 
-            val accountConfig = android.getAccountConfig(variant)
+            val accountConfig = android.getAccountConfig(variant) ?: extension
             val variantName = variant.name.capitalize()
+
+            if (!variant.isSigningReady) {
+                project.logger.error(
+                        "Signing not ready. Be sure to specify a signingConfig for $variantName")
+            }
+            accountConfig.run {
+                check(jsonFile != null || pk12File != null && serviceAccountEmail != null) {
+                    "No credentials provided"
+                }
+            }
 
             fun PlayPublishTaskBase.init() {
                 this.extension = extension
                 this.variant = variant
-                this.accountConfig = accountConfig ?: extension
+                this.accountConfig = accountConfig
             }
 
             project.newTask<BootstrapTask>(
@@ -97,30 +107,25 @@ class PlayPublisherPlugin : Plugin<Project> {
                 publishListingAllTask.dependsOn(this)
             }
 
-            if (variant.isSigningReady) {
-                val publishApkTask = project.newTask<PublishApkTask>(
-                        "publishApk$variantName",
-                        "Uploads APK for $variantName."
-                ) {
-                    init()
-                    inputFolder = playResourcesTask.outputFolder
+            val publishApkTask = project.newTask<PublishApkTask>(
+                    "publishApk$variantName",
+                    "Uploads APK for $variantName."
+            ) {
+                init()
+                inputFolder = playResourcesTask.outputFolder
 
-                    dependsOn(playResourcesTask)
-                    dependsOn(variant.assemble)
-                    publishApkAllTask.dependsOn(this)
-                }
+                dependsOn(playResourcesTask)
+                dependsOn(variant.assemble)
+                publishApkAllTask.dependsOn(this)
+            }
 
-                project.newTask<Task>(
-                        "publish$variantName",
-                        "Uploads all Play Store metadata for $variantName."
-                ) {
-                    dependsOn(publishApkTask)
-                    dependsOn(publishListingTask)
-                    publishAllTask.dependsOn(this)
-                }
-            } else {
-                project.logger.error(
-                        "Signing not ready. Be sure to specify a signingConfig for $variantName?")
+            project.newTask<Task>(
+                    "publish$variantName",
+                    "Uploads all Play Store metadata for $variantName."
+            ) {
+                dependsOn(publishApkTask)
+                dependsOn(publishListingTask)
+                publishAllTask.dependsOn(this)
             }
         }
     }
