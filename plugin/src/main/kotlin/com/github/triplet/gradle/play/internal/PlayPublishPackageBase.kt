@@ -7,10 +7,10 @@ import com.google.api.services.androidpublisher.model.TrackRelease
 import java.io.File
 
 abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
-    protected fun AndroidPublisher.Edits.updateTracks(
+    internal fun AndroidPublisher.Edits.updateTracks(
             editId: String,
             inputFolder: File,
-            releaseStatus: String,
+            releaseStatus: ReleaseStatus,
             versions: List<Long>,
             trackType: String,
             userPercent: Double
@@ -39,8 +39,8 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
         }
         val trackRelease = TrackRelease().apply {
             releaseNotes = releaseTexts
-            status = releaseStatus
-            userFraction = if (status == ReleaseStatus.INPROGRESS.status) userPercent else 0.0
+            status = releaseStatus.status
+            userFraction = if (status == ReleaseStatus.IN_PROGRESS.status) userPercent else 0.0
             versionCodes = versions
         }
 

@@ -1,13 +1,13 @@
 package com.github.triplet.gradle.play
 
 import com.android.build.gradle.api.ApkVariantOutput
+import com.github.triplet.gradle.play.internal.PlayPublishPackageBase
+import com.github.triplet.gradle.play.internal.TrackType.INTERNAL
+import com.github.triplet.gradle.play.internal.superiors
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.Apk
-import com.github.triplet.gradle.play.internal.PlayPublishPackageBase
-import com.github.triplet.gradle.play.internal.TrackType.INTERNAL
-import com.github.triplet.gradle.play.internal.superiors
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 
@@ -21,15 +21,16 @@ open class PublishApkTask : PlayPublishPackageBase() {
         updateTracks(
                 editId,
                 inputFolder,
-                extension.releaseStatus,
+                extension._releaseStatus,
                 publishedApks.map { it.versionCode.toLong() },
                 extension.track,
-                extension.userFraction)
+                extension.userFraction
+        )
     }
 
     private fun AndroidPublisher.Edits.publishApks(editId: String) = variant.outputs
-                .filter { it is ApkVariantOutput }
-                .map { publishApk(editId, FileContent(MIME_TYPE_APK, it.outputFile)) }
+            .filter { it is ApkVariantOutput }
+            .map { publishApk(editId, FileContent(MIME_TYPE_APK, it.outputFile)) }
 
     private fun AndroidPublisher.Edits.publishApk(editId: String, apkFile: FileContent): Apk {
         val apk = apks().upload(variant.applicationId, editId, apkFile).execute()

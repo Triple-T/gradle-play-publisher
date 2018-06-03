@@ -78,7 +78,7 @@ class PlayPublisherPluginTest {
 
     @Test(expected = IllegalArgumentException)
     void test_InternalTrackWithInProgressStatus_Fails() {
-        evaluateProjectWithTrackAndStatus(TrackType.INTERNAL, ReleaseStatus.INPROGRESS)
+        evaluateProjectWithTrackAndStatus(TrackType.INTERNAL, ReleaseStatus.IN_PROGRESS)
     }
 
     @Test(expected = IllegalArgumentException)
@@ -98,7 +98,7 @@ class PlayPublisherPluginTest {
 
     @Test(expected = IllegalArgumentException)
     void test_AlphaTrackWithInProgressStatus_Fails() {
-        evaluateProjectWithTrackAndStatus(TrackType.ALPHA, ReleaseStatus.INPROGRESS)
+        evaluateProjectWithTrackAndStatus(TrackType.ALPHA, ReleaseStatus.IN_PROGRESS)
     }
 
     @Test(expected = IllegalArgumentException)
@@ -118,7 +118,7 @@ class PlayPublisherPluginTest {
 
     @Test(expected = IllegalArgumentException)
     void test_BetaTrackWithInProgressStatus_Fails() {
-        evaluateProjectWithTrackAndStatus(TrackType.BETA, ReleaseStatus.INPROGRESS)
+        evaluateProjectWithTrackAndStatus(TrackType.BETA, ReleaseStatus.IN_PROGRESS)
     }
 
     @Test(expected = IllegalArgumentException)
@@ -138,7 +138,7 @@ class PlayPublisherPluginTest {
 
     @Test(expected = IllegalArgumentException)
     void test_ProductionTrackWithInProgressStatus_Fails() {
-        evaluateProjectWithTrackAndStatus(TrackType.PRODUCTION, ReleaseStatus.INPROGRESS)
+        evaluateProjectWithTrackAndStatus(TrackType.PRODUCTION, ReleaseStatus.IN_PROGRESS)
     }
 
     @Test(expected = IllegalArgumentException)
@@ -163,7 +163,7 @@ class PlayPublisherPluginTest {
 
     @Test
     void test_RolloutTrackWithInProgressStatus_Evaluates() {
-        assertTrue(evaluateProjectWithTrackAndStatus(TrackType.ROLLOUT, ReleaseStatus.INPROGRESS))
+        assertTrue(evaluateProjectWithTrackAndStatus(TrackType.ROLLOUT, ReleaseStatus.IN_PROGRESS))
     }
 
     private evaluateProjectWithTrackAndStatus(TrackType trackType, ReleaseStatus status) {
@@ -208,7 +208,7 @@ class PlayPublisherPluginTest {
         assertEquals('rollout',
                 evaluateProjectWithStatus(ReleaseStatus.HALTED).extensions.findByName('play').track)
         assertEquals('rollout',
-                evaluateProjectWithStatus(ReleaseStatus.INPROGRESS).extensions.findByName('play').track)
+                evaluateProjectWithStatus(ReleaseStatus.IN_PROGRESS).extensions.findByName('play').track)
     }
 
     private evaluateProjectWithStatus(ReleaseStatus status) {

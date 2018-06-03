@@ -19,5 +19,5 @@ internal enum class ReleaseStatus(val status: String) {
     COMPLETED("completed"),
     DRAFT("draft"),
     HALTED("halted"),
-    INPROGRESS("inProgress");
+    IN_PROGRESS("inProgress");
 }
