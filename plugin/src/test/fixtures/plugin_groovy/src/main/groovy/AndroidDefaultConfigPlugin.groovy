@@ -1,4 +1,4 @@
-package de.triplet.gradle.play.test
+package com.github.triplet.gradle.play.test
 
 
 import com.android.build.gradle.AppExtension
