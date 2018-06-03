@@ -27,7 +27,7 @@ gradlePlugin {
     plugins {
         create("play") {
             id = "com.github.triplet.play"
-            implementationClass = "de.triplet.gradle.play.PlayPublisherPlugin"
+            implementationClass = "com.github.triplet.gradle.play.PlayPublisherPlugin"
         }
     }
 }
