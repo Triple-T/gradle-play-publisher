@@ -1,12 +1,23 @@
 package de.triplet.gradle.play.internal
 
-internal val Track.superiors get() = Track.values().takeWhile { it != this && it != Track.ROLLOUT }
+internal val TrackType.superiors get() = TrackType.values().takeWhile { it != this && it != TrackType.ROLLOUT }
 
-internal enum class Track(val publishedName: String) {
+internal enum class TrackType(val publishedName: String) {
     // Note: changing the order breaks API compatibility
     INTERNAL("internal"),
     ALPHA("alpha"),
     BETA("beta"),
     ROLLOUT("rollout"),
-    PRODUCTION("production")
+    PRODUCTION("production");
+
+    companion object {
+        fun fromString(value: String) = values().first { it.publishedName.equals(value, true) }
+    }
+}
+
+internal enum class ReleaseStatus(val status: String) {
+    COMPLETED("completed"),
+    DRAFT("draft"),
+    HALTED("halted"),
+    INPROGRESS("inProgress");
 }

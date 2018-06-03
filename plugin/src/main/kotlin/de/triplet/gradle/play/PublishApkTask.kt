@@ -5,61 +5,34 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.Apk
-import com.google.api.services.androidpublisher.model.ApkListing
-import com.google.api.services.androidpublisher.model.Track
-import de.triplet.gradle.play.internal.ListingDetail
-import de.triplet.gradle.play.internal.LocaleFileFilter
-import de.triplet.gradle.play.internal.PlayPublishTaskBase
-import de.triplet.gradle.play.internal.Track.INTERNAL
-import de.triplet.gradle.play.internal.orNull
-import de.triplet.gradle.play.internal.readProcessed
+import de.triplet.gradle.play.internal.PlayPublishPackageBase
+import de.triplet.gradle.play.internal.TrackType.INTERNAL
 import de.triplet.gradle.play.internal.superiors
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 
-open class PublishApkTask : PlayPublishTaskBase() {
+open class PublishApkTask : PlayPublishPackageBase() {
     lateinit var inputFolder: File
 
     @TaskAction
     fun publishApks() = write { editId: String ->
+        //TODO: If we take in a folder here as an option, we can fix #233, #227
         val publishedApks = publishApks(editId)
-        updateTracks(editId, publishedApks)
+        updateTracks(
+                editId,
+                inputFolder,
+                extension.releaseStatus,
+                publishedApks.map { it.versionCode.toLong() },
+                extension.track,
+                extension.userFraction)
     }
 
     private fun AndroidPublisher.Edits.publishApks(editId: String) = variant.outputs
-            .filter { it is ApkVariantOutput }
-            .map { publishApk(editId, FileContent(MIME_TYPE_APK, it.outputFile)) }
-
-    private fun AndroidPublisher.Edits.updateTracks(editId: String, publishedApks: List<Apk>) {
-        tracks()
-                .update(variant.applicationId, editId, extension.track, Track()
-                        .setVersionCodes(publishedApks.map { it.versionCode })
-                        .setUserFraction(extension.userFraction))
-                .execute()
-    }
+                .filter { it is ApkVariantOutput }
+                .map { publishApk(editId, FileContent(MIME_TYPE_APK, it.outputFile)) }
 
     private fun AndroidPublisher.Edits.publishApk(editId: String, apkFile: FileContent): Apk {
         val apk = apks().upload(variant.applicationId, editId, apkFile).execute()
-
-        fun updateWhatsNew(locale: File) {
-            val fileName = ListingDetail.WHATS_NEW.fileName
-            val file = run {
-                var file = File(locale, "$fileName-${extension.track}").orNull()
-                if (file == null) file = File(locale, fileName).orNull()
-                file
-            } ?: return
-
-            val listing = ApkListing().apply {
-                recentChanges = File(file, fileName).readProcessed(
-                        ListingDetail.WHATS_NEW.maxLength,
-                        extension.errorOnSizeLimit
-                )
-            }
-
-            apklistings()
-                    .update(variant.applicationId, editId, apk.versionCode, locale.name, listing)
-                    .execute()
-        }
 
         if (extension.untrackOld && extension._track != INTERNAL) {
             extension._track.superiors.map { it.publishedName }.forEach { channel ->
@@ -69,9 +42,10 @@ open class PublishApkTask : PlayPublishTaskBase() {
                             editId,
                             channel
                     ).execute().apply {
-                        versionCodes = versionCodes.filter { it > apk.versionCode }
+                        releases.forEach {
+                            it.versionCodes = it.versionCodes.filter { it > apk.versionCode.toLong() }
+                        }
                     }
-
                     tracks().update(variant.applicationId, editId, channel, track).execute()
                 } catch (e: GoogleJsonResponseException) {
                     // Just skip if there is no version in track
@@ -86,11 +60,6 @@ open class PublishApkTask : PlayPublishTaskBase() {
             deobfuscationfiles()
                     .upload(variant.applicationId, editId, apk.versionCode, "proguard", content)
                     .execute()
-        }
-
-        if (inputFolder.exists()) {
-            // Matches valid locales e.g. en-US for Play Store
-            inputFolder.listFiles(LocaleFileFilter).forEach { updateWhatsNew(it) }
         }
 
         return apk

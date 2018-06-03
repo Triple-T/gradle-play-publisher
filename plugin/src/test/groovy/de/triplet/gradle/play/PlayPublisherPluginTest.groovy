@@ -1,5 +1,7 @@
 package de.triplet.gradle.play
 
+import de.triplet.gradle.play.internal.ReleaseStatus
+import de.triplet.gradle.play.internal.TrackType
 import org.gradle.api.internal.plugins.PluginApplicationException
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Ignore
@@ -9,6 +11,7 @@ import static de.triplet.gradle.play.DependsOn.dependsOn
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
 import static org.junit.Assert.assertThat
+import static org.junit.Assert.assertTrue
 import static org.junit.Assert.fail
 
 class PlayPublisherPluginTest {
@@ -62,6 +65,161 @@ class PlayPublisherPluginTest {
 
         assertEquals('internal', project.extensions.findByName('play').track)
     }
+
+    @Test
+    void test_InternalTrackWithDraftStatus_Evaluates() {
+        assertTrue(evaluateProjectWithTrackAndStatus(TrackType.INTERNAL, ReleaseStatus.DRAFT))
+    }
+
+    @Test
+    void test_InternalTrackWithCompletedStatus_Evaluates() {
+        assertTrue(evaluateProjectWithTrackAndStatus(TrackType.INTERNAL, ReleaseStatus.COMPLETED))
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void test_InternalTrackWithInProgressStatus_Fails() {
+        evaluateProjectWithTrackAndStatus(TrackType.INTERNAL, ReleaseStatus.INPROGRESS)
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void test_InternalTrackWithHaltedStatus_Fails() {
+        evaluateProjectWithTrackAndStatus(TrackType.INTERNAL, ReleaseStatus.HALTED)
+    }
+
+    @Test
+    void test_AlphaTrackWithDraftStatus_Evaluates() {
+        assertTrue(evaluateProjectWithTrackAndStatus(TrackType.ALPHA, ReleaseStatus.DRAFT))
+    }
+
+    @Test
+    void test_AlphaTrackWithCompletedStatus_Evaluates() {
+        assertTrue(evaluateProjectWithTrackAndStatus(TrackType.ALPHA, ReleaseStatus.COMPLETED))
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void test_AlphaTrackWithInProgressStatus_Fails() {
+        evaluateProjectWithTrackAndStatus(TrackType.ALPHA, ReleaseStatus.INPROGRESS)
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void test_AlphaTrackWithHaltedStatus_Fails() {
+        evaluateProjectWithTrackAndStatus(TrackType.ALPHA, ReleaseStatus.HALTED)
+    }
+
+    @Test
+    void test_BetaTrackWithDraftStatus_Evaluates() {
+        assertTrue(evaluateProjectWithTrackAndStatus(TrackType.BETA, ReleaseStatus.DRAFT))
+    }
+
+    @Test
+    void test_BetaTrackWithCompletedStatus_Evaluates() {
+        assertTrue(evaluateProjectWithTrackAndStatus(TrackType.BETA, ReleaseStatus.COMPLETED))
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void test_BetaTrackWithInProgressStatus_Fails() {
+        evaluateProjectWithTrackAndStatus(TrackType.BETA, ReleaseStatus.INPROGRESS)
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void test_BetaTrackWithHaltedStatus_Fails() {
+        evaluateProjectWithTrackAndStatus(TrackType.BETA, ReleaseStatus.HALTED)
+    }
+
+    @Test
+    void test_ProductionTrackWithDraftStatus_Evaluates() {
+        assertTrue(evaluateProjectWithTrackAndStatus(TrackType.PRODUCTION, ReleaseStatus.DRAFT))
+    }
+
+    @Test
+    void test_ProductionTrackWithCompletedStatus_Evaluates() {
+        assertTrue(evaluateProjectWithTrackAndStatus(TrackType.PRODUCTION, ReleaseStatus.COMPLETED))
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void test_ProductionTrackWithInProgressStatus_Fails() {
+        evaluateProjectWithTrackAndStatus(TrackType.PRODUCTION, ReleaseStatus.INPROGRESS)
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void test_ProductionTrackWithHaltedStatus_Fails() {
+        evaluateProjectWithTrackAndStatus(TrackType.PRODUCTION, ReleaseStatus.HALTED)
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void test_RolloutTrackWithDraftStatus_Fails() {
+        evaluateProjectWithTrackAndStatus(TrackType.ROLLOUT, ReleaseStatus.DRAFT)
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void test_RolloutTrackWithCompletedStatus_Fails() {
+        evaluateProjectWithTrackAndStatus(TrackType.ROLLOUT, ReleaseStatus.COMPLETED)
+    }
+
+    @Test
+    void test_RolloutTrackWithHaltedStatus_Evaluates() {
+        assertTrue(evaluateProjectWithTrackAndStatus(TrackType.ROLLOUT, ReleaseStatus.HALTED))
+    }
+
+    @Test
+    void test_RolloutTrackWithInProgressStatus_Evaluates() {
+        assertTrue(evaluateProjectWithTrackAndStatus(TrackType.ROLLOUT, ReleaseStatus.INPROGRESS))
+    }
+
+    private evaluateProjectWithTrackAndStatus(TrackType trackType, ReleaseStatus status) {
+        def project = TestHelper.evaluatableProject()
+        project.play {
+            track trackType.publishedName
+            releaseStatus status.status
+        }
+        project.evaluate()
+        return true
+    }
+
+    @Test
+    void test_ProjectWithTracksAndNoStatus_defaults() {
+        assertEquals('completed',
+                evaluateProjectWithTrack(TrackType.INTERNAL).extensions.findByName('play').releaseStatus)
+        assertEquals('completed',
+                evaluateProjectWithTrack(TrackType.ALPHA).extensions.findByName('play').releaseStatus)
+        assertEquals('completed',
+                evaluateProjectWithTrack(TrackType.BETA).extensions.findByName('play').releaseStatus)
+        assertEquals('completed',
+                evaluateProjectWithTrack(TrackType.PRODUCTION).extensions.findByName('play').releaseStatus)
+        assertEquals('inProgress',
+                evaluateProjectWithTrack(TrackType.ROLLOUT).extensions.findByName('play').releaseStatus)
+    }
+
+    private evaluateProjectWithTrack(TrackType trackType) {
+        def project = TestHelper.evaluatableProject()
+        project.play {
+            track trackType.publishedName
+        }
+        project.evaluate()
+        return project
+    }
+
+    @Test
+    void test_ProjectWithStatusAndNoTrack_defaults() {
+        assertEquals('internal',
+                evaluateProjectWithStatus(ReleaseStatus.COMPLETED).extensions.findByName('play').track)
+        assertEquals('internal',
+                evaluateProjectWithStatus(ReleaseStatus.DRAFT).extensions.findByName('play').track)
+        assertEquals('rollout',
+                evaluateProjectWithStatus(ReleaseStatus.HALTED).extensions.findByName('play').track)
+        assertEquals('rollout',
+                evaluateProjectWithStatus(ReleaseStatus.INPROGRESS).extensions.findByName('play').track)
+    }
+
+    private evaluateProjectWithStatus(ReleaseStatus status) {
+        def project = TestHelper.evaluatableProject()
+        project.play {
+            releaseStatus status.status
+        }
+        project.evaluate()
+        return project
+    }
+
 
     @Test
     void testTrack() {
