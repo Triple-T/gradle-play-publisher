@@ -3,6 +3,7 @@ package com.github.triplet.gradle.play
 import com.github.triplet.gradle.play.internal.AccountConfig
 import com.github.triplet.gradle.play.internal.ReleaseStatus
 import com.github.triplet.gradle.play.internal.TrackType
+import java.io.File
 
 open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension() {
     internal var _track = TrackType.INTERNAL
@@ -60,4 +61,10 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
                         ReleaseStatus.values().joinToString { "'${it.publishedName}'" }
             }
         }
+
+    /**
+     * Optional folder to find APK files. Only for use when the APK is built by an external process
+     */
+    var overrideBuildOutput: File? = null
+
 }

@@ -159,6 +159,28 @@ class PlayPublishTaskTest {
     }
 
     @Test
+    void whenPublishing_withOverrideFolder_UploadsOnlySpecifiedFiles() {
+        def project = TestHelper.evaluatableProject()
+        project.play {
+            overrideBuildOutput new File(TestHelper.FIXTURE_WORKING_DIR, "override_output")
+        }
+        project.evaluate()
+
+        setMockPublisher(project.tasks.publishApkRelease)
+        project.tasks.publishApkRelease.publishApks()
+
+        verify(apksMock).upload(
+                eq('com.example.publisher'),
+                eq('424242'),
+                contentWithName("example_1.apk"))
+
+        verify(apksMock).upload(
+                eq('com.example.publisher'),
+                eq('424242'),
+                contentWithName("example_2.apk"))
+    }
+
+    @Test
     void whenPublishingToBeta_publishApkRelease_removesBlockingVersionsFromAlpha() {
         def project = TestHelper.evaluatableProject()
         project.play {
@@ -347,4 +369,14 @@ class PlayPublishTaskTest {
             }
         })
     }
+
+    static FileContent contentWithName(String name) {
+        return argThat(new ArgumentMatcher<FileContent>() {
+            @Override
+            boolean matches(FileContent content) {
+                return content.file.name == name
+            }
+        })
+    }
+
 }

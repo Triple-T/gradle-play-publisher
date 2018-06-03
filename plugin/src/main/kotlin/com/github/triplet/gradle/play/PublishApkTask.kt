@@ -16,14 +16,14 @@ open class PublishApkTask : PlayPublishPackageBase() {
 
     @TaskAction
     fun publishApks() = write { editId: String ->
-        //TODO: If we take in a folder here as an option, we can fix #233, #227
-        val publishedApks = publishApks(editId)
+        val files = extension.overrideBuildOutput?.listFiles({ _, name -> name.endsWith(".apk") })?.toList()
+                ?: variant.outputs.filter { it is ApkVariantOutput }.map { it.outputFile }
+        val publishedApks = publishApks(editId, files)
         updateTracks(editId, inputFolder, publishedApks.map { it.versionCode.toLong() })
     }
 
-    private fun AndroidPublisher.Edits.publishApks(editId: String) = variant.outputs
-            .filter { it is ApkVariantOutput }
-            .map { publishApk(editId, FileContent(MIME_TYPE_APK, it.outputFile)) }
+    private fun AndroidPublisher.Edits.publishApks(editId: String, apks: List<File>) =
+            apks.map { publishApk(editId, FileContent(MIME_TYPE_APK, it)) }
 
     private fun AndroidPublisher.Edits.publishApk(editId: String, apkFile: FileContent): Apk {
         val apk = apks().upload(variant.applicationId, editId, apkFile).execute()
