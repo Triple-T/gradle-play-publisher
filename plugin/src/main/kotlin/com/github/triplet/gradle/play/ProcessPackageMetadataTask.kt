@@ -13,8 +13,8 @@ open class ProcessPackageMetadataTask : PlayPublishTaskBase() {
 
     private fun processVersionCodes() = read { editId ->
         val maxVersionCode = tracks().list(variant.applicationId, editId).execute().tracks
-                ?.map { it.releases }?.flatten()
-                ?.map { it.versionCodes }?.flatten()
+                ?.map { it.releases ?: emptyList() }?.flatten()
+                ?.map { it.versionCodes ?: emptyList() }?.flatten()
                 ?.max() ?: 1
 
         when (extension._resolutionStrategy) {
