@@ -2,6 +2,7 @@ package com.github.triplet.gradle.play
 
 import com.github.triplet.gradle.play.internal.ReleaseStatus
 import com.github.triplet.gradle.play.internal.TrackType
+import org.gradle.api.ProjectConfigurationException
 import org.gradle.api.internal.plugins.PluginApplicationException
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Ignore
@@ -76,12 +77,12 @@ class PlayPublisherPluginTest {
         assertTrue(evaluateProjectWithTrackAndStatus(TrackType.INTERNAL, ReleaseStatus.COMPLETED))
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = ProjectConfigurationException)
     void test_InternalTrackWithInProgressStatus_Fails() {
-        evaluateProjectWithTrackAndStatus(TrackType.INTERNAL, ReleaseStatus.INPROGRESS)
+        evaluateProjectWithTrackAndStatus(TrackType.INTERNAL, ReleaseStatus.IN_PROGRESS)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = ProjectConfigurationException)
     void test_InternalTrackWithHaltedStatus_Fails() {
         evaluateProjectWithTrackAndStatus(TrackType.INTERNAL, ReleaseStatus.HALTED)
     }
@@ -96,12 +97,12 @@ class PlayPublisherPluginTest {
         assertTrue(evaluateProjectWithTrackAndStatus(TrackType.ALPHA, ReleaseStatus.COMPLETED))
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = ProjectConfigurationException)
     void test_AlphaTrackWithInProgressStatus_Fails() {
-        evaluateProjectWithTrackAndStatus(TrackType.ALPHA, ReleaseStatus.INPROGRESS)
+        evaluateProjectWithTrackAndStatus(TrackType.ALPHA, ReleaseStatus.IN_PROGRESS)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = ProjectConfigurationException)
     void test_AlphaTrackWithHaltedStatus_Fails() {
         evaluateProjectWithTrackAndStatus(TrackType.ALPHA, ReleaseStatus.HALTED)
     }
@@ -116,12 +117,12 @@ class PlayPublisherPluginTest {
         assertTrue(evaluateProjectWithTrackAndStatus(TrackType.BETA, ReleaseStatus.COMPLETED))
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = ProjectConfigurationException)
     void test_BetaTrackWithInProgressStatus_Fails() {
-        evaluateProjectWithTrackAndStatus(TrackType.BETA, ReleaseStatus.INPROGRESS)
+        evaluateProjectWithTrackAndStatus(TrackType.BETA, ReleaseStatus.IN_PROGRESS)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = ProjectConfigurationException)
     void test_BetaTrackWithHaltedStatus_Fails() {
         evaluateProjectWithTrackAndStatus(TrackType.BETA, ReleaseStatus.HALTED)
     }
@@ -136,22 +137,22 @@ class PlayPublisherPluginTest {
         assertTrue(evaluateProjectWithTrackAndStatus(TrackType.PRODUCTION, ReleaseStatus.COMPLETED))
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = ProjectConfigurationException)
     void test_ProductionTrackWithInProgressStatus_Fails() {
-        evaluateProjectWithTrackAndStatus(TrackType.PRODUCTION, ReleaseStatus.INPROGRESS)
+        evaluateProjectWithTrackAndStatus(TrackType.PRODUCTION, ReleaseStatus.IN_PROGRESS)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = ProjectConfigurationException)
     void test_ProductionTrackWithHaltedStatus_Fails() {
         evaluateProjectWithTrackAndStatus(TrackType.PRODUCTION, ReleaseStatus.HALTED)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = ProjectConfigurationException)
     void test_RolloutTrackWithDraftStatus_Fails() {
         evaluateProjectWithTrackAndStatus(TrackType.ROLLOUT, ReleaseStatus.DRAFT)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = ProjectConfigurationException)
     void test_RolloutTrackWithCompletedStatus_Fails() {
         evaluateProjectWithTrackAndStatus(TrackType.ROLLOUT, ReleaseStatus.COMPLETED)
     }
@@ -163,17 +164,7 @@ class PlayPublisherPluginTest {
 
     @Test
     void test_RolloutTrackWithInProgressStatus_Evaluates() {
-        assertTrue(evaluateProjectWithTrackAndStatus(TrackType.ROLLOUT, ReleaseStatus.INPROGRESS))
-    }
-
-    private evaluateProjectWithTrackAndStatus(TrackType trackType, ReleaseStatus status) {
-        def project = TestHelper.evaluatableProject()
-        project.play {
-            track trackType.publishedName
-            releaseStatus status.status
-        }
-        project.evaluate()
-        return true
+        assertTrue(evaluateProjectWithTrackAndStatus(TrackType.ROLLOUT, ReleaseStatus.IN_PROGRESS))
     }
 
     @Test
@@ -190,6 +181,16 @@ class PlayPublisherPluginTest {
                 evaluateProjectWithTrack(TrackType.ROLLOUT).extensions.findByName('play').releaseStatus)
     }
 
+    private evaluateProjectWithTrackAndStatus(TrackType trackType, ReleaseStatus status) {
+        def project = TestHelper.evaluatableProject()
+        project.play {
+            track trackType.publishedName
+            releaseStatus status.publishedName
+        }
+        project.evaluate()
+        return true
+    }
+
     private evaluateProjectWithTrack(TrackType trackType) {
         def project = TestHelper.evaluatableProject()
         project.play {
@@ -198,28 +199,6 @@ class PlayPublisherPluginTest {
         project.evaluate()
         return project
     }
-
-    @Test
-    void test_ProjectWithStatusAndNoTrack_defaults() {
-        assertEquals('internal',
-                evaluateProjectWithStatus(ReleaseStatus.COMPLETED).extensions.findByName('play').track)
-        assertEquals('internal',
-                evaluateProjectWithStatus(ReleaseStatus.DRAFT).extensions.findByName('play').track)
-        assertEquals('rollout',
-                evaluateProjectWithStatus(ReleaseStatus.HALTED).extensions.findByName('play').track)
-        assertEquals('rollout',
-                evaluateProjectWithStatus(ReleaseStatus.INPROGRESS).extensions.findByName('play').track)
-    }
-
-    private evaluateProjectWithStatus(ReleaseStatus status) {
-        def project = TestHelper.evaluatableProject()
-        project.play {
-            releaseStatus status.status
-        }
-        project.evaluate()
-        return project
-    }
-
 
     @Test
     void testTrack() {
@@ -462,7 +441,6 @@ class PlayPublisherPluginTest {
         project.evaluate()
 
         assertThat(project.tasks.bootstrapAll, dependsOn('bootstrapReleasePlayResources'))
-        assertThat(project.tasks.generateAll, dependsOn('generateReleasePlayResources'))
         assertThat(project.tasks.publishAll, dependsOn('publishRelease'))
         assertThat(project.tasks.publishApkAll, dependsOn('publishApkRelease'))
         assertThat(project.tasks.publishListingAll, dependsOn('publishListingRelease'))
@@ -505,25 +483,21 @@ class PlayPublisherPluginTest {
         project.evaluate()
 
         assertThat(project.tasks.bootstrapAll, dependsOn('bootstrapDemoFreeReleasePlayResources'))
-        assertThat(project.tasks.generateAll, dependsOn('generateDemoFreeReleasePlayResources'))
         assertThat(project.tasks.publishAll, dependsOn('publishDemoFreeRelease'))
         assertThat(project.tasks.publishApkAll, dependsOn('publishApkDemoFreeRelease'))
         assertThat(project.tasks.publishListingAll, dependsOn('publishListingDemoFreeRelease'))
 
         assertThat(project.tasks.bootstrapAll, dependsOn('bootstrapDemoPaidReleasePlayResources'))
-        assertThat(project.tasks.generateAll, dependsOn('generateDemoPaidReleasePlayResources'))
         assertThat(project.tasks.publishAll, dependsOn('publishDemoPaidRelease'))
         assertThat(project.tasks.publishApkAll, dependsOn('publishApkDemoPaidRelease'))
         assertThat(project.tasks.publishListingAll, dependsOn('publishListingDemoPaidRelease'))
 
         assertThat(project.tasks.bootstrapAll, dependsOn('bootstrapProductionFreeReleasePlayResources'))
-        assertThat(project.tasks.generateAll, dependsOn('generateProductionFreeReleasePlayResources'))
         assertThat(project.tasks.publishAll, dependsOn('publishProductionFreeRelease'))
         assertThat(project.tasks.publishApkAll, dependsOn('publishApkProductionFreeRelease'))
         assertThat(project.tasks.publishListingAll, dependsOn('publishListingProductionFreeRelease'))
 
         assertThat(project.tasks.bootstrapAll, dependsOn('bootstrapProductionPaidReleasePlayResources'))
-        assertThat(project.tasks.generateAll, dependsOn('generateProductionPaidReleasePlayResources'))
         assertThat(project.tasks.publishAll, dependsOn('publishProductionPaidRelease'))
         assertThat(project.tasks.publishApkAll, dependsOn('publishApkProductionPaidRelease'))
         assertThat(project.tasks.publishListingAll, dependsOn('publishListingProductionPaidRelease'))
