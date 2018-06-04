@@ -177,7 +177,8 @@ class PlayPublisherPluginTest {
                 evaluateProjectWithTrack(TrackType.BETA).extensions.findByName('play').releaseStatus)
         assertEquals('completed',
                 evaluateProjectWithTrack(TrackType.PRODUCTION).extensions.findByName('play').releaseStatus)
-        assertTrue(evaluateProjectWithTrackAndStatus(TrackType.ROLLOUT, ReleaseStatus.IN_PROGRESS))
+        assertEquals('inProgress',
+                evaluateProjectWithTrack(TrackType.ROLLOUT).extensions.findByName('play').releaseStatus)
     }
 
     private evaluateProjectWithTrackAndStatus(TrackType trackType, ReleaseStatus status) {

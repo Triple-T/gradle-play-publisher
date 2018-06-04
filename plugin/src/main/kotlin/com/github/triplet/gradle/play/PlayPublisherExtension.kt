@@ -40,13 +40,18 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
      */
     var errorOnSizeLimit = true
 
-    internal var _releaseStatus = ReleaseStatus.COMPLETED
+    internal lateinit var _releaseStatus: ReleaseStatus
     /**
      * Specify the status to apply to the uploaded app release. May be one of completed, draft,
-     * halted, or inProgress. Default is completed.
+     * halted, or inProgress. Default is completed for all tracks except rollout where inProgress is
+     * the default.
      */
     var releaseStatus
-        get() = _releaseStatus.publishedName
+        get() = when {
+            ::_releaseStatus.isInitialized -> _releaseStatus
+            _track == TrackType.ROLLOUT -> ReleaseStatus.IN_PROGRESS
+            else -> ReleaseStatus.COMPLETED
+        }.publishedName
         set(value) {
             _releaseStatus = requireNotNull(
                     ReleaseStatus.values().find { it.publishedName == value }

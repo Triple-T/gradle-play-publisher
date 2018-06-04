@@ -11,6 +11,8 @@ private val rolloutStatuses = listOf(ReleaseStatus.IN_PROGRESS, ReleaseStatus.HA
  * For reference: [https://developers.google.com/android-publisher/api-ref/edits/tracks]
  */
 internal fun PlayPublisherExtension.validate() {
+    _releaseStatus = ReleaseStatus.fromString(releaseStatus)
+
     val usesRolloutStatues = rolloutStatuses.contains(_releaseStatus)
     if (_track == TrackType.ROLLOUT) {
         check(usesRolloutStatues) {

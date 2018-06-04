@@ -19,5 +19,9 @@ internal enum class ReleaseStatus(val publishedName: String) {
     COMPLETED("completed"),
     DRAFT("draft"),
     HALTED("halted"),
-    IN_PROGRESS("inProgress")
+    IN_PROGRESS("inProgress");
+
+    companion object {
+        fun fromString(value: String) = values().first { it.publishedName.equals(value, true) }
+    }
 }
