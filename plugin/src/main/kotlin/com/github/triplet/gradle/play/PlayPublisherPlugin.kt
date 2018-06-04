@@ -11,6 +11,7 @@ import com.github.triplet.gradle.play.internal.get
 import com.github.triplet.gradle.play.internal.newTask
 import com.github.triplet.gradle.play.internal.nullOrFull
 import com.github.triplet.gradle.play.internal.set
+import com.github.triplet.gradle.play.internal.validate
 import groovy.lang.GroovyObject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -120,6 +121,10 @@ class PlayPublisherPlugin : Plugin<Project> {
                 project.logger.error(
                         "Signing not ready. Be sure to specify a signingConfig for $variantName?")
             }
+        }
+
+        project.afterEvaluate {
+            extension.validate()
         }
     }
 
