@@ -11,6 +11,7 @@ import com.github.triplet.gradle.play.internal.get
 import com.github.triplet.gradle.play.internal.newTask
 import com.github.triplet.gradle.play.internal.nullOrFull
 import com.github.triplet.gradle.play.internal.set
+import com.github.triplet.gradle.play.internal.validate
 import groovy.lang.GroovyObject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -29,10 +30,6 @@ class PlayPublisherPlugin : Plugin<Project> {
         val bootstrapAllTask = project.newTask<Task>(
                 "bootstrapAll",
                 "Downloads the Play Store listing metadata for all variants."
-        )
-        val playResourcesAllTask = project.newTask<Task>(
-                "generateAll",
-                "Collects Play Store resources for all variants."
         )
         val publishAllTask = project.newTask<Task>(
                 "publishAll",
@@ -86,7 +83,8 @@ class PlayPublisherPlugin : Plugin<Project> {
 
             val playResourcesTask = project.newTask<GeneratePlayResourcesTask>(
                     "generate${variantName}PlayResources",
-                    "Collects Play Store resources for $variantName."
+                    "Collects Play Store resources for $variantName.",
+                    null
             ) {
                 inputs.file("src/main/$PLAY_PATH")
                 if (variant.flavorName.isNotEmpty()) {
@@ -96,8 +94,6 @@ class PlayPublisherPlugin : Plugin<Project> {
                 inputs.file("src/${variant.name}/$PLAY_PATH")
 
                 outputFolder = File(project.buildDir, "$RESOURCES_OUTPUT_PATH/${variant.name}")
-
-                playResourcesAllTask.dependsOn(this)
             }
             val publishListingTask = project.newTask<PublishListingTask>(
                     "publishListing$variantName",
@@ -130,6 +126,10 @@ class PlayPublisherPlugin : Plugin<Project> {
                 dependsOn(publishListingTask)
                 publishAllTask.dependsOn(this)
             }
+        }
+
+        project.afterEvaluate {
+            extension.validate()
         }
     }
 

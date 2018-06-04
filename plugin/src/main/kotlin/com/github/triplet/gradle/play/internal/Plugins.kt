@@ -15,7 +15,7 @@ internal inline fun <reified T> ExtensionContainer.get() = findByType(T::class.j
 internal inline fun <reified T : Task> Project.newTask(
         name: String,
         description: String,
-        group: String = PLUGIN_GROUP,
+        group: String? = PLUGIN_GROUP,
         block: T.() -> Unit = {}
 ): T = tasks.create(name, T::class.java).apply {
     this.description = description

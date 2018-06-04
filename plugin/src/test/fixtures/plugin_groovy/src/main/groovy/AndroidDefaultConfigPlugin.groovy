@@ -1,6 +1,5 @@
 package com.github.triplet.gradle.play.test
 
-
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.AppPlugin
 import org.gradle.api.Plugin

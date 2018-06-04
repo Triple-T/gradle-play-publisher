@@ -33,7 +33,7 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
         val trackRelease = TrackRelease().apply {
             releaseNotes = releaseTexts
             status = extension.releaseStatus
-            userFraction = if (extension._releaseStatus == ReleaseStatus.INPROGRESS) {
+            userFraction = if (extension._releaseStatus == ReleaseStatus.IN_PROGRESS) {
                 extension.userFraction
             } else {
                 null
