@@ -30,10 +30,6 @@ class PlayPublisherPlugin : Plugin<Project> {
                 "bootstrapAll",
                 "Downloads the Play Store listing metadata for all variants."
         )
-        val playResourcesAllTask = project.newTask<Task>(
-                "generateAll",
-                "Collects Play Store resources for all variants."
-        )
         val publishAllTask = project.newTask<Task>(
                 "publishAll",
                 "Uploads APK or App Bundle and all Play Store metadata for every variant."
@@ -86,8 +82,6 @@ class PlayPublisherPlugin : Plugin<Project> {
                 inputs.file("src/${variant.name}/$PLAY_PATH")
 
                 outputFolder = File(project.buildDir, "$RESOURCES_OUTPUT_PATH/${variant.name}")
-
-                playResourcesAllTask.dependsOn(this)
             }
             val publishListingTask = project.newTask<PublishListingTask>(
                     "publishListing$variantName",
