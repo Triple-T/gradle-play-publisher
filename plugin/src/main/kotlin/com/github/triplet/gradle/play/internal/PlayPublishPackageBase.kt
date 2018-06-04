@@ -10,15 +10,12 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
     internal fun AndroidPublisher.Edits.updateTracks(
             editId: String,
             inputFolder: File,
-            releaseStatus: ReleaseStatus,
-            versions: List<Long>,
-            trackType: String,
-            userPercent: Double
+            versions: List<Long>
     ) {
         val track = tracks()
                 .list(variant.applicationId, editId)
                 .execute().tracks
-                ?.firstOrNull { it.track == trackType } ?: Track()
+                ?.firstOrNull { it.track == extension.track } ?: Track()
 
         val releaseTexts = if (inputFolder.exists()) {
             inputFolder.listFiles(LocaleFileFilter).mapNotNull { locale ->
@@ -39,15 +36,19 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
         }
         val trackRelease = TrackRelease().apply {
             releaseNotes = releaseTexts
-            status = releaseStatus.publishedName
-            userFraction = if (releaseStatus == ReleaseStatus.IN_PROGRESS) userPercent else 0.0
+            status = extension.releaseStatus
+            userFraction = if (extension._releaseStatus == ReleaseStatus.IN_PROGRESS) {
+                extension.userFraction
+            } else {
+                null
+            }
             versionCodes = versions
         }
 
         track.releases = listOf(trackRelease)
 
         tracks()
-                .update(variant.applicationId, editId, trackType, track)
+                .update(variant.applicationId, editId, extension.track, track)
                 .execute()
     }
 }

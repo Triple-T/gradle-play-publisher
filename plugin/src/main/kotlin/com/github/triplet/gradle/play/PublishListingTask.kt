@@ -1,10 +1,5 @@
 package com.github.triplet.gradle.play
 
-import com.google.api.client.googleapis.json.GoogleJsonResponseException
-import com.google.api.client.http.FileContent
-import com.google.api.services.androidpublisher.AndroidPublisher
-import com.google.api.services.androidpublisher.model.AppDetails
-import com.google.api.services.androidpublisher.model.Listing
 import com.github.triplet.gradle.play.internal.ImageFileFilter
 import com.github.triplet.gradle.play.internal.ImageType
 import com.github.triplet.gradle.play.internal.LISTING_PATH
@@ -13,6 +8,11 @@ import com.github.triplet.gradle.play.internal.LocaleFileFilter
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.internal.readProcessed
+import com.google.api.client.googleapis.json.GoogleJsonResponseException
+import com.google.api.client.http.FileContent
+import com.google.api.services.androidpublisher.AndroidPublisher
+import com.google.api.services.androidpublisher.model.AppDetails
+import com.google.api.services.androidpublisher.model.Listing
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 
@@ -41,18 +41,14 @@ open class PublishListingTask : PlayPublishTaskBase() {
         val details = AppDetails().apply {
             val errorOnSizeLimit = extension.errorOnSizeLimit
 
-            defaultLanguage = (File(inputFolder, ListingDetail.DEFAULT_LANGUAGE.fileName)
-                    .orNull() ?: return)
-                    .readProcessed(ListingDetail.DEFAULT_LANGUAGE.maxLength, errorOnSizeLimit)
-            contactEmail = (File(inputFolder, ListingDetail.CONTACT_EMAIL.fileName)
-                    .orNull() ?: return)
-                    .readProcessed(ListingDetail.CONTACT_EMAIL.maxLength, errorOnSizeLimit)
-            contactPhone = (File(inputFolder, ListingDetail.CONTACT_PHONE.fileName)
-                    .orNull() ?: return)
-                    .readProcessed(ListingDetail.CONTACT_PHONE.maxLength, errorOnSizeLimit)
-            contactWebsite = (File(inputFolder, ListingDetail.CONTACT_WEBSITE.fileName)
-                    .orNull() ?: return)
-                    .readProcessed(ListingDetail.CONTACT_WEBSITE.maxLength, errorOnSizeLimit)
+            defaultLanguage = File(inputFolder, ListingDetail.DEFAULT_LANGUAGE.fileName).orNull()
+                    ?.readProcessed(ListingDetail.DEFAULT_LANGUAGE.maxLength, errorOnSizeLimit)
+            contactEmail = File(inputFolder, ListingDetail.CONTACT_EMAIL.fileName).orNull()
+                    ?.readProcessed(ListingDetail.CONTACT_EMAIL.maxLength, errorOnSizeLimit)
+            contactPhone = File(inputFolder, ListingDetail.CONTACT_PHONE.fileName).orNull()
+                    ?.readProcessed(ListingDetail.CONTACT_PHONE.maxLength, errorOnSizeLimit)
+            contactWebsite = File(inputFolder, ListingDetail.CONTACT_WEBSITE.fileName).orNull()
+                    ?.readProcessed(ListingDetail.CONTACT_WEBSITE.maxLength, errorOnSizeLimit)
         }
 
         details().update(variant.applicationId, editId, details).execute()
@@ -66,18 +62,16 @@ open class PublishListingTask : PlayPublishTaskBase() {
             val listing = Listing().apply {
                 val errorOnSizeLimit = extension.errorOnSizeLimit
 
-                title = (File(inputFolder, ListingDetail.TITLE.fileName)
-                        .orNull() ?: return)
-                        .readProcessed(ListingDetail.TITLE.maxLength, errorOnSizeLimit)
-                shortDescription = (File(inputFolder, ListingDetail.SHORT_DESCRIPTION.fileName)
-                        .orNull() ?: return)
-                        .readProcessed(ListingDetail.SHORT_DESCRIPTION.maxLength, errorOnSizeLimit)
-                fullDescription = (File(inputFolder, ListingDetail.FULL_DESCRIPTION.fileName)
-                        .orNull() ?: return)
-                        .readProcessed(ListingDetail.FULL_DESCRIPTION.maxLength, errorOnSizeLimit)
-                video = (File(inputFolder, ListingDetail.VIDEO.fileName)
-                        .orNull() ?: return)
-                        .readProcessed(ListingDetail.VIDEO.maxLength, errorOnSizeLimit)
+                title = File(listingDir, ListingDetail.TITLE.fileName).orNull()
+                        ?.readProcessed(ListingDetail.TITLE.maxLength, errorOnSizeLimit)
+                shortDescription = File(listingDir, ListingDetail.SHORT_DESCRIPTION.fileName)
+                        .orNull()
+                        ?.readProcessed(ListingDetail.SHORT_DESCRIPTION.maxLength, errorOnSizeLimit)
+                fullDescription = File(listingDir, ListingDetail.FULL_DESCRIPTION.fileName)
+                        .orNull()
+                        ?.readProcessed(ListingDetail.FULL_DESCRIPTION.maxLength, errorOnSizeLimit)
+                video = File(listingDir, ListingDetail.VIDEO.fileName).orNull()
+                        ?.readProcessed(ListingDetail.VIDEO.maxLength, errorOnSizeLimit)
             }
 
             try {
