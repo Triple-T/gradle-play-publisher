@@ -62,15 +62,15 @@ open class PublishListingTask : PlayPublishTaskBase() {
             val listing = Listing().apply {
                 val errorOnSizeLimit = extension.errorOnSizeLimit
 
-                title = File(inputFolder, ListingDetail.TITLE.fileName).orNull()
+                title = File(listingDir, ListingDetail.TITLE.fileName).orNull()
                         ?.readProcessed(ListingDetail.TITLE.maxLength, errorOnSizeLimit)
-                shortDescription = File(inputFolder, ListingDetail.SHORT_DESCRIPTION.fileName)
+                shortDescription = File(listingDir, ListingDetail.SHORT_DESCRIPTION.fileName)
                         .orNull()
                         ?.readProcessed(ListingDetail.SHORT_DESCRIPTION.maxLength, errorOnSizeLimit)
-                fullDescription = File(inputFolder, ListingDetail.FULL_DESCRIPTION.fileName)
+                fullDescription = File(listingDir, ListingDetail.FULL_DESCRIPTION.fileName)
                         .orNull()
                         ?.readProcessed(ListingDetail.FULL_DESCRIPTION.maxLength, errorOnSizeLimit)
-                video = File(inputFolder, ListingDetail.VIDEO.fileName).orNull()
+                video = File(listingDir, ListingDetail.VIDEO.fileName).orNull()
                         ?.readProcessed(ListingDetail.VIDEO.maxLength, errorOnSizeLimit)
             }
 

@@ -16,6 +16,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.ExtensionAware
+import java.io.File
 
 class PlayPublisherPlugin : Plugin<Project> {
     override fun apply(project: Project) {
@@ -84,7 +85,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 inputs.file("src/${variant.buildType.name}/$PLAY_PATH")
                 inputs.file("src/${variant.name}/$PLAY_PATH")
 
-                outputFolder = project.file("$RESOURCES_OUTPUT_PATH/${variant.name}")
+                outputFolder = File(project.buildDir, "$RESOURCES_OUTPUT_PATH/${variant.name}")
 
                 playResourcesAllTask.dependsOn(this)
             }
