@@ -20,13 +20,7 @@ open class PublishApkTask : PlayPublishPackageBase() {
     fun publishApks() = write { editId: String ->
         //TODO: If we take in a folder here as an option, we can fix #233, #227
         val publishedApks = publishApks(editId)
-        updateTracks(
-                editId,
-                inputFolder,
-                extension.releaseStatus,
-                publishedApks.map { it.versionCode.toLong() },
-                extension.track,
-                extension.userFraction)
+        updateTracks(editId, inputFolder, publishedApks.map { it.versionCode.toLong() })
     }
 
     private fun AndroidPublisher.Edits.publishApks(editId: String) = variant.outputs

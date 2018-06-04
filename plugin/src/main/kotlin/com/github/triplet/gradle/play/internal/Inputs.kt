@@ -7,7 +7,14 @@ internal fun File.orNull() = if (exists()) this else null
 internal fun File.readProcessed(maxLength: Int, error: Boolean) =
         readText().normalized().takeOrThrow(maxLength, error, this)
 
+internal fun File.safeCreateNewFile() = apply {
+    check(parentFile.exists() || parentFile.mkdirs()) { "Unable to create $parentFile" }
+    check(exists() || createNewFile()) { "Unable to create $this" }
+}
+
 internal fun String.normalized() = replace(Regex("\\r\\n"), "\n").trim()
+
+internal fun String?.nullOrFull() = if (isNullOrBlank()) null else this
 
 private fun String.takeOrThrow(n: Int, error: Boolean, file: File): String {
     val result = take(n)

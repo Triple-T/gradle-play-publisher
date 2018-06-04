@@ -5,6 +5,8 @@ import com.github.triplet.gradle.play.internal.LISTING_PATH
 import com.github.triplet.gradle.play.internal.ListingDetail
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.internal.TrackType
+import com.github.triplet.gradle.play.internal.nullOrFull
+import com.github.triplet.gradle.play.internal.safeCreateNewFile
 import com.google.api.services.androidpublisher.AndroidPublisher
 import org.gradle.api.tasks.TaskAction
 import java.io.File
@@ -32,10 +34,10 @@ open class BootstrapTask : PlayPublishTaskBase() {
             fun downloadMetadata() {
                 fun String.write(detail: ListingDetail) = write(rootDir, detail)
 
-                listing.fullDescription.write(ListingDetail.FULL_DESCRIPTION)
-                listing.shortDescription.write(ListingDetail.SHORT_DESCRIPTION)
-                listing.title.write(ListingDetail.TITLE)
-                listing.video.write(ListingDetail.VIDEO)
+                listing.fullDescription.nullOrFull()?.write(ListingDetail.FULL_DESCRIPTION)
+                listing.shortDescription.nullOrFull()?.write(ListingDetail.SHORT_DESCRIPTION)
+                listing.title.nullOrFull()?.write(ListingDetail.TITLE)
+                listing.video.nullOrFull()?.write(ListingDetail.VIDEO)
             }
 
             fun downloadImages() {
@@ -47,9 +49,12 @@ open class BootstrapTask : PlayPublishTaskBase() {
                     val imageDir = File(rootDir, type.fileName)
 
                     for (image in images) {
-                        File(imageDir, "${image.id}.png").outputStream().use { stream ->
-                            URL(image.url).openStream().use { it.copyTo(stream) }
-                        }
+                        File(imageDir, "${image.id}.png")
+                                .safeCreateNewFile()
+                                .outputStream()
+                                .use { stream ->
+                                    URL(image.url).openStream().use { it.copyTo(stream) }
+                                }
                     }
                 }
             }
@@ -65,9 +70,11 @@ open class BootstrapTask : PlayPublishTaskBase() {
             ?.maxBy { TrackType.fromString(it.track) }
             ?.releases
             ?.maxBy { it.versionCodes.max() ?: Long.MIN_VALUE }
-            ?.releaseNotes?.forEach {
+            ?.releaseNotes
+            ?.forEach {
                 File(outputFolder, "${it.language}/${ListingDetail.WHATS_NEW.fileName}")
-                    .writeText(it.text)
+                        .safeCreateNewFile()
+                        .writeText(it.text)
             }
 
     private fun AndroidPublisher.Edits.bootstrapAppDetails(editId: String) {
@@ -75,12 +82,12 @@ open class BootstrapTask : PlayPublishTaskBase() {
 
         val details = details().get(variant.applicationId, editId).execute()
 
-        details.contactEmail.write(ListingDetail.CONTACT_EMAIL)
-        details.contactPhone.write(ListingDetail.CONTACT_PHONE)
-        details.contactWebsite.write(ListingDetail.CONTACT_WEBSITE)
-        details.defaultLanguage.write(ListingDetail.DEFAULT_LANGUAGE)
+        details.contactEmail.nullOrFull()?.write(ListingDetail.CONTACT_EMAIL)
+        details.contactPhone.nullOrFull()?.write(ListingDetail.CONTACT_PHONE)
+        details.contactWebsite.nullOrFull()?.write(ListingDetail.CONTACT_WEBSITE)
+        details.defaultLanguage.nullOrFull()?.write(ListingDetail.DEFAULT_LANGUAGE)
     }
 
     private fun String.write(dir: File, detail: ListingDetail) =
-            File(dir, detail.fileName).writeText(this)
+            File(dir, detail.fileName).safeCreateNewFile().writeText(this)
 }
