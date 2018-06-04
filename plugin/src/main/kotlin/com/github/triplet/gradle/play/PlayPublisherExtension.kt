@@ -81,6 +81,11 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
                         ResolutionStrategy.values().joinToString { "'${it.publishedName}'" }
             }
         }
+    /**
+     * If the [resolutionStrategy] is auto, optionally compute a new version name from the updated
+     * version code. Returning null means the version name should not be changed.
+     */
+    var versionNameOverride: (versionCode: Int) -> String? = { null }
 
     internal var _releaseStatus = ReleaseStatus.COMPLETED
     /**
