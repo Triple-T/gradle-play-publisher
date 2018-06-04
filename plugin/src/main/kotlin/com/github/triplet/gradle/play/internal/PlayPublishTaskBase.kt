@@ -52,12 +52,14 @@ abstract class PlayPublishTaskBase : DefaultTask() {
         val id = try {
             request.execute().id
         } catch (e: GoogleJsonResponseException) {
+            // Rethrow for clarity
             if (e.details.errors.any { it.reason == "applicationNotFound" }) {
-                // Rethrow for clarity
                 throw IllegalArgumentException(
                         "No application found for the package name ${variant.applicationId}. " +
                                 "The first version of your app must be uploaded via the " +
                                 "Play Store console.", e)
+            } else if (e.statusCode == 401) {
+                throw IllegalArgumentException("Invalid service account credentials.", e)
             } else {
                 throw e
             }
