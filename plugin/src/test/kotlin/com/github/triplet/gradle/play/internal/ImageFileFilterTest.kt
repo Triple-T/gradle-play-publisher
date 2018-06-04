@@ -1,6 +1,5 @@
-package com.github.triplet.gradle.play
+package com.github.triplet.gradle.play.internal
 
-import com.github.triplet.gradle.play.internal.ImageFileFilter
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
