@@ -63,8 +63,7 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
         }
 
     /**
-     * Optional folder to find APK files. Only for use when the APK is built by an external process
+     * Optional folder where your processed APK/Bundle files are generated. See [README] for details
      */
-    var overrideBuildOutput: File? = null
-
+    var buildInputFolder: File? = null
 }

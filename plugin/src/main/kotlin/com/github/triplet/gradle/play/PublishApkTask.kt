@@ -1,6 +1,7 @@
 package com.github.triplet.gradle.play
 
 import com.android.build.gradle.api.ApkVariantOutput
+import com.github.triplet.gradle.play.internal.ApkFileFilter
 import com.github.triplet.gradle.play.internal.PlayPublishPackageBase
 import com.github.triplet.gradle.play.internal.TrackType.INTERNAL
 import com.github.triplet.gradle.play.internal.superiors
@@ -16,7 +17,7 @@ open class PublishApkTask : PlayPublishPackageBase() {
 
     @TaskAction
     fun publishApks() = write { editId: String ->
-        val files = extension.overrideBuildOutput?.listFiles({ _, name -> name.endsWith(".apk") })?.toList()
+        val files = extension.buildInputFolder?.listFiles(ApkFileFilter)?.toList()
                 ?: variant.outputs.filter { it is ApkVariantOutput }.map { it.outputFile }
         val publishedApks = publishApks(editId, files)
         updateTracks(editId, inputFolder, publishedApks.map { it.versionCode.toLong() })
