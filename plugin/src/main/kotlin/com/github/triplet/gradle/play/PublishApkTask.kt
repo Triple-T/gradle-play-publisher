@@ -1,13 +1,13 @@
 package com.github.triplet.gradle.play
 
 import com.android.build.gradle.api.ApkVariantOutput
+import com.github.triplet.gradle.play.internal.PlayPublishPackageBase
+import com.github.triplet.gradle.play.internal.TrackType.INTERNAL
+import com.github.triplet.gradle.play.internal.superiors
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.Apk
-import com.github.triplet.gradle.play.internal.PlayPublishPackageBase
-import com.github.triplet.gradle.play.internal.TrackType.INTERNAL
-import com.github.triplet.gradle.play.internal.superiors
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 
@@ -18,13 +18,7 @@ open class PublishApkTask : PlayPublishPackageBase() {
     fun publishApks() = write { editId: String ->
         //TODO: If we take in a folder here as an option, we can fix #233, #227
         val publishedApks = publishApks(editId)
-        updateTracks(
-                editId,
-                inputFolder,
-                extension.releaseStatus,
-                publishedApks.map { it.versionCode.toLong() },
-                extension.track,
-                extension.userFraction)
+        updateTracks(editId, inputFolder, publishedApks.map { it.versionCode.toLong() })
     }
 
     private fun AndroidPublisher.Edits.publishApks(editId: String) = variant.outputs
