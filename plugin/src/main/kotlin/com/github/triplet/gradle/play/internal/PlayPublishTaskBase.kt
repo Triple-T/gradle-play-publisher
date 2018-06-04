@@ -8,11 +8,13 @@ import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.AndroidPublisherScopes
 import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Nested
 
 abstract class PlayPublishTaskBase : DefaultTask() {
-    lateinit var extension: PlayPublisherExtension
-    lateinit var variant: ApplicationVariant
-    lateinit var accountConfig: AccountConfig
+    @get:Nested lateinit var extension: PlayPublisherExtension
+    @get:Internal lateinit var variant: ApplicationVariant
+    @get:Nested lateinit var accountConfig: AccountConfig
 
     private val publisher by lazy {
         val credential = accountConfig.run {

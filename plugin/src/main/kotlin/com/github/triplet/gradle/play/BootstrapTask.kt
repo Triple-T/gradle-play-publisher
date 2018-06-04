@@ -9,12 +9,17 @@ import com.github.triplet.gradle.play.internal.TrackType
 import com.github.triplet.gradle.play.internal.nullOrFull
 import com.github.triplet.gradle.play.internal.safeCreateNewFile
 import com.google.api.services.androidpublisher.AndroidPublisher
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 import java.net.URL
 
 open class BootstrapTask : PlayPublishTaskBase() {
-    lateinit var outputFolder: File
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:OutputDirectory
+    lateinit var srcDir: File
 
     @TaskAction
     fun bootstrap() = read { editId ->
@@ -30,7 +35,7 @@ open class BootstrapTask : PlayPublishTaskBase() {
                 .listings ?: return
 
         for (listing in listings) {
-            val rootDir = File(outputFolder, "${listing.language}/$LISTING_PATH")
+            val rootDir = File(srcDir, "${listing.language}/$LISTING_PATH")
 
             fun downloadMetadata() {
                 fun String.write(detail: ListingDetail) = write(rootDir, detail.fileName)
@@ -73,13 +78,13 @@ open class BootstrapTask : PlayPublishTaskBase() {
             ?.maxBy { it.versionCodes.max() ?: Long.MIN_VALUE }
             ?.releaseNotes
             ?.forEach {
-                File(outputFolder, "${it.language}/${ListingDetail.WHATS_NEW.fileName}")
+                File(srcDir, "${it.language}/${ListingDetail.WHATS_NEW.fileName}")
                         .safeCreateNewFile()
                         .writeText(it.text)
             }
 
     private fun AndroidPublisher.Edits.bootstrapAppDetails(editId: String) {
-        fun String.write(detail: AppDetail) = write(outputFolder, detail.fileName)
+        fun String.write(detail: AppDetail) = write(srcDir, detail.fileName)
 
         val details = details().get(variant.applicationId, editId).execute()
 
