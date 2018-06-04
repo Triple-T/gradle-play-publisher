@@ -8,15 +8,14 @@ import org.gradle.api.tasks.TaskAction
 open class ProcessPackageMetadataTask : PlayPublishTaskBase() {
     @TaskAction
     fun processVersionCodes() = read { editId ->
-        val maxVersionCode = bundles().list(variant.applicationId, editId).execute().bundles
-                ?.map { it.versionCode }
-                ?.max() ?: apks().list(variant.applicationId, editId).execute().apks
-                ?.map { it.versionCode }
+        val maxVersionCode = tracks().list(variant.applicationId, editId).execute().tracks
+                ?.map { it.releases }?.flatten()
+                ?.map { it.versionCodes }?.flatten()
                 ?.max() ?: 1
 
         when (extension._resolutionStrategy) {
             ResolutionStrategy.AUTO -> variant.outputs.filterIsInstance<ApkVariantOutput>().forEach { output ->
-                val newCode = maxVersionCode + 1
+                val newCode = maxVersionCode.toInt() + 1
                 output.versionCodeOverride = newCode
                 extension.versionNameOverride(newCode)?.let { output.versionNameOverride = it }
             }
