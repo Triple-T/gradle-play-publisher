@@ -2,6 +2,7 @@ package com.github.triplet.gradle.play
 
 import com.github.triplet.gradle.play.internal.AccountConfig
 import com.github.triplet.gradle.play.internal.ReleaseStatus
+import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.TrackType
 
 open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension() {
@@ -64,6 +65,22 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
      * simply trim it. Default throws.
      */
     var errorOnSizeLimit = true
+
+    internal var _resolutionStrategy = ResolutionStrategy.IGNORE
+    /**
+     * Specify the resolution strategy to employ when a version conflict occurs. May be one of auto,
+     * fail, or ignore. Default is ignore.
+     */
+    var resolutionStrategy
+        get() = _resolutionStrategy.publishedName
+        set(value) {
+            _resolutionStrategy = requireNotNull(
+                    ResolutionStrategy.values().find { it.publishedName == value }
+            ) {
+                "Resolution strategy must be one of " +
+                        ResolutionStrategy.values().joinToString { "'${it.publishedName}'" }
+            }
+        }
 
     internal var _releaseStatus = ReleaseStatus.COMPLETED
     /**
