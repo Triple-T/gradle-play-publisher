@@ -9,6 +9,7 @@ import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.internal.RESOURCES_OUTPUT_PATH
 import com.github.triplet.gradle.play.internal.get
 import com.github.triplet.gradle.play.internal.newTask
+import com.github.triplet.gradle.play.internal.nullOrFull
 import com.github.triplet.gradle.play.internal.set
 import groovy.lang.GroovyObject
 import org.gradle.api.Plugin
@@ -66,7 +67,8 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "Downloads the Play Store listing metadata for $variantName."
             ) {
                 init()
-                outputFolder = project.file("src/${variant.flavorName ?: "main"}/$PLAY_PATH")
+                outputFolder =
+                        project.file("src/${variant.flavorName.nullOrFull() ?: "main"}/$PLAY_PATH")
 
                 bootstrapAllTask.dependsOn(this)
             }
