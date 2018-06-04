@@ -162,7 +162,7 @@ class PlayPublishTaskTest {
     void whenPublishing_withOverrideFolder_UploadsOnlySpecifiedFiles() {
         def project = TestHelper.evaluatableProject()
         project.play {
-            overrideBuildOutput new File(TestHelper.FIXTURE_WORKING_DIR, "override_output")
+            buildInputFolder new File(TestHelper.FIXTURE_WORKING_DIR, "override_output")
         }
         project.evaluate()
 
