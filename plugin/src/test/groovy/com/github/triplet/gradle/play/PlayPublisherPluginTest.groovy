@@ -184,7 +184,7 @@ class PlayPublisherPluginTest {
         def project = TestHelper.evaluatableProject()
         project.play {
             track trackType.publishedName
-            releaseStatus status.status
+            releaseStatus status.publishedName
         }
         project.evaluate()
         return true

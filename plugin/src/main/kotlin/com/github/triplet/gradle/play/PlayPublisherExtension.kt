@@ -46,11 +46,13 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
      * halted, or inProgress. Default is completed.
      */
     var releaseStatus
-        get() = _releaseStatus.status
+        get() = _releaseStatus.publishedName
         set(value) {
-            _releaseStatus = requireNotNull(ReleaseStatus.values().find { it.status == value }) {
+            _releaseStatus = requireNotNull(
+                    ReleaseStatus.values().find { it.publishedName == value }
+            ) {
                 "Release Status must be one of " +
-                        ReleaseStatus.values().joinToString { "'${it.status}'" }
+                        ReleaseStatus.values().joinToString { "'${it.publishedName}'" }
             }
         }
 }

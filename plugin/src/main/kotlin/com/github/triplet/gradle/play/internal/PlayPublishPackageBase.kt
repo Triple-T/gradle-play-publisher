@@ -39,8 +39,8 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
         }
         val trackRelease = TrackRelease().apply {
             releaseNotes = releaseTexts
-            status = releaseStatus.status
-            userFraction = if (status == ReleaseStatus.IN_PROGRESS.status) userPercent else 0.0
+            status = releaseStatus.publishedName
+            userFraction = if (releaseStatus == ReleaseStatus.IN_PROGRESS) userPercent else 0.0
             versionCodes = versions
         }
 
