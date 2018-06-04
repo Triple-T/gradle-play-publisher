@@ -7,7 +7,11 @@ import org.gradle.api.tasks.TaskAction
 
 open class ProcessPackageMetadataTask : PlayPublishTaskBase() {
     @TaskAction
-    fun processVersionCodes() = read { editId ->
+    fun process() {
+        if (extension._resolutionStrategy != ResolutionStrategy.IGNORE) processVersionCodes()
+    }
+
+    private fun processVersionCodes() = read { editId ->
         val maxVersionCode = tracks().list(variant.applicationId, editId).execute().tracks
                 ?.map { it.releases }?.flatten()
                 ?.map { it.versionCodes }?.flatten()
@@ -22,8 +26,7 @@ open class ProcessPackageMetadataTask : PlayPublishTaskBase() {
             ResolutionStrategy.FAIL -> check(variant.versionCode > maxVersionCode) {
                 "Version code $maxVersionCode is too low for variant ${variant.name}."
             }
-            ResolutionStrategy.IGNORE -> if (variant.versionCode <= maxVersionCode) logger.warn(
-                    "Version code $maxVersionCode may be too low for variant ${variant.name}.")
+            ResolutionStrategy.IGNORE -> error("Impossible condition")
         }
     }
 }
