@@ -9,12 +9,14 @@ import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.internal.RESOURCES_OUTPUT_PATH
 import com.github.triplet.gradle.play.internal.get
 import com.github.triplet.gradle.play.internal.newTask
+import com.github.triplet.gradle.play.internal.nullOrFull
 import com.github.triplet.gradle.play.internal.set
 import groovy.lang.GroovyObject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.ExtensionAware
+import java.io.File
 
 class PlayPublisherPlugin : Plugin<Project> {
     override fun apply(project: Project) {
@@ -66,7 +68,8 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "Downloads the Play Store listing metadata for $variantName."
             ) {
                 init()
-                outputFolder = project.file("src/${variant.flavorName ?: "main"}/$PLAY_PATH")
+                outputFolder =
+                        project.file("src/${variant.flavorName.nullOrFull() ?: "main"}/$PLAY_PATH")
 
                 bootstrapAllTask.dependsOn(this)
             }
@@ -82,7 +85,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 inputs.file("src/${variant.buildType.name}/$PLAY_PATH")
                 inputs.file("src/${variant.name}/$PLAY_PATH")
 
-                outputFolder = project.file("$RESOURCES_OUTPUT_PATH/${variant.name}")
+                outputFolder = File(project.buildDir, "$RESOURCES_OUTPUT_PATH/${variant.name}")
 
                 playResourcesAllTask.dependsOn(this)
             }
