@@ -364,3 +364,23 @@ project.afterEvaluate {
 
 Note that we have to wait for the evaluation phase to complete before the
 `generateReleasePlayResources` task becomes visible.
+
+#### Using external tools from Gradle
+
+If you need to process your APK or App Bundle before it's published but your tool doesn't have a
+Gradle plugin, you'll need to create a task to bridge the scripting and JVM worlds:
+
+```groovy
+tasks.whenTaskAdded { addedTask ->
+    if (addedTask.name == 'publishApkRelease') {
+        task myExternalTool(type: Exec) {
+            workingDir projectDir
+            commandLine 'sh', './myScript.sh'
+            dependsOn assembleRelease
+        }
+        addedTask.dependsOn myExternalTool
+    }
+}
+```
+
+Be sure to overwrite `$projectDir/build/outputs/[apk/bundle]/[variant]/*.[apk/aab]` in your script.
