@@ -103,7 +103,8 @@ class PlayPublisherPlugin : Plugin<Project> {
             if (variant.isSigningReady) {
                 val processPackageMetadata = project.newTask<ProcessPackageMetadataTask>(
                         "processPackageMetadata$variantName",
-                        "Processes packaging metadata for $variantName."
+                        "Processes packaging metadata for $variantName.",
+                        null
                 ) {
                     init()
 
