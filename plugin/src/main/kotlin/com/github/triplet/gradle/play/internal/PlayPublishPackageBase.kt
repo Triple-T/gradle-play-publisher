@@ -7,7 +7,7 @@ import com.google.api.services.androidpublisher.model.TrackRelease
 import java.io.File
 
 abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
-    internal fun AndroidPublisher.Edits.updateTracks(
+    protected fun AndroidPublisher.Edits.updateTracks(
             editId: String,
             inputFolder: File,
             versions: List<Long>
