@@ -72,7 +72,8 @@ class PlayPublisherPlugin : Plugin<Project> {
 
             val playResourcesTask = project.newTask<GeneratePlayResourcesTask>(
                     "generate${variantName}PlayResources",
-                    "Collects Play Store resources for $variantName."
+                    "Collects Play Store resources for $variantName.",
+                    null
             ) {
                 inputs.file("src/main/$PLAY_PATH")
                 if (variant.flavorName.isNotEmpty()) {
