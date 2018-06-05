@@ -3,6 +3,10 @@ package com.github.triplet.gradle.play
 import com.github.triplet.gradle.play.internal.AccountConfig
 import com.github.triplet.gradle.play.internal.ReleaseStatus
 import com.github.triplet.gradle.play.internal.TrackType
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import java.io.File
 
 open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension() {
@@ -65,5 +69,8 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
     /**
      * Optional folder where your processed APK/Bundle files are generated. See [README] for details
      */
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:InputDirectory
+    @get:Optional
     var buildInputFolder: File? = null
 }
