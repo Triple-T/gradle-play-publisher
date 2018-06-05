@@ -24,8 +24,7 @@ class PlayPublisherPlugin : Plugin<Project> {
         val android = requireNotNull(project.extensions.get<AppExtension>()) {
             "The 'com.android.application' plugin is required."
         }
-        val extension =
-                project.extensions.create(PLAY_PATH, PlayPublisherExtension::class.java)
+        val extension = project.extensions.create(PLAY_PATH, PlayPublisherExtension::class.java)
 
         val bootstrapAllTask = project.newTask<Task>(
                 "bootstrapAll",
