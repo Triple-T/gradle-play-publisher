@@ -3,17 +3,17 @@ package com.github.triplet.gradle.play.internal
 import java.io.File
 import java.io.FileFilter
 
-// region '419' is a special case in the Play Store that represents latin america
-// 'fil' is a special case in the Play Store that represents Filipino
-private val localeRegex = Regex("^(fil|[a-z]{2}(-([A-Z]{2}|419))?)\\z")
-
 internal object LocaleFileFilter : FileFilter {
+    // region '419' is a special case in the Play Store that represents latin america
+    // 'fil' is a special case in the Play Store that represents Filipino
+    private val localeRegex = Regex("^(fil|[a-z]{2}(-([A-Z]{2}|419))?)\\z")
+
     override fun accept(file: File) = file.name.matches(localeRegex)
 }
 
-private val imageExtensions = arrayOf("png", "jpg")
-
 internal object ImageFileFilter : FileFilter {
+    private val imageExtensions = arrayOf("png", "jpg")
+
     override fun accept(file: File) = file.extension.toLowerCase() in imageExtensions
 }
 
@@ -33,10 +33,11 @@ internal enum class AppDetail(val fileName: String, val maxLength: Int = Int.MAX
     DEFAULT_LANGUAGE("defaultLanguage")
 }
 
-// Min length for any side: 320px. Max length for any side: 3840px.
-internal data class ImageSize(val minWidth: Int, val minHeight: Int, val maxWidth: Int = minWidth, val maxHeight: Int = minHeight)
-
-internal enum class ImageType(val fileName: String, val constraints: ImageSize = ImageSize(320, 320, 3840, 3840), val maxNum: Int = 8) {
+internal enum class ImageType(
+        val fileName: String,
+        val constraints: ImageSize = ImageSize(320, 320, 3840, 3840),
+        val maxNum: Int = 8
+) {
     ICON("icon", ImageSize(512, 512), 1),
     FEATURE_GRAPHIC("featureGraphic", ImageSize(1024, 500), 1),
     PROMO_GRAPHIC("promoGraphic", ImageSize(180, 120), 1),
@@ -48,3 +49,11 @@ internal enum class ImageType(val fileName: String, val constraints: ImageSize =
     TV_SCREENSHOTS("tvScreenshots"),
     WEAR_SCREENSHOTS("wearScreenshots")
 }
+
+// Min length for any side: 320px. Max length for any side: 3840px.
+internal data class ImageSize(
+        val minWidth: Int,
+        val minHeight: Int,
+        val maxWidth: Int = minWidth,
+        val maxHeight: Int = minHeight
+)
