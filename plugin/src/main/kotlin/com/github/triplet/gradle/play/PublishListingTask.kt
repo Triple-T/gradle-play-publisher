@@ -97,21 +97,19 @@ open class PublishListingTask : PlayPublishTaskBase() {
             for (imageType in ImageType.values()) {
                 val typeName = imageType.fileName
                 val files = File(listingDir, typeName).listFiles(ImageFileFilter)
-                        .sorted()
-                        .map { FileContent(MIME_TYPE_IMAGE, it) }
+                        ?.sorted()
+                        ?.map { FileContent(MIME_TYPE_IMAGE, it) }
 
-                if (files.isEmpty()) return
+                if (files?.isEmpty() != false) continue
+                check(files.size <= imageType.maxNum) {
+                    "You can only upload ${imageType.maxNum} graphic(s) for the $typeName"
+                }
 
                 images().deleteall(variant.applicationId, editId, locale, typeName).execute()
-                if (files.size <= imageType.maxNum) {
-                    for (file in files) {
-                        images()
-                                .upload(variant.applicationId, editId, locale, typeName, file)
-                                .execute()
-                    }
-                } else {
-                    logger.error(
-                            "You can only upload ${imageType.maxNum} graphic(s) for the $typeName")
+                for (file in files) {
+                    images()
+                            .upload(variant.applicationId, editId, locale, typeName, file)
+                            .execute()
                 }
             }
         }
