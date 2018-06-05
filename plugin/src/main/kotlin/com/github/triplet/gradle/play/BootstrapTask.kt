@@ -1,5 +1,6 @@
 package com.github.triplet.gradle.play
 
+import com.github.triplet.gradle.play.internal.AppDetail
 import com.github.triplet.gradle.play.internal.ImageType
 import com.github.triplet.gradle.play.internal.LISTING_PATH
 import com.github.triplet.gradle.play.internal.ListingDetail
@@ -32,7 +33,7 @@ open class BootstrapTask : PlayPublishTaskBase() {
             val rootDir = File(outputFolder, "${listing.language}/$LISTING_PATH")
 
             fun downloadMetadata() {
-                fun String.write(detail: ListingDetail) = write(rootDir, detail)
+                fun String.write(detail: ListingDetail) = write(rootDir, detail.fileName)
 
                 listing.fullDescription.nullOrFull()?.write(ListingDetail.FULL_DESCRIPTION)
                 listing.shortDescription.nullOrFull()?.write(ListingDetail.SHORT_DESCRIPTION)
@@ -78,16 +79,16 @@ open class BootstrapTask : PlayPublishTaskBase() {
             }
 
     private fun AndroidPublisher.Edits.bootstrapAppDetails(editId: String) {
-        fun String.write(detail: ListingDetail) = write(outputFolder, detail)
+        fun String.write(detail: AppDetail) = write(outputFolder, detail.fileName)
 
         val details = details().get(variant.applicationId, editId).execute()
 
-        details.contactEmail.nullOrFull()?.write(ListingDetail.CONTACT_EMAIL)
-        details.contactPhone.nullOrFull()?.write(ListingDetail.CONTACT_PHONE)
-        details.contactWebsite.nullOrFull()?.write(ListingDetail.CONTACT_WEBSITE)
-        details.defaultLanguage.nullOrFull()?.write(ListingDetail.DEFAULT_LANGUAGE)
+        details.contactEmail.nullOrFull()?.write(AppDetail.CONTACT_EMAIL)
+        details.contactPhone.nullOrFull()?.write(AppDetail.CONTACT_PHONE)
+        details.contactWebsite.nullOrFull()?.write(AppDetail.CONTACT_WEBSITE)
+        details.defaultLanguage.nullOrFull()?.write(AppDetail.DEFAULT_LANGUAGE)
     }
 
-    private fun String.write(dir: File, detail: ListingDetail) =
-            File(dir, detail.fileName).safeCreateNewFile().writeText(this)
+    private fun String.write(dir: File, fileName: String) =
+            File(dir, fileName).safeCreateNewFile().writeText(this)
 }

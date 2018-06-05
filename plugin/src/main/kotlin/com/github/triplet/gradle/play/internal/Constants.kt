@@ -13,6 +13,3 @@ internal const val LISTING_PATH = "listing"
 internal const val RESOURCES_OUTPUT_PATH = "outputs/$PLAY_PATH"
 
 internal val transport: NetHttpTransport by lazy { GoogleNetHttpTransport.newTrustedTransport() }
-internal val imageExtensions = arrayOf("png", "jpg")
-internal const val APK_EXTENSION = "apk"
-internal const val BUNDLE_EXTENSION = "aab"

@@ -1,5 +1,6 @@
 package com.github.triplet.gradle.play
 
+import com.github.triplet.gradle.play.internal.AppDetail
 import com.github.triplet.gradle.play.internal.ImageFileFilter
 import com.github.triplet.gradle.play.internal.ImageType
 import com.github.triplet.gradle.play.internal.LISTING_PATH
@@ -41,14 +42,14 @@ open class PublishListingTask : PlayPublishTaskBase() {
         val details = AppDetails().apply {
             val errorOnSizeLimit = extension.errorOnSizeLimit
 
-            defaultLanguage = File(inputFolder, ListingDetail.DEFAULT_LANGUAGE.fileName).orNull()
-                    ?.readProcessed(ListingDetail.DEFAULT_LANGUAGE.maxLength, errorOnSizeLimit)
-            contactEmail = File(inputFolder, ListingDetail.CONTACT_EMAIL.fileName).orNull()
-                    ?.readProcessed(ListingDetail.CONTACT_EMAIL.maxLength, errorOnSizeLimit)
-            contactPhone = File(inputFolder, ListingDetail.CONTACT_PHONE.fileName).orNull()
-                    ?.readProcessed(ListingDetail.CONTACT_PHONE.maxLength, errorOnSizeLimit)
-            contactWebsite = File(inputFolder, ListingDetail.CONTACT_WEBSITE.fileName).orNull()
-                    ?.readProcessed(ListingDetail.CONTACT_WEBSITE.maxLength, errorOnSizeLimit)
+            defaultLanguage = File(inputFolder, AppDetail.DEFAULT_LANGUAGE.fileName).orNull()
+                    ?.readProcessed(AppDetail.DEFAULT_LANGUAGE.maxLength, errorOnSizeLimit)
+            contactEmail = File(inputFolder, AppDetail.CONTACT_EMAIL.fileName).orNull()
+                    ?.readProcessed(AppDetail.CONTACT_EMAIL.maxLength, errorOnSizeLimit)
+            contactPhone = File(inputFolder, AppDetail.CONTACT_PHONE.fileName).orNull()
+                    ?.readProcessed(AppDetail.CONTACT_PHONE.maxLength, errorOnSizeLimit)
+            contactWebsite = File(inputFolder, AppDetail.CONTACT_WEBSITE.fileName).orNull()
+                    ?.readProcessed(AppDetail.CONTACT_WEBSITE.maxLength, errorOnSizeLimit)
         }
 
         details().update(variant.applicationId, editId, details).execute()
