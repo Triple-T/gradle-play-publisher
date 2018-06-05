@@ -6,10 +6,10 @@ import com.github.triplet.gradle.play.internal.ACCOUNT_CONFIG
 import com.github.triplet.gradle.play.internal.AccountConfig
 import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
-import com.github.triplet.gradle.play.internal.RESOURCES_OUTPUT_PATH
+import com.github.triplet.gradle.play.internal.flavorNameOrDefault
 import com.github.triplet.gradle.play.internal.get
 import com.github.triplet.gradle.play.internal.newTask
-import com.github.triplet.gradle.play.internal.nullOrFull
+import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.internal.set
 import com.github.triplet.gradle.play.internal.validate
 import groovy.lang.GroovyObject
@@ -64,7 +64,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "Downloads the Play Store listing metadata for $variantName."
             ) {
                 init()
-                srcDir = project.file("src/${variant.flavorName.nullOrFull() ?: "main"}/$PLAY_PATH")
+                srcDir = project.file("src/${variant.flavorNameOrDefault}/$PLAY_PATH")
 
                 bootstrapAllTask.dependsOn(this)
             }
@@ -74,14 +74,8 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "Collects Play Store resources for $variantName.",
                     null
             ) {
-                inputs.file("src/main/$PLAY_PATH")
-                if (variant.flavorName.isNotEmpty()) {
-                    inputs.file("src/${variant.flavorName}/$PLAY_PATH")
-                }
-                inputs.file("src/${variant.buildType.name}/$PLAY_PATH")
-                inputs.file("src/${variant.name}/$PLAY_PATH")
-
-                resDir = File(project.buildDir, "$RESOURCES_OUTPUT_PATH/${variant.name}")
+                inputs.files(*variant.sourceSets.map { "src/${it.name}/$PLAY_PATH" }.toTypedArray())
+                resDir = File(project.buildDir, "${variant.playPath}/res")
             }
             val publishListingTask = project.newTask<PublishListingTask>(
                     "publishListing$variantName",

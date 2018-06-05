@@ -5,10 +5,10 @@ import com.github.triplet.gradle.play.internal.ImageFileFilter
 import com.github.triplet.gradle.play.internal.ImageType
 import com.github.triplet.gradle.play.internal.LISTING_PATH
 import com.github.triplet.gradle.play.internal.ListingDetail
-import com.github.triplet.gradle.play.internal.LocaleFileFilter
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
-import com.github.triplet.gradle.play.internal.RESOURCES_OUTPUT_PATH
+import com.github.triplet.gradle.play.internal.climbUpTo
 import com.github.triplet.gradle.play.internal.orNull
+import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.internal.readProcessed
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
@@ -20,6 +20,7 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import java.io.File
 
 open class PublishListingTask : PlayPublishTaskBase() {
@@ -29,19 +30,41 @@ open class PublishListingTask : PlayPublishTaskBase() {
     @Suppress("MemberVisibilityCanBePrivate") // Needed for Gradle caching to work correctly
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputFile
-    val outputFile = File(project.buildDir, "$RESOURCES_OUTPUT_PATH-listing-cache-key")
+    val outputFile by lazy { File(project.buildDir, "${variant.playPath}/listing-cache-key") }
 
     @TaskAction
-    fun publishListing() = write { editId ->
-        updateListings(editId)
-        updateAppDetails(editId)
+    fun publishListing(inputs: IncrementalTaskInputs) {
+        if (!inputs.isIncremental) project.delete(outputs.files)
 
-        outputFile.writeText(editId)
-    }
+        var appDetailsChanged = false
+        val changedListingDetails = mutableSetOf<File>()
+        val changedImages = mutableListOf<Pair<ImageType, File>>()
 
-    private fun AndroidPublisher.Edits.updateListings(editId: String) {
-        // Matches valid locales e.g. en-US for Play Store
-        resDir.listFiles(LocaleFileFilter).forEach { updateListing(editId, it) }
+        fun File.process() {
+            appDetailsChanged = appDetailsChanged || invalidatesAppDetails()
+            if (invalidatesListingDetails()) {
+                climbUpTo(LISTING_PATH)?.let { changedListingDetails += it }
+            }
+            invalidatedImageType()?.let { changedImages += it to this }
+        }
+
+        inputs.outOfDate { it.file.process() }
+        inputs.removed { it.file.process() }
+
+        write { editId ->
+            if (appDetailsChanged) updateAppDetails(editId)
+            for (listingDir in changedListingDetails) {
+                updateListing(editId, listingDir.parentFile.name, listingDir)
+            }
+            changedImages.map { (type, image) ->
+                type to image.parentFile
+            }.toSet().forEach { (type, imageDir) ->
+                updateImages(
+                        editId, imageDir.climbUpTo(LISTING_PATH)!!.parentFile.name, type, imageDir)
+            }
+
+            outputFile.writeText(editId)
+        }
     }
 
     private fun AndroidPublisher.Edits.updateAppDetails(editId: String) {
@@ -61,62 +84,75 @@ open class PublishListingTask : PlayPublishTaskBase() {
         details().update(variant.applicationId, editId, details).execute()
     }
 
-    private fun AndroidPublisher.Edits.updateListing(editId: String, dir: File) {
-        val locale = dir.name
-        val listingDir = File(dir, LISTING_PATH).orNull() ?: return
+    private fun AndroidPublisher.Edits.updateListing(
+            editId: String,
+            locale: String,
+            listingDir: File
+    ) {
+        val listing = Listing().apply {
+            val errorOnSizeLimit = extension.errorOnSizeLimit
 
-        fun uploadListing() {
-            val listing = Listing().apply {
-                val errorOnSizeLimit = extension.errorOnSizeLimit
-
-                title = File(listingDir, ListingDetail.TITLE.fileName).orNull()
-                        ?.readProcessed(ListingDetail.TITLE.maxLength, errorOnSizeLimit)
-                shortDescription = File(listingDir, ListingDetail.SHORT_DESCRIPTION.fileName)
-                        .orNull()
-                        ?.readProcessed(ListingDetail.SHORT_DESCRIPTION.maxLength, errorOnSizeLimit)
-                fullDescription = File(listingDir, ListingDetail.FULL_DESCRIPTION.fileName)
-                        .orNull()
-                        ?.readProcessed(ListingDetail.FULL_DESCRIPTION.maxLength, errorOnSizeLimit)
-                video = File(listingDir, ListingDetail.VIDEO.fileName).orNull()
-                        ?.readProcessed(ListingDetail.VIDEO.maxLength, errorOnSizeLimit)
-            }
-
-            try {
-                listings().update(variant.applicationId, editId, locale, listing).execute()
-            } catch (e: GoogleJsonResponseException) {
-                if (e.details.errors.any { it.reason == "unsupportedListingLanguage" }) {
-                    // Rethrow for clarity
-                    throw IllegalArgumentException("Unsupported locale $locale", e)
-                } else {
-                    throw e
-                }
-            }
+            title = File(listingDir, ListingDetail.TITLE.fileName).orNull()
+                    ?.readProcessed(ListingDetail.TITLE.maxLength, errorOnSizeLimit)
+            shortDescription = File(listingDir, ListingDetail.SHORT_DESCRIPTION.fileName)
+                    .orNull()
+                    ?.readProcessed(ListingDetail.SHORT_DESCRIPTION.maxLength, errorOnSizeLimit)
+            fullDescription = File(listingDir, ListingDetail.FULL_DESCRIPTION.fileName)
+                    .orNull()
+                    ?.readProcessed(ListingDetail.FULL_DESCRIPTION.maxLength, errorOnSizeLimit)
+            video = File(listingDir, ListingDetail.VIDEO.fileName).orNull()
+                    ?.readProcessed(ListingDetail.VIDEO.maxLength, errorOnSizeLimit)
         }
 
-        fun updateImages() {
-            for (imageType in ImageType.values()) {
-                val typeName = imageType.fileName
-                val files = File(listingDir, typeName).listFiles(ImageFileFilter)
-                        ?.sorted()
-                        ?.map { FileContent(MIME_TYPE_IMAGE, it) }
-
-                if (files?.isEmpty() != false) continue
-                check(files.size <= imageType.maxNum) {
-                    "You can only upload ${imageType.maxNum} graphic(s) for the $typeName"
-                }
-
-                images().deleteall(variant.applicationId, editId, locale, typeName).execute()
-                for (file in files) {
-                    images()
-                            .upload(variant.applicationId, editId, locale, typeName, file)
-                            .execute()
-                }
+        try {
+            listings().update(variant.applicationId, editId, locale, listing).execute()
+        } catch (e: GoogleJsonResponseException) {
+            if (e.details.errors.any { it.reason == "unsupportedListingLanguage" }) {
+                // Rethrow for clarity
+                throw IllegalArgumentException("Unsupported locale $locale", e)
+            } else {
+                throw e
             }
         }
-
-        uploadListing()
-        updateImages()
     }
+
+    private fun AndroidPublisher.Edits.updateImages(
+            editId: String,
+            locale: String,
+            type: ImageType,
+            imageDir: File
+    ) {
+        val typeName = type.fileName
+        val files = imageDir.listFiles()
+                ?.sorted()
+                ?.map { FileContent(MIME_TYPE_IMAGE, it) } ?: return
+
+        check(files.all {
+            val isValidType = ImageFileFilter.accept(it.file)
+            if (!isValidType) logger.error("Invalid file type: ${it.file.name}")
+            isValidType
+        }) { "Invalid files type(s), check logs for details." }
+        check(files.size <= type.maxNum) {
+            "You can only upload ${type.maxNum} graphic(s) for the $typeName"
+        }
+
+        images().deleteall(variant.applicationId, editId, locale, typeName).execute()
+        for (file in files) {
+            images()
+                    .upload(variant.applicationId, editId, locale, typeName, file)
+                    .execute()
+        }
+    }
+
+    private fun File.invalidatesAppDetails() =
+            isChildOf(resDir.name) && AppDetail.values().any { it.fileName == name }
+
+    private fun File.invalidatesListingDetails() =
+            isChildOf(LISTING_PATH) && ListingDetail.values().any { it.fileName == name }
+
+    private fun File.invalidatedImageType() = ImageType.values().find { isChildOf(it.fileName) }
+
+    private fun File.isChildOf(parentName: String) = parentFile?.name == parentName
 
     private companion object {
         const val MIME_TYPE_IMAGE = "image/*"
