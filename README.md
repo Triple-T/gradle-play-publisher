@@ -30,7 +30,7 @@ the Google Play Store from a continuous integration server or anywhere you have 
 
 1. Upload the first version of your APK or App Bundle using the
    [Google Play Console](https://play.google.com/apps/publish)
-1. [Create a Google Play Service Account](#google-play-service-account)
+1. [Create a Google Play Service Account](#service-account)
 1. [Sign your release builds](https://developer.android.com/studio/publish/app-signing#gradle-sign)
    with a valid `signingConfig`
 1. [Add and apply the plugin](#installation)
@@ -90,19 +90,19 @@ apply plugin: 'com.github.triplet.play'
 
 #### Snapshot builds
 
-If you're prepared to cut yourself on the bleeding edge of this plugin, snapshot builds are
-available through JitPack:
+If you're prepared to cut yourself on the bleeding edge of this plugin, snapshot builds are available in [Sonatype's
+`snapshots` repository](https://oss.sonatype.org/content/repositories/snapshots/):
 
 ```groovy
 buildscript {
     repositories {
         // ...
-        maven { url 'https://jitpack.io' }
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
     }
 
     dependencies {
         // ...
-        implementation 'com.github.Triple-T:gradle-play-publisher:commitId' // E.g. 75bed587f8
+        classpath 'com.github.triplet.gradle:play-publisher:2.0.0-SNAPSHOT'
     }
 }
 ```
