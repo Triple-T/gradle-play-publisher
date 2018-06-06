@@ -2,6 +2,7 @@ package com.github.triplet.gradle.play
 
 import com.android.build.gradle.api.ApkVariantOutput
 import com.github.triplet.gradle.play.internal.PlayPublishPackageBase
+import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.TrackType.INTERNAL
 import com.github.triplet.gradle.play.internal.superiors
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
@@ -17,16 +18,30 @@ open class PublishApkTask : PlayPublishPackageBase() {
     @TaskAction
     fun publishApks() = write { editId: String ->
         //TODO: If we take in a folder here as an option, we can fix #233, #227
-        val publishedApks = publishApks(editId)
-        updateTracks(editId, inputFolder, publishedApks.map { it.versionCode.toLong() })
+        val publishedApks = publishApks(editId).filterNotNull()
+        if (publishedApks.isNotEmpty()) {
+            updateTracks(editId, inputFolder, publishedApks.map { it.versionCode.toLong() })
+        }
     }
 
     private fun AndroidPublisher.Edits.publishApks(editId: String) = variant.outputs
             .filterIsInstance<ApkVariantOutput>()
             .map { publishApk(editId, FileContent(MIME_TYPE_APK, it.outputFile)) }
 
-    private fun AndroidPublisher.Edits.publishApk(editId: String, apkFile: FileContent): Apk {
-        val apk = apks().upload(variant.applicationId, editId, apkFile).execute()
+    private fun AndroidPublisher.Edits.publishApk(editId: String, apkFile: FileContent): Apk? {
+        val apk = try {
+            apks().upload(variant.applicationId, editId, apkFile).execute()
+        } catch (e: GoogleJsonResponseException) {
+            if (
+                    extension._resolutionStrategy == ResolutionStrategy.IGNORE ||
+                    e.details.errors.all { it.reason == "apkUpgradeVersionConflict" }
+            ) {
+                logger.warn("Ignoring APK for version code ${variant.versionCode}")
+                return null
+            } else {
+                throw e
+            }
+        }
 
         if (extension.untrackOld && extension._track != INTERNAL) {
             extension._track.superiors.map { it.publishedName }.forEach { channel ->
@@ -37,7 +52,8 @@ open class PublishApkTask : PlayPublishPackageBase() {
                             channel
                     ).execute().apply {
                         releases.forEach {
-                            it.versionCodes = it.versionCodes.filter { it > apk.versionCode.toLong() }
+                            it.versionCodes =
+                                    it.versionCodes.filter { it > apk.versionCode.toLong() }
                         }
                     }
                     tracks().update(variant.applicationId, editId, channel, track).execute()
