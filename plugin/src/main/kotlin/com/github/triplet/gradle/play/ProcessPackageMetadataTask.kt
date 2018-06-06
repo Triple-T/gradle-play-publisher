@@ -18,10 +18,16 @@ open class ProcessPackageMetadataTask : PlayPublishTaskBase() {
                 ?.max() ?: 1
 
         when (extension._resolutionStrategy) {
-            ResolutionStrategy.AUTO -> variant.outputs.filterIsInstance<ApkVariantOutput>().forEach { output ->
-                val newCode = maxVersionCode.toInt() + 1
-                output.versionCodeOverride = newCode
-                extension.versionNameOverride(newCode)?.let { output.versionNameOverride = it }
+            ResolutionStrategy.AUTO -> {
+                val outputs = variant.outputs.filterIsInstance<ApkVariantOutput>()
+                while (outputs.any { it.versionCode <= maxVersionCode }) {
+                    for (output in outputs) {
+                        val newCode = output.versionCode + 1
+                        output.versionCodeOverride = newCode
+                        extension.versionNameOverride(newCode)
+                                ?.let { output.versionNameOverride = it }
+                    }
+                }
             }
             ResolutionStrategy.FAIL -> check(variant.versionCode > maxVersionCode) {
                 "Version code $maxVersionCode is too low for variant ${variant.name}."
