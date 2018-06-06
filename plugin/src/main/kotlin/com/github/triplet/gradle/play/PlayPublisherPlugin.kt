@@ -75,6 +75,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                     null
             ) {
                 inputs.files(*variant.sourceSets.map { "src/${it.name}/$PLAY_PATH" }.toTypedArray())
+                        .skipWhenEmpty()
                 resDir = File(project.buildDir, "${variant.playPath}/res")
             }
             val publishListingTask = project.newTask<PublishListingTask>(
