@@ -1,6 +1,6 @@
 package com.github.triplet.gradle.play
 
-import com.github.triplet.gradle.play.internal.InputsKt
+import com.github.triplet.gradle.play.internal.IoKt
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 
@@ -12,8 +12,8 @@ class TestHelper {
         def project = ProjectBuilder.builder().withProjectDir(FIXTURE_WORKING_DIR).build()
 
         def base = new File(project.buildDir, "outputs/apk")
-        InputsKt.safeCreateNewFile(new File(base, "release/test-release.apk")).write("")
-        InputsKt.safeCreateNewFile(new File(base, "paid/release/test-paid-release.apk")).write("")
+        IoKt.safeCreateNewFile(new File(base, "release/test-release.apk")).write("")
+        IoKt.safeCreateNewFile(new File(base, "paid/release/test-paid-release.apk")).write("")
 
         return project
     }

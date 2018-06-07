@@ -2,7 +2,6 @@ package com.github.triplet.gradle.play
 
 import com.android.build.gradle.api.ApkVariantOutput
 import com.github.triplet.gradle.play.internal.PlayPublishPackageBase
-import com.github.triplet.gradle.play.internal.RESOURCES_OUTPUT_PATH
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.TrackType.INTERNAL
 import com.github.triplet.gradle.play.internal.playPath
@@ -45,12 +44,14 @@ open class PublishApkTask : PlayPublishPackageBase() {
                     it.into(outputDir)
                 }
 
-                publishedApks += publishApk(editId, FileContent(MIME_TYPE_APK, file))
+                publishApk(editId, FileContent(MIME_TYPE_APK, file))?.let { publishedApks += it }
             }
         }
         inputs.removed { project.delete(File(outputDir, it.file.name)) }
 
-        updateTracks(editId, publishedApks.map { it.versionCode.toLong() })
+        if (publishedApks.isNotEmpty()) {
+            updateTracks(editId, publishedApks.map { it.versionCode.toLong() })
+        }
     }
 
     private fun AndroidPublisher.Edits.publishApk(editId: String, apkFile: FileContent): Apk? {
