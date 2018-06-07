@@ -214,6 +214,24 @@ class GenerateResourcesTest {
         project.tasks.generateFlavor1Flavor4BuildType1PlayResources.execute()
     }
 
+    @Test(expected = TaskExecutionException)
+    void invalidLocaleThrow() {
+        def project = TestHelper.evaluatableProject()
+
+        project.android {
+            flavorDimensions 'diem1'
+
+            productFlavors {
+                invalidLocale { dimension 'diem1' }
+            }
+        }
+
+        project.evaluate()
+
+        project.tasks.clean.execute()
+        project.tasks.generateInvalidLocaleReleasePlayResources.execute()
+    }
+
     @Test
     void multidimensionalFlavorsMerge() {
         def project = TestHelper.evaluatableProject()
