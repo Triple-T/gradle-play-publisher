@@ -7,6 +7,7 @@ import com.github.triplet.gradle.play.internal.LISTING_PATH
 import com.github.triplet.gradle.play.internal.ListingDetail
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.internal.climbUpTo
+import com.github.triplet.gradle.play.internal.isChildOf
 import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.internal.readProcessed
@@ -151,8 +152,6 @@ open class PublishListingTask : PlayPublishTaskBase() {
             isChildOf(LISTING_PATH) && ListingDetail.values().any { it.fileName == name }
 
     private fun File.invalidatedImageType() = ImageType.values().find { isChildOf(it.fileName) }
-
-    private fun File.isChildOf(parentName: String) = parentFile?.name == parentName
 
     private companion object {
         const val MIME_TYPE_IMAGE = "image/*"

@@ -13,7 +13,7 @@ import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import java.io.File
 
 @CacheableTask
-open class GeneratePlayResourcesTask : DefaultTask() {
+open class GenerateResourcesTask : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputDirectory
     lateinit var resDir: File
@@ -30,11 +30,11 @@ open class GeneratePlayResourcesTask : DefaultTask() {
 
         if (!inputs.isIncremental) project.delete(outputs.files)
 
-        inputs.outOfDate {
-            it.file.orNull()?.let { input ->
-                project.copy {
-                    it.from(input)
-                    it.into(input.findClosestDir().findDest())
+        project.copy { spec ->
+            inputs.outOfDate {
+                it.file.orNull()?.let {
+                    spec.from(it)
+                    spec.into(it.findClosestDir().findDest())
                 }
             }
         }

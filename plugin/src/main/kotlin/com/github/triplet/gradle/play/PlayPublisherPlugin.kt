@@ -69,7 +69,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 bootstrapAllTask.dependsOn(this)
             }
 
-            val playResourcesTask = project.newTask<GeneratePlayResourcesTask>(
+            val playResourcesTask = project.newTask<GenerateResourcesTask>(
                     "generate${variantName}PlayResources",
                     "Collects Play Store resources for $variantName.",
                     null
