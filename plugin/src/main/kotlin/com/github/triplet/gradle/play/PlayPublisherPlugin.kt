@@ -74,7 +74,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "Collects Play Store resources for $variantName.",
                     null
             ) {
-                inputs.files(*variant.sourceSets.map { "src/${it.name}/$PLAY_PATH" }.toTypedArray())
+                this.variant = variant
                 resDir = File(project.buildDir, "${variant.playPath}/res")
             }
             val publishListingTask = project.newTask<PublishListingTask>(

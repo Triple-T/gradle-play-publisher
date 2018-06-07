@@ -22,17 +22,17 @@ class ExtensionsTest {
 
     @Test
     fun `Long files are trimmed`() {
-        assertThat(project.file(TEST_FILE).readProcessed(6, false)).hasSize(6)
+        assertThat(project.file(TEST_FILE).readProcessed(2, false)).hasSize(2)
     }
 
     @Test
     fun `Files on the edge are trimmed correctly`() {
-        assertThat(project.file(TEST_FILE).readProcessed(12, false)).hasSize(12)
+        assertThat(project.file(TEST_FILE).readProcessed(4, false)).hasSize(4)
     }
 
     @Test
     fun `Short files aren't trimmed`() {
-        assertThat(project.file(TEST_FILE).readProcessed(100, false)).hasSize(12)
+        assertThat(project.file(TEST_FILE).readProcessed(100, false)).hasSize(4)
     }
 
     @Test(expected = IllegalArgumentException::class)

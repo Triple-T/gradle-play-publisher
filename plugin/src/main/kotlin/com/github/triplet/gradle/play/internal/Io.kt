@@ -12,6 +12,9 @@ internal tailrec fun File.findClosestDir(): File {
 internal fun File.climbUpTo(parentName: String): File? =
         if (name == parentName) this else parentFile?.climbUpTo(parentName)
 
+internal fun File.flattened(): List<File> =
+        listFiles()?.map { it.flattened() }?.flatten() ?: listOf(this)
+
 internal fun File.readProcessed(maxLength: Int, error: Boolean) =
         readText().normalized().takeOrThrow(maxLength, error, this)
 
