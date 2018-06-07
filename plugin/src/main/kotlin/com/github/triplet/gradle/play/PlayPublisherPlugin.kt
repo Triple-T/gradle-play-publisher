@@ -69,7 +69,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 bootstrapAllTask.dependsOn(this)
             }
 
-            val playResourcesTask = project.newTask<GeneratePlayResourcesTask>(
+            val playResourcesTask = project.newTask<GenerateResourcesTask>(
                     "generate${variantName}PlayResources",
                     "Collects Play Store resources for $variantName.",
                     null
@@ -90,6 +90,16 @@ class PlayPublisherPlugin : Plugin<Project> {
             }
 
             if (variant.isSigningReady) {
+                val processPackageMetadata = project.newTask<ProcessPackageMetadataTask>(
+                        "processPackageMetadata$variantName",
+                        "Processes packaging metadata for $variantName.",
+                        null
+                ) {
+                    init()
+
+                    variant.checkManifest.dependsOn(this)
+                }
+
                 val publishApkTask = project.newTask<PublishApkTask>(
                         "publishApk$variantName",
                         "Uploads APK for $variantName."
@@ -97,6 +107,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                     init()
                     resDir = playResourcesTask.resDir
 
+                    dependsOn(processPackageMetadata)
                     dependsOn(playResourcesTask)
                     dependsOn(variant.assemble)
                     publishApkAllTask.dependsOn(this)
