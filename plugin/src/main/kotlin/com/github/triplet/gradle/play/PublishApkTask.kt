@@ -33,7 +33,7 @@ open class PublishApkTask : PlayPublishPackageBase() {
             apks().upload(variant.applicationId, editId, apkFile).execute()
         } catch (e: GoogleJsonResponseException) {
             if (
-                    extension._resolutionStrategy == ResolutionStrategy.IGNORE ||
+                    extension._resolutionStrategy == ResolutionStrategy.IGNORE &&
                     e.details.errors.all { it.reason == "apkUpgradeVersionConflict" }
             ) {
                 logger.warn("Ignoring APK for version code ${variant.versionCode}")
