@@ -34,7 +34,9 @@ open class PublishApkTask : PlayPublishPackageBase() {
         } catch (e: GoogleJsonResponseException) {
             if (
                     extension._resolutionStrategy == ResolutionStrategy.IGNORE &&
-                    e.details.errors.all { it.reason == "apkUpgradeVersionConflict" }
+                    e.details.errors.all {
+                        it.reason == "apkUpgradeVersionConflict" || it.reason == "apkNoUpgradePath"
+                    }
             ) {
                 logger.warn("Ignoring APK for version code ${variant.versionCode}")
                 return null
