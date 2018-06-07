@@ -32,13 +32,23 @@ open class PublishApkTask : PlayPublishPackageBase() {
         val apk = try {
             apks().upload(variant.applicationId, editId, apkFile).execute()
         } catch (e: GoogleJsonResponseException) {
-            if (
-                    extension._resolutionStrategy == ResolutionStrategy.IGNORE &&
-                    e.details.errors.all {
-                        it.reason == "apkUpgradeVersionConflict" || it.reason == "apkNoUpgradePath"
-                    }
-            ) {
-                logger.warn("Ignoring APK for version code ${variant.versionCode}")
+            val isConflict = e.details.errors.all {
+                it.reason == "apkUpgradeVersionConflict" || it.reason == "apkNoUpgradePath"
+            }
+            if (isConflict) {
+                when (extension._resolutionStrategy) {
+                    ResolutionStrategy.AUTO -> throw IllegalStateException(
+                            "Concurrent uploads for variant ${variant.name}. Make sure to " +
+                                    "synchronously upload your APKs such that they don't conflict.",
+                            e
+                    )
+                    ResolutionStrategy.FAIL -> throw IllegalStateException(
+                            "Version code ${variant.versionCode} is too low for variant ${variant.name}.",
+                            e
+                    )
+                    ResolutionStrategy.IGNORE -> logger.warn(
+                            "Ignoring APK ($apkFile) for version code ${variant.versionCode}")
+                }
                 return null
             } else {
                 throw e

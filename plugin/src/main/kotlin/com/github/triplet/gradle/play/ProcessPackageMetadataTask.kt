@@ -8,7 +8,7 @@ import org.gradle.api.tasks.TaskAction
 open class ProcessPackageMetadataTask : PlayPublishTaskBase() {
     @TaskAction
     fun process() {
-        if (extension._resolutionStrategy != ResolutionStrategy.IGNORE) processVersionCodes()
+        if (extension._resolutionStrategy == ResolutionStrategy.AUTO) processVersionCodes()
     }
 
     private fun processVersionCodes() = read { editId ->
@@ -17,22 +17,14 @@ open class ProcessPackageMetadataTask : PlayPublishTaskBase() {
                 ?.map { it.versionCodes ?: emptyList() }?.flatten()
                 ?.max() ?: 1
 
-        when (extension._resolutionStrategy) {
-            ResolutionStrategy.AUTO -> {
-                val outputs = variant.outputs.filterIsInstance<ApkVariantOutput>()
-                while (outputs.any { it.versionCode <= maxVersionCode }) {
-                    for (output in outputs) {
-                        val newCode = output.versionCode + 1
-                        output.versionCodeOverride = newCode
-                        extension.versionNameOverride(newCode)
-                                ?.let { output.versionNameOverride = it }
-                    }
-                }
+        val outputs = variant.outputs.filterIsInstance<ApkVariantOutput>()
+        while (outputs.any { it.versionCode <= maxVersionCode }) {
+            for (output in outputs) {
+                val newCode = output.versionCode + 1
+                output.versionCodeOverride = newCode
+                extension.versionNameOverride(newCode)
+                        ?.let { output.versionNameOverride = it }
             }
-            ResolutionStrategy.FAIL -> check(variant.versionCode > maxVersionCode) {
-                "Version code $maxVersionCode is too low for variant ${variant.name}."
-            }
-            ResolutionStrategy.IGNORE -> error("Impossible condition")
         }
     }
 }

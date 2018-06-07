@@ -41,7 +41,7 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
      */
     var errorOnSizeLimit = true
 
-    internal var _resolutionStrategy = ResolutionStrategy.IGNORE
+    internal var _resolutionStrategy = ResolutionStrategy.FAIL
     /**
      * Specify the resolution strategy to employ when a version conflict occurs. May be one of auto,
      * fail, or ignore. Default is ignore.
