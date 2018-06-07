@@ -96,6 +96,16 @@ class PlayPublisherPlugin : Plugin<Project> {
             }
 
             if (variant.isSigningReady) {
+                val processPackageMetadata = project.newTask<ProcessPackageMetadataTask>(
+                        "processPackageMetadata$variantName",
+                        "Processes packaging metadata for $variantName.",
+                        null
+                ) {
+                    init()
+
+                    variant.checkManifest.dependsOn(this)
+                }
+
                 val publishApkTask = project.newTask<PublishApkTask>(
                         "publishApk$variantName",
                         "Uploads APK for $variantName."
@@ -103,6 +113,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                     init()
                     inputFolder = playResourcesTask.outputFolder
 
+                    dependsOn(processPackageMetadata)
                     dependsOn(playResourcesTask)
                     dependsOn(variant.assemble)
                     publishApkAllTask.dependsOn(this)
