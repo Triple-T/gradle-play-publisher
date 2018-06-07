@@ -255,15 +255,6 @@ play {
 
 ### Uploading images
 
-To speed things up a little, images are only uploaded if you explicitly say so:
-
-```groovy
-play {
-    // ...
-    uploadImages = true
-}
-```
-
 Images are filed by locale as before:
 
 ```
