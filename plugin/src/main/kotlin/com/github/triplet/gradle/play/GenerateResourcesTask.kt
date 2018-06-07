@@ -19,7 +19,7 @@ import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import java.io.File
 
 @CacheableTask
-open class GeneratePlayResourcesTask : DefaultTask() {
+open class GenerateResourcesTask : DefaultTask() {
     @get:Internal
     lateinit var variant: ApplicationVariant
 

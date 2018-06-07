@@ -2,12 +2,13 @@ package com.github.triplet.gradle.play
 
 import com.github.triplet.gradle.play.internal.AccountConfig
 import com.github.triplet.gradle.play.internal.ReleaseStatus
+import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.TrackType
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 
 open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension() {
-    @get:Internal
+    @get:Internal("Backing property for public input")
     internal var _track = TrackType.INTERNAL
     /**
      * Specify the track in which to upload your app. May be one of internal, alpha, beta, rollout,
@@ -41,7 +42,32 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
     @get:Input
     var errorOnSizeLimit = true
 
-    @get:Internal
+    @get:Internal("Backing property for public input")
+    internal var _resolutionStrategy = ResolutionStrategy.FAIL
+    /**
+     * Specify the resolution strategy to employ when a version conflict occurs. May be one of auto,
+     * fail, or ignore. Default is ignore.
+     */
+    @get:Input
+    var resolutionStrategy
+        get() = _resolutionStrategy.publishedName
+        set(value) {
+            _resolutionStrategy = requireNotNull(
+                    ResolutionStrategy.values().find { it.publishedName == value }
+            ) {
+                "Resolution strategy must be one of " +
+                        ResolutionStrategy.values().joinToString { "'${it.publishedName}'" }
+            }
+        }
+    /**
+     * If the [resolutionStrategy] is auto, optionally compute a new version name from the updated
+     * version code. Returning null means the version name should not be changed.
+     */
+    @get:Internal("ProcessPackageMetadataTask is always out-of-date. Also, Closures with " +
+                          "parameters cannot be used as inputs.")
+    var versionNameOverride: (versionCode: Int) -> String? = { null }
+
+    @get:Internal("Backing property for public input")
     internal lateinit var _releaseStatus: ReleaseStatus
     /**
      * Specify the status to apply to the uploaded app release. May be one of completed, draft,

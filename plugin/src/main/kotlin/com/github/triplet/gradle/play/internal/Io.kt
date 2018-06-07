@@ -18,6 +18,8 @@ internal fun File.flattened(): List<File> =
 internal fun File.readProcessed(maxLength: Int, error: Boolean) =
         readText().normalized().takeOrThrow(maxLength, error, this)
 
+internal fun File.isChildOf(parentName: String) = parentFile?.name == parentName
+
 internal fun File.safeCreateNewFile() = apply {
     check(parentFile.exists() || parentFile.mkdirs()) { "Unable to create $parentFile" }
     check(exists() || createNewFile()) { "Unable to create $this" }
