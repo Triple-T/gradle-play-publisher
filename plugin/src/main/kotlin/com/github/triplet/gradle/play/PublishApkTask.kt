@@ -2,6 +2,7 @@ package com.github.triplet.gradle.play
 
 import com.android.build.gradle.api.ApkVariantOutput
 import com.github.triplet.gradle.play.internal.PlayPublishPackageBase
+import com.github.triplet.gradle.play.internal.RESOURCES_OUTPUT_PATH
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.TrackType.INTERNAL
 import com.github.triplet.gradle.play.internal.superiors
@@ -9,24 +10,40 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.Apk
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 
 open class PublishApkTask : PlayPublishPackageBase() {
-    lateinit var inputFolder: File
+    @Suppress("MemberVisibilityCanBePrivate") // Needed for Gradle caching to work correctly
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:InputFiles
+    val inputApks by lazy {
+        variant.outputs.filterIsInstance<ApkVariantOutput>().map { it.outputFile }
+    }
+    @Suppress("MemberVisibilityCanBePrivate") // Needed for Gradle caching to work correctly
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:OutputDirectory
+    val outputDir = File(project.buildDir, "$RESOURCES_OUTPUT_PATH-apks")
 
     @TaskAction
     fun publishApks() = write { editId: String ->
         //TODO: If we take in a folder here as an option, we can fix #233, #227
         val publishedApks = publishApks(editId).filterNotNull()
         if (publishedApks.isNotEmpty()) {
-            updateTracks(editId, inputFolder, publishedApks.map { it.versionCode.toLong() })
+            updateTracks(editId, publishedApks.map { it.versionCode.toLong() })
         }
     }
 
-    private fun AndroidPublisher.Edits.publishApks(editId: String) = variant.outputs
-            .filterIsInstance<ApkVariantOutput>()
-            .map { publishApk(editId, FileContent(MIME_TYPE_APK, it.outputFile)) }
+    private fun AndroidPublisher.Edits.publishApks(editId: String): List<Apk?> {
+        outputDir.deleteRecursively()
+        return inputApks
+                .map { File(outputDir, it.name).apply { it.copyRecursively(this, true) } }
+                .map { publishApk(editId, FileContent(MIME_TYPE_APK, it)) }
+    }
 
     private fun AndroidPublisher.Edits.publishApk(editId: String, apkFile: FileContent): Apk? {
         val apk = try {

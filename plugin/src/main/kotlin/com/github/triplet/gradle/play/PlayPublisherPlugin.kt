@@ -64,8 +64,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "Downloads the Play Store listing metadata for $variantName."
             ) {
                 init()
-                outputFolder =
-                        project.file("src/${variant.flavorName.nullOrFull() ?: "main"}/$PLAY_PATH")
+                srcDir = project.file("src/${variant.flavorName.nullOrFull() ?: "main"}/$PLAY_PATH")
 
                 bootstrapAllTask.dependsOn(this)
             }
@@ -82,14 +81,14 @@ class PlayPublisherPlugin : Plugin<Project> {
                 inputs.file("src/${variant.buildType.name}/$PLAY_PATH")
                 inputs.file("src/${variant.name}/$PLAY_PATH")
 
-                outputFolder = File(project.buildDir, "$RESOURCES_OUTPUT_PATH/${variant.name}")
+                resDir = File(project.buildDir, "$RESOURCES_OUTPUT_PATH/${variant.name}")
             }
             val publishListingTask = project.newTask<PublishListingTask>(
                     "publishListing$variantName",
                     "Uploads all Play Store metadata for $variantName."
             ) {
                 init()
-                inputFolder = playResourcesTask.outputFolder
+                resDir = playResourcesTask.resDir
 
                 dependsOn(playResourcesTask)
                 publishListingAllTask.dependsOn(this)
@@ -111,7 +110,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                         "Uploads APK for $variantName."
                 ) {
                     init()
-                    inputFolder = playResourcesTask.outputFolder
+                    resDir = playResourcesTask.resDir
 
                     dependsOn(processPackageMetadata)
                     dependsOn(playResourcesTask)

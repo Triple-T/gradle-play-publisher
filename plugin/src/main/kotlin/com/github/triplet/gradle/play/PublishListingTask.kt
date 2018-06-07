@@ -7,6 +7,7 @@ import com.github.triplet.gradle.play.internal.LISTING_PATH
 import com.github.triplet.gradle.play.internal.ListingDetail
 import com.github.triplet.gradle.play.internal.LocaleFileFilter
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
+import com.github.triplet.gradle.play.internal.RESOURCES_OUTPUT_PATH
 import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.internal.readProcessed
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
@@ -14,41 +15,46 @@ import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.AppDetails
 import com.google.api.services.androidpublisher.model.Listing
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 
 open class PublishListingTask : PlayPublishTaskBase() {
-    lateinit var inputFolder: File
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:InputDirectory
+    lateinit var resDir: File
+    @Suppress("MemberVisibilityCanBePrivate") // Needed for Gradle caching to work correctly
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:OutputFile
+    val outputFile = File(project.buildDir, "$RESOURCES_OUTPUT_PATH-listing-cache-key")
 
     @TaskAction
-    fun publishListing() {
-        if (!inputFolder.exists()) {
-            logger.info("Skipping listing upload: $inputFolder does not exist.")
-            return
-        }
+    fun publishListing() = write { editId ->
+        updateListings(editId)
+        updateAppDetails(editId)
 
-        write { editId ->
-            updateListings(editId)
-            updateAppDetails(editId)
-        }
+        outputFile.writeText(editId)
     }
 
     private fun AndroidPublisher.Edits.updateListings(editId: String) {
         // Matches valid locales e.g. en-US for Play Store
-        inputFolder.listFiles(LocaleFileFilter).forEach { updateListing(editId, it) }
+        resDir.listFiles(LocaleFileFilter).forEach { updateListing(editId, it) }
     }
 
     private fun AndroidPublisher.Edits.updateAppDetails(editId: String) {
         val details = AppDetails().apply {
             val errorOnSizeLimit = extension.errorOnSizeLimit
 
-            defaultLanguage = File(inputFolder, AppDetail.DEFAULT_LANGUAGE.fileName).orNull()
+            defaultLanguage = File(resDir, AppDetail.DEFAULT_LANGUAGE.fileName).orNull()
                     ?.readProcessed(AppDetail.DEFAULT_LANGUAGE.maxLength, errorOnSizeLimit)
-            contactEmail = File(inputFolder, AppDetail.CONTACT_EMAIL.fileName).orNull()
+            contactEmail = File(resDir, AppDetail.CONTACT_EMAIL.fileName).orNull()
                     ?.readProcessed(AppDetail.CONTACT_EMAIL.maxLength, errorOnSizeLimit)
-            contactPhone = File(inputFolder, AppDetail.CONTACT_PHONE.fileName).orNull()
+            contactPhone = File(resDir, AppDetail.CONTACT_PHONE.fileName).orNull()
                     ?.readProcessed(AppDetail.CONTACT_PHONE.maxLength, errorOnSizeLimit)
-            contactWebsite = File(inputFolder, AppDetail.CONTACT_WEBSITE.fileName).orNull()
+            contactWebsite = File(resDir, AppDetail.CONTACT_WEBSITE.fileName).orNull()
                     ?.readProcessed(AppDetail.CONTACT_WEBSITE.maxLength, errorOnSizeLimit)
         }
 
@@ -91,27 +97,25 @@ open class PublishListingTask : PlayPublishTaskBase() {
             for (imageType in ImageType.values()) {
                 val typeName = imageType.fileName
                 val files = File(listingDir, typeName).listFiles(ImageFileFilter)
-                        .sorted()
-                        .map { FileContent(MIME_TYPE_IMAGE, it) }
+                        ?.sorted()
+                        ?.map { FileContent(MIME_TYPE_IMAGE, it) }
 
-                if (files.isEmpty()) return
+                if (files?.isEmpty() != false) continue
+                check(files.size <= imageType.maxNum) {
+                    "You can only upload ${imageType.maxNum} graphic(s) for the $typeName"
+                }
 
                 images().deleteall(variant.applicationId, editId, locale, typeName).execute()
-                if (files.size <= imageType.maxNum) {
-                    for (file in files) {
-                        images()
-                                .upload(variant.applicationId, editId, locale, typeName, file)
-                                .execute()
-                    }
-                } else {
-                    logger.error(
-                            "You can only upload ${imageType.maxNum} graphic(s) for the $typeName")
+                for (file in files) {
+                    images()
+                            .upload(variant.applicationId, editId, locale, typeName, file)
+                            .execute()
                 }
             }
         }
 
         uploadListing()
-        if (extension.uploadImages) updateImages()
+        updateImages()
     }
 
     private companion object {
