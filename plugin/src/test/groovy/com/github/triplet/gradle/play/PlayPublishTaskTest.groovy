@@ -11,6 +11,7 @@ import com.google.api.services.androidpublisher.model.TrackRelease
 import com.google.api.services.androidpublisher.model.TracksListResponse
 import kotlin.LazyKt
 import org.gradle.api.Task
+import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatcher
@@ -62,6 +63,9 @@ class PlayPublishTaskTest {
 
     @Mock
     AndroidPublisher.Edits.Apks.Upload uploadMock
+
+    @Mock
+    IncrementalTaskInputs inputsMock
 
     // These are final and not mock able
     final AppEdit appEdit = new AppEdit()
@@ -220,6 +224,49 @@ class PlayPublishTaskTest {
 
         verify(editTracksMock, times(0)).update(anyString(), anyString(), eq('alpha'), nullable(Track.class))
         verify(editTracksMock, times(0)).update(anyString(), anyString(), eq('beta'), nullable(Track.class))
+    }
+
+    @Test
+    void testApplicationIdChange() {
+        def project = TestHelper.evaluatableProject()
+
+        project.android {
+            flavorDimensions 'pricing'
+
+            productFlavors {
+                paid {
+                    dimension 'pricing'
+                    applicationId 'com.example.publisher'
+                }
+                free {
+                    dimension 'pricing'
+                }
+            }
+
+            buildTypes {
+                release {
+                    applicationIdSuffix '.release'
+                }
+            }
+
+            applicationVariants.all { variant ->
+                def flavorName = variant.variantData.variantConfiguration.flavorName
+                if (flavorName == 'paid') {
+                    variant.mergedFlavor.applicationId += '.paid'
+                }
+            }
+        }
+
+        project.evaluate()
+
+        // Attach the mock
+        setMockPublisher(project.tasks.publishApkPaidRelease)
+
+        // finally run the task we want to check
+        project.tasks.publishApkPaidRelease.publishApks(inputsMock)
+
+        // verify that we init the connection with the correct application id
+        verify(editsMock).insert('com.example.publisher.paid.release', null)
     }
 
     private void setMockPublisher(Task task) {
