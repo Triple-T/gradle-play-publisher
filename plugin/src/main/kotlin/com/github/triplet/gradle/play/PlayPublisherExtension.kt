@@ -13,7 +13,7 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
      * `publish[Variant]`.
      */
     @get:Input
-    var defaultToAppBundle = true
+    var defaultToAppBundle = false // App Bundles require Google Play App Signing
 
     @get:Internal("Backing property for public input")
     internal var _track = TrackType.INTERNAL
