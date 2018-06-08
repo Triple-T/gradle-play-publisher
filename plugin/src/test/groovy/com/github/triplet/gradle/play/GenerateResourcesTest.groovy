@@ -342,5 +342,4 @@ class GenerateResourcesTest {
         assertEquals(originalFulldescription, processedFulldescription)
         assertEquals(originalTitle, processedTitle)
     }
-
 }
