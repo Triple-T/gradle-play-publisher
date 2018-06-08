@@ -6,6 +6,11 @@ import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import org.gradle.api.tasks.TaskAction
 
 open class ProcessPackageMetadataTask : PlayPublishTaskBase() {
+    init {
+        // Always out-of-date since we don't know what's changed on the network
+        outputs.upToDateWhen { false }
+    }
+
     @TaskAction
     fun process() {
         if (extension._resolutionStrategy == ResolutionStrategy.AUTO) processVersionCodes()
