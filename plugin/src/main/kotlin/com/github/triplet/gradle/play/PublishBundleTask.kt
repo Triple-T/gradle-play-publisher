@@ -1,13 +1,13 @@
 package com.github.triplet.gradle.play
 
-import com.android.build.gradle.api.ApkVariantOutput
+import com.github.triplet.gradle.play.internal.MIME_TYPE_STREAM
 import com.github.triplet.gradle.play.internal.PlayPublishPackageBase
 import com.github.triplet.gradle.play.internal.playPath
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
-import com.google.api.services.androidpublisher.model.Apk
-import org.gradle.api.tasks.InputFiles
+import com.google.api.services.androidpublisher.model.Bundle
+import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -15,55 +15,53 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import java.io.File
 
-open class PublishApkTask : PlayPublishPackageBase() {
+open class PublishBundleTask : PlayPublishPackageBase() {
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    @get:InputFiles
-    val inputApks by lazy {
+    @get:InputFile
+    val bundle by lazy {
         // TODO: If we take a customizable folder, we can fix #233, #227
-        variant.outputs.filterIsInstance<ApkVariantOutput>().map { it.outputFile }
+        File(project.buildDir, "outputs/bundle/${variant.name}/bundle.aab")
     }
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputDirectory
-    val outputDir by lazy { File(project.buildDir, "${variant.playPath}/apks") }
+    val outputDir by lazy {
+        File(project.buildDir, "${variant.playPath}/bundles/${variant.name}")
+    }
 
     @TaskAction
-    fun publishApks(inputs: IncrementalTaskInputs) = write { editId: String ->
+    fun publishBundle(inputs: IncrementalTaskInputs) = write { editId: String ->
         if (!inputs.isIncremental) project.delete(outputs.files)
 
-        val publishedApks = mutableListOf<Apk>()
         inputs.outOfDate {
             val file = it.file
-            if (inputApks.contains(file)) {
+            if (file == bundle) {
                 project.copy {
                     it.from(file)
                     it.into(outputDir)
                 }
 
-                publishApk(editId, FileContent(MIME_TYPE_APK, file))?.let { publishedApks += it }
+                publishBundle(editId, FileContent(MIME_TYPE_STREAM, file))?.let {
+                    updateTracks(editId, listOf(it.versionCode.toLong()))
+                }
             }
         }
         inputs.removed { project.delete(File(outputDir, it.file.name)) }
-
-        if (publishedApks.isNotEmpty()) {
-            updateTracks(editId, publishedApks.map { it.versionCode.toLong() })
-        }
     }
 
-    private fun AndroidPublisher.Edits.publishApk(editId: String, content: FileContent): Apk? {
-        val apk = try {
-            apks().upload(variant.applicationId, editId, content).execute()
+    private fun AndroidPublisher.Edits.publishBundle(
+            editId: String,
+            content: FileContent
+    ): Bundle? {
+        val bundle = try {
+            bundles().upload(variant.applicationId, editId, content).execute()
         } catch (e: GoogleJsonResponseException) {
             return e.handleUploadFailures(content.file)
         }
 
-        handlePackageDetails(editId, apk.versionCode)
+        handlePackageDetails(editId, bundle.versionCode)
 
-        return apk
-    }
-
-    private companion object {
-        const val MIME_TYPE_APK = "application/vnd.android.package-archive"
+        return bundle
     }
 }

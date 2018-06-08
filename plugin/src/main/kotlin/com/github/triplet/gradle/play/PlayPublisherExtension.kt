@@ -8,6 +8,13 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 
 open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension() {
+    /**
+     * Choose the default packaging method. Either an App Bundle or an APK. Affects tasks like
+     * publish[Variant]
+     */
+    @get:Input
+    var defaultToAppBundle = true
+
     @get:Internal("Backing property for public input")
     internal var _track = TrackType.INTERNAL
     /**

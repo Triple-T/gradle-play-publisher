@@ -2,6 +2,8 @@ package com.github.triplet.gradle.play
 
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.api.ApplicationVariant
+import com.android.build.gradle.internal.api.InstallableVariantImpl
+import com.android.build.gradle.internal.variant.TaskContainer
 import com.github.triplet.gradle.play.internal.ACCOUNT_CONFIG
 import com.github.triplet.gradle.play.internal.AccountConfig
 import com.github.triplet.gradle.play.internal.PLAY_PATH
@@ -37,6 +39,10 @@ class PlayPublisherPlugin : Plugin<Project> {
         val publishApkAllTask = project.newTask<Task>(
                 "publishApkAll",
                 "Uploads APK for every variant."
+        )
+        val publishBundleAllTask = project.newTask<Task>(
+                "publishBundleAll",
+                "Uploads App Bundle for every variant."
         )
         val publishListingAllTask = project.newTask<Task>(
                 "publishListingAll",
@@ -112,11 +118,26 @@ class PlayPublisherPlugin : Plugin<Project> {
                     publishApkAllTask.dependsOn(this)
                 }
 
+                val publishBundleTask = project.newTask<PublishBundleTask>(
+                        "publishBundle$variantName",
+                        "Uploads App Bundle for $variantName."
+                ) {
+                    init()
+                    resDir = playResourcesTask.resDir
+
+                    dependsOn(processPackageMetadata)
+                    dependsOn(playResourcesTask)
+                    dependsOn((variant as InstallableVariantImpl).variantData
+                                      .getTaskByKind(TaskContainer.TaskKind.BUNDLE))
+                    publishBundleAllTask.dependsOn(this)
+                }
+
                 project.newTask<Task>(
                         "publish$variantName",
-                        "Uploads all Play Store metadata for $variantName."
+                        "Uploads APK or App Bundle and all Play Store metadata for $variantName."
                 ) {
-                    dependsOn(publishApkTask)
+                    dependsOn(
+                            if (extension.defaultToAppBundle) publishBundleTask else publishApkTask)
                     dependsOn(publishListingTask)
                     publishAllTask.dependsOn(this)
                 }

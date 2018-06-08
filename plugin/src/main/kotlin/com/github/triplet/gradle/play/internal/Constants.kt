@@ -12,4 +12,6 @@ internal const val PLAY_PATH = "play"
 internal const val LISTING_PATH = "listing"
 internal const val RESOURCES_OUTPUT_PATH = "outputs/$PLAY_PATH"
 
+internal const val MIME_TYPE_STREAM = "application/octet-stream"
+
 internal val transport: NetHttpTransport by lazy { GoogleNetHttpTransport.newTrustedTransport() }
