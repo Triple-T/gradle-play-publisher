@@ -13,6 +13,7 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import java.io.File
@@ -23,6 +24,7 @@ open class GenerateResourcesTask : DefaultTask() {
     lateinit var variant: ApplicationVariant
 
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
+    @get:SkipWhenEmpty
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
     val resSrcDirs by lazy { variant.sourceSets.map { project.file("src/${it.name}/$PLAY_PATH") } }
