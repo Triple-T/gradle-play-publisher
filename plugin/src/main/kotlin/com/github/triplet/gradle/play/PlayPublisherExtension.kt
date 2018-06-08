@@ -10,7 +10,7 @@ import org.gradle.api.tasks.Internal
 open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension() {
     /**
      * Choose the default packaging method. Either an App Bundle or an APK. Affects tasks like
-     * publish[Variant]
+     * `publish[Variant]`.
      */
     @get:Input
     var defaultToAppBundle = true
