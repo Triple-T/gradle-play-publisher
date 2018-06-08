@@ -20,7 +20,9 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
                 .execute().tracks
                 ?.firstOrNull { it.track == extension.track } ?: Track()
 
-        val releaseTexts = resDir.orNull()?.listFiles(LocaleFileFilter)?.mapNotNull { locale ->
+        val releaseTexts = resDir.orNull()?.listFiles()?.filter {
+            it.isDirectory
+        }?.mapNotNull { locale ->
             val fileName = ListingDetail.WHATS_NEW.fileName
             val file = File(locale, "$fileName-${extension.track}").orNull()
                     ?: File(locale, fileName).orNull()

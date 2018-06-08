@@ -2,9 +2,9 @@ package com.github.triplet.gradle.play
 
 import com.android.build.gradle.api.ApkVariantOutput
 import com.github.triplet.gradle.play.internal.PlayPublishPackageBase
-import com.github.triplet.gradle.play.internal.RESOURCES_OUTPUT_PATH
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.TrackType.INTERNAL
+import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.internal.superiors
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
@@ -15,34 +15,43 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import java.io.File
 
 open class PublishApkTask : PlayPublishPackageBase() {
-    @Suppress("MemberVisibilityCanBePrivate") // Needed for Gradle caching to work correctly
+    @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
     val inputApks by lazy {
+        // TODO: If we take a customizable folder, we can fix #233, #227
         variant.outputs.filterIsInstance<ApkVariantOutput>().map { it.outputFile }
     }
-    @Suppress("MemberVisibilityCanBePrivate") // Needed for Gradle caching to work correctly
+    @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputDirectory
-    val outputDir = File(project.buildDir, "$RESOURCES_OUTPUT_PATH-apks")
+    val outputDir by lazy { File(project.buildDir, "${variant.playPath}/apks") }
 
     @TaskAction
-    fun publishApks() = write { editId: String ->
-        //TODO: If we take in a folder here as an option, we can fix #233, #227
-        val publishedApks = publishApks(editId).filterNotNull()
+    fun publishApks(inputs: IncrementalTaskInputs) = write { editId: String ->
+        if (!inputs.isIncremental) project.delete(outputs.files)
+
+        val publishedApks = mutableListOf<Apk>()
+        inputs.outOfDate {
+            val file = it.file
+            if (inputApks.contains(file)) {
+                project.copy {
+                    it.from(file)
+                    it.into(outputDir)
+                }
+
+                publishApk(editId, FileContent(MIME_TYPE_APK, file))?.let { publishedApks += it }
+            }
+        }
+        inputs.removed { project.delete(File(outputDir, it.file.name)) }
+
         if (publishedApks.isNotEmpty()) {
             updateTracks(editId, publishedApks.map { it.versionCode.toLong() })
         }
-    }
-
-    private fun AndroidPublisher.Edits.publishApks(editId: String): List<Apk?> {
-        outputDir.deleteRecursively()
-        return inputApks
-                .map { File(outputDir, it.name).apply { it.copyRecursively(this, true) } }
-                .map { publishApk(editId, FileContent(MIME_TYPE_APK, it)) }
     }
 
     private fun AndroidPublisher.Edits.publishApk(editId: String, apkFile: FileContent): Apk? {
