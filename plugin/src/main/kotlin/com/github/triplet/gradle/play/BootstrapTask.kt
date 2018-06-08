@@ -21,6 +21,11 @@ open class BootstrapTask : PlayPublishTaskBase() {
     @get:OutputDirectory
     lateinit var srcDir: File
 
+    init {
+        // Always out-of-date since we don't know what's changed on the network
+        outputs.upToDateWhen { false }
+    }
+
     @TaskAction
     fun bootstrap() = read { editId ->
         bootstrapListing(editId)
