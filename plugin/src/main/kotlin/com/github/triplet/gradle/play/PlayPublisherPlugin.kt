@@ -26,7 +26,8 @@ class PlayPublisherPlugin : Plugin<Project> {
         val android = requireNotNull(project.extensions.get<AppExtension>()) {
             "The 'com.android.application' plugin is required."
         }
-        val extension = project.extensions.create(PLAY_PATH, PlayPublisherExtension::class.java)
+        val extension: PlayPublisherExtension =
+                project.extensions.create(PLAY_PATH, PlayPublisherExtension::class.java)
 
         val bootstrapAllTask = project.newTask<Task>(
                 "bootstrapAll",
@@ -56,13 +57,23 @@ class PlayPublisherPlugin : Plugin<Project> {
                 return@whenObjectAdded
             }
 
-            val accountConfig = android.getAccountConfig(variant)
+            val accountConfig = android.getAccountConfig(variant) ?: extension
             val variantName = variant.name.capitalize()
+
+            if (!variant.isSigningReady) {
+                project.logger.error(
+                        "Signing not ready. Be sure to specify a signingConfig for $variantName")
+            }
+            accountConfig.run {
+                check(jsonFile != null || pk12File != null && serviceAccountEmail != null) {
+                    "No credentials provided"
+                }
+            }
 
             fun PlayPublishTaskBase.init() {
                 this.extension = extension
                 this.variant = variant
-                this.accountConfig = accountConfig ?: extension
+                this.accountConfig = accountConfig
             }
 
             project.newTask<BootstrapTask>(
@@ -81,6 +92,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                     null
             ) {
                 inputs.files(*variant.sourceSets.map { "src/${it.name}/$PLAY_PATH" }.toTypedArray())
+                        .skipWhenEmpty()
                 resDir = File(project.buildDir, "${variant.playPath}/res")
             }
             val publishListingTask = project.newTask<PublishListingTask>(
@@ -94,56 +106,51 @@ class PlayPublisherPlugin : Plugin<Project> {
                 publishListingAllTask.dependsOn(this)
             }
 
-            if (variant.isSigningReady) {
-                val processPackageMetadata = project.newTask<ProcessPackageMetadataTask>(
-                        "processPackageMetadata$variantName",
-                        "Processes packaging metadata for $variantName.",
-                        null
-                ) {
-                    init()
+            val processPackageMetadata = project.newTask<ProcessPackageMetadataTask>(
+                    "processPackageMetadata$variantName",
+                    "Processes packaging metadata for $variantName.",
+                    null
+            ) {
+                init()
 
-                    variant.checkManifest.dependsOn(this)
-                }
+                variant.checkManifest.dependsOn(this)
+            }
 
-                val publishApkTask = project.newTask<PublishApkTask>(
-                        "publishApk$variantName",
-                        "Uploads APK for $variantName."
-                ) {
-                    init()
-                    resDir = playResourcesTask.resDir
+            val publishApkTask = project.newTask<PublishApkTask>(
+                    "publishApk$variantName",
+                    "Uploads APK for $variantName."
+            ) {
+                init()
+                resDir = playResourcesTask.resDir
 
-                    dependsOn(processPackageMetadata)
-                    dependsOn(playResourcesTask)
-                    dependsOn(variant.assemble)
-                    publishApkAllTask.dependsOn(this)
-                }
+                dependsOn(processPackageMetadata)
+                dependsOn(playResourcesTask)
+                dependsOn(variant.assemble)
+                publishApkAllTask.dependsOn(this)
+            }
 
-                val publishBundleTask = project.newTask<PublishBundleTask>(
-                        "publishBundle$variantName",
-                        "Uploads App Bundle for $variantName."
-                ) {
-                    init()
-                    resDir = playResourcesTask.resDir
+            val publishBundleTask = project.newTask<PublishBundleTask>(
+                    "publishBundle$variantName",
+                    "Uploads App Bundle for $variantName."
+            ) {
+                init()
+                resDir = playResourcesTask.resDir
 
-                    dependsOn(processPackageMetadata)
-                    dependsOn(playResourcesTask)
-                    dependsOn((variant as InstallableVariantImpl).variantData
-                                      .getTaskByKind(TaskContainer.TaskKind.BUNDLE))
-                    publishBundleAllTask.dependsOn(this)
-                }
+                dependsOn(processPackageMetadata)
+                dependsOn(playResourcesTask)
+                dependsOn((variant as InstallableVariantImpl).variantData
+                                  .getTaskByKind(TaskContainer.TaskKind.BUNDLE))
+                publishBundleAllTask.dependsOn(this)
+            }
 
-                project.newTask<Task>(
-                        "publish$variantName",
-                        "Uploads APK or App Bundle and all Play Store metadata for $variantName."
-                ) {
-                    dependsOn(
-                            if (extension.defaultToAppBundle) publishBundleTask else publishApkTask)
-                    dependsOn(publishListingTask)
-                    publishAllTask.dependsOn(this)
-                }
-            } else {
-                project.logger.error(
-                        "Signing not ready. Be sure to specify a signingConfig for $variantName?")
+            project.newTask<Task>(
+                    "publish$variantName",
+                    "Uploads APK or App Bundle and all Play Store metadata for $variantName."
+            ) {
+                dependsOn(
+                        if (extension.defaultToAppBundle) publishBundleTask else publishApkTask)
+                dependsOn(publishListingTask)
+                publishAllTask.dependsOn(this)
             }
         }
 

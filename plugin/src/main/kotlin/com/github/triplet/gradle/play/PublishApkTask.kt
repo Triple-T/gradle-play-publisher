@@ -11,12 +11,14 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import java.io.File
 
 open class PublishApkTask : PlayPublishPackageBase() {
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
+    @get:SkipWhenEmpty
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
     val inputApks by lazy {
@@ -30,6 +32,8 @@ open class PublishApkTask : PlayPublishPackageBase() {
 
     @TaskAction
     fun publishApks(inputs: IncrementalTaskInputs) = write { editId: String ->
+        progressLogger.start("Uploads APK files for variant ${variant.name}", null)
+
         if (!inputs.isIncremental) project.delete(outputs.files)
 
         val publishedApks = mutableListOf<Apk>()
@@ -49,6 +53,8 @@ open class PublishApkTask : PlayPublishPackageBase() {
         if (publishedApks.isNotEmpty()) {
             updateTracks(editId, publishedApks.map { it.versionCode.toLong() })
         }
+
+        progressLogger.completed()
     }
 
     private fun AndroidPublisher.Edits.publishApk(editId: String, content: FileContent): Apk? {
