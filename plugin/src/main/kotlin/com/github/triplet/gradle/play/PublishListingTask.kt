@@ -37,8 +37,6 @@ open class PublishListingTask : PlayPublishTaskBase() {
 
     @TaskAction
     fun publishListing(inputs: IncrementalTaskInputs) {
-        progressLogger.start("Uploads app metadata for variant ${variant.name}", null)
-
         if (!inputs.isIncremental) project.delete(outputs.files)
 
         var appDetailsChanged = false
@@ -57,6 +55,8 @@ open class PublishListingTask : PlayPublishTaskBase() {
         inputs.removed { it.file.process() }
 
         write { editId ->
+            progressLogger.start("Uploads app metadata for variant ${variant.name}", null)
+
             if (appDetailsChanged) updateAppDetails(editId)
             for (listingDir in changedListingDetails) {
                 updateListing(editId, listingDir.parentFile.name, listingDir)
@@ -69,9 +69,9 @@ open class PublishListingTask : PlayPublishTaskBase() {
             }
 
             outputFile.writeText(editId)
-        }
 
-        progressLogger.completed()
+            progressLogger.completed()
+        }
     }
 
     private fun AndroidPublisher.Edits.updateAppDetails(editId: String) {
