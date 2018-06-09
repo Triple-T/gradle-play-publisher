@@ -5,7 +5,6 @@ import com.github.triplet.gradle.play.internal.TrackType
 import org.gradle.api.ProjectConfigurationException
 import org.gradle.api.internal.plugins.PluginApplicationException
 import org.gradle.testfixtures.ProjectBuilder
-import org.junit.Ignore
 import org.junit.Test
 
 import static DependsOn.dependsOn
@@ -296,8 +295,8 @@ class PlayPublisherPluginTest {
 
         project.evaluate()
 
-        project.extensions.play.serviceAccountEmail == 'service-account@test.com'
-        project.extensions.play.pk12File = new File('key.p12')
+        assertEquals('service-account@test.com', project.extensions.play.serviceAccountEmail)
+        assertEquals(new File('key.p12'), project.extensions.play.pk12File)
     }
 
     @Test
@@ -501,29 +500,5 @@ class PlayPublisherPluginTest {
         assertThat(project.tasks.publishAll, dependsOn('publishProductionPaidRelease'))
         assertThat(project.tasks.publishApkAll, dependsOn('publishApkProductionPaidRelease'))
         assertThat(project.tasks.publishListingAll, dependsOn('publishListingProductionPaidRelease'))
-    }
-
-    @Ignore("These test is not plugin specific and failing with the latest Android Gradle plugin")
-    @Test
-    void testSplits() {
-        def project = TestHelper.evaluatableProject()
-
-        project.android {
-            splits {
-                abi {
-                    enable true
-                    reset()
-                    include 'x86', 'armeabi-v7a', 'mips'
-                }
-            }
-        }
-
-        project.evaluate()
-
-        assertThat(project.tasks.assembleRelease, dependsOn('assembleX86Release'))
-        assertThat(project.tasks.assembleRelease, dependsOn('assembleArmeabi-v7aRelease'))
-        assertThat(project.tasks.assembleRelease, dependsOn('assembleMipsRelease'))
-
-        assertThat(project.tasks.publishApkRelease, dependsOn('assembleRelease'))
     }
 }
