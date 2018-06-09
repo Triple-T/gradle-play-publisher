@@ -42,6 +42,10 @@ class PlayPublisherPlugin : Plugin<Project> {
                 "publishListingAll",
                 "Uploads all Play Store metadata for every variant."
         )
+        val publishProductsAllTask = project.newTask<Task>(
+                "publishProductsAll",
+                "Uploads all Play Store in-app products for every variant."
+        )
 
         project.initPlayAccountConfigs(android)
         android.applicationVariants.whenObjectAdded { variant ->
@@ -88,6 +92,16 @@ class PlayPublisherPlugin : Plugin<Project> {
                 dependsOn(playResourcesTask)
                 publishListingAllTask.dependsOn(this)
             }
+            val publishProductsTask = project.newTask<PublishProductsTask>(
+                    "publishProducts$variantName",
+                    "Uploads all Play Store in-app products for $variantName."
+            ) {
+                init()
+                resDir = playResourcesTask.resDir
+
+                dependsOn(playResourcesTask)
+                publishProductsAllTask.dependsOn(this)
+            }
 
             if (variant.isSigningReady) {
                 val processPackageMetadata = project.newTask<ProcessPackageMetadataTask>(
@@ -119,6 +133,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 ) {
                     dependsOn(publishApkTask)
                     dependsOn(publishListingTask)
+                    dependsOn(publishProductsTask)
                     publishAllTask.dependsOn(this)
                 }
             } else {

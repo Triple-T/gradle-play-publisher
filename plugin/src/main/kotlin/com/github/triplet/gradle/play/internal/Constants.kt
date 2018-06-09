@@ -10,6 +10,8 @@ internal const val ACCOUNT_CONFIG = "playAccountConfig"
 
 internal const val PLAY_PATH = "play"
 internal const val LISTING_PATH = "listing"
+internal const val LISTINGS_PATH = "listings"
+internal const val PRODUCTS_PATH = "products"
 internal const val RESOURCES_OUTPUT_PATH = "outputs/$PLAY_PATH"
 
 internal val transport: NetHttpTransport by lazy { GoogleNetHttpTransport.newTrustedTransport() }

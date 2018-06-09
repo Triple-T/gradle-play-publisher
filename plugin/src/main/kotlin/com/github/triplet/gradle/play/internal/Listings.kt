@@ -17,6 +17,12 @@ internal object ImageFileFilter : FileFilter {
     override fun accept(file: File) = file.extension.toLowerCase() in imageExtensions
 }
 
+internal object JsonFileFilter : FileFilter {
+    private const val JSON_EXTENSION = "json"
+
+    override fun accept(file: File) = file.extension.toLowerCase() == JSON_EXTENSION
+}
+
 internal enum class ListingDetail(val fileName: String, val maxLength: Int = Int.MAX_VALUE) {
     TITLE("title", 50),
     SHORT_DESCRIPTION("shortdescription", 80),

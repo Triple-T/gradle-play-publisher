@@ -2,8 +2,10 @@ package com.github.triplet.gradle.play
 
 import com.github.triplet.gradle.play.internal.AppDetail
 import com.github.triplet.gradle.play.internal.ImageType
+import com.github.triplet.gradle.play.internal.LISTINGS_PATH
 import com.github.triplet.gradle.play.internal.LISTING_PATH
 import com.github.triplet.gradle.play.internal.ListingDetail
+import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.internal.TrackType
 import com.github.triplet.gradle.play.internal.nullOrFull
@@ -31,6 +33,7 @@ open class BootstrapTask : PlayPublishTaskBase() {
         bootstrapListing(editId)
         bootstrapWhatsNew(editId)
         bootstrapAppDetails(editId)
+        bootstrapInAppProducts()
     }
 
     private fun AndroidPublisher.Edits.bootstrapListing(editId: String) {
@@ -40,7 +43,7 @@ open class BootstrapTask : PlayPublishTaskBase() {
                 .listings ?: return
 
         for (listing in listings) {
-            val rootDir = File(srcDir, "${listing.language}/$LISTING_PATH")
+            val rootDir = File(srcDir, "$LISTINGS_PATH/${listing.language}/$LISTING_PATH")
 
             fun downloadMetadata() {
                 fun String.write(detail: ListingDetail) = write(rootDir, detail.fileName)
@@ -97,6 +100,12 @@ open class BootstrapTask : PlayPublishTaskBase() {
         details.contactPhone.nullOrFull()?.write(AppDetail.CONTACT_PHONE)
         details.contactWebsite.nullOrFull()?.write(AppDetail.CONTACT_WEBSITE)
         details.defaultLanguage.nullOrFull()?.write(AppDetail.DEFAULT_LANGUAGE)
+    }
+
+    private fun bootstrapInAppProducts() {
+        publisher.inappproducts().list(variant.applicationId).execute().inappproduct.forEach {
+            gson.toJson(it).write(srcDir, "$PRODUCTS_PATH/${it.sku}.json")
+        }
     }
 
     private fun String.write(dir: File, fileName: String) =
