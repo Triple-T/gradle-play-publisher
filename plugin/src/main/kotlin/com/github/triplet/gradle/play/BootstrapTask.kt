@@ -5,7 +5,6 @@ import com.github.triplet.gradle.play.internal.ImageType
 import com.github.triplet.gradle.play.internal.LISTING_PATH
 import com.github.triplet.gradle.play.internal.ListingDetail
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
-import com.github.triplet.gradle.play.internal.TrackType
 import com.github.triplet.gradle.play.internal.nullOrFull
 import com.github.triplet.gradle.play.internal.safeCreateNewFile
 import com.google.api.services.androidpublisher.AndroidPublisher
@@ -28,12 +27,17 @@ open class BootstrapTask : PlayPublishTaskBase() {
 
     @TaskAction
     fun bootstrap() = read { editId ->
+        progressLogger.start("Downloads resources for variant ${variant.name}", null)
+
+        bootstrapAppDetails(editId)
         bootstrapListing(editId)
         bootstrapWhatsNew(editId)
-        bootstrapAppDetails(editId)
+
+        progressLogger.completed()
     }
 
     private fun AndroidPublisher.Edits.bootstrapListing(editId: String) {
+        progressLogger.progress("Fetching listings")
         val listings = listings()
                 .list(variant.applicationId, editId)
                 .execute()
@@ -45,6 +49,7 @@ open class BootstrapTask : PlayPublishTaskBase() {
             fun downloadMetadata() {
                 fun String.write(detail: ListingDetail) = write(rootDir, detail.fileName)
 
+                progressLogger.progress("Downloading ${listing.language} listing")
                 listing.fullDescription.nullOrFull()?.write(ListingDetail.FULL_DESCRIPTION)
                 listing.shortDescription.nullOrFull()?.write(ListingDetail.SHORT_DESCRIPTION)
                 listing.title.nullOrFull()?.write(ListingDetail.TITLE)
@@ -53,6 +58,9 @@ open class BootstrapTask : PlayPublishTaskBase() {
 
             fun downloadImages() {
                 for (type in ImageType.values()) {
+                    progressLogger.progress(
+                            "Downloading ${listing.language} listing graphics for type " +
+                                    "'${type.fileName}'")
                     val images = images()
                             .list(variant.applicationId, editId, listing.language, type.fileName)
                             .execute()
@@ -75,22 +83,24 @@ open class BootstrapTask : PlayPublishTaskBase() {
         }
     }
 
-    private fun AndroidPublisher.Edits.bootstrapWhatsNew(editId: String) = tracks()
-            .list(variant.applicationId, editId)
-            .execute().tracks
-            ?.maxBy { TrackType.fromString(it.track) }
-            ?.releases
-            ?.maxBy { it.versionCodes.max() ?: Long.MIN_VALUE }
-            ?.releaseNotes
-            ?.forEach {
-                File(srcDir, "${it.language}/${ListingDetail.WHATS_NEW.fileName}")
+    private fun AndroidPublisher.Edits.bootstrapWhatsNew(editId: String) {
+        progressLogger.progress("Downloading release notes")
+        tracks().list(variant.applicationId, editId).execute().tracks?.forEach { track ->
+            track.releases.maxBy {
+                it.versionCodes?.max() ?: Long.MIN_VALUE
+            }?.releaseNotes?.forEach {
+                val extension = track.track?.let { "-$it" } ?: ""
+                File(srcDir, "${it.language}/${ListingDetail.WHATS_NEW.fileName}$extension")
                         .safeCreateNewFile()
                         .writeText(it.text)
             }
+        }
+    }
 
     private fun AndroidPublisher.Edits.bootstrapAppDetails(editId: String) {
         fun String.write(detail: AppDetail) = write(srcDir, detail.fileName)
 
+        progressLogger.progress("Downloading app details")
         val details = details().get(variant.applicationId, editId).execute()
 
         details.contactEmail.nullOrFull()?.write(AppDetail.CONTACT_EMAIL)

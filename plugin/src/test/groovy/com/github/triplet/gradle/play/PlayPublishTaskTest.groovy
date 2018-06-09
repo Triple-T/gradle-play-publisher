@@ -304,10 +304,15 @@ class PlayPublishTaskTest {
     }
 
     private void publishApk(Task task, String fileName) {
-        def method = findBaseTask(task.class, PublishApkTask.class).getDeclaredMethod(
+        def progressLogger = findBaseTask(task.class, PlayPublishTaskBase.class)
+                .getDeclaredField("progressLogger")
+        progressLogger.setAccessible(true)
+        progressLogger.get(task).start("Desc", null)
+
+        def publishApk = findBaseTask(task.class, PublishApkTask.class).getDeclaredMethod(
                 "publishApk", AndroidPublisher.Edits.class, String.class, FileContent.class)
-        method.setAccessible(true)
-        method.invoke(task, editsMock, "424242", new FileContent(null, new File(fileName)))
+        publishApk.setAccessible(true)
+        publishApk.invoke(task, editsMock, "424242", new FileContent(null, new File(fileName)))
     }
 
     private Class<? super Task> findBaseTask(Class<? super Task> start, Class<? super Task> end) {
