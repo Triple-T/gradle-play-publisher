@@ -10,11 +10,17 @@ import com.google.api.services.androidpublisher.AndroidPublisherScopes
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
+import org.gradle.internal.logging.progress.ProgressLogger
+import org.gradle.internal.logging.progress.ProgressLoggerFactory
 
 abstract class PlayPublishTaskBase : DefaultTask() {
     @get:Nested lateinit var extension: PlayPublisherExtension
     @get:Internal lateinit var variant: ApplicationVariant
     @get:Nested lateinit var accountConfig: AccountConfig
+
+    @get:Internal
+    protected val progressLogger: ProgressLogger = services[ProgressLoggerFactory::class.java]
+            .newOperation(javaClass)
 
     private val publisher by lazy {
         val credential = accountConfig.run {
@@ -54,12 +60,14 @@ abstract class PlayPublishTaskBase : DefaultTask() {
         val id = try {
             request.execute().id
         } catch (e: GoogleJsonResponseException) {
+            // Rethrow for clarity
             if (e.details.errors.any { it.reason == "applicationNotFound" }) {
-                // Rethrow for clarity
                 throw IllegalArgumentException(
                         "No application found for the package name ${variant.applicationId}. " +
                                 "The first version of your app must be uploaded via the " +
                                 "Play Store console.", e)
+            } else if (e.statusCode == 401) {
+                throw IllegalArgumentException("Invalid service account credentials.", e)
             } else {
                 throw e
             }
