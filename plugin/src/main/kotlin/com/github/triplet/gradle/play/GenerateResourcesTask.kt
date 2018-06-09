@@ -1,19 +1,19 @@
 package com.github.triplet.gradle.play
 
 import com.android.build.gradle.api.ApplicationVariant
+import com.github.triplet.gradle.play.internal.LISTINGS_PATH
 import com.github.triplet.gradle.play.internal.LocaleFileFilter
 import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.climbUpTo
 import com.github.triplet.gradle.play.internal.findClosestDir
-import com.github.triplet.gradle.play.internal.flattened
+import com.github.triplet.gradle.play.internal.isChildOf
+import com.github.triplet.gradle.play.internal.isDirectChildOf
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.CacheableTask
-import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
-import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import java.io.File
@@ -23,55 +23,72 @@ open class GenerateResourcesTask : DefaultTask() {
     @get:Internal
     lateinit var variant: ApplicationVariant
 
-    @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
-    @get:SkipWhenEmpty
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    @get:InputFiles
-    val resSrcDirs by lazy { variant.sourceSets.map { project.file("src/${it.name}/$PLAY_PATH") } }
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputDirectory
     lateinit var resDir: File
 
+    private val resSrcDirs: List<File> by lazy {
+        variant.sourceSets.map { project.file("src/${it.name}/$PLAY_PATH") }
+    }
+    private val flavors by lazy { variant.baseName.split("-").run { take(size - 1) } }
+
+    fun init() {
+        for (dir in resSrcDirs) {
+            inputs.dir(dir).skipWhenEmpty().withPathSensitivity(PathSensitivity.RELATIVE)
+        }
+    }
+
     @TaskAction
     fun generate(inputs: IncrementalTaskInputs) {
-        validateAll()
         if (!inputs.isIncremental) project.delete(outputs.files)
 
-        project.copy { spec ->
-            inputs.outOfDate {
-                val file = it.file
-                if (file.exists()) {
-                    spec.from(file)
-                    spec.into(file.findClosestDir().findDest())
-                }
+        inputs.outOfDate {
+            val file = it.file
+            file.validate()
+
+            project.copy { spec ->
+                spec.from(file)
+                spec.into(file.findClosestDir().findDest())
             }
         }
         inputs.removed { project.delete(it.file.findDest()) }
     }
 
-    private fun validateAll() {
-        check(resSrcDirs.all {
-            it.listFiles()?.filter { it.isDirectory }?.all {
-                val isValidLocale = LocaleFileFilter.accept(it)
-                if (!isValidLocale) logger.error("Invalid locale: ${it.name}")
-                isValidLocale
-            } ?: true
-        }) { "Invalid locale(s), check logs for details." }
-
-        val flavors = variant.baseName.split("-").run { take(size - 1) }
-        val flavorTree = resSrcDirs
-                .filter { flavors.contains(it.parentFile?.name) }
-                .map { it.flattened() }
-                .flatten()
-                .map { File(it.path.removePrefix(it.climbUpTo(PLAY_PATH)!!.path)) }
-
-        val files = mutableSetOf<File>()
-        for (file in flavorTree) check(files.add(file)) {
-            "File '$file' is duplicated in $flavors with identical priority."
+    private fun File.validate() {
+        fun validateLocales() {
+            val listings = climbUpTo(LISTINGS_PATH) ?: return
+            check(listings.isDirectChildOf(PLAY_PATH)) {
+                "Listings ($listings) must be in the '$PLAY_PATH' folder"
+            }
+            checkNotNull(listings.listFiles()) {
+                "$listings must be a folder"
+            }.toList().onEach {
+                check(it.isDirectory && LocaleFileFilter.accept(it)) {
+                    "Invalid locale: ${it.name}"
+                }
+            }
         }
+
+        fun validateDuplicates() {
+            if (isDirectory) return
+            val flavor = flavors.singleOrNull { isChildOf(it) } ?: return
+            val path = toRelativeString(climbUpTo(flavor)!!)
+            flavors.filter { it != flavor }.forEach {
+                check(!project.file("src/$it/$path").exists()) {
+                    "File '$this' is duplicated in flavor $it with identical priority."
+                }
+            }
+        }
+
+        check(climbUpTo(LISTINGS_PATH) != null || isDirectChildOf(PLAY_PATH)) {
+            "Unknown file: $this"
+        }
+
+        validateLocales()
+        validateDuplicates()
     }
 
     private fun File.findDest() = File(resDir, toRelativeString(findOwner()))
 
-    private fun File.findOwner(): File = resSrcDirs.single { startsWith(it) }
+    private fun File.findOwner() = resSrcDirs.single { startsWith(it) }
 }

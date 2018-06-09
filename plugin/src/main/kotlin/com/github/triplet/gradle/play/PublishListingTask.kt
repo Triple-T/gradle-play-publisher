@@ -161,7 +161,8 @@ open class PublishListingTask : PlayPublishTaskBase() {
     private fun File.invalidatesListingDetails() =
             isDirectChildOf(LISTING_PATH) && ListingDetail.values().any { it.fileName == name }
 
-    private fun File.invalidatedImageType() = ImageType.values().find { isDirectChildOf(it.fileName) }
+    private fun File.invalidatedImageType() =
+            ImageType.values().find { isDirectChildOf(it.fileName) }
 
     private companion object {
         const val MIME_TYPE_IMAGE = "image/*"

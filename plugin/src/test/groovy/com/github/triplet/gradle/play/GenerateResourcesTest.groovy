@@ -19,12 +19,12 @@ class GenerateResourcesTest {
 
         assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play').exists())
         assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/release').exists())
-        assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/release/res/en-US').exists())
-        assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/release/res/fr-FR').exists())
+        assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/release/res/listings/en-US').exists())
+        assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/release/res/listings/fr-FR').exists())
 
-        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/release/res/en-US/whatsnew').text
+        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/release/res/listings/en-US/whatsnew').text
         assertEquals('main', content)
-        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/release/res/fr-FR/whatsnew').text
+        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/release/res/listings/fr-FR/whatsnew').text
         assertEquals('main', content)
     }
 
@@ -52,24 +52,24 @@ class GenerateResourcesTest {
 
         assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play').exists())
         assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease').exists())
-        assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease/res/de-DE').exists())
-        assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease/res/en-US').exists())
-        assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease/res/fr-FR').exists())
+        assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease/res/listings/de-DE').exists())
+        assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease/res/listings/en-US').exists())
+        assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease/res/listings/fr-FR').exists())
 
-        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease/res/de-DE/whatsnew').text
+        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease/res/listings/de-DE/whatsnew').text
         assertEquals('free german', content)
-        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease/res/fr-FR/whatsnew').text
+        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease/res/listings/fr-FR/whatsnew').text
         assertEquals('main', content)
-        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease/res/en-US/whatsnew').text
+        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease/res/listings/en-US/whatsnew').text
         assertEquals('main', content)
 
         project.tasks.generatePaidReleasePlayResources.execute()
 
-        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/paidRelease/res/de-DE/whatsnew').text
+        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/paidRelease/res/listings/de-DE/whatsnew').text
         assertEquals('paid german', content)
-        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/paidRelease/res/fr-FR/whatsnew').text
+        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/paidRelease/res/listings/fr-FR/whatsnew').text
         assertEquals('main', content)
-        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/paidRelease/res/en-US/whatsnew').text
+        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/paidRelease/res/listings/en-US/whatsnew').text
         assertEquals('paid english', content)
     }
 
@@ -88,7 +88,7 @@ class GenerateResourcesTest {
         project.tasks.clean.execute()
         project.tasks.generateDogfoodPlayResources.execute()
 
-        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/dogfood/res/en-US/whatsnew').text
+        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/dogfood/res/listings/en-US/whatsnew').text
         assertEquals('dogfood english', content)
     }
 
@@ -118,7 +118,7 @@ class GenerateResourcesTest {
         project.tasks.clean.execute()
         project.tasks.generatePaidDogfoodPlayResources.execute()
 
-        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/paidDogfood/res/en-US/whatsnew').text
+        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/paidDogfood/res/listings/en-US/whatsnew').text
         assertEquals('dogfood english', content)
     }
 
@@ -148,7 +148,7 @@ class GenerateResourcesTest {
         project.tasks.clean.execute()
         project.tasks.generateFreeDogfoodPlayResources.execute()
 
-        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeDogfood/res/en-US/whatsnew').text
+        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeDogfood/res/listings/en-US/whatsnew').text
         assertEquals('free dogfood english', content)
     }
 
@@ -156,9 +156,9 @@ class GenerateResourcesTest {
     void multidimensionalResourcesAreNotOverwritten() {
         def project = TestHelper.evaluatableProject()
         def originalWhatsnew = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'src/flavor1Flavor3BuildType1/play/en-US/whatsnew').text
+                'src/flavor1Flavor3BuildType1/play/listings/en-US/whatsnew').text
         def originalFulldescription = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'src/flavor1Flavor3BuildType1/play/en-US/listing/fulldescription').text
+                'src/flavor1Flavor3BuildType1/play/listings/en-US/listing/fulldescription').text
 
         project.android {
             flavorDimensions 'diem1', 'diem2'
@@ -181,9 +181,9 @@ class GenerateResourcesTest {
         project.tasks.generateFlavor1Flavor3BuildType1PlayResources.execute()
 
         def processedWhatsnew = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'build/outputs/play/flavor1Flavor3BuildType1/res/en-US/whatsnew').text
+                'build/outputs/play/flavor1Flavor3BuildType1/res/listings/en-US/whatsnew').text
         def processedFulldescription = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'build/outputs/play/flavor1Flavor3BuildType1/res/en-US/listing/fulldescription').text
+                'build/outputs/play/flavor1Flavor3BuildType1/res/listings/en-US/listing/fulldescription').text
 
         assertEquals(originalWhatsnew, processedWhatsnew)
         assertEquals(originalFulldescription, processedFulldescription)
@@ -232,13 +232,31 @@ class GenerateResourcesTest {
         project.tasks.generateInvalidLocaleReleasePlayResources.execute()
     }
 
+    @Test(expected = TaskExecutionException)
+    void fileInWrongDirThrow() {
+        def project = TestHelper.evaluatableProject()
+
+        project.android {
+            flavorDimensions 'diem1'
+
+            productFlavors {
+                unknownFile { dimension 'diem1' }
+            }
+        }
+
+        project.evaluate()
+
+        project.tasks.clean.execute()
+        project.tasks.generateUnknownFileReleasePlayResources.execute()
+    }
+
     @Test
     void multidimensionalFlavorsMerge() {
         def project = TestHelper.evaluatableProject()
         def originalWhatsnew = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'src/flavor1Flavor3/play/en-US/whatsnew').text
+                'src/flavor1Flavor3/play/listings/en-US/whatsnew').text
         def originalFulldescription = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'src/flavor1Flavor3Release/play/en-US/listing/fulldescription').text
+                'src/flavor1Flavor3Release/play/listings/en-US/listing/fulldescription').text
 
         project.android {
             flavorDimensions 'diem1', 'diem2'
@@ -261,9 +279,9 @@ class GenerateResourcesTest {
         project.tasks.generateFlavor1Flavor3ReleasePlayResources.execute()
 
         def processedWhatsnew = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'build/outputs/play/flavor1Flavor3Release/res/en-US/whatsnew').text
+                'build/outputs/play/flavor1Flavor3Release/res/listings/en-US/whatsnew').text
         def processedFulldescription = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'build/outputs/play/flavor1Flavor3Release/res/en-US/listing/fulldescription').text
+                'build/outputs/play/flavor1Flavor3Release/res/listings/en-US/listing/fulldescription').text
 
         assertEquals(originalWhatsnew, processedWhatsnew)
         assertEquals(originalFulldescription, processedFulldescription)
@@ -273,9 +291,9 @@ class GenerateResourcesTest {
     void flavorMerge() {
         def project = TestHelper.evaluatableProject()
         def originalFulldescription = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'src/flavor1Flavor3Release/play/en-US/listing/fulldescription').text
+                'src/flavor1Flavor3Release/play/listings/en-US/listing/fulldescription').text
         def originalShortdescription = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'src/flavor1/play/en-US/listing/shortdescription').text
+                'src/flavor1/play/listings/en-US/listing/shortdescription').text
 
         project.android {
             flavorDimensions 'diem1', 'diem2'
@@ -298,9 +316,9 @@ class GenerateResourcesTest {
         project.tasks.generateFlavor1Flavor3ReleasePlayResources.execute()
 
         def processedFulldescription = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'build/outputs/play/flavor1Flavor3Release/res/en-US/listing/fulldescription').text
+                'build/outputs/play/flavor1Flavor3Release/res/listings/en-US/listing/fulldescription').text
         def processedShortdescription = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'build/outputs/play/flavor1Flavor3Release/res/en-US/listing/shortdescription').text
+                'build/outputs/play/flavor1Flavor3Release/res/listings/en-US/listing/shortdescription').text
 
         assertEquals(originalFulldescription, processedFulldescription)
         assertEquals(originalShortdescription, processedShortdescription)
@@ -310,9 +328,9 @@ class GenerateResourcesTest {
     void mainMerge() {
         def project = TestHelper.evaluatableProject()
         def originalFulldescription = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'src/flavor1Flavor3Release/play/en-US/listing/fulldescription').text
+                'src/flavor1Flavor3Release/play/listings/en-US/listing/fulldescription').text
         def originalTitle = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'src/main/play/en-US/listing/title').text
+                'src/main/play/listings/en-US/listing/title').text
 
         project.android {
             flavorDimensions 'diem1', 'diem2'
@@ -335,9 +353,9 @@ class GenerateResourcesTest {
         project.tasks.generateFlavor1Flavor3ReleasePlayResources.execute()
 
         def processedFulldescription = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'build/outputs/play/flavor1Flavor3Release/res/en-US/listing/fulldescription').text
+                'build/outputs/play/flavor1Flavor3Release/res/listings/en-US/listing/fulldescription').text
         def processedTitle = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'build/outputs/play/flavor1Flavor3Release/res/en-US/listing/title').text
+                'build/outputs/play/flavor1Flavor3Release/res/listings/en-US/listing/title').text
 
         assertEquals(originalFulldescription, processedFulldescription)
         assertEquals(originalTitle, processedTitle)
