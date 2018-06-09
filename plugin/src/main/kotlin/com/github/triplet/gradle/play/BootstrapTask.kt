@@ -60,7 +60,7 @@ open class BootstrapTask : PlayPublishTaskBase() {
                 for (type in ImageType.values()) {
                     progressLogger.progress(
                             "Downloading ${listing.language} listing graphics for type " +
-                                    type.fileName)
+                                    "'${type.fileName}'")
                     val images = images()
                             .list(variant.applicationId, editId, listing.language, type.fileName)
                             .execute()

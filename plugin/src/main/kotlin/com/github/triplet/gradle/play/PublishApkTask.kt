@@ -63,9 +63,9 @@ open class PublishApkTask : PlayPublishPackageBase() {
 
     private fun AndroidPublisher.Edits.publishApk(editId: String, apkFile: FileContent): Apk? {
         val apk = try {
-            apks().upload(variant.applicationId, editId, apkFile).apply {
-                trackProgress(progressLogger)
-            }.execute()
+            apks().upload(variant.applicationId, editId, apkFile)
+                    .trackProgress(progressLogger, "APK")
+                    .execute()
         } catch (e: GoogleJsonResponseException) {
             val isConflict = e.details.errors.all {
                 it.reason == "apkUpgradeVersionConflict" || it.reason == "apkNoUpgradePath"
@@ -91,6 +91,7 @@ open class PublishApkTask : PlayPublishPackageBase() {
         }
 
         if (extension.untrackOld && extension._track != INTERNAL) {
+            progressLogger.progress("Removing old tracks")
             extension._track.superiors.map { it.publishedName }.forEach { channel ->
                 try {
                     val track = tracks().get(
@@ -116,6 +117,7 @@ open class PublishApkTask : PlayPublishPackageBase() {
             val content = FileContent(MIME_TYPE_STREAM, variant.mappingFile)
             deobfuscationfiles()
                     .upload(variant.applicationId, editId, apk.versionCode, "proguard", content)
+                    .trackProgress(progressLogger, "mapping file")
                     .execute()
         }
 

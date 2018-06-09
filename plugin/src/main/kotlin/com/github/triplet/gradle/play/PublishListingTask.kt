@@ -146,7 +146,7 @@ open class PublishListingTask : PlayPublishTaskBase() {
         }
 
         progressLogger.progress(
-                "Uploading $locale listing graphics for type ${type.fileName}")
+                "Uploading $locale listing graphics for type '${type.fileName}'")
         images().deleteall(variant.applicationId, editId, locale, typeName).execute()
         for (file in files) {
             images()
