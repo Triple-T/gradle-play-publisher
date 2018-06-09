@@ -5,7 +5,7 @@ import com.google.api.services.androidpublisher.AndroidPublisherRequest
 import org.gradle.internal.logging.progress.ProgressLogger
 import kotlin.math.roundToInt
 
-internal fun <T> AndroidPublisherRequest<T>.trackProgress(
+internal fun <T> AndroidPublisherRequest<T>.trackUploadProgress(
         logger: ProgressLogger,
         thing: String
 ): AndroidPublisherRequest<T> {
