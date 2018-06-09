@@ -28,7 +28,7 @@ open class BootstrapTask : PlayPublishTaskBase() {
 
     @TaskAction
     fun bootstrap() = read { editId ->
-        progressLogger.started("Downloads resources for variant ${variant.name}")
+        progressLogger.start("Downloads resources for variant ${variant.name}", null)
 
         bootstrapAppDetails(editId)
         bootstrapListing(editId)

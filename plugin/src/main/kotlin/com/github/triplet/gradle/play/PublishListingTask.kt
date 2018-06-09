@@ -37,7 +37,7 @@ open class PublishListingTask : PlayPublishTaskBase() {
 
     @TaskAction
     fun publishListing(inputs: IncrementalTaskInputs) {
-        progressLogger.started("Uploads app metadata for variant ${variant.name}")
+        progressLogger.start("Uploads app metadata for variant ${variant.name}", null)
 
         if (!inputs.isIncremental) project.delete(outputs.files)
 

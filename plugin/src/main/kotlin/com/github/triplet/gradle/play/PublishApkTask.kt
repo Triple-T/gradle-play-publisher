@@ -36,7 +36,7 @@ open class PublishApkTask : PlayPublishPackageBase() {
 
     @TaskAction
     fun publishApks(inputs: IncrementalTaskInputs) = write { editId: String ->
-        progressLogger.started("Uploads APK files for variant ${variant.name}")
+        progressLogger.start("Uploads APK files for variant ${variant.name}", null)
 
         if (!inputs.isIncremental) project.delete(outputs.files)
 

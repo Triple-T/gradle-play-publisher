@@ -13,7 +13,7 @@ open class ProcessPackageMetadataTask : PlayPublishTaskBase() {
 
     @TaskAction
     fun process() {
-        progressLogger.started("Updates APK/Bundle metadata for variant ${variant.name}")
+        progressLogger.start("Updates APK/Bundle metadata for variant ${variant.name}", null)
 
         if (extension._resolutionStrategy == ResolutionStrategy.AUTO) processVersionCodes()
 
