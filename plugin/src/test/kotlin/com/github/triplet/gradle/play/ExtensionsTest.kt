@@ -52,8 +52,8 @@ class ExtensionsTest {
     }
 
     private companion object {
-        const val TEST_FILE = "src/main/play/en-US/whatsnew"
-        const val FILE_WITH_LINEBREAK = "src/main/play/en-US/listing/shortdescription"
+        const val TEST_FILE = "src/main/play/en-US/release-notes.txt"
+        const val FILE_WITH_LINEBREAK = "src/main/play/en-US/listing/short-description.txt"
 
         val newLine = byteArrayOf(97, 13, 10, 98, 13, 10, 99, 13, 10, 97)
                 .toString(StandardCharsets.UTF_8)

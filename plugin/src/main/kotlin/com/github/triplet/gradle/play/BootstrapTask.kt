@@ -1,6 +1,7 @@
 package com.github.triplet.gradle.play
 
 import com.github.triplet.gradle.play.internal.AppDetail
+import com.github.triplet.gradle.play.internal.GRAPHICS_PATH
 import com.github.triplet.gradle.play.internal.ImageType
 import com.github.triplet.gradle.play.internal.LISTING_PATH
 import com.github.triplet.gradle.play.internal.ListingDetail
@@ -31,7 +32,7 @@ open class BootstrapTask : PlayPublishTaskBase() {
 
         bootstrapAppDetails(editId)
         bootstrapListing(editId)
-        bootstrapWhatsNew(editId)
+        bootstrapReleaseNotes(editId)
 
         progressLogger.completed()
     }
@@ -58,14 +59,14 @@ open class BootstrapTask : PlayPublishTaskBase() {
 
             fun downloadImages() {
                 for (type in ImageType.values()) {
+                    val typeName = type.publishedName
                     progressLogger.progress(
-                            "Downloading ${listing.language} listing graphics for type " +
-                                    "'${type.fileName}'")
+                            "Downloading ${listing.language} listing graphics for type '$typeName'")
                     val images = images()
-                            .list(variant.applicationId, editId, listing.language, type.fileName)
+                            .list(variant.applicationId, editId, listing.language, typeName)
                             .execute()
                             .images ?: continue
-                    val imageDir = File(rootDir, type.fileName)
+                    val imageDir = File(rootDir, "$GRAPHICS_PATH/${type.dirName}")
 
                     for (image in images) {
                         File(imageDir, "${image.id}.png")
@@ -83,14 +84,14 @@ open class BootstrapTask : PlayPublishTaskBase() {
         }
     }
 
-    private fun AndroidPublisher.Edits.bootstrapWhatsNew(editId: String) {
+    private fun AndroidPublisher.Edits.bootstrapReleaseNotes(editId: String) {
         progressLogger.progress("Downloading release notes")
         tracks().list(variant.applicationId, editId).execute().tracks?.forEach { track ->
             track.releases.maxBy {
                 it.versionCodes?.max() ?: Long.MIN_VALUE
             }?.releaseNotes?.forEach {
                 val extension = track.track?.let { "-$it" } ?: ""
-                File(srcDir, "${it.language}/${ListingDetail.WHATS_NEW.fileName}$extension")
+                File(srcDir, "${it.language}/${ListingDetail.RELEASE_NOTES.fileName}$extension")
                         .safeCreateNewFile()
                         .writeText(it.text)
             }

@@ -131,7 +131,7 @@ open class PublishListingTask : PlayPublishTaskBase() {
             type: ImageType,
             imageDir: File
     ) {
-        val typeName = type.fileName
+        val typeName = type.publishedName
         val files = imageDir.listFiles()
                 ?.sorted()
                 ?.map { FileContent(MIME_TYPE_IMAGE, it) } ?: return
@@ -145,8 +145,7 @@ open class PublishListingTask : PlayPublishTaskBase() {
             "You can only upload ${type.maxNum} graphic(s) for the $typeName"
         }
 
-        progressLogger.progress(
-                "Uploading $locale listing graphics for type '${type.fileName}'")
+        progressLogger.progress("Uploading $locale listing graphics for type '$typeName'")
         images().deleteall(variant.applicationId, editId, locale, typeName).execute()
         for (file in files) {
             images()
@@ -161,7 +160,7 @@ open class PublishListingTask : PlayPublishTaskBase() {
     private fun File.invalidatesListingDetails() =
             isChildOf(LISTING_PATH) && ListingDetail.values().any { it.fileName == name }
 
-    private fun File.invalidatedImageType() = ImageType.values().find { isChildOf(it.fileName) }
+    private fun File.invalidatedImageType() = ImageType.values().find { isChildOf(it.dirName) }
 
     private companion object {
         const val MIME_TYPE_IMAGE = "image/*"

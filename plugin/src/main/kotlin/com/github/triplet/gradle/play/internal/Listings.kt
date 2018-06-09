@@ -18,36 +18,37 @@ internal object ImageFileFilter : FileFilter {
 }
 
 internal enum class ListingDetail(val fileName: String, val maxLength: Int = Int.MAX_VALUE) {
-    TITLE("title", 50),
-    SHORT_DESCRIPTION("shortdescription", 80),
-    FULL_DESCRIPTION("fulldescription", 4000),
-    VIDEO("video"),
+    TITLE("title.txt", 50),
+    SHORT_DESCRIPTION("short-description.txt", 80),
+    FULL_DESCRIPTION("full-description.txt", 4000),
+    VIDEO("video-url.txt"),
 
-    WHATS_NEW("whatsnew", 500)
+    RELEASE_NOTES("release-notes.txt", 500)
 }
 
 internal enum class AppDetail(val fileName: String, val maxLength: Int = Int.MAX_VALUE) {
-    CONTACT_EMAIL("contactEmail"),
-    CONTACT_PHONE("contactPhone"),
-    CONTACT_WEBSITE("contactWebsite"),
-    DEFAULT_LANGUAGE("defaultLanguage")
+    CONTACT_EMAIL("contact-email.txt"),
+    CONTACT_PHONE("contact-phone.txt"),
+    CONTACT_WEBSITE("contact-website.txt"),
+    DEFAULT_LANGUAGE("default-language.txt")
 }
 
 internal enum class ImageType(
-        val fileName: String,
+        val publishedName: String,
+        val dirName: String,
         val constraints: ImageSize = ImageSize(320, 320, 3840, 3840),
         val maxNum: Int = 8
 ) {
-    ICON("icon", ImageSize(512, 512), 1),
-    FEATURE_GRAPHIC("featureGraphic", ImageSize(1024, 500), 1),
-    PROMO_GRAPHIC("promoGraphic", ImageSize(180, 120), 1),
+    ICON("icon", "icon", ImageSize(512, 512), 1),
+    FEATURE_GRAPHIC("featureGraphic", "feature-graphic", ImageSize(1024, 500), 1),
+    PROMO_GRAPHIC("promoGraphic", "promo-graphic", ImageSize(180, 120), 1),
 
-    PHONE_SCREENSHOTS("phoneScreenshots"),
-    SEVEN_INCH_SCREENSHOTS("sevenInchScreenshots"),
-    TEN_INCH_SCREENSHOTS("tenInchScreenshots"),
-    TV_BANNER("tvBanner", ImageSize(1280, 720), 1),
-    TV_SCREENSHOTS("tvScreenshots"),
-    WEAR_SCREENSHOTS("wearScreenshots")
+    PHONE_SCREENSHOTS("phoneScreenshots", "phone-screenshots"),
+    SEVEN_INCH_SCREENSHOTS("sevenInchScreenshots", "tablet-screenshots"),
+    TEN_INCH_SCREENSHOTS("tenInchScreenshots", "large-tablet-screenshots"),
+    TV_BANNER("tvBanner", "tv-banner", ImageSize(1280, 720), 1),
+    TV_SCREENSHOTS("tvScreenshots", "tv-screenshots"),
+    WEAR_SCREENSHOTS("wearScreenshots", "wear-screenshots")
 }
 
 // Min length for any side: 320px. Max length for any side: 3840px.

@@ -23,13 +23,13 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
         val releaseTexts = resDir.orNull()?.listFiles()?.filter {
             it.isDirectory
         }?.mapNotNull { locale ->
-            val fileName = ListingDetail.WHATS_NEW.fileName
+            val fileName = ListingDetail.RELEASE_NOTES.fileName
             val file = File(locale, "$fileName-${extension.track}").orNull()
                     ?: File(locale, fileName).orNull()
                     ?: return@mapNotNull null
 
             val recentChanges = file.readProcessed(
-                    ListingDetail.WHATS_NEW.maxLength,
+                    ListingDetail.RELEASE_NOTES.maxLength,
                     extension.errorOnSizeLimit
             )
             LocalizedText().setLanguage(locale.name).setText(recentChanges)
