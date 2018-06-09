@@ -90,7 +90,7 @@ open class BootstrapTask : PlayPublishTaskBase() {
                 it.versionCodes?.max() ?: Long.MIN_VALUE
             }?.releaseNotes?.forEach {
                 val extension = track.track?.let { "-$it" } ?: ""
-                File(srcDir, "${it.language}/${ListingDetail.WHATS_NEW.fileName}-$extension")
+                File(srcDir, "${it.language}/${ListingDetail.WHATS_NEW.fileName}$extension")
                         .safeCreateNewFile()
                         .writeText(it.text)
             }
