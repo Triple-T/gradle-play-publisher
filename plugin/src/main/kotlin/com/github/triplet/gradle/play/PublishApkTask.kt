@@ -3,6 +3,7 @@ package com.github.triplet.gradle.play
 import com.android.build.gradle.api.ApkVariantOutput
 import com.github.triplet.gradle.play.internal.PlayPublishPackageBase
 import com.github.triplet.gradle.play.internal.playPath
+import com.github.triplet.gradle.play.internal.trackUploadProgress
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
@@ -59,7 +60,9 @@ open class PublishApkTask : PlayPublishPackageBase() {
 
     private fun AndroidPublisher.Edits.publishApk(editId: String, content: FileContent): Apk? {
         val apk = try {
-            apks().upload(variant.applicationId, editId, content).execute()
+            apks().upload(variant.applicationId, editId, content)
+                    .trackUploadProgress(progressLogger, "APK")
+                    .execute()
         } catch (e: GoogleJsonResponseException) {
             return e.handleUploadFailures(content.file)
         }

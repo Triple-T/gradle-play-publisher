@@ -80,6 +80,7 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
 
     protected fun AndroidPublisher.Edits.handlePackageDetails(editId: String, versionCode: Int) {
         if (extension.untrackOld && extension._track != TrackType.INTERNAL) {
+            progressLogger.progress("Removing old tracks")
             extension._track.superiors.map { it.publishedName }.forEach { channel ->
                 try {
                     val track = tracks().get(
@@ -105,6 +106,7 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
             val mapping = FileContent(MIME_TYPE_STREAM, variant.mappingFile)
             deobfuscationfiles()
                     .upload(variant.applicationId, editId, versionCode, "proguard", mapping)
+                    .trackUploadProgress(progressLogger, "mapping file")
                     .execute()
         }
     }
