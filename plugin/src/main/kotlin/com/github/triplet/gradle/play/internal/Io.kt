@@ -4,8 +4,18 @@ import java.io.File
 
 internal fun File.orNull() = if (exists()) this else null
 
+internal tailrec fun File.findClosestDir(): File {
+    check(exists()) { "$this does not exist" }
+    return if (isDirectory) this else parentFile.findClosestDir()
+}
+
+internal fun File.climbUpTo(parentName: String): File? =
+        if (name == parentName) this else parentFile?.climbUpTo(parentName)
+
 internal fun File.readProcessed(maxLength: Int, error: Boolean) =
         readText().normalized().takeOrThrow(maxLength, error, this)
+
+internal fun File.isChildOf(parentName: String) = parentFile?.name == parentName
 
 internal fun File.safeCreateNewFile() = apply {
     check(parentFile.exists() || parentFile.mkdirs()) { "Unable to create $parentFile" }
