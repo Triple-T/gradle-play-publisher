@@ -120,7 +120,8 @@ class PlayPublishTaskTest {
         project.evaluate()
 
         setMockPublisher(project.tasks.publishApkRelease)
-        project.tasks.publishApkRelease.publishApks()
+        publishApk(project.tasks.publishApkRelease, "example_1.apk")
+        publishApk(project.tasks.publishApkRelease, "example_2.apk")
 
         verify(apksMock).upload(
                 eq('com.example.publisher'),
@@ -299,10 +300,14 @@ class PlayPublishTaskTest {
     }
 
     private void publishApk(Task task) {
+        publishApk(task, "foo")
+    }
+
+    private void publishApk(Task task, String fileName) {
         def method = findBaseTask(task.class, PublishApkTask.class).getDeclaredMethod(
                 "publishApk", AndroidPublisher.Edits.class, String.class, FileContent.class)
         method.setAccessible(true)
-        method.invoke(task, editsMock, "424242", new FileContent(null, new File("foo")))
+        method.invoke(task, editsMock, "424242", new FileContent(null, new File(fileName)))
     }
 
     private Class<? super Task> findBaseTask(Class<? super Task> start, Class<? super Task> end) {
