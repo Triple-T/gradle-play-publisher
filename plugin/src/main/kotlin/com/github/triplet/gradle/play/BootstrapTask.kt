@@ -5,7 +5,6 @@ import com.github.triplet.gradle.play.internal.ImageType
 import com.github.triplet.gradle.play.internal.LISTING_PATH
 import com.github.triplet.gradle.play.internal.ListingDetail
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
-import com.github.triplet.gradle.play.internal.TrackType
 import com.github.triplet.gradle.play.internal.nullOrFull
 import com.github.triplet.gradle.play.internal.safeCreateNewFile
 import com.google.api.services.androidpublisher.AndroidPublisher
@@ -84,20 +83,18 @@ open class BootstrapTask : PlayPublishTaskBase() {
         }
     }
 
-    private fun AndroidPublisher.Edits.bootstrapWhatsNew(editId: String): Unit? {
+    private fun AndroidPublisher.Edits.bootstrapWhatsNew(editId: String) {
         progressLogger.progress("Downloading release notes")
-        return tracks()
-                .list(variant.applicationId, editId)
-                .execute().tracks
-                ?.maxBy { TrackType.fromString(it.track) }
-                ?.releases
-                ?.maxBy { it.versionCodes.max() ?: Long.MIN_VALUE }
-                ?.releaseNotes
-                ?.forEach {
-                    File(srcDir, "${it.language}/${ListingDetail.WHATS_NEW.fileName}")
-                            .safeCreateNewFile()
-                            .writeText(it.text)
-                }
+        tracks().list(variant.applicationId, editId).execute().tracks?.forEach { track ->
+            track.releases.maxBy {
+                it.versionCodes?.max() ?: Long.MIN_VALUE
+            }?.releaseNotes?.forEach {
+                val extension = track.track?.let { "-$it" } ?: ""
+                File(srcDir, "${it.language}/${ListingDetail.WHATS_NEW.fileName}-$extension")
+                        .safeCreateNewFile()
+                        .writeText(it.text)
+            }
+        }
     }
 
     private fun AndroidPublisher.Edits.bootstrapAppDetails(editId: String) {
