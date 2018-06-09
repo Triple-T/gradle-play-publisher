@@ -97,7 +97,7 @@ open class PublishListingTask : PlayPublishTaskBase() {
             locale: String,
             listingDir: File
     ) {
-        progressLogger.progress("Uploading listing for locale $locale")
+        progressLogger.progress("Uploading $locale listing")
         val listing = Listing().apply {
             val errorOnSizeLimit = extension.errorOnSizeLimit
 
@@ -146,7 +146,7 @@ open class PublishListingTask : PlayPublishTaskBase() {
         }
 
         progressLogger.progress(
-                "Uploading listing graphics for type ${type.fileName} and locale $locale")
+                "Uploading $locale listing graphics for type ${type.fileName}")
         images().deleteall(variant.applicationId, editId, locale, typeName).execute()
         for (file in files) {
             images()

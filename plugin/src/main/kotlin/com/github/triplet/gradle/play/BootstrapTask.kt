@@ -49,7 +49,7 @@ open class BootstrapTask : PlayPublishTaskBase() {
             fun downloadMetadata() {
                 fun String.write(detail: ListingDetail) = write(rootDir, detail.fileName)
 
-                progressLogger.progress("Downloading listing for locale ${listing.language}")
+                progressLogger.progress("Downloading ${listing.language} listing")
                 listing.fullDescription.nullOrFull()?.write(ListingDetail.FULL_DESCRIPTION)
                 listing.shortDescription.nullOrFull()?.write(ListingDetail.SHORT_DESCRIPTION)
                 listing.title.nullOrFull()?.write(ListingDetail.TITLE)
@@ -59,8 +59,8 @@ open class BootstrapTask : PlayPublishTaskBase() {
             fun downloadImages() {
                 for (type in ImageType.values()) {
                     progressLogger.progress(
-                            "Downloading listing graphics for type " +
-                                    "${type.fileName} and locale ${listing.language}")
+                            "Downloading ${listing.language} listing graphics for type " +
+                                    type.fileName)
                     val images = images()
                             .list(variant.applicationId, editId, listing.language, type.fileName)
                             .execute()
