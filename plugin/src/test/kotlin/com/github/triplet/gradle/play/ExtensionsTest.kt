@@ -35,7 +35,7 @@ class ExtensionsTest {
         assertThat(project.file(TEST_FILE).readProcessed(100, false)).hasSize(12)
     }
 
-    @Test(expected = IllegalArgumentException::class)
+    @Test(expected = IllegalStateException::class)
     fun `Throws on overflow`() {
         project.file(TEST_FILE).readProcessed(1, true)
     }

@@ -6,6 +6,7 @@ import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.TrackType.INTERNAL
 import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.internal.superiors
+import com.github.triplet.gradle.play.internal.trackUploadProgress
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
@@ -35,6 +36,8 @@ open class PublishApkTask : PlayPublishPackageBase() {
 
     @TaskAction
     fun publishApks(inputs: IncrementalTaskInputs) = write { editId: String ->
+        progressLogger.start("Uploads APK files for variant ${variant.name}", null)
+
         if (!inputs.isIncremental) project.delete(outputs.files)
 
         val publishedApks = mutableListOf<Apk>()
@@ -54,11 +57,15 @@ open class PublishApkTask : PlayPublishPackageBase() {
         if (publishedApks.isNotEmpty()) {
             updateTracks(editId, publishedApks.map { it.versionCode.toLong() })
         }
+
+        progressLogger.completed()
     }
 
     private fun AndroidPublisher.Edits.publishApk(editId: String, apkFile: FileContent): Apk? {
         val apk = try {
-            apks().upload(variant.applicationId, editId, apkFile).execute()
+            apks().upload(variant.applicationId, editId, apkFile)
+                    .trackUploadProgress(progressLogger, "APK")
+                    .execute()
         } catch (e: GoogleJsonResponseException) {
             val isConflict = e.details.errors.all {
                 it.reason == "apkUpgradeVersionConflict" || it.reason == "apkNoUpgradePath"
@@ -84,6 +91,7 @@ open class PublishApkTask : PlayPublishPackageBase() {
         }
 
         if (extension.untrackOld && extension._track != INTERNAL) {
+            progressLogger.progress("Removing old tracks")
             extension._track.superiors.map { it.publishedName }.forEach { channel ->
                 try {
                     val track = tracks().get(
@@ -109,6 +117,7 @@ open class PublishApkTask : PlayPublishPackageBase() {
             val content = FileContent(MIME_TYPE_STREAM, variant.mappingFile)
             deobfuscationfiles()
                     .upload(variant.applicationId, editId, apk.versionCode, "proguard", content)
+                    .trackUploadProgress(progressLogger, "mapping file")
                     .execute()
         }
 
