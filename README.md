@@ -11,6 +11,7 @@ the Google Play Store from a continuous integration server or anywhere you have 
 1. [Quick start guide](#quick-start-guide)
 1. [Prerequisites](#prerequisites)
    1. [Initial Play Store upload](#initial-play-store-upload)
+   1. [Signing configuration](#signing-configuration)
    1. [Service Account](#service-account)
 1. [Usage](#usage)
    1. [Installation](#installation)
@@ -42,6 +43,12 @@ the Google Play Store from a continuous integration server or anywhere you have 
 The first APK or App Bundle needs to be uploaded via the Google Play Console because registering the
 app with the Play Store cannot be done using the Play Developer API. For all subsequent uploads and
 changes this plugin can be used.
+
+### Signing configuration
+
+If the plugin didn't create any tasks, you most likely haven't added a valid signing configuration
+to your release builds. Be sure to
+[add one](https://developer.android.com/studio/publish/app-signing#gradle-sign).
 
 ### Service Account
 
