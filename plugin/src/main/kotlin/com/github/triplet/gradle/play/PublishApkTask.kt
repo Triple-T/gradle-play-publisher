@@ -34,13 +34,9 @@ open class PublishApkTask : PlayPublishPackageBase() {
     @get:OutputDirectory
     val outputDir by lazy { File(project.buildDir, "${variant.playPath}/apks") }
 
-    init {
-        progressLogger.description = "Uploads APK files for variant ${variant.name}"
-    }
-
     @TaskAction
     fun publishApks(inputs: IncrementalTaskInputs) = write { editId: String ->
-        progressLogger.started()
+        progressLogger.started("Uploads APK files for variant ${variant.name}")
 
         if (!inputs.isIncremental) project.delete(outputs.files)
 

@@ -35,13 +35,9 @@ open class PublishListingTask : PlayPublishTaskBase() {
     @get:OutputFile
     val outputFile by lazy { File(project.buildDir, "${variant.playPath}/listing-cache-key") }
 
-    init {
-        progressLogger.description = "Uploads app metadata for variant ${variant.name}"
-    }
-
     @TaskAction
     fun publishListing(inputs: IncrementalTaskInputs) {
-        progressLogger.started()
+        progressLogger.started("Uploads app metadata for variant ${variant.name}")
 
         if (!inputs.isIncremental) project.delete(outputs.files)
 

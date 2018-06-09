@@ -24,13 +24,11 @@ open class BootstrapTask : PlayPublishTaskBase() {
     init {
         // Always out-of-date since we don't know what's changed on the network
         outputs.upToDateWhen { false }
-
-        progressLogger.description = "Downloads resources for variant ${variant.name}"
     }
 
     @TaskAction
     fun bootstrap() = read { editId ->
-        progressLogger.started()
+        progressLogger.started("Downloads resources for variant ${variant.name}")
 
         bootstrapAppDetails(editId)
         bootstrapListing(editId)
