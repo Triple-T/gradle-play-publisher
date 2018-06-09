@@ -92,9 +92,7 @@ open class BootstrapTask : PlayPublishTaskBase() {
             }?.releaseNotes?.forEach {
                 val extension = track.track?.let { "-$it" } ?: ""
                 val path = "$LISTINGS_PATH/${it.language}/${ListingDetail.WHATS_NEW.fileName}"
-                File(srcDir, "$path$extension")
-                        .safeCreateNewFile()
-                        .writeText(it.text)
+                File(srcDir, "$path$extension").safeCreateNewFile().writeText(it.text)
             }
         }
     }
