@@ -96,7 +96,7 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
         }
 
     /**
-     * Optional folder where your processed APK/Bundle files are generated. See [README] for
+     * Optional folder where your processed APK/Bundle files are generated. See `README` for
      * details.
      */
     @get:PathSensitive(PathSensitivity.RELATIVE)

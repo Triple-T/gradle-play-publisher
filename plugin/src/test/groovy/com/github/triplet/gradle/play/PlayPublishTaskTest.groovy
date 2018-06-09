@@ -346,5 +346,4 @@ class PlayPublishTaskTest {
             }
         })
     }
-
 }
