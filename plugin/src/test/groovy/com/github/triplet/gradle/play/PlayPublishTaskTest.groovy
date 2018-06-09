@@ -121,17 +121,11 @@ class PlayPublishTaskTest {
 
         setMockPublisher(project.tasks.publishApkRelease)
         publishApk(project.tasks.publishApkRelease, "example_1.apk")
-        publishApk(project.tasks.publishApkRelease, "example_2.apk")
 
         verify(apksMock).upload(
                 eq('com.example.publisher'),
                 eq('424242'),
                 contentWithName("example_1.apk"))
-
-        verify(apksMock).upload(
-                eq('com.example.publisher'),
-                eq('424242'),
-                contentWithName("example_2.apk"))
     }
 
     @Test
