@@ -5,7 +5,12 @@ import com.github.triplet.gradle.play.internal.ReleaseStatus
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.TrackType
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
+import java.io.File
 
 open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension() {
     @get:Internal("Backing property for public input")
