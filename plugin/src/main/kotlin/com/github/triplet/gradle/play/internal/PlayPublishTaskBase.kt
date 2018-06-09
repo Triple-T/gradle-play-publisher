@@ -18,6 +18,7 @@ abstract class PlayPublishTaskBase : DefaultTask() {
     @get:Internal lateinit var variant: ApplicationVariant
     @get:Nested lateinit var accountConfig: AccountConfig
 
+    @get:Internal
     protected val progressLogger: ProgressLogger = services[ProgressLoggerFactory::class.java]
             .newOperation(javaClass)
 
