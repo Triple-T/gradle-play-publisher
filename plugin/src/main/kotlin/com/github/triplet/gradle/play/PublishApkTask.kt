@@ -6,6 +6,7 @@ import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.TrackType.INTERNAL
 import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.internal.superiors
+import com.github.triplet.gradle.play.internal.trackProgress
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
@@ -33,8 +34,14 @@ open class PublishApkTask : PlayPublishPackageBase() {
     @get:OutputDirectory
     val outputDir by lazy { File(project.buildDir, "${variant.playPath}/apks") }
 
+    init {
+        progressLogger.description = "Uploads APK files for variant ${variant.name}"
+    }
+
     @TaskAction
     fun publishApks(inputs: IncrementalTaskInputs) = write { editId: String ->
+        progressLogger.started()
+
         if (!inputs.isIncremental) project.delete(outputs.files)
 
         val publishedApks = mutableListOf<Apk>()
@@ -54,11 +61,15 @@ open class PublishApkTask : PlayPublishPackageBase() {
         if (publishedApks.isNotEmpty()) {
             updateTracks(editId, publishedApks.map { it.versionCode.toLong() })
         }
+
+        progressLogger.completed()
     }
 
     private fun AndroidPublisher.Edits.publishApk(editId: String, apkFile: FileContent): Apk? {
         val apk = try {
-            apks().upload(variant.applicationId, editId, apkFile).execute()
+            apks().upload(variant.applicationId, editId, apkFile).apply {
+                trackProgress(progressLogger)
+            }.execute()
         } catch (e: GoogleJsonResponseException) {
             val isConflict = e.details.errors.all {
                 it.reason == "apkUpgradeVersionConflict" || it.reason == "apkNoUpgradePath"

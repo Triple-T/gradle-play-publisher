@@ -10,11 +10,16 @@ import com.google.api.services.androidpublisher.AndroidPublisherScopes
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
+import org.gradle.internal.logging.progress.ProgressLogger
+import org.gradle.internal.logging.progress.ProgressLoggerFactory
 
 abstract class PlayPublishTaskBase : DefaultTask() {
     @get:Nested lateinit var extension: PlayPublisherExtension
     @get:Internal lateinit var variant: ApplicationVariant
     @get:Nested lateinit var accountConfig: AccountConfig
+
+    protected val progressLogger: ProgressLogger = services[ProgressLoggerFactory::class.java]
+            .newOperation(javaClass)
 
     private val publisher by lazy {
         val credential = accountConfig.run {

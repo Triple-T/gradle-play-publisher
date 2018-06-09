@@ -35,8 +35,14 @@ open class PublishListingTask : PlayPublishTaskBase() {
     @get:OutputFile
     val outputFile by lazy { File(project.buildDir, "${variant.playPath}/listing-cache-key") }
 
+    init {
+        progressLogger.description = "Uploads app metadata for variant ${variant.name}"
+    }
+
     @TaskAction
     fun publishListing(inputs: IncrementalTaskInputs) {
+        progressLogger.started()
+
         if (!inputs.isIncremental) project.delete(outputs.files)
 
         var appDetailsChanged = false
@@ -68,9 +74,12 @@ open class PublishListingTask : PlayPublishTaskBase() {
 
             outputFile.writeText(editId)
         }
+
+        progressLogger.completed()
     }
 
     private fun AndroidPublisher.Edits.updateAppDetails(editId: String) {
+        progressLogger.progress("Uploading app details")
         val details = AppDetails().apply {
             val errorOnSizeLimit = extension.errorOnSizeLimit
 
@@ -92,6 +101,7 @@ open class PublishListingTask : PlayPublishTaskBase() {
             locale: String,
             listingDir: File
     ) {
+        progressLogger.progress("Uploading listing for locale $locale")
         val listing = Listing().apply {
             val errorOnSizeLimit = extension.errorOnSizeLimit
 
@@ -139,6 +149,8 @@ open class PublishListingTask : PlayPublishTaskBase() {
             "You can only upload ${type.maxNum} graphic(s) for the $typeName"
         }
 
+        progressLogger.progress(
+                "Uploading listing graphics for type ${type.fileName} and locale $locale")
         images().deleteall(variant.applicationId, editId, locale, typeName).execute()
         for (file in files) {
             images()

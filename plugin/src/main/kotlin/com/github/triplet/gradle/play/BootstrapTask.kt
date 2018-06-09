@@ -24,16 +24,23 @@ open class BootstrapTask : PlayPublishTaskBase() {
     init {
         // Always out-of-date since we don't know what's changed on the network
         outputs.upToDateWhen { false }
+
+        progressLogger.description = "Downloads resources for variant ${variant.name}"
     }
 
     @TaskAction
     fun bootstrap() = read { editId ->
+        progressLogger.started()
+
+        bootstrapAppDetails(editId)
         bootstrapListing(editId)
         bootstrapWhatsNew(editId)
-        bootstrapAppDetails(editId)
+
+        progressLogger.completed()
     }
 
     private fun AndroidPublisher.Edits.bootstrapListing(editId: String) {
+        progressLogger.progress("Fetching listings")
         val listings = listings()
                 .list(variant.applicationId, editId)
                 .execute()
@@ -45,6 +52,7 @@ open class BootstrapTask : PlayPublishTaskBase() {
             fun downloadMetadata() {
                 fun String.write(detail: ListingDetail) = write(rootDir, detail.fileName)
 
+                progressLogger.progress("Downloading listing for locale ${listing.language}")
                 listing.fullDescription.nullOrFull()?.write(ListingDetail.FULL_DESCRIPTION)
                 listing.shortDescription.nullOrFull()?.write(ListingDetail.SHORT_DESCRIPTION)
                 listing.title.nullOrFull()?.write(ListingDetail.TITLE)
@@ -53,6 +61,9 @@ open class BootstrapTask : PlayPublishTaskBase() {
 
             fun downloadImages() {
                 for (type in ImageType.values()) {
+                    progressLogger.progress(
+                            "Downloading listing graphics for type " +
+                                    "${type.fileName} and locale ${listing.language}")
                     val images = images()
                             .list(variant.applicationId, editId, listing.language, type.fileName)
                             .execute()
@@ -75,22 +86,26 @@ open class BootstrapTask : PlayPublishTaskBase() {
         }
     }
 
-    private fun AndroidPublisher.Edits.bootstrapWhatsNew(editId: String) = tracks()
-            .list(variant.applicationId, editId)
-            .execute().tracks
-            ?.maxBy { TrackType.fromString(it.track) }
-            ?.releases
-            ?.maxBy { it.versionCodes.max() ?: Long.MIN_VALUE }
-            ?.releaseNotes
-            ?.forEach {
-                File(srcDir, "${it.language}/${ListingDetail.WHATS_NEW.fileName}")
-                        .safeCreateNewFile()
-                        .writeText(it.text)
-            }
+    private fun AndroidPublisher.Edits.bootstrapWhatsNew(editId: String): Unit? {
+        progressLogger.progress("Downloading release notes")
+        return tracks()
+                .list(variant.applicationId, editId)
+                .execute().tracks
+                ?.maxBy { TrackType.fromString(it.track) }
+                ?.releases
+                ?.maxBy { it.versionCodes.max() ?: Long.MIN_VALUE }
+                ?.releaseNotes
+                ?.forEach {
+                    File(srcDir, "${it.language}/${ListingDetail.WHATS_NEW.fileName}")
+                            .safeCreateNewFile()
+                            .writeText(it.text)
+                }
+    }
 
     private fun AndroidPublisher.Edits.bootstrapAppDetails(editId: String) {
         fun String.write(detail: AppDetail) = write(srcDir, detail.fileName)
 
+        progressLogger.progress("Downloading app details")
         val details = details().get(variant.applicationId, editId).execute()
 
         details.contactEmail.nullOrFull()?.write(AppDetail.CONTACT_EMAIL)
