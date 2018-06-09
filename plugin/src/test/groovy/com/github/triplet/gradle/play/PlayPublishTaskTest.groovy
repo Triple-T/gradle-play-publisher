@@ -1,5 +1,7 @@
 package com.github.triplet.gradle.play
 
+import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
+import com.github.triplet.gradle.play.internal.TrackType
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.Apk
@@ -7,10 +9,9 @@ import com.google.api.services.androidpublisher.model.AppEdit
 import com.google.api.services.androidpublisher.model.Track
 import com.google.api.services.androidpublisher.model.TrackRelease
 import com.google.api.services.androidpublisher.model.TracksListResponse
-import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
-import com.github.triplet.gradle.play.internal.TrackType
 import kotlin.LazyKt
 import org.gradle.api.Task
+import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatcher
@@ -63,6 +64,9 @@ class PlayPublishTaskTest {
     @Mock
     AndroidPublisher.Edits.Apks.Upload uploadMock
 
+    @Mock
+    IncrementalTaskInputs inputsMock
+
     // These are final and not mock able
     final AppEdit appEdit = new AppEdit()
     final Apk apk = new Apk()
@@ -108,57 +112,6 @@ class PlayPublishTaskTest {
     }
 
     @Test
-    void testApplicationId() {
-        def project = TestHelper.evaluatableProject()
-        project.evaluate()
-
-        // Attach the mock
-        setMockPublisher(project.tasks.publishApkRelease)
-
-        // finally run the task we want to check
-        project.tasks.publishApkRelease.publishApks()
-
-        // verify that we init the connection with the correct application id
-        verify(editsMock).insert('com.example.publisher', null)
-    }
-
-    @Test
-    void testApplicationIdWithFlavorsAndSuffix() {
-        def project = TestHelper.evaluatableProject()
-
-        project.android {
-            flavorDimensions 'pricing'
-
-            productFlavors {
-                paid {
-                    dimension 'pricing'
-                    applicationId 'com.example.publisher.paid'
-                }
-                free {
-                    dimension 'pricing'
-                }
-            }
-
-            buildTypes {
-                release {
-                    applicationIdSuffix '.release'
-                }
-            }
-        }
-
-        project.evaluate()
-
-        // Attach the mock
-        setMockPublisher(project.tasks.publishApkPaidRelease)
-
-        // finally run the task we want to check
-        project.tasks.publishApkPaidRelease.publishApks()
-
-        // verify that we init the connection with the correct application id
-        verify(editsMock).insert('com.example.publisher.paid.release', null)
-    }
-
-    @Test
     void whenPublishing_withOverrideFolder_UploadsOnlySpecifiedFiles() {
         def project = TestHelper.evaluatableProject()
         project.play {
@@ -193,7 +146,7 @@ class PlayPublishTaskTest {
         alphaTrack.setReleases([new TrackRelease().setVersionCodes([41L, 40L])])
 
         setMockPublisher(project.tasks.publishApkRelease)
-        project.tasks.publishApkRelease.publishApks()
+        publishApk(project.tasks.publishApkRelease)
 
         verify(editTracksMock).update(
                 eq('com.example.publisher'),
@@ -215,7 +168,7 @@ class PlayPublishTaskTest {
         alphaTrack.setReleases([new TrackRelease().setVersionCodes([43L])])
 
         setMockPublisher(project.tasks.publishApkRelease)
-        project.tasks.publishApkRelease.publishApks()
+        publishApk(project.tasks.publishApkRelease)
 
         verify(editTracksMock).update(
                 eq('com.example.publisher'),
@@ -238,7 +191,7 @@ class PlayPublishTaskTest {
         betaTrack.setReleases([new TrackRelease().setVersionCodes([39L])])
 
         setMockPublisher(project.tasks.publishApkRelease)
-        project.tasks.publishApkRelease.publishApks()
+        publishApk(project.tasks.publishApkRelease)
 
         verify(editTracksMock).update(
                 eq('com.example.publisher'),
@@ -267,7 +220,7 @@ class PlayPublishTaskTest {
         betaTrack.setReleases([new TrackRelease().setVersionCodes([43L])])
 
         setMockPublisher(project.tasks.publishApkRelease)
-        project.tasks.publishApkRelease.publishApks()
+        publishApk(project.tasks.publishApkRelease)
 
         verify(editTracksMock).update(
                 eq('com.example.publisher'),
@@ -332,23 +285,31 @@ class PlayPublishTaskTest {
         setMockPublisher(project.tasks.publishApkPaidRelease)
 
         // finally run the task we want to check
-        project.tasks.publishApkPaidRelease.publishApks()
+        project.tasks.publishApkPaidRelease.publishApks(inputsMock)
 
         // verify that we init the connection with the correct application id
         verify(editsMock).insert('com.example.publisher.paid.release', null)
     }
 
     private void setMockPublisher(Task task) {
-        def field = findBaseTask(task.class).getDeclaredField("publisher\$delegate")
+        def field = findBaseTask(task.class, PlayPublishTaskBase.class)
+                .getDeclaredField("publisher\$delegate")
         field.setAccessible(true)
         field.set(task, LazyKt.lazy { publisherMock })
     }
 
-    private Class<PlayPublishTaskBase> findBaseTask(Class<? super Task> clazz) {
-        if (clazz == PlayPublishTaskBase.class) {
-            return clazz as Class<PlayPublishTaskBase>
+    private void publishApk(Task task) {
+        def method = findBaseTask(task.class, PublishApkTask.class).getDeclaredMethod(
+                "publishApk", AndroidPublisher.Edits.class, String.class, FileContent.class)
+        method.setAccessible(true)
+        method.invoke(task, editsMock, "424242", new FileContent(null, new File("foo")))
+    }
+
+    private Class<? super Task> findBaseTask(Class<? super Task> start, Class<? super Task> end) {
+        if (start == end) {
+            return end as Class<? super Task>
         } else {
-            return findBaseTask(clazz.superclass)
+            return findBaseTask(start.superclass, end)
         }
     }
 
@@ -356,7 +317,9 @@ class PlayPublishTaskTest {
         return argThat(new ArgumentMatcher<Track>() {
             @Override
             boolean matches(Track track) {
-                return track.getReleases().sum { (it as TrackRelease).getVersionCodes().size() } == 0
+                return track.getReleases().sum {
+                    (it as TrackRelease).getVersionCodes().size()
+                } == 0
             }
         })
     }
@@ -365,7 +328,7 @@ class PlayPublishTaskTest {
         return argThat(new ArgumentMatcher<Track>() {
             @Override
             boolean matches(Track track) {
-                return track.getReleases().find {it.getVersionCodes().contains(code)} != null
+                return track.getReleases().find { it.getVersionCodes().contains(code) } != null
             }
         })
     }
