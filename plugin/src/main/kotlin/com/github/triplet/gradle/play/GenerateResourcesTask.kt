@@ -61,7 +61,7 @@ open class GenerateResourcesTask : DefaultTask() {
         fun File.validateLocales() {
             checkNotNull(listFiles()) {
                 "$this must be a folder"
-            }.toList().onEach {
+            }.forEach {
                 check(it.isDirectory && LocaleFileFilter.accept(it)) {
                     "Invalid locale: ${it.name}"
                 }
