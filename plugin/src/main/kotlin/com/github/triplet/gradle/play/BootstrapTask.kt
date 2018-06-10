@@ -35,7 +35,7 @@ open class BootstrapTask : PlayPublishTaskBase() {
         bootstrapAppDetails(editId)
         bootstrapListing(editId)
         bootstrapReleaseNotes(editId)
-        bootstrapInAppProducts()
+        bootstrapProducts()
 
         progressLogger.completed()
     }
@@ -112,7 +112,7 @@ open class BootstrapTask : PlayPublishTaskBase() {
         }
     }
 
-    private fun bootstrapInAppProducts() {
+    private fun bootstrapProducts() {
         progressLogger.progress("Downloading in-app products")
         publisher.inappproducts().list(variant.applicationId).execute().inappproduct.forEach {
             gson.toJson(it).write(srcDir, "$PRODUCTS_PATH/${it.sku}.json")
