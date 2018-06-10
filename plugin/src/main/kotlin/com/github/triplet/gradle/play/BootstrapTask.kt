@@ -3,11 +3,10 @@ package com.github.triplet.gradle.play
 import com.github.triplet.gradle.play.internal.AppDetail
 import com.github.triplet.gradle.play.internal.ImageType
 import com.github.triplet.gradle.play.internal.LISTINGS_PATH
-import com.github.triplet.gradle.play.internal.LISTING_PATH
 import com.github.triplet.gradle.play.internal.ListingDetail
 import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
-import com.github.triplet.gradle.play.internal.TrackType
+import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
 import com.github.triplet.gradle.play.internal.nullOrFull
 import com.github.triplet.gradle.play.internal.safeCreateNewFile
 import com.google.api.services.androidpublisher.AndroidPublisher
@@ -30,24 +29,42 @@ open class BootstrapTask : PlayPublishTaskBase() {
 
     @TaskAction
     fun bootstrap() = read { editId ->
-        bootstrapListing(editId)
-        bootstrapWhatsNew(editId)
+        progressLogger.start("Downloads resources for variant ${variant.name}", null)
+
         bootstrapAppDetails(editId)
+        bootstrapListing(editId)
+        bootstrapReleaseNotes(editId)
         bootstrapInAppProducts()
+
+        progressLogger.completed()
+    }
+
+    private fun AndroidPublisher.Edits.bootstrapAppDetails(editId: String) {
+        fun String.write(detail: AppDetail) = write(srcDir, detail.fileName)
+
+        progressLogger.progress("Downloading app details")
+        val details = details().get(variant.applicationId, editId).execute()
+
+        details.contactEmail.nullOrFull()?.write(AppDetail.CONTACT_EMAIL)
+        details.contactPhone.nullOrFull()?.write(AppDetail.CONTACT_PHONE)
+        details.contactWebsite.nullOrFull()?.write(AppDetail.CONTACT_WEBSITE)
+        details.defaultLanguage.nullOrFull()?.write(AppDetail.DEFAULT_LANGUAGE)
     }
 
     private fun AndroidPublisher.Edits.bootstrapListing(editId: String) {
+        progressLogger.progress("Fetching listings")
         val listings = listings()
                 .list(variant.applicationId, editId)
                 .execute()
                 .listings ?: return
 
         for (listing in listings) {
-            val rootDir = File(srcDir, "$LISTINGS_PATH/${listing.language}/$LISTING_PATH")
+            val rootDir = File(srcDir, "$LISTINGS_PATH/${listing.language}")
 
             fun downloadMetadata() {
                 fun String.write(detail: ListingDetail) = write(rootDir, detail.fileName)
 
+                progressLogger.progress("Downloading ${listing.language} listing")
                 listing.fullDescription.nullOrFull()?.write(ListingDetail.FULL_DESCRIPTION)
                 listing.shortDescription.nullOrFull()?.write(ListingDetail.SHORT_DESCRIPTION)
                 listing.title.nullOrFull()?.write(ListingDetail.TITLE)
@@ -56,6 +73,9 @@ open class BootstrapTask : PlayPublishTaskBase() {
 
             fun downloadImages() {
                 for (type in ImageType.values()) {
+                    progressLogger.progress(
+                            "Downloading ${listing.language} listing graphics for type " +
+                                    "'${type.fileName}'")
                     val images = images()
                             .list(variant.applicationId, editId, listing.language, type.fileName)
                             .execute()
@@ -78,31 +98,21 @@ open class BootstrapTask : PlayPublishTaskBase() {
         }
     }
 
-    private fun AndroidPublisher.Edits.bootstrapWhatsNew(editId: String) = tracks()
-            .list(variant.applicationId, editId)
-            .execute().tracks
-            ?.maxBy { TrackType.fromString(it.track) }
-            ?.releases
-            ?.maxBy { it.versionCodes.max() ?: Long.MIN_VALUE }
-            ?.releaseNotes
-            ?.forEach {
-                File(srcDir, "${it.language}/${ListingDetail.WHATS_NEW.fileName}")
+    private fun AndroidPublisher.Edits.bootstrapReleaseNotes(editId: String) {
+        progressLogger.progress("Downloading release notes")
+        tracks().list(variant.applicationId, editId).execute().tracks?.forEach { track ->
+            track.releases.maxBy {
+                it.versionCodes?.max() ?: Long.MIN_VALUE
+            }?.releaseNotes?.forEach {
+                File(srcDir, "$RELEASE_NOTES_PATH/${it.language}/${track.track}.txt")
                         .safeCreateNewFile()
                         .writeText(it.text)
             }
-
-    private fun AndroidPublisher.Edits.bootstrapAppDetails(editId: String) {
-        fun String.write(detail: AppDetail) = write(srcDir, detail.fileName)
-
-        val details = details().get(variant.applicationId, editId).execute()
-
-        details.contactEmail.nullOrFull()?.write(AppDetail.CONTACT_EMAIL)
-        details.contactPhone.nullOrFull()?.write(AppDetail.CONTACT_PHONE)
-        details.contactWebsite.nullOrFull()?.write(AppDetail.CONTACT_WEBSITE)
-        details.defaultLanguage.nullOrFull()?.write(AppDetail.DEFAULT_LANGUAGE)
+        }
     }
 
     private fun bootstrapInAppProducts() {
+        progressLogger.progress("Downloading in-app products")
         publisher.inappproducts().list(variant.applicationId).execute().inappproduct.forEach {
             gson.toJson(it).write(srcDir, "$PRODUCTS_PATH/${it.sku}.json")
         }

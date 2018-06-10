@@ -13,10 +13,15 @@ open class ProcessPackageMetadataTask : PlayPublishTaskBase() {
 
     @TaskAction
     fun process() {
+        progressLogger.start("Updates APK/Bundle metadata for variant ${variant.name}", null)
+
         if (extension._resolutionStrategy == ResolutionStrategy.AUTO) processVersionCodes()
+
+        progressLogger.completed()
     }
 
     private fun processVersionCodes() = read { editId ->
+        progressLogger.progress("Downloading active version codes")
         val maxVersionCode = tracks().list(variant.applicationId, editId).execute().tracks
                 ?.map { it.releases ?: emptyList() }?.flatten()
                 ?.map { it.versionCodes ?: emptyList() }?.flatten()

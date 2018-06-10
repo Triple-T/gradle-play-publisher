@@ -15,7 +15,9 @@ internal fun File.climbUpTo(parentName: String): File? =
 internal fun File.readProcessed(maxLength: Int, error: Boolean) =
         readText().normalized().takeOrThrow(maxLength, error, this)
 
-internal fun File.isChildOf(parentName: String) = parentFile?.name == parentName
+internal fun File.isChildOf(parentName: String) = climbUpTo(parentName) != null
+
+internal fun File.isDirectChildOf(parentName: String) = parentFile?.name == parentName
 
 internal fun File.safeCreateNewFile() = apply {
     check(parentFile.exists() || parentFile.mkdirs()) { "Unable to create $parentFile" }
@@ -26,9 +28,9 @@ internal fun String.normalized() = replace(Regex("\\r\\n"), "\n").trim()
 
 internal fun String?.nullOrFull() = if (isNullOrBlank()) null else this
 
-internal fun String.takeOrThrow(n: Int, error: Boolean, file: File): String {
+private fun String.takeOrThrow(n: Int, error: Boolean, file: File): String {
     val result = take(n)
-    if (error) require(result.length == length) {
+    if (error) check(result.length == length) {
         "File '$file' has reached the limit of $n characters."
     }
     return result
