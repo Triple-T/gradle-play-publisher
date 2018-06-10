@@ -101,7 +101,6 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
             }
         }
 
-        // Upload Proguard mapping.txt if available
         if (variant.mappingFile?.exists() == true) {
             val mapping = FileContent(MIME_TYPE_STREAM, variant.mappingFile)
             deobfuscationfiles()
