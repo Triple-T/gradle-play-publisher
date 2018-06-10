@@ -8,11 +8,7 @@ internal enum class TrackType(val publishedName: String) {
     ALPHA("alpha"),
     BETA("beta"),
     ROLLOUT("rollout"),
-    PRODUCTION("production");
-
-    companion object {
-        fun fromString(value: String) = values().first { it.publishedName.equals(value, true) }
-    }
+    PRODUCTION("production")
 }
 
 internal enum class ReleaseStatus(val publishedName: String) {

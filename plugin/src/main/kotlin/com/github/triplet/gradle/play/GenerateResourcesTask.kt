@@ -22,18 +22,18 @@ import java.io.File
 @CacheableTask
 open class GenerateResourcesTask : DefaultTask() {
     @get:Internal
-    lateinit var variant: ApplicationVariant
+    internal lateinit var variant: ApplicationVariant
 
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputDirectory
-    lateinit var resDir: File
+    internal lateinit var resDir: File
 
     private val resSrcDirs: List<File> by lazy {
         variant.sourceSets.map { project.file("src/${it.name}/$PLAY_PATH") }
     }
     private val flavors by lazy { variant.baseName.split("-").run { take(size - 1) } }
 
-    fun init() {
+    internal fun init() {
         for (dir in resSrcDirs) {
             inputs.dir(dir).skipWhenEmpty().withPathSensitivity(PathSensitivity.RELATIVE)
         }

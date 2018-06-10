@@ -12,7 +12,7 @@ import java.io.File
 abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
     @PathSensitive(PathSensitivity.RELATIVE)
     @get:InputDirectory
-    lateinit var releaseNotesDir: File
+    internal lateinit var releaseNotesDir: File
 
     protected fun AndroidPublisher.Edits.updateTracks(editId: String, versions: List<Long>) {
         val track = tracks()
