@@ -4,6 +4,7 @@ import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.internal.LISTINGS_PATH
 import com.github.triplet.gradle.play.internal.LocaleFileFilter
 import com.github.triplet.gradle.play.internal.PLAY_PATH
+import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
 import com.github.triplet.gradle.play.internal.climbUpTo
 import com.github.triplet.gradle.play.internal.findClosestDir
 import com.github.triplet.gradle.play.internal.isChildOf
@@ -55,18 +56,30 @@ open class GenerateResourcesTask : DefaultTask() {
     }
 
     private fun File.validate() {
-        fun validateLocales() {
-            val listings = climbUpTo(LISTINGS_PATH) ?: return
-            check(listings.isDirectChildOf(PLAY_PATH)) {
-                "Listings ($listings) must be in the '$PLAY_PATH' folder"
-            }
-            checkNotNull(listings.listFiles()) {
-                "$listings must be a folder"
+        fun File.validateLocales() {
+            checkNotNull(listFiles()) {
+                "$this must be a folder"
             }.toList().onEach {
                 check(it.isDirectory && LocaleFileFilter.accept(it)) {
                     "Invalid locale: ${it.name}"
                 }
             }
+        }
+
+        fun validateListings() {
+            val listings = climbUpTo(LISTINGS_PATH) ?: return
+            check(listings.isDirectChildOf(PLAY_PATH)) {
+                "Listings ($listings) must be under the '$PLAY_PATH' folder"
+            }
+            listings.validateLocales()
+        }
+
+        fun validateReleaseNotes() {
+            val releaseNotes = climbUpTo(RELEASE_NOTES_PATH) ?: return
+            check(releaseNotes.isDirectChildOf(PLAY_PATH)) {
+                "Release notes ($releaseNotes) must be under the '$PLAY_PATH' folder"
+            }
+            releaseNotes.validateLocales()
         }
 
         fun validateDuplicates() {
@@ -80,11 +93,13 @@ open class GenerateResourcesTask : DefaultTask() {
             }
         }
 
-        check(climbUpTo(LISTINGS_PATH) != null || isDirectChildOf(PLAY_PATH)) {
-            "Unknown file: $this"
-        }
+        val areRootsValid = climbUpTo(LISTINGS_PATH) != null
+                || climbUpTo(RELEASE_NOTES_PATH) != null
+                || isDirectChildOf(PLAY_PATH)
+        check(areRootsValid) { "Unknown file: $this" }
 
-        validateLocales()
+        validateListings()
+        validateReleaseNotes()
         validateDuplicates()
     }
 
