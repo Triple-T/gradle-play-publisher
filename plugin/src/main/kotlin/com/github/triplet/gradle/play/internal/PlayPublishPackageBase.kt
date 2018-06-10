@@ -20,18 +20,17 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
                 .execute().tracks
                 ?.firstOrNull { it.track == extension.track } ?: Track()
 
-        val releaseTexts = File(releaseNotesDir, RELEASE_NOTES_PATH).orNull()?.listFiles()
-                ?.mapNotNull { locale ->
-                    val file = File(locale, "${extension.track}.txt").orNull()
-                            ?: File(locale, RELEASE_NOTES_DEFAULT_NAME).orNull()
-                            ?: return@mapNotNull null
+        val releaseTexts = releaseNotesDir.orNull()?.listFiles()?.mapNotNull { locale ->
+            val file = File(locale, "${extension.track}.txt").orNull()
+                    ?: File(locale, RELEASE_NOTES_DEFAULT_NAME).orNull()
+                    ?: return@mapNotNull null
 
-                    val recentChanges = file.readProcessed(
-                            RELEASE_NOTES_MAX_LENGTH,
-                            extension.errorOnSizeLimit
-                    )
-                    LocalizedText().setLanguage(locale.name).setText(recentChanges)
-                }
+            val recentChanges = file.readProcessed(
+                    RELEASE_NOTES_MAX_LENGTH,
+                    extension.errorOnSizeLimit
+            )
+            LocalizedText().setLanguage(locale.name).setText(recentChanges)
+        }
         val trackRelease = TrackRelease().apply {
             releaseNotes = releaseTexts
             status = extension.releaseStatus
