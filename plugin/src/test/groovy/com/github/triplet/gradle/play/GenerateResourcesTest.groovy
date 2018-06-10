@@ -190,7 +190,7 @@ class GenerateResourcesTest {
     }
 
     @Test(expected = TaskExecutionException)
-    void conflictingFlavorsThrow() {
+    void conflictingFlavorsThrows() {
         def project = TestHelper.evaluatableProject()
 
         project.android {
@@ -215,7 +215,7 @@ class GenerateResourcesTest {
     }
 
     @Test(expected = TaskExecutionException)
-    void invalidLocaleThrow() {
+    void invalidLocaleThrows() {
         def project = TestHelper.evaluatableProject()
 
         project.android {
@@ -233,7 +233,7 @@ class GenerateResourcesTest {
     }
 
     @Test(expected = TaskExecutionException)
-    void fileInWrongDirThrow() {
+    void fileInWrongDirThrows() {
         def project = TestHelper.evaluatableProject()
 
         project.android {
