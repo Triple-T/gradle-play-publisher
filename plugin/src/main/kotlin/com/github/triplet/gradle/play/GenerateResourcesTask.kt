@@ -1,6 +1,7 @@
 package com.github.triplet.gradle.play
 
 import com.android.build.gradle.api.ApplicationVariant
+import com.github.triplet.gradle.play.internal.EXPANSION_FILES_PATH
 import com.github.triplet.gradle.play.internal.LISTINGS_PATH
 import com.github.triplet.gradle.play.internal.LocaleFileFilter
 import com.github.triplet.gradle.play.internal.PLAY_PATH
@@ -95,6 +96,7 @@ open class GenerateResourcesTask : DefaultTask() {
 
         val areRootsValid = climbUpTo(LISTINGS_PATH) != null
                 || climbUpTo(RELEASE_NOTES_PATH) != null
+                || climbUpTo(EXPANSION_FILES_PATH) != null
                 || isDirectChildOf(PLAY_PATH)
         check(areRootsValid) { "Unknown file: $this" }
 

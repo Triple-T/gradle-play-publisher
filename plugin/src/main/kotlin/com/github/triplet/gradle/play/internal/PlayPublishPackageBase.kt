@@ -5,14 +5,21 @@ import com.google.api.services.androidpublisher.model.LocalizedText
 import com.google.api.services.androidpublisher.model.Track
 import com.google.api.services.androidpublisher.model.TrackRelease
 import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import java.io.File
 
 abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
-    @PathSensitive(PathSensitivity.RELATIVE)
+    @get:Internal
+    lateinit var resDir: File
+
+    @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
+    @get:Optional
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputDirectory
-    lateinit var releaseNotesDir: File
+    val releaseNotesDir by lazy { File(resDir, RELEASE_NOTES_PATH) }
 
     protected fun AndroidPublisher.Edits.updateTracks(editId: String, versions: List<Long>) {
         val track = tracks()

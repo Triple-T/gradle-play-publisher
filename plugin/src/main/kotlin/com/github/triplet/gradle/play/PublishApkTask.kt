@@ -1,6 +1,7 @@
 package com.github.triplet.gradle.play
 
 import com.android.build.gradle.api.ApkVariantOutput
+import com.github.triplet.gradle.play.internal.EXPANSION_FILES_PATH
 import com.github.triplet.gradle.play.internal.PlayPublishPackageBase
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.TrackType.INTERNAL
@@ -11,7 +12,9 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.Apk
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -29,6 +32,12 @@ open class PublishApkTask : PlayPublishPackageBase() {
         // TODO: If we take a customizable folder, we can fix #233, #227
         variant.outputs.filterIsInstance<ApkVariantOutput>().map { it.outputFile }
     }
+    @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
+    @get:Optional
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:InputDirectory
+    val expansionFilesDir by lazy { File(resDir, EXPANSION_FILES_PATH) }
+
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputDirectory
@@ -119,6 +128,17 @@ open class PublishApkTask : PlayPublishPackageBase() {
                     .upload(variant.applicationId, editId, apk.versionCode, "proguard", content)
                     .trackUploadProgress(progressLogger, "mapping file")
                     .execute()
+        }
+
+        expansionFilesDir.listFiles()?.forEach {
+            val type = it.nameWithoutExtension
+            expansionfiles().upload(
+                    variant.applicationId,
+                    editId,
+                    apk.versionCode,
+                    type,
+                    FileContent(MIME_TYPE_STREAM, it)
+            ).trackUploadProgress(progressLogger, "$type expansion file").execute()
         }
 
         return apk
