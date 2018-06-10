@@ -7,6 +7,7 @@ import com.github.triplet.gradle.play.internal.ListingDetail
 import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
+import com.github.triplet.gradle.play.internal.gson
 import com.github.triplet.gradle.play.internal.nullOrFull
 import com.github.triplet.gradle.play.internal.safeCreateNewFile
 import com.google.api.services.androidpublisher.AndroidPublisher

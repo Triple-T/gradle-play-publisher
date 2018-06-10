@@ -2,6 +2,7 @@ package com.github.triplet.gradle.play
 
 import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
+import com.github.triplet.gradle.play.internal.gson
 import com.github.triplet.gradle.play.internal.isDirectChildOf
 import com.github.triplet.gradle.play.internal.playPath
 import com.google.api.services.androidpublisher.model.InAppProduct
@@ -44,7 +45,7 @@ open class PublishProductsTask : PlayPublishTaskBase() {
             }.forEach {
                 progressLogger.progress("Uploading ${it.sku}")
                 logger.error(it.toString())
-//                update(variant.applicationId, it.sku, it).execute()
+                update(variant.applicationId, it.sku, it).execute()
             }
 
             outputFile.writeText(hashCode().toString())

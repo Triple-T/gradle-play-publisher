@@ -7,8 +7,6 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.AndroidPublisherScopes
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
@@ -54,10 +52,6 @@ abstract class PlayPublishTaskBase : DefaultTask() {
                 connectTimeout = 100_000
             })
         }.setApplicationName(PLUGIN_NAME).build()
-    }
-    @get:Internal
-    protected val gson: Gson by lazy {
-        GsonBuilder().setPrettyPrinting().create()
     }
 
     protected fun read(block: AndroidPublisher.Edits.(editId: String) -> Unit) {
