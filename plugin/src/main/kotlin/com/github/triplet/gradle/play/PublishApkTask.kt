@@ -44,11 +44,7 @@ open class PublishApkTask : PlayPublishPackageBase() {
         inputs.outOfDate {
             val file = it.file
             if (inputApks.contains(file)) {
-                project.copy {
-                    it.from(file)
-                    it.into(outputDir)
-                }
-
+                project.copy { it.from(file).into(outputDir) }
                 publishApk(editId, FileContent(MIME_TYPE_APK, file))?.let { publishedApks += it }
             }
         }
