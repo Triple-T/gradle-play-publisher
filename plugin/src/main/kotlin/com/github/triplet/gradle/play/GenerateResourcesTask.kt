@@ -1,9 +1,11 @@
 package com.github.triplet.gradle.play
 
 import com.android.build.gradle.api.ApplicationVariant
+import com.github.triplet.gradle.play.internal.JsonFileFilter
 import com.github.triplet.gradle.play.internal.LISTINGS_PATH
 import com.github.triplet.gradle.play.internal.LocaleFileFilter
 import com.github.triplet.gradle.play.internal.PLAY_PATH
+import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
 import com.github.triplet.gradle.play.internal.climbUpTo
 import com.github.triplet.gradle.play.internal.findClosestDir
@@ -74,7 +76,15 @@ open class GenerateResourcesTask : DefaultTask() {
             listings.validateLocales()
         }
 
-        fun validateListings() {
+        fun validateReleaseNotes() {
+            val releaseNotes = climbUpTo(RELEASE_NOTES_PATH) ?: return
+            check(releaseNotes.isDirectChildOf(PLAY_PATH)) {
+                "Release notes ($releaseNotes) must be under the '$PLAY_PATH' folder"
+            }
+            releaseNotes.validateLocales()
+        }
+
+        fun validateProducts() {
             val products = climbUpTo(PRODUCTS_PATH) ?: return
             check(products.isDirectChildOf(PLAY_PATH)) {
                 "Products ($products) must be under the '$PLAY_PATH' folder"
@@ -82,18 +92,8 @@ open class GenerateResourcesTask : DefaultTask() {
             checkNotNull(products.listFiles()) {
                 "$products must be a folder"
             }.forEach {
-                check(JsonFileFilter.accept(it)) {
-                    "In-app product files must be JSON."
-                }
+                check(JsonFileFilter.accept(it)) { "In-app product files must be JSON." }
             }
-        }
-
-        fun validateReleaseNotes() {
-            val releaseNotes = climbUpTo(RELEASE_NOTES_PATH) ?: return
-            check(releaseNotes.isDirectChildOf(PLAY_PATH)) {
-                "Release notes ($releaseNotes) must be under the '$PLAY_PATH' folder"
-            }
-            releaseNotes.validateLocales()
         }
 
         fun validateDuplicates() {
@@ -115,6 +115,7 @@ open class GenerateResourcesTask : DefaultTask() {
 
         validateListings()
         validateReleaseNotes()
+        validateProducts()
         validateDuplicates()
     }
 
