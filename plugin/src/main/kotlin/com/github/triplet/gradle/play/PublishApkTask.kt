@@ -99,9 +99,10 @@ open class PublishApkTask : PlayPublishPackageBase() {
                             editId,
                             channel
                     ).execute().apply {
-                        releases.forEach {
+                        releases = releases.filter {
                             it.versionCodes =
                                     it.versionCodes.filter { it > apk.versionCode.toLong() }
+                            it.versionCodes.isNotEmpty()
                         }
                     }
                     tracks().update(variant.applicationId, editId, channel, track).execute()
