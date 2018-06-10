@@ -25,17 +25,6 @@ internal interface ExtensionOptions {
 
     @get:Internal
     @set:Option(
-            option = "untrack-old",
-            description = "Untrack superseded versions automatically."
-    )
-    var untrackOldOption: Boolean
-        get() = throw UnsupportedOperationException()
-        set(value) {
-            extension.untrackOld = value
-        }
-
-    @get:Internal
-    @set:Option(
             option = "user-fraction",
             description = "Set the user percent intended to receive a 'rollout' update. 10% == 0.1"
     )
