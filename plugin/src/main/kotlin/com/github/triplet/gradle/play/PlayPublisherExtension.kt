@@ -1,5 +1,6 @@
 package com.github.triplet.gradle.play
 
+import com.android.build.gradle.api.ApkVariantOutput
 import com.github.triplet.gradle.play.internal.AccountConfig
 import com.github.triplet.gradle.play.internal.ReleaseStatus
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
@@ -60,12 +61,13 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
             }
         }
     /**
-     * If the [resolutionStrategy] is auto, optionally compute a new version name from the updated
-     * version code. Returning null means the version name should not be changed.
+     * If the [resolutionStrategy] is auto, process the outputs such that they will pass validation
+     * when uploaded.
      */
     @get:Internal("ProcessPackageMetadataTask is always out-of-date. Also, Closures with " +
                           "parameters cannot be used as inputs.")
-    var versionNameOverride: (versionCode: Int) -> String? = { null }
+    var autoResolutionHandler: (inputs: AutoResolutionInputs) -> Unit =
+            AutoResolutionInputs::runDefault
 
     @get:Internal("Backing property for public input")
     internal lateinit var _releaseStatus: ReleaseStatus
@@ -89,4 +91,32 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
                         ReleaseStatus.values().joinToString { "'${it.publishedName}'" }
             }
         }
+}
+
+data class AutoResolutionInputs(
+        /** The outputs to be processed. */
+        val outputs: List<ApkVariantOutput>,
+        /** The highest version code uploaded to the Play Store. */
+        val highestRemoteVersionCode: Long
+) {
+    /**
+     * Linearly shifts all version codes such that the smallest one is 1 unit greater than the
+     * maximum version code found in the Play Store.
+     *
+     * This logic is provided in standalone form to support merging your own custom handler logic on
+     * top of the default. For example, you could run this handler and then update each output's
+     * version name using the newly mutated version codes.
+     *
+     * Note: applying this handler permanently mutates the outputs.
+     *
+     * @see [PlayPublisherExtension.autoResolutionHandler]
+     */
+    fun runDefault() {
+        val smallestVersionCode = outputs.map { it.versionCode }.min() ?: 1
+
+        val patch = highestRemoteVersionCode - smallestVersionCode + 1
+        if (patch <= 0) return // Nothing to do, outputs are already greater than remote
+
+        for (output in outputs) output.versionCodeOverride = output.versionCode + patch.toInt()
+    }
 }

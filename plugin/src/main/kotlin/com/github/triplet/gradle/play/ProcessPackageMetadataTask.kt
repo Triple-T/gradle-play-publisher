@@ -28,13 +28,6 @@ open class ProcessPackageMetadataTask : PlayPublishTaskBase() {
                 ?.max() ?: 1
 
         val outputs = variant.outputs.filterIsInstance<ApkVariantOutput>()
-        while (outputs.any { it.versionCode <= maxVersionCode }) {
-            for (output in outputs) {
-                val newCode = output.versionCode + 1
-                output.versionCodeOverride = newCode
-                extension.versionNameOverride(newCode)
-                        ?.let { output.versionNameOverride = it }
-            }
-        }
+        extension.autoResolutionHandler(AutoResolutionInputs(outputs, maxVersionCode))
     }
 }
