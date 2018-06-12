@@ -126,7 +126,8 @@ class PlayPublisherPlugin : Plugin<Project> {
 
                 dependsOn(processPackageMetadata)
                 dependsOn(playResourcesTask)
-                dependsOn(variant.assemble)
+                variant.assemble?.let { dependsOn(it) }
+                        ?: logger.warn("Assemble task not found. Publishing APKs may not work.")
                 publishApkAllTask.dependsOn(this)
             }
 
@@ -139,8 +140,9 @@ class PlayPublisherPlugin : Plugin<Project> {
 
                 dependsOn(processPackageMetadata)
                 dependsOn(playResourcesTask)
-                dependsOn((variant as InstallableVariantImpl).variantData
-                                  .getTaskByKind(TaskContainer.TaskKind.BUNDLE))
+                (variant as InstallableVariantImpl).variantData
+                        .getTaskByKind(TaskContainer.TaskKind.BUNDLE)?.let { dependsOn(it) }
+                        ?: logger.warn("Bundle task not found. Publishing App Bundles may not work.")
                 publishBundleAllTask.dependsOn(this)
             }
 
