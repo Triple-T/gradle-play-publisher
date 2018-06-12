@@ -14,7 +14,7 @@ import java.io.File
 abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
     @PathSensitive(PathSensitivity.RELATIVE)
     @get:InputDirectory
-    lateinit var resDir: File
+    lateinit var releaseNotesDir: File
 
     protected fun AndroidPublisher.Edits.updateTracks(editId: String, versions: List<Long>) {
         val track = tracks()
@@ -22,16 +22,13 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
                 .execute().tracks
                 ?.firstOrNull { it.track == extension.track } ?: Track()
 
-        val releaseTexts = resDir.orNull()?.listFiles()?.filter {
-            it.isDirectory
-        }?.mapNotNull { locale ->
-            val fileName = ListingDetail.WHATS_NEW.fileName
-            val file = File(locale, "$fileName-${extension.track}").orNull()
-                    ?: File(locale, fileName).orNull()
+        val releaseTexts = releaseNotesDir.orNull()?.listFiles()?.mapNotNull { locale ->
+            val file = File(locale, "${extension.track}.txt").orNull()
+                    ?: File(locale, RELEASE_NOTES_DEFAULT_NAME).orNull()
                     ?: return@mapNotNull null
 
             val recentChanges = file.readProcessed(
-                    ListingDetail.WHATS_NEW.maxLength,
+                    RELEASE_NOTES_MAX_LENGTH,
                     extension.errorOnSizeLimit
             )
             LocalizedText().setLanguage(locale.name).setText(recentChanges)
