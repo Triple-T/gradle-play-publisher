@@ -12,6 +12,11 @@ import com.github.triplet.gradle.play.internal.newTask
 import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.internal.set
 import com.github.triplet.gradle.play.internal.validate
+import com.github.triplet.gradle.play.tasks.Bootstrap
+import com.github.triplet.gradle.play.tasks.GenerateResources
+import com.github.triplet.gradle.play.tasks.ProcessPackageMetadata
+import com.github.triplet.gradle.play.tasks.PublishApk
+import com.github.triplet.gradle.play.tasks.PublishListing
 import groovy.lang.GroovyObject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -70,7 +75,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 this.accountConfig = accountConfig
             }
 
-            project.newTask<BootstrapTask>(
+            project.newTask<Bootstrap>(
                     "bootstrap${variantName}PlayResources",
                     "Downloads the Play Store listing metadata for $variantName."
             ) {
@@ -80,7 +85,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 bootstrapAllTask.dependsOn(this)
             }
 
-            val playResourcesTask = project.newTask<GenerateResourcesTask>(
+            val playResourcesTask = project.newTask<GenerateResources>(
                     "generate${variantName}PlayResources",
                     "Collects Play Store resources for $variantName.",
                     null
@@ -89,7 +94,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                         .skipWhenEmpty()
                 resDir = File(project.buildDir, "${variant.playPath}/res")
             }
-            val publishListingTask = project.newTask<PublishListingTask>(
+            val publishListingTask = project.newTask<PublishListing>(
                     "publishListing$variantName",
                     "Uploads all Play Store metadata for $variantName."
             ) {
@@ -100,7 +105,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 publishListingAllTask.dependsOn(this)
             }
 
-            val processPackageMetadata = project.newTask<ProcessPackageMetadataTask>(
+            val processPackageMetadata = project.newTask<ProcessPackageMetadata>(
                     "processPackageMetadata$variantName",
                     "Processes packaging metadata for $variantName.",
                     null
@@ -110,7 +115,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 variant.checkManifest.dependsOn(this)
             }
 
-            val publishApkTask = project.newTask<PublishApkTask>(
+            val publishApkTask = project.newTask<PublishApk>(
                     "publishApk$variantName",
                     "Uploads APK for $variantName."
             ) {

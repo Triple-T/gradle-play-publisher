@@ -1,4 +1,4 @@
-package com.github.triplet.gradle.play
+package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.play.internal.LocaleFileFilter
 import com.github.triplet.gradle.play.internal.findClosestDir
@@ -13,7 +13,7 @@ import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import java.io.File
 
 @CacheableTask
-open class GenerateResourcesTask : DefaultTask() {
+open class GenerateResources : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputDirectory
     lateinit var resDir: File
