@@ -22,9 +22,9 @@ class GenerateResourcesTest {
         assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/release/res/listings/en-US').exists())
         assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/release/res/listings/fr-FR').exists())
 
-        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/release/res/release-notes/en-US/default.txt').text
+        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/release/res/release-notes/en-US/default').text
         assertEquals('main', content)
-        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/release/res/release-notes/fr-FR/default.txt').text
+        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/release/res/release-notes/fr-FR/default').text
         assertEquals('main', content)
     }
 
@@ -56,20 +56,20 @@ class GenerateResourcesTest {
         assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease/res/listings/en-US').exists())
         assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease/res/listings/fr-FR').exists())
 
-        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease/res/release-notes/de-DE/default.txt').text
+        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease/res/release-notes/de-DE/default').text
         assertEquals('free german', content)
-        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease/res/release-notes/fr-FR/default.txt').text
+        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease/res/release-notes/fr-FR/default').text
         assertEquals('main', content)
-        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease/res/release-notes/en-US/default.txt').text
-        assertEquals('main', content)
+        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeRelease/res/release-notes/en-US/default').text
+        assertEquals('free', content)
 
         project.tasks.generatePaidReleasePlayResources.execute()
 
-        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/paidRelease/res/release-notes/de-DE/default.txt').text
+        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/paidRelease/res/release-notes/de-DE/default').text
         assertEquals('paid german', content)
-        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/paidRelease/res/release-notes/fr-FR/default.txt').text
+        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/paidRelease/res/release-notes/fr-FR/default').text
         assertEquals('main', content)
-        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/paidRelease/res/release-notes/en-US/default.txt').text
+        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/paidRelease/res/release-notes/en-US/default').text
         assertEquals('paid english', content)
     }
 
@@ -88,7 +88,7 @@ class GenerateResourcesTest {
         project.tasks.clean.execute()
         project.tasks.generateDogfoodPlayResources.execute()
 
-        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/dogfood/res/release-notes/en-US/default.txt').text
+        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/dogfood/res/release-notes/en-US/default').text
         assertEquals('dogfood english', content)
     }
 
@@ -118,7 +118,7 @@ class GenerateResourcesTest {
         project.tasks.clean.execute()
         project.tasks.generatePaidDogfoodPlayResources.execute()
 
-        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/paidDogfood/res/release-notes/en-US/default.txt').text
+        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/paidDogfood/res/release-notes/en-US/default').text
         assertEquals('dogfood english', content)
     }
 
@@ -148,7 +148,7 @@ class GenerateResourcesTest {
         project.tasks.clean.execute()
         project.tasks.generateFreeDogfoodPlayResources.execute()
 
-        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeDogfood/res/release-notes/en-US/default.txt').text
+        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/freeDogfood/res/release-notes/en-US/default').text
         assertEquals('free dogfood english', content)
     }
 
@@ -156,7 +156,7 @@ class GenerateResourcesTest {
     void multidimensionalResourcesAreNotOverwritten() {
         def project = TestHelper.evaluatableProject()
         def originalReleaseNotes = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'src/freeStagingDogfood/play/release-notes/en-US/default.txt').text
+                'src/freeStagingDogfood/play/release-notes/en-US/default').text
         def originalFullDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
                 'src/freeStagingDogfood/play/listings/en-US/fulldescription').text
 
@@ -181,7 +181,7 @@ class GenerateResourcesTest {
         project.tasks.generateFreeStagingDogfoodPlayResources.execute()
 
         def processedReleaseNotes = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'build/outputs/play/freeStagingDogfood/res/release-notes/en-US/default.txt').text
+                'build/outputs/play/freeStagingDogfood/res/release-notes/en-US/default').text
         def processedFullDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
                 'build/outputs/play/freeStagingDogfood/res/listings/en-US/fulldescription').text
 
@@ -254,7 +254,7 @@ class GenerateResourcesTest {
     void multidimensionalFlavorsMerge() {
         def project = TestHelper.evaluatableProject()
         def originalReleaseNotes = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'src/freeStaging/play/release-notes/en-US/default.txt').text
+                'src/freeStaging/play/release-notes/en-US/default').text
         def originalFullDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
                 'src/freeStagingRelease/play/listings/en-US/fulldescription').text
 
@@ -279,7 +279,7 @@ class GenerateResourcesTest {
         project.tasks.generateFreeStagingReleasePlayResources.execute()
 
         def processedReleaseNotes = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'build/outputs/play/freeStagingRelease/res/release-notes/en-US/default.txt').text
+                'build/outputs/play/freeStagingRelease/res/release-notes/en-US/default').text
         def processedFullDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
                 'build/outputs/play/freeStagingRelease/res/listings/en-US/fulldescription').text
 
