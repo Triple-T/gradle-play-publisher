@@ -6,6 +6,7 @@ import com.github.triplet.gradle.play.internal.ACCOUNT_CONFIG
 import com.github.triplet.gradle.play.internal.AccountConfig
 import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
+import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
 import com.github.triplet.gradle.play.internal.flavorNameOrDefault
 import com.github.triplet.gradle.play.internal.get
 import com.github.triplet.gradle.play.internal.newTask
@@ -90,8 +91,8 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "Collects Play Store resources for $variantName.",
                     null
             ) {
-                inputs.files(*variant.sourceSets.map { "src/${it.name}/$PLAY_PATH" }.toTypedArray())
-                        .skipWhenEmpty()
+                this.variant = variant
+                init()
                 resDir = File(project.buildDir, "${variant.playPath}/res")
             }
             val publishListingTask = project.newTask<PublishListing>(
@@ -120,7 +121,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "Uploads APK for $variantName."
             ) {
                 init()
-                resDir = playResourcesTask.resDir
+                releaseNotesDir = File(playResourcesTask.resDir, RELEASE_NOTES_PATH)
 
                 dependsOn(processPackageMetadata)
                 dependsOn(playResourcesTask)
