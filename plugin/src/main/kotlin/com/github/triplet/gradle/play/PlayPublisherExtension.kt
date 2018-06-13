@@ -24,13 +24,6 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
             }
         }
     /**
-     * Choose whether or not to untrack superseded versions automatically. See
-     * https://github.com/Triple-T/gradle-play-publisher#untrack-conflicting-versions. Disabled by
-     * default.
-     */
-    @get:Input
-    var untrackOld = false
-    /**
      * Specify the initial user percent intended to receive a 'rollout' update (see [track]).
      * Default is 10% == 0.1.
      */

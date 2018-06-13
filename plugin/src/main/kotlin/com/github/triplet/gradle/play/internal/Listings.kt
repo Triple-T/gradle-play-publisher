@@ -3,6 +3,9 @@ package com.github.triplet.gradle.play.internal
 import java.io.File
 import java.io.FileFilter
 
+internal const val RELEASE_NOTES_DEFAULT_NAME = "default"
+internal const val RELEASE_NOTES_MAX_LENGTH = 500
+
 internal object LocaleFileFilter : FileFilter {
     // region '419' is a special case in the Play Store that represents latin america
     // 'fil' is a special case in the Play Store that represents Filipino
@@ -22,8 +25,6 @@ internal enum class ListingDetail(val fileName: String, val maxLength: Int = Int
     SHORT_DESCRIPTION("shortdescription", 80),
     FULL_DESCRIPTION("fulldescription", 4000),
     VIDEO("video"),
-
-    WHATS_NEW("whatsnew", 500)
 }
 
 internal enum class AppDetail(val fileName: String, val maxLength: Int = Int.MAX_VALUE) {

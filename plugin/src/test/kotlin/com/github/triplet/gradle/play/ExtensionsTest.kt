@@ -22,17 +22,17 @@ class ExtensionsTest {
 
     @Test
     fun `Long files are trimmed`() {
-        assertThat(project.file(TEST_FILE).readProcessed(6, false)).hasSize(6)
+        assertThat(project.file(TEST_FILE).readProcessed(2, false)).hasSize(2)
     }
 
     @Test
     fun `Files on the edge are trimmed correctly`() {
-        assertThat(project.file(TEST_FILE).readProcessed(12, false)).hasSize(12)
+        assertThat(project.file(TEST_FILE).readProcessed(4, false)).hasSize(4)
     }
 
     @Test
     fun `Short files aren't trimmed`() {
-        assertThat(project.file(TEST_FILE).readProcessed(100, false)).hasSize(12)
+        assertThat(project.file(TEST_FILE).readProcessed(100, false)).hasSize(4)
     }
 
     @Test(expected = IllegalStateException::class)
@@ -52,8 +52,8 @@ class ExtensionsTest {
     }
 
     private companion object {
-        const val TEST_FILE = "src/main/play/en-US/whatsnew"
-        const val FILE_WITH_LINEBREAK = "src/main/play/en-US/listing/shortdescription"
+        const val TEST_FILE = "src/main/play/release-notes/en-US/default"
+        const val FILE_WITH_LINEBREAK = "src/main/play/listings/en-US/shortdescription"
 
         val newLine = byteArrayOf(97, 13, 10, 98, 13, 10, 99, 13, 10, 97)
                 .toString(StandardCharsets.UTF_8)
