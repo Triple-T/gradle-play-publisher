@@ -190,31 +190,6 @@ class GenerateResourcesTest {
     }
 
     @Test(expected = TaskExecutionException)
-    void conflictingFlavorsThrows() {
-        def project = TestHelper.evaluatableProject()
-
-        project.android {
-            flavorDimensions 'pricing', 'server'
-
-            productFlavors {
-                free { dimension 'pricing' }
-                paid { dimension 'pricing' }
-                staging { dimension 'server' }
-                prod { dimension 'server' }
-            }
-
-            buildTypes {
-                dogfood.initWith(buildTypes.release)
-            }
-        }
-
-        project.evaluate()
-
-        project.tasks.clean.execute()
-        project.tasks.generateFreeProdDogfoodPlayResources.execute()
-    }
-
-    @Test(expected = TaskExecutionException)
     void invalidLocaleThrows() {
         def project = TestHelper.evaluatableProject()
 
@@ -322,6 +297,38 @@ class GenerateResourcesTest {
 
         assertEquals(originalFullDescription, processedFullDescription)
         assertEquals(originalShortDescription, processedShortDescription)
+    }
+
+    @Test
+    void flavorDimensionOrderDeterminesConflictingFlavorWinner() {
+        def project = TestHelper.evaluatableProject()
+        def originalReleaseNotes = new File(TestHelper.FIXTURE_WORKING_DIR,
+                'src/prod/play/release-notes/en-US/default').text
+
+        project.android {
+            flavorDimensions 'server', 'pricing'
+
+            productFlavors {
+                free { dimension 'pricing' }
+                paid { dimension 'pricing' }
+                staging { dimension 'server' }
+                prod { dimension 'server' }
+            }
+
+            buildTypes {
+                dogfood.initWith(buildTypes.release)
+            }
+        }
+
+        project.evaluate()
+
+        project.tasks.clean.execute()
+        project.tasks.generateProdFreeReleasePlayResources.execute()
+
+        def processedReleaseNotes = new File(TestHelper.FIXTURE_WORKING_DIR,
+                'build/outputs/play/prodFreeRelease/res/release-notes/en-US/default').text
+
+        assertEquals(originalReleaseNotes, processedReleaseNotes)
     }
 
     @Test
