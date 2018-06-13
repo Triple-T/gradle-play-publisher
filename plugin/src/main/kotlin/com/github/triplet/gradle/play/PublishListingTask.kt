@@ -3,11 +3,11 @@ package com.github.triplet.gradle.play
 import com.github.triplet.gradle.play.internal.AppDetail
 import com.github.triplet.gradle.play.internal.ImageFileFilter
 import com.github.triplet.gradle.play.internal.ImageType
-import com.github.triplet.gradle.play.internal.LISTING_PATH
+import com.github.triplet.gradle.play.internal.LISTINGS_PATH
 import com.github.triplet.gradle.play.internal.ListingDetail
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.internal.climbUpTo
-import com.github.triplet.gradle.play.internal.isChildOf
+import com.github.triplet.gradle.play.internal.isDirectChildOf
 import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.internal.readProcessed
@@ -46,7 +46,7 @@ open class PublishListingTask : PlayPublishTaskBase() {
         fun File.process() {
             appDetailsChanged = appDetailsChanged || invalidatesAppDetails()
             if (invalidatesListingDetails()) {
-                climbUpTo(LISTING_PATH)?.let { changedListingDetails += it }
+                changedListingDetails += findLocale()?.let { climbUpTo(it) }!!
             }
             invalidatedImageType()?.let { changedImages += it to this }
         }
@@ -59,13 +59,12 @@ open class PublishListingTask : PlayPublishTaskBase() {
 
             if (appDetailsChanged) updateAppDetails(editId)
             for (listingDir in changedListingDetails) {
-                updateListing(editId, listingDir.parentFile.name, listingDir)
+                updateListing(editId, listingDir.name, listingDir)
             }
             changedImages.map { (type, image) ->
                 type to image.parentFile
             }.toSet().forEach { (type, imageDir) ->
-                updateImages(
-                        editId, imageDir.climbUpTo(LISTING_PATH)!!.parentFile.name, type, imageDir)
+                updateImages(editId, imageDir.findLocale()!!, type, imageDir)
             }
 
             outputFile.writeText(editId)
@@ -155,12 +154,20 @@ open class PublishListingTask : PlayPublishTaskBase() {
     }
 
     private fun File.invalidatesAppDetails() =
-            isChildOf(resDir.name) && AppDetail.values().any { it.fileName == name }
+            isDirectChildOf(resDir.name) && AppDetail.values().any { it.fileName == name }
 
-    private fun File.invalidatesListingDetails() =
-            isChildOf(LISTING_PATH) && ListingDetail.values().any { it.fileName == name }
+    private fun File.invalidatesListingDetails(): Boolean {
+        return isDirectChildOf(findLocale() ?: return false)
+                && ListingDetail.values().any { it.fileName == name }
+    }
 
-    private fun File.invalidatedImageType() = ImageType.values().find { isChildOf(it.dirName) }
+    private fun File.invalidatedImageType() =
+            ImageType.values().find { isDirectChildOf(it.dirName) }
+
+    private fun File.findLocale() = climbUpTo(LISTINGS_PATH)
+            ?.let { relativeTo(it).invariantSeparatorsPath }
+            ?.split("/")
+            ?.firstOrNull()
 
     private companion object {
         const val MIME_TYPE_IMAGE = "image/*"
