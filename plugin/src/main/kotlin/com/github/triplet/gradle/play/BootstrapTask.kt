@@ -105,7 +105,7 @@ open class BootstrapTask : PlayPublishTaskBase() {
             track.releases.maxBy {
                 it.versionCodes?.max() ?: Long.MIN_VALUE
             }?.releaseNotes?.forEach {
-                File(srcDir, "$RELEASE_NOTES_PATH/${it.language}/${track.track}.txt")
+                File(srcDir, "$RELEASE_NOTES_PATH/${it.language}/${track.track}")
                         .safeCreateNewFile()
                         .writeText(it.text)
             }

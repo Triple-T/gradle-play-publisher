@@ -9,7 +9,6 @@ import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
 import com.github.triplet.gradle.play.internal.climbUpTo
 import com.github.triplet.gradle.play.internal.findClosestDir
-import com.github.triplet.gradle.play.internal.isChildOf
 import com.github.triplet.gradle.play.internal.isDirectChildOf
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.CacheableTask
@@ -33,7 +32,6 @@ open class GenerateResourcesTask : DefaultTask() {
     private val resSrcDirs: List<File> by lazy {
         variant.sourceSets.map { project.file("src/${it.name}/$PLAY_PATH") }
     }
-    private val flavors by lazy { variant.baseName.split("-").run { take(size - 1) } }
 
     fun init() {
         for (dir in resSrcDirs) {
@@ -96,17 +94,6 @@ open class GenerateResourcesTask : DefaultTask() {
             }
         }
 
-        fun validateDuplicates() {
-            if (isDirectory) return
-            val flavor = flavors.singleOrNull { isChildOf(it) } ?: return
-            val path = toRelativeString(climbUpTo(flavor)!!)
-            flavors.filter { it != flavor }.forEach {
-                check(!project.file("src/$it/$path").exists()) {
-                    "File '$this' is duplicated in flavor $it with identical priority."
-                }
-            }
-        }
-
         val areRootsValid = climbUpTo(LISTINGS_PATH) != null
                 || climbUpTo(PRODUCTS_PATH) != null
                 || climbUpTo(RELEASE_NOTES_PATH) != null
@@ -116,7 +103,6 @@ open class GenerateResourcesTask : DefaultTask() {
         validateListings()
         validateReleaseNotes()
         validateProducts()
-        validateDuplicates()
     }
 
     private fun File.findDest() = File(resDir, toRelativeString(findOwner()))
