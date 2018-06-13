@@ -8,6 +8,7 @@ import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
 import com.github.triplet.gradle.play.internal.climbUpTo
 import com.github.triplet.gradle.play.internal.findClosestDir
+import com.github.triplet.gradle.play.internal.isChildOf
 import com.github.triplet.gradle.play.internal.isDirectChildOf
 import com.github.triplet.gradle.play.internal.normalized
 import com.github.triplet.gradle.play.internal.nullOrFull
@@ -40,6 +41,7 @@ open class GenerateResourcesTask : DefaultTask() {
                     ?.readText()?.normalized().nullOrFull()
         }.lastOrNull()
     }
+
     fun init() {
         for (dir in resSrcDirs) {
             inputs.dir(dir).skipWhenEmpty().withPathSensitivity(PathSensitivity.RELATIVE)
