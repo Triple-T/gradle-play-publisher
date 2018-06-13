@@ -1,3 +1,6 @@
+![192](https://user-images.githubusercontent.com/34313493/41367768-ce504c2a-6f61-11e8-85c6-b3b465f314cb.png)
+
+
 # Gradle Play Publisher
 
 [![Build Status](https://travis-ci.org/Triple-T/gradle-play-publisher.svg?branch=master)](https://travis-ci.org/Triple-T/gradle-play-publisher)
