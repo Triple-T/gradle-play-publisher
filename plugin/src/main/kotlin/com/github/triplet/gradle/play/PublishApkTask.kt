@@ -3,9 +3,7 @@ package com.github.triplet.gradle.play
 import com.android.build.gradle.api.ApkVariantOutput
 import com.github.triplet.gradle.play.internal.PlayPublishPackageBase
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
-import com.github.triplet.gradle.play.internal.TrackType.INTERNAL
 import com.github.triplet.gradle.play.internal.playPath
-import com.github.triplet.gradle.play.internal.superiors
 import com.github.triplet.gradle.play.internal.trackUploadProgress
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
@@ -86,29 +84,6 @@ open class PublishApkTask : PlayPublishPackageBase() {
             }
         }
 
-        if (extension.untrackOld && extension._track != INTERNAL) {
-            progressLogger.progress("Removing old tracks")
-            extension._track.superiors.map { it.publishedName }.forEach { channel ->
-                try {
-                    val track = tracks().get(
-                            variant.applicationId,
-                            editId,
-                            channel
-                    ).execute().apply {
-                        releases.forEach {
-                            it.versionCodes =
-                                    it.versionCodes.filter { it > apk.versionCode.toLong() }
-                        }
-                    }
-                    tracks().update(variant.applicationId, editId, channel, track).execute()
-                } catch (e: GoogleJsonResponseException) {
-                    // Just skip if there is no version in track
-                    if (e.details.code != 404) throw e
-                }
-            }
-        }
-
-        // Upload Proguard mapping.txt if available
         if (variant.mappingFile?.exists() == true) {
             val content = FileContent(MIME_TYPE_STREAM, variant.mappingFile)
             deobfuscationfiles()

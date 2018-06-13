@@ -8,7 +8,6 @@ import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
 import com.github.triplet.gradle.play.internal.climbUpTo
 import com.github.triplet.gradle.play.internal.findClosestDir
-import com.github.triplet.gradle.play.internal.isChildOf
 import com.github.triplet.gradle.play.internal.isDirectChildOf
 import com.github.triplet.gradle.play.internal.normalized
 import com.github.triplet.gradle.play.internal.nullOrFull
@@ -35,14 +34,12 @@ open class GenerateResourcesTask : DefaultTask() {
     private val resSrcDirs: List<File> by lazy {
         variant.sourceSets.map { project.file("src/${it.name}/$PLAY_PATH") }
     }
-    private val flavors by lazy { variant.baseName.split("-").run { take(size - 1) } }
     private val defaultLocale by lazy {
         resSrcDirs.mapNotNull {
             File(it, AppDetail.DEFAULT_LANGUAGE.fileName).orNull()
                     ?.readText()?.normalized().nullOrFull()
         }.lastOrNull()
     }
-
     fun init() {
         for (dir in resSrcDirs) {
             inputs.dir(dir).skipWhenEmpty().withPathSensitivity(PathSensitivity.RELATIVE)
@@ -110,17 +107,6 @@ open class GenerateResourcesTask : DefaultTask() {
             releaseNotes.validateLocales()
         }
 
-        fun validateDuplicates() {
-            if (isDirectory) return
-            val flavor = flavors.singleOrNull { isChildOf(it) } ?: return
-            val path = toRelativeString(climbUpTo(flavor)!!)
-            flavors.filter { it != flavor }.forEach {
-                check(!project.file("src/$it/$path").exists()) {
-                    "File '$this' is duplicated in flavor $it with identical priority."
-                }
-            }
-        }
-
         val areRootsValid = climbUpTo(LISTINGS_PATH) != null
                 || climbUpTo(RELEASE_NOTES_PATH) != null
                 || isDirectChildOf(PLAY_PATH)
@@ -128,7 +114,6 @@ open class GenerateResourcesTask : DefaultTask() {
 
         validateListings()
         validateReleaseNotes()
-        validateDuplicates()
     }
 
     private fun File.findDest() = File(resDir, toRelativeString(findOwner()))
