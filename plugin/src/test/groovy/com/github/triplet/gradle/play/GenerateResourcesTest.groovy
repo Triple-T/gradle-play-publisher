@@ -242,10 +242,6 @@ class GenerateResourcesTest {
                 staging { dimension 'server' }
                 prod { dimension 'server' }
             }
-
-            buildTypes {
-                dogfood.initWith(buildTypes.release)
-            }
         }
 
         project.evaluate()
@@ -279,10 +275,6 @@ class GenerateResourcesTest {
                 staging { dimension 'server' }
                 prod { dimension 'server' }
             }
-
-            buildTypes {
-                dogfood.initWith(buildTypes.release)
-            }
         }
 
         project.evaluate()
@@ -314,10 +306,6 @@ class GenerateResourcesTest {
                 staging { dimension 'server' }
                 prod { dimension 'server' }
             }
-
-            buildTypes {
-                dogfood.initWith(buildTypes.release)
-            }
         }
 
         project.evaluate()
@@ -347,10 +335,6 @@ class GenerateResourcesTest {
                 paid { dimension 'pricing' }
                 staging { dimension 'server' }
                 prod { dimension 'server' }
-            }
-
-            buildTypes {
-                dogfood.initWith(buildTypes.release)
             }
         }
 
@@ -386,10 +370,6 @@ class GenerateResourcesTest {
                 paid { dimension 'pricing' }
                 staging { dimension 'server' }
                 prod { dimension 'pricing' }
-            }
-
-            buildTypes {
-                dogfood.initWith(buildTypes.release)
             }
         }
 
