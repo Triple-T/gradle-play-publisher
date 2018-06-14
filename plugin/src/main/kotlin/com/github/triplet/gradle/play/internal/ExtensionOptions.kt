@@ -9,12 +9,12 @@ import org.gradle.api.tasks.options.OptionValues
 internal interface ExtensionOptions {
     @get:Nested val extension: PlayPublisherExtension
 
-    @get:OptionValues("track")
+    @get:OptionValues("publish-track")
     val trackOptions
         get() = TrackType.values().map { it.publishedName }
     @get:Internal
     @set:Option(
-            option = "track",
+            option = "publish-track",
             description = "Set the track in which to upload your app."
     )
     var trackOption: String
@@ -25,7 +25,7 @@ internal interface ExtensionOptions {
 
     @get:Internal
     @set:Option(
-            option = "user-fraction",
+            option = "publish-user-fraction",
             description = "Set the user percent intended to receive a 'rollout' update. 10% == 0.1"
     )
     var userFractionOption: String
@@ -36,7 +36,7 @@ internal interface ExtensionOptions {
 
     @get:Internal
     @set:Option(
-            option = "trim-on-size-limit",
+            option = "publish-trim-on-size-limit",
             description = "Trim listing details instead of failing should they be too large."
     )
     var trimOnSizeLimitOption: Boolean
@@ -45,12 +45,12 @@ internal interface ExtensionOptions {
             extension.errorOnSizeLimit = !value
         }
 
-    @get:OptionValues("resolution-strategy")
+    @get:OptionValues("publish-resolution-strategy")
     val resolutionStrategyOptions
         get() = ResolutionStrategy.values().map { it.publishedName }
     @get:Internal
     @set:Option(
-            option = "resolution-strategy",
+            option = "publish-resolution-strategy",
             description = "Set the version conflict resolution strategy."
     )
     var resolutionStrategyOption: String
@@ -59,12 +59,12 @@ internal interface ExtensionOptions {
             extension.resolutionStrategy = value
         }
 
-    @get:OptionValues("release-status")
+    @get:OptionValues("publish-release-status")
     val releaseStatusOptions
         get() = ReleaseStatus.values().map { it.publishedName }
     @get:Internal
     @set:Option(
-            option = "release-status",
+            option = "publish-release-status",
             description = "Set the app release status."
     )
     var releaseStatusOption: String
