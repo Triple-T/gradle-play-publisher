@@ -376,34 +376,34 @@ class GenerateResourcesTest {
         def originalFullDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
                 'src/main/play/listings/de-DE/fulldescription').text
         def originalShortDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'src/flavor1/play/listings/en-US/shortdescription').text
+                'src/staging/play/listings/en-US/shortdescription').text
 
         project.android {
-            flavorDimensions 'diem1', 'diem2'
+            flavorDimensions 'pricing', 'server'
 
             productFlavors {
-                flavor1 { dimension 'diem1' }
-                flavor2 { dimension 'diem1' }
-                flavor3 { dimension 'diem2' }
-                flavor4 { dimension 'diem2' }
+                free { dimension 'server' }
+                paid { dimension 'pricing' }
+                staging { dimension 'server' }
+                prod { dimension 'pricing' }
             }
 
             buildTypes {
-                buildType1.initWith(buildTypes.release)
+                dogfood.initWith(buildTypes.release)
             }
         }
 
         project.evaluate()
 
         project.tasks.clean.execute()
-        project.tasks.generateFlavor1Flavor3ReleasePlayResources.execute()
+        project.tasks.generateProdStagingReleasePlayResources.execute()
 
         def processedTitle = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'build/outputs/play/flavor1Flavor3Release/res/listings/de-DE/title').text
+                'build/outputs/play/prodStagingRelease/res/listings/de-DE/title').text
         def processedFullDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'build/outputs/play/flavor1Flavor3Release/res/listings/de-DE/fulldescription').text
+                'build/outputs/play/prodStagingRelease/res/listings/de-DE/fulldescription').text
         def processedShortDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'build/outputs/play/flavor1Flavor3Release/res/listings/de-DE/shortdescription').text
+                'build/outputs/play/prodStagingRelease/res/listings/de-DE/shortdescription').text
 
         assertEquals(originalTitle, processedTitle)
         assertEquals(originalFullDescription, processedFullDescription)

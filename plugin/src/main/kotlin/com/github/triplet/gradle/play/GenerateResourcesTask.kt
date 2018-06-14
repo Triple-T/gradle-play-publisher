@@ -118,42 +118,6 @@ open class GenerateResourcesTask : DefaultTask() {
         validateReleaseNotes()
     }
 
-    private fun File.validate() {
-        fun File.validateLocales() {
-            checkNotNull(listFiles()) {
-                "$this must be a folder"
-            }.forEach {
-                check(it.isDirectory && LocaleFileFilter.accept(it)) {
-                    "Invalid locale: ${it.name}"
-                }
-            }
-        }
-
-        fun validateListings() {
-            val listings = climbUpTo(LISTINGS_PATH) ?: return
-            check(listings.isDirectChildOf(PLAY_PATH)) {
-                "Listings ($listings) must be under the '$PLAY_PATH' folder"
-            }
-            listings.validateLocales()
-        }
-
-        fun validateReleaseNotes() {
-            val releaseNotes = climbUpTo(RELEASE_NOTES_PATH) ?: return
-            check(releaseNotes.isDirectChildOf(PLAY_PATH)) {
-                "Release notes ($releaseNotes) must be under the '$PLAY_PATH' folder"
-            }
-            releaseNotes.validateLocales()
-        }
-
-        val areRootsValid = climbUpTo(LISTINGS_PATH) != null
-                || climbUpTo(RELEASE_NOTES_PATH) != null
-                || isDirectChildOf(PLAY_PATH)
-        check(areRootsValid) { "Unknown file: $this" }
-
-        validateListings()
-        validateReleaseNotes()
-    }
-
     private fun File.findDest() = File(resDir, toRelativeString(findOwner()))
 
     private fun File.findOwner() = resSrcDirs.single { startsWith(it) }
