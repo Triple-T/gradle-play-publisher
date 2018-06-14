@@ -39,7 +39,7 @@ open class GenerateResourcesTask : DefaultTask() {
         resSrcDirs.mapNotNull {
             File(it, AppDetail.DEFAULT_LANGUAGE.fileName).orNull()
                     ?.readText()?.normalized().nullOrFull()
-        }.lastOrNull()
+        }.lastOrNull() // Pick the most specialized option available. E.g. `paidProdRelease`
     }
 
     fun init() {
@@ -65,7 +65,9 @@ open class GenerateResourcesTask : DefaultTask() {
         }
         inputs.removed { project.delete(it.file.findDest()) }
 
-        for (default in changedDefaults.associateBy { it.name }.flatMap { listOf(it.value) }) {
+        val uniqueChangedDefaults =
+                changedDefaults.associateBy { it.name }.flatMap { listOf(it.value) }
+        for (default in uniqueChangedDefaults) {
             val listings = default.findDest().climbUpTo(LISTINGS_PATH)!!
             val relativePath = default.invariantSeparatorsPath.split("$defaultLocale/").last()
 
