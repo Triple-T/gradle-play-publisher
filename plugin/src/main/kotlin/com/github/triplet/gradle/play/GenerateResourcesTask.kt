@@ -25,13 +25,13 @@ open class GenerateResourcesTask : DefaultTask() {
 
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputDirectory
-    internal lateinit var resDir: File
+    lateinit var resDir: File
 
     private val resSrcDirs: List<File> by lazy {
         variant.sourceSets.map { project.file("src/${it.name}/$PLAY_PATH") }
     }
 
-    internal fun init() {
+    fun init() {
         for (dir in resSrcDirs) {
             inputs.dir(dir).skipWhenEmpty().withPathSensitivity(PathSensitivity.RELATIVE)
         }
