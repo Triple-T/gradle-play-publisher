@@ -19,7 +19,7 @@ import java.net.URL
 open class Bootstrap : PlayPublishTaskBase() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputDirectory
-    lateinit var srcDir: File
+    internal lateinit var srcDir: File
 
     init {
         // Always out-of-date since we don't know what's changed on the network

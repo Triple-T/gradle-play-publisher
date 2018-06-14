@@ -23,14 +23,14 @@ open class PublishApk : PlayPublishPackageBase() {
     @get:SkipWhenEmpty
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
-    val inputApks by lazy {
+    internal val inputApks by lazy {
         // TODO: If we take a customizable folder, we can fix #233, #227
         variant.outputs.filterIsInstance<ApkVariantOutput>().map { it.outputFile }
     }
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputDirectory
-    val outputDir by lazy { File(project.buildDir, "${variant.playPath}/apks") }
+    internal val outputDir by lazy { File(project.buildDir, "${variant.playPath}/apks") }
 
     @TaskAction
     fun publishApks(inputs: IncrementalTaskInputs) = write { editId: String ->

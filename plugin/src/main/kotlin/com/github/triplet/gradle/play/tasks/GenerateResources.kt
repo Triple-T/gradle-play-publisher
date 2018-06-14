@@ -21,7 +21,7 @@ import java.io.File
 @CacheableTask
 open class GenerateResources : DefaultTask() {
     @get:Internal
-    lateinit var variant: ApplicationVariant
+    internal lateinit var variant: ApplicationVariant
 
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputDirectory

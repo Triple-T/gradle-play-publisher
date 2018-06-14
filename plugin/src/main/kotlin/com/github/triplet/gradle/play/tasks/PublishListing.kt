@@ -29,11 +29,13 @@ open class PublishListing : PlayPublishTaskBase() {
     @get:SkipWhenEmpty
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputDirectory
-    lateinit var resDir: File
+    internal lateinit var resDir: File
     @Suppress("MemberVisibilityCanBePrivate") // Needed for Gradle caching to work correctly
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputFile
-    val outputFile by lazy { File(project.buildDir, "${variant.playPath}/listing-cache-key") }
+    internal val outputFile by lazy {
+        File(project.buildDir, "${variant.playPath}/listing-cache-key")
+    }
 
     @TaskAction
     fun publishListing(inputs: IncrementalTaskInputs) {
