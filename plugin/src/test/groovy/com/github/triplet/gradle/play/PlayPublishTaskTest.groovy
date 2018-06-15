@@ -2,6 +2,7 @@ package com.github.triplet.gradle.play
 
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.internal.TrackType
+import com.github.triplet.gradle.play.tasks.PublishApk
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.Apk
@@ -187,7 +188,7 @@ class PlayPublishTaskTest {
         progressLogger.setAccessible(true)
         progressLogger.get(task).start("Desc", null)
 
-        def publishApk = findBaseTask(task.class, PublishApkTask.class).getDeclaredMethod(
+        def publishApk = findBaseTask(task.class, PublishApk.class).getDeclaredMethod(
                 "publishApk", AndroidPublisher.Edits.class, String.class, FileContent.class)
         publishApk.setAccessible(true)
         publishApk.invoke(task, editsMock, "424242", new FileContent(null, new File(fileName)))

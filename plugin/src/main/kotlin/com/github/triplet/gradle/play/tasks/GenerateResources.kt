@@ -1,4 +1,4 @@
-package com.github.triplet.gradle.play
+package com.github.triplet.gradle.play.tasks
 
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.internal.LISTINGS_PATH
@@ -19,7 +19,7 @@ import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import java.io.File
 
 @CacheableTask
-open class GenerateResourcesTask : DefaultTask() {
+open class GenerateResources : DefaultTask() {
     @get:Internal
     internal lateinit var variant: ApplicationVariant
 
