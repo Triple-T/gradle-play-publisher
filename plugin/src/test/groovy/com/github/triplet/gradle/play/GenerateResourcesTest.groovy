@@ -242,10 +242,6 @@ class GenerateResourcesTest {
                 staging { dimension 'server' }
                 prod { dimension 'server' }
             }
-
-            buildTypes {
-                dogfood.initWith(buildTypes.release)
-            }
         }
 
         project.evaluate()
@@ -279,10 +275,6 @@ class GenerateResourcesTest {
                 staging { dimension 'server' }
                 prod { dimension 'server' }
             }
-
-            buildTypes {
-                dogfood.initWith(buildTypes.release)
-            }
         }
 
         project.evaluate()
@@ -314,10 +306,6 @@ class GenerateResourcesTest {
                 staging { dimension 'server' }
                 prod { dimension 'server' }
             }
-
-            buildTypes {
-                dogfood.initWith(buildTypes.release)
-            }
         }
 
         project.evaluate()
@@ -348,10 +336,6 @@ class GenerateResourcesTest {
                 staging { dimension 'server' }
                 prod { dimension 'server' }
             }
-
-            buildTypes {
-                dogfood.initWith(buildTypes.release)
-            }
         }
 
         project.evaluate()
@@ -366,5 +350,43 @@ class GenerateResourcesTest {
 
         assertEquals(originalFullDescription, processedFullDescription)
         assertEquals(originalTitle, processedTitle)
+    }
+
+    @Test
+    void languageMerge() {
+        def project = TestHelper.evaluatableProject()
+        def originalTitle = new File(TestHelper.FIXTURE_WORKING_DIR,
+                'src/main/play/listings/en-US/title').text
+        def originalFullDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
+                'src/main/play/listings/de-DE/fulldescription').text
+        def originalShortDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
+                'src/staging/play/listings/en-US/shortdescription').text
+
+        project.android {
+            flavorDimensions 'pricing', 'server'
+
+            productFlavors {
+                free { dimension 'server' }
+                paid { dimension 'pricing' }
+                staging { dimension 'server' }
+                prod { dimension 'pricing' }
+            }
+        }
+
+        project.evaluate()
+
+        project.tasks.clean.execute()
+        project.tasks.generateProdStagingReleasePlayResources.execute()
+
+        def processedTitle = new File(TestHelper.FIXTURE_WORKING_DIR,
+                'build/outputs/play/prodStagingRelease/res/listings/de-DE/title').text
+        def processedFullDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
+                'build/outputs/play/prodStagingRelease/res/listings/de-DE/fulldescription').text
+        def processedShortDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
+                'build/outputs/play/prodStagingRelease/res/listings/de-DE/shortdescription').text
+
+        assertEquals(originalTitle, processedTitle)
+        assertEquals(originalFullDescription, processedFullDescription)
+        assertEquals(originalShortDescription, processedShortDescription)
     }
 }
