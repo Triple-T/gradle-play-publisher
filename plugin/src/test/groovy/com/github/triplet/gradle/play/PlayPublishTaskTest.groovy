@@ -2,7 +2,6 @@ package com.github.triplet.gradle.play
 
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.internal.TrackType
-import com.github.triplet.gradle.play.tasks.PublishApk
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.Apk
@@ -120,12 +119,24 @@ class PlayPublishTaskTest {
         project.evaluate()
 
         setMockPublisher(project.tasks.publishApkRelease)
-        publishApk(project.tasks.publishApkRelease, "example_1.apk")
+        project.tasks.publishApkRelease.publishApks(inputsMock)
 
         verify(apksMock).upload(
                 eq('com.example.publisher'),
                 eq('424242'),
                 contentWithName("example_1.apk"))
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void whenPublishing_withEmptyOverrideFolder_Fails() {
+        def project = TestHelper.evaluatableProject()
+        project.play {
+            buildInputFolder TestHelper.FIXTURE_WORKING_DIR
+        }
+        project.evaluate()
+
+        setMockPublisher(project.tasks.publishApkRelease)
+        project.tasks.publishApkRelease.publishApks(inputsMock)
     }
 
     @Test
@@ -176,22 +187,6 @@ class PlayPublishTaskTest {
                 .getDeclaredField("publisher\$delegate")
         field.setAccessible(true)
         field.set(task, LazyKt.lazy { publisherMock })
-    }
-
-    private void publishApk(Task task) {
-        publishApk(task, "foo")
-    }
-
-    private void publishApk(Task task, String fileName) {
-        def progressLogger = findBaseTask(task.class, PlayPublishTaskBase.class)
-                .getDeclaredField("progressLogger")
-        progressLogger.setAccessible(true)
-        progressLogger.get(task).start("Desc", null)
-
-        def publishApk = findBaseTask(task.class, PublishApk.class).getDeclaredMethod(
-                "publishApk", AndroidPublisher.Edits.class, String.class, FileContent.class)
-        publishApk.setAccessible(true)
-        publishApk.invoke(task, editsMock, "424242", new FileContent(null, new File(fileName)))
     }
 
     private Class<? super Task> findBaseTask(Class<? super Task> start, Class<? super Task> end) {

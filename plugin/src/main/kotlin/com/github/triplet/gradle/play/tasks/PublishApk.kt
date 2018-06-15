@@ -25,8 +25,13 @@ open class PublishApk : PlayPublishPackageBase() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
     internal val inputApks by lazy {
-        extension.buildInputFolder?.listFiles(ApkFileFilter)?.toList()
-                ?: variant.outputs.filterIsInstance<ApkVariantOutput>().map { it.outputFile }
+        if (extension.buildInputFolder == null) {
+            variant.outputs.filterIsInstance<ApkVariantOutput>().map { it.outputFile }
+        } else {
+            extension.buildInputFolder!!.listFiles(ApkFileFilter).toList().apply {
+                require(isNotEmpty(), { "Build input folder provided, but no APK files found" })
+            }
+        }
     }
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
