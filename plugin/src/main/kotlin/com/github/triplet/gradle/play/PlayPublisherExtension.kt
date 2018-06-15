@@ -74,7 +74,7 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
      * If the [resolutionStrategy] is auto, optionally compute a new version name from the updated
      * version code. Returning null means the version name should not be changed.
      */
-    @get:Internal("ProcessPackageMetadataTask is always out-of-date. Also, Closures with " +
+    @get:Internal("ProcessPackageMetadata is always out-of-date. Also, Closures with " +
                           "parameters cannot be used as inputs.")
     var versionNameOverride: (versionCode: Int) -> String? = { null }
 
