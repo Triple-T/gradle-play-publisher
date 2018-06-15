@@ -13,10 +13,10 @@ import org.gradle.api.tasks.Nested
 import org.gradle.internal.logging.progress.ProgressLogger
 import org.gradle.internal.logging.progress.ProgressLoggerFactory
 
-abstract class PlayPublishTaskBase : DefaultTask() {
-    @get:Nested lateinit var extension: PlayPublisherExtension
-    @get:Internal lateinit var variant: ApplicationVariant
-    @get:Nested lateinit var accountConfig: AccountConfig
+abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
+    @get:Nested override lateinit var extension: PlayPublisherExtension
+    @get:Internal internal lateinit var variant: ApplicationVariant
+    @get:Nested internal lateinit var accountConfig: AccountConfig
 
     @get:Internal
     protected val progressLogger: ProgressLogger = services[ProgressLoggerFactory::class.java]
@@ -77,9 +77,7 @@ abstract class PlayPublishTaskBase : DefaultTask() {
         edits.block(id)
     }
 
-    protected inline fun write(
-            crossinline block: AndroidPublisher.Edits.(editId: String) -> Unit
-    ) = read {
+    protected fun write(block: AndroidPublisher.Edits.(editId: String) -> Unit) = read {
         block(it)
         commit(variant.applicationId, it).execute()
     }

@@ -1,13 +1,11 @@
-package com.github.triplet.gradle.play
+package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.play.internal.AppDetail
 import com.github.triplet.gradle.play.internal.ImageType
 import com.github.triplet.gradle.play.internal.LISTINGS_PATH
 import com.github.triplet.gradle.play.internal.ListingDetail
-import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
-import com.github.triplet.gradle.play.internal.gson
 import com.github.triplet.gradle.play.internal.nullOrFull
 import com.github.triplet.gradle.play.internal.safeCreateNewFile
 import com.google.api.services.androidpublisher.AndroidPublisher
@@ -18,10 +16,10 @@ import org.gradle.api.tasks.TaskAction
 import java.io.File
 import java.net.URL
 
-open class BootstrapTask : PlayPublishTaskBase() {
+open class Bootstrap : PlayPublishTaskBase() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputDirectory
-    lateinit var srcDir: File
+    internal lateinit var srcDir: File
 
     init {
         // Always out-of-date since we don't know what's changed on the network
@@ -35,7 +33,6 @@ open class BootstrapTask : PlayPublishTaskBase() {
         bootstrapAppDetails(editId)
         bootstrapListing(editId)
         bootstrapReleaseNotes(editId)
-        bootstrapProducts()
 
         progressLogger.completed()
     }
@@ -109,13 +106,6 @@ open class BootstrapTask : PlayPublishTaskBase() {
                         .safeCreateNewFile()
                         .writeText(it.text)
             }
-        }
-    }
-
-    private fun bootstrapProducts() {
-        progressLogger.progress("Downloading in-app products")
-        publisher.inappproducts().list(variant.applicationId).execute().inappproduct.forEach {
-            gson.toJson(it).write(srcDir, "$PRODUCTS_PATH/${it.sku}.json")
         }
     }
 
