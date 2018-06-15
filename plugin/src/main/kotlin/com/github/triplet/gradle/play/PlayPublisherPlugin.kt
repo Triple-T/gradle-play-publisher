@@ -19,6 +19,7 @@ import com.github.triplet.gradle.play.tasks.Bootstrap
 import com.github.triplet.gradle.play.tasks.GenerateResources
 import com.github.triplet.gradle.play.tasks.ProcessPackageMetadata
 import com.github.triplet.gradle.play.tasks.PublishApk
+import com.github.triplet.gradle.play.tasks.PublishBundle
 import com.github.triplet.gradle.play.tasks.PublishListing
 import groovy.lang.GroovyObject
 import org.gradle.api.Plugin
@@ -136,7 +137,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 publishApkAllTask.dependsOn(this)
             }
 
-            val publishBundleTask = project.newTask<PublishBundleTask>(
+            val publishBundleTask = project.newTask<PublishBundle>(
                     "publishBundle$variantName",
                     "Uploads App Bundle for $variantName."
             ) {
@@ -156,7 +157,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "Uploads APK or App Bundle and all Play Store metadata for $variantName."
             ) {
                 dependsOn(
-                        if (extension.defaultToAppBundle) publishBundleTask else publishApkTask)
+                        if (extension.defaultToAppBundles) publishBundleTask else publishApkTask)
                 dependsOn(publishListingTask)
                 publishAllTask.dependsOn(this)
             }
