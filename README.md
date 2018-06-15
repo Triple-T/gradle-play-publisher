@@ -1,7 +1,19 @@
-# Gradle Play Publisher
+<p align="center">
+    <img alt="Logo" src="assets/logo.svg" width="25%" />
+</p>
 
-[![Build Status](https://travis-ci.org/Triple-T/gradle-play-publisher.svg?branch=master)](https://travis-ci.org/Triple-T/gradle-play-publisher)
-[![Latest Version](https://maven-badges.herokuapp.com/maven-central/com.github.triplet.gradle/play-publisher/badge.svg)](https://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.github.triplet.gradle%22%20AND%20a%3A%22play-publisher%22)
+<h1 align="center">
+    Gradle Play Publisher
+</h1>
+
+<p align="center">
+    <a href="https://travis-ci.org/Triple-T/gradle-play-publisher">
+        <img src="https://img.shields.io/travis/Triple-T/gradle-play-publisher/master.svg?style=flat-square" />
+    </a>
+    <a href="https://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.github.triplet.gradle%22%20AND%20a%3A%22play-publisher%22">
+        <img src="https://maven-badges.herokuapp.com/maven-central/com.github.triplet.gradle/play-publisher/badge.svg" />
+    </a>
+</p>
 
 Gradle Play Publisher is a Gradle plugin that allows you to upload your APK and other app details to
 the Google Play Store from a continuous integration server or anywhere you have a command line.
