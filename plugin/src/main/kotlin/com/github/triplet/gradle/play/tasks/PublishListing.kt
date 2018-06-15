@@ -1,4 +1,4 @@
-package com.github.triplet.gradle.play
+package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.play.internal.AppDetail
 import com.github.triplet.gradle.play.internal.ImageFileFilter
@@ -25,15 +25,17 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import java.io.File
 
-open class PublishListingTask : PlayPublishTaskBase() {
+open class PublishListing : PlayPublishTaskBase() {
     @get:SkipWhenEmpty
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputDirectory
-    lateinit var resDir: File
+    internal lateinit var resDir: File
     @Suppress("MemberVisibilityCanBePrivate") // Needed for Gradle caching to work correctly
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputFile
-    val outputFile by lazy { File(project.buildDir, "${variant.playPath}/listing-cache-key") }
+    internal val outputFile by lazy {
+        File(project.buildDir, "${variant.playPath}/listing-cache-key")
+    }
 
     @TaskAction
     fun publishListing(inputs: IncrementalTaskInputs) {
