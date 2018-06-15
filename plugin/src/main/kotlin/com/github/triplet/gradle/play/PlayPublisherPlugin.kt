@@ -34,19 +34,19 @@ class PlayPublisherPlugin : Plugin<Project> {
                 project.extensions.create(PLAY_PATH, PlayPublisherExtension::class.java)
 
         val bootstrapAllTask = project.newTask<Task>(
-                "bootstrapAll",
+                "bootstrap",
                 "Downloads the Play Store listing metadata for all variants."
         )
         val publishAllTask = project.newTask<Task>(
-                "publishAll",
+                "publish",
                 "Uploads APK or App Bundle and all Play Store metadata for every variant."
         )
         val publishApkAllTask = project.newTask<Task>(
-                "publishApkAll",
+                "publishApk",
                 "Uploads APK for every variant."
         )
         val publishListingAllTask = project.newTask<Task>(
-                "publishListingAll",
+                "publishListing",
                 "Uploads all Play Store metadata for every variant."
         )
 
