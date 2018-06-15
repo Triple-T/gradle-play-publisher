@@ -76,28 +76,6 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
     }
 
     protected fun AndroidPublisher.Edits.handlePackageDetails(editId: String, versionCode: Int) {
-        if (extension.untrackOld && extension._track != TrackType.INTERNAL) {
-            progressLogger.progress("Removing old tracks")
-            extension._track.superiors.map { it.publishedName }.forEach { channel ->
-                try {
-                    val track = tracks().get(
-                            variant.applicationId,
-                            editId,
-                            channel
-                    ).execute().apply {
-                        releases.forEach {
-                            it.versionCodes =
-                                    it.versionCodes.filter { it > versionCode.toLong() }
-                        }
-                    }
-                    tracks().update(variant.applicationId, editId, channel, track).execute()
-                } catch (e: GoogleJsonResponseException) {
-                    // Just skip if there is no version in track
-                    if (e.details.code != 404) throw e
-                }
-            }
-        }
-
         if (variant.mappingFile?.exists() == true) {
             val mapping = FileContent(MIME_TYPE_STREAM, variant.mappingFile)
             deobfuscationfiles()
