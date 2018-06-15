@@ -5,6 +5,7 @@ import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.internal.ACCOUNT_CONFIG
 import com.github.triplet.gradle.play.internal.AccountConfig
 import com.github.triplet.gradle.play.internal.PLAY_PATH
+import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
 import com.github.triplet.gradle.play.internal.flavorNameOrDefault
@@ -18,6 +19,7 @@ import com.github.triplet.gradle.play.tasks.GenerateResources
 import com.github.triplet.gradle.play.tasks.ProcessPackageMetadata
 import com.github.triplet.gradle.play.tasks.PublishApk
 import com.github.triplet.gradle.play.tasks.PublishListing
+import com.github.triplet.gradle.play.tasks.PublishProducts
 import groovy.lang.GroovyObject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -109,12 +111,12 @@ class PlayPublisherPlugin : Plugin<Project> {
                 dependsOn(playResourcesTask)
                 publishListingAllTask.dependsOn(this)
             }
-            val publishProductsTask = project.newTask<PublishProductsTask>(
+            val publishProductsTask = project.newTask<PublishProducts>(
                     "publishProducts$variantName",
                     "Uploads all Play Store in-app products for $variantName."
             ) {
                 init()
-                resDir = playResourcesTask.resDir
+                productsDir = File(playResourcesTask.resDir, PRODUCTS_PATH)
 
                 dependsOn(playResourcesTask)
                 publishProductsAllTask.dependsOn(this)

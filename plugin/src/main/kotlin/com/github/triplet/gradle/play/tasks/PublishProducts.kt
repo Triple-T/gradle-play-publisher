@@ -1,4 +1,4 @@
-package com.github.triplet.gradle.play
+package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
@@ -15,11 +15,11 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import java.io.File
 
-open class PublishProductsTask : PlayPublishTaskBase() {
+open class PublishProducts : PlayPublishTaskBase() {
     @get:SkipWhenEmpty
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputDirectory
-    lateinit var resDir: File
+    lateinit var productsDir: File
     @Suppress("MemberVisibilityCanBePrivate") // Needed for Gradle caching to work correctly
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputFile
@@ -44,7 +44,6 @@ open class PublishProductsTask : PlayPublishTaskBase() {
                 gson.fromJson(it.readText(), InAppProduct::class.java)
             }.forEach {
                 progressLogger.progress("Uploading ${it.sku}")
-                logger.error(it.toString())
                 update(variant.applicationId, it.sku, it).execute()
             }
 
