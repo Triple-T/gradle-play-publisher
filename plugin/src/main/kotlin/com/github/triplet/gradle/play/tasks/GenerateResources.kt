@@ -65,9 +65,7 @@ open class GenerateResources : DefaultTask() {
         }
         inputs.removed { project.delete(it.file.findDest()) }
 
-        val uniqueChangedDefaults =
-                changedDefaults.associateBy { it.name }.flatMap { listOf(it.value) }
-        for (default in uniqueChangedDefaults) {
+        for (default in changedDefaults.distinctBy { it.name }) {
             val listings = default.findDest().climbUpTo(LISTINGS_PATH)!!
             val relativePath = default.invariantSeparatorsPath.split("$defaultLocale/").last()
 
