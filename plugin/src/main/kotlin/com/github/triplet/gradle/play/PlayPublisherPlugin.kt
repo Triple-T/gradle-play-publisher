@@ -3,7 +3,6 @@ package com.github.triplet.gradle.play
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.internal.api.InstallableVariantImpl
-import com.android.build.gradle.internal.variant.TaskContainer
 import com.github.triplet.gradle.play.internal.ACCOUNT_CONFIG
 import com.github.triplet.gradle.play.internal.AccountConfig
 import com.github.triplet.gradle.play.internal.PLAY_PATH
@@ -147,7 +146,8 @@ class PlayPublisherPlugin : Plugin<Project> {
                 dependsOn(processPackageMetadata)
                 dependsOn(playResourcesTask)
                 (variant as InstallableVariantImpl).variantData
-                        .getTaskByKind(TaskContainer.TaskKind.BUNDLE)?.let { dependsOn(it) }
+                        // Remove hack when AGP 3.2 reaches stable channel
+                        .getTaskName("bundle", "")?.let { dependsOn(it) }
                         ?: logger.warn("Bundle task not found. Publishing App Bundles may not work.")
                 publishBundleAllTask.dependsOn(this)
             }
