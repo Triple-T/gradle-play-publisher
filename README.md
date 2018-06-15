@@ -6,10 +6,6 @@
     Gradle Play Publisher
 </h1>
 
-<h4 align="center">
-    Reliable, versioned Play Store listings
-</h4>
-
 <p align="center">
     <a href="https://travis-ci.org/Triple-T/gradle-play-publisher">
         <img src="https://img.shields.io/travis/Triple-T/gradle-play-publisher/master.svg?style=flat-square" />
