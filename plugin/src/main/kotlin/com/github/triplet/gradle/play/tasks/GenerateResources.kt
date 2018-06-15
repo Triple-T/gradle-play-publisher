@@ -1,13 +1,18 @@
 package com.github.triplet.gradle.play.tasks
 
 import com.android.build.gradle.api.ApplicationVariant
+import com.github.triplet.gradle.play.internal.AppDetail
 import com.github.triplet.gradle.play.internal.LISTINGS_PATH
 import com.github.triplet.gradle.play.internal.LocaleFileFilter
 import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
 import com.github.triplet.gradle.play.internal.climbUpTo
 import com.github.triplet.gradle.play.internal.findClosestDir
+import com.github.triplet.gradle.play.internal.isChildOf
 import com.github.triplet.gradle.play.internal.isDirectChildOf
+import com.github.triplet.gradle.play.internal.normalized
+import com.github.triplet.gradle.play.internal.nullOrFull
+import com.github.triplet.gradle.play.internal.orNull
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Internal
@@ -30,6 +35,12 @@ open class GenerateResources : DefaultTask() {
     private val resSrcDirs: List<File> by lazy {
         variant.sourceSets.map { project.file("src/${it.name}/$PLAY_PATH") }
     }
+    private val defaultLocale by lazy {
+        resSrcDirs.mapNotNull {
+            File(it, AppDetail.DEFAULT_LANGUAGE.fileName).orNull()
+                    ?.readText()?.normalized().nullOrFull()
+        }.lastOrNull() // Pick the most specialized option available. E.g. `paidProdRelease`
+    }
 
     fun init() {
         for (dir in resSrcDirs) {
@@ -41,16 +52,34 @@ open class GenerateResources : DefaultTask() {
     fun generate(inputs: IncrementalTaskInputs) {
         if (!inputs.isIncremental) project.delete(outputs.files)
 
+        val changedDefaults = mutableListOf<File>()
+
         inputs.outOfDate {
             val file = it.file
             file.validate()
 
-            project.copy { spec ->
-                spec.from(file)
-                spec.into(file.findClosestDir().findDest())
+            defaultLocale?.let {
+                if (file.isChildOf(LISTINGS_PATH) && file.isChildOf(it)) changedDefaults += file
             }
+            project.copy { it.from(file).into(file.findClosestDir().findDest()) }
         }
         inputs.removed { project.delete(it.file.findDest()) }
+
+        for (default in changedDefaults.reversed().distinctBy { it.name }) {
+            val listings = default.findDest().climbUpTo(LISTINGS_PATH)!!
+            val relativePath = default.invariantSeparatorsPath.split("$defaultLocale/").last()
+
+            listings.listFiles()
+                    .filter { it.name != defaultLocale }
+                    .map { File(it, relativePath) }
+                    .filter { !it.exists() }
+                    .forEach {
+                        project.copy { spec ->
+                            spec.from(default)
+                            spec.into(File(resDir, it.parentFile.toRelativeString(resDir)))
+                        }
+                    }
+        }
     }
 
     private fun File.validate() {
