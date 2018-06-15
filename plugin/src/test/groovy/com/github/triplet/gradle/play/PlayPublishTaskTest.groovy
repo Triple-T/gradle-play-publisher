@@ -11,6 +11,8 @@ import com.google.api.services.androidpublisher.model.TrackRelease
 import com.google.api.services.androidpublisher.model.TracksListResponse
 import kotlin.LazyKt
 import org.gradle.api.Task
+import org.gradle.api.logging.LogLevel
+import org.gradle.api.logging.Logging
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import org.junit.Before
 import org.junit.Test
@@ -113,25 +115,24 @@ class PlayPublishTaskTest {
     @Test
     void whenPublishing_withOverrideFolder_UploadsOnlySpecifiedFiles() {
         def project = TestHelper.evaluatableProject()
+        def inputFolder = new File(TestHelper.FIXTURE_WORKING_DIR, "override_output")
+        def expectedPath = new File(inputFolder, "example_1.apk").absolutePath
         project.play {
-            buildInputFolder new File(TestHelper.FIXTURE_WORKING_DIR, "override_output")
+            buildInputFolder inputFolder
         }
         project.evaluate()
 
         setMockPublisher(project.tasks.publishApkRelease)
-        project.tasks.publishApkRelease.publishApks(inputsMock)
-
-        verify(apksMock).upload(
-                eq('com.example.publisher'),
-                eq('424242'),
-                contentWithName("example_1.apk"))
+        assert(project.tasks.publishApkRelease.inputs.files.files.any {
+            it.absolutePath.substring(1).equalsIgnoreCase(expectedPath)
+        })
     }
 
     @Test(expected = IllegalArgumentException)
     void whenPublishing_withEmptyOverrideFolder_Fails() {
         def project = TestHelper.evaluatableProject()
         project.play {
-            buildInputFolder TestHelper.FIXTURE_WORKING_DIR
+            buildInputFolder new File(TestHelper.FIXTURE_WORKING_DIR, "not_real_path")
         }
         project.evaluate()
 
