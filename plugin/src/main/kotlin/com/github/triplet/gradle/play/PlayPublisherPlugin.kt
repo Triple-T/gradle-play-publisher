@@ -50,7 +50,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 "Uploads all Play Store metadata for every variant."
         )
         val modifyAllTask = project.newTask<Task>(
-                "modifyAll",
+                "modify",
                 "Applies release modification options to all published variants."
         )
 
