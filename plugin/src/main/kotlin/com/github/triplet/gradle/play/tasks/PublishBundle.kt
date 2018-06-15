@@ -33,6 +33,8 @@ open class PublishBundle : PlayPublishPackageBase() {
 
     @TaskAction
     fun publishBundle(inputs: IncrementalTaskInputs) = write { editId: String ->
+        progressLogger.start("Uploads App Bundle for variant ${variant.name}", null)
+
         if (!inputs.isIncremental) project.delete(outputs.files)
 
         inputs.outOfDate {
@@ -49,6 +51,8 @@ open class PublishBundle : PlayPublishPackageBase() {
             }
         }
         inputs.removed { project.delete(File(outputDir, it.file.name)) }
+
+        progressLogger.completed()
     }
 
     private fun AndroidPublisher.Edits.publishBundle(

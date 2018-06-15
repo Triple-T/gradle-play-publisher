@@ -17,6 +17,8 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
     internal lateinit var releaseNotesDir: File
 
     protected fun AndroidPublisher.Edits.updateTracks(editId: String, versions: List<Long>) {
+        progressLogger.progress("Updating tracks")
+
         val track = tracks()
                 .list(variant.applicationId, editId)
                 .execute().tracks
