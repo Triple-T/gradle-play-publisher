@@ -2,9 +2,11 @@ package com.github.triplet.gradle.play.tasks
 
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.internal.AppDetail
+import com.github.triplet.gradle.play.internal.JsonFileFilter
 import com.github.triplet.gradle.play.internal.LISTINGS_PATH
 import com.github.triplet.gradle.play.internal.LocaleFileFilter
 import com.github.triplet.gradle.play.internal.PLAY_PATH
+import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
 import com.github.triplet.gradle.play.internal.climbUpTo
 import com.github.triplet.gradle.play.internal.findClosestDir
@@ -109,13 +111,27 @@ open class GenerateResources : DefaultTask() {
             releaseNotes.validateLocales()
         }
 
+        fun validateProducts() {
+            val products = climbUpTo(PRODUCTS_PATH) ?: return
+            check(products.isDirectChildOf(PLAY_PATH)) {
+                "Products ($products) must be under the '$PLAY_PATH' folder"
+            }
+            checkNotNull(products.listFiles()) {
+                "$products must be a folder"
+            }.forEach {
+                check(JsonFileFilter.accept(it)) { "In-app product files must be JSON." }
+            }
+        }
+
         val areRootsValid = climbUpTo(LISTINGS_PATH) != null
                 || climbUpTo(RELEASE_NOTES_PATH) != null
+                || climbUpTo(PRODUCTS_PATH) != null
                 || isDirectChildOf(PLAY_PATH)
         check(areRootsValid) { "Unknown file: $this" }
 
         validateListings()
         validateReleaseNotes()
+        validateProducts()
     }
 
     private fun File.findDest() = File(resDir, toRelativeString(findOwner()))
