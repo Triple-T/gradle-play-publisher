@@ -26,6 +26,27 @@ class GenerateResourcesTest {
         assertEquals('main', content)
         content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/release/res/release-notes/fr-FR/default').text
         assertEquals('main', content)
+
+        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/release/res/products/sku.json').text
+        assertEquals(new File(TestHelper.FIXTURE_WORKING_DIR, 'src/main/play/products/sku.json').text, content)
+    }
+
+    @Test(expected = TaskExecutionException)
+    void invalidProductThrows() {
+        def project = TestHelper.evaluatableProject()
+
+        project.android {
+            flavorDimensions 'pricing'
+
+            productFlavors {
+                invalidProduct { dimension 'pricing' }
+            }
+        }
+
+        project.evaluate()
+
+        project.tasks.clean.execute()
+        project.tasks.generateInvalidProductReleasePlayResources.execute()
     }
 
     @Test
