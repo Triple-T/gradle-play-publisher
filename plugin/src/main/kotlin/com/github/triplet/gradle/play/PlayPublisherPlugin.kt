@@ -44,6 +44,10 @@ class PlayPublisherPlugin : Plugin<Project> {
                 "publishListingAll",
                 "Uploads all Play Store metadata for every variant."
         )
+        val modifyAllTask = project.newTask<Task>(
+                "modifyAll",
+                "Applies release modification options to all published variants."
+        )
 
         project.initPlayAccountConfigs(android)
         android.applicationVariants.whenObjectAdded { variant ->
@@ -131,6 +135,14 @@ class PlayPublisherPlugin : Plugin<Project> {
                 dependsOn(publishApkTask)
                 dependsOn(publishListingTask)
                 publishAllTask.dependsOn(this)
+            }
+
+            project.newTask<ModifyReleaseTask>(
+                    "modify$variantName",
+                    "Applies release modification options to $variantName."
+            ) {
+                init()
+                modifyAllTask.dependsOn(this)
             }
         }
 
