@@ -24,14 +24,14 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
         }
 
     @get:Internal("Backing property for CLI option")
-    internal var _fromTrack = TrackType.INTERNAL
+    internal var _fromTrack: TrackType? = null
     /**
      * Specify the track for your app that will be modified. May be one of internal, alpha, beta, rollout,
      * or production. Default is internal.
      */
     @get:Input
     internal var fromTrack
-        get() = _fromTrack.publishedName
+        get() = _fromTrack?.publishedName
         set(value) {
             _fromTrack = requireNotNull(TrackType.values().find { it.publishedName == value }) {
                 "Track to modify must be one of ${TrackType.values().joinToString { "'${it.publishedName}'" }}"

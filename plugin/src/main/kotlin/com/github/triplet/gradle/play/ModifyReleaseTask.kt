@@ -16,7 +16,10 @@ open class ModifyReleaseTask : PlayPublishPackageBase() {
     fun modify() {
         progressLogger.start("Modifies release tracks for variant ${variant.name}", null)
 
-        downloadVersionCodes(extension._fromTrack)
+        requireNotNull(extension._fromTrack) {
+            progressLogger.completed("No from-track provided to modify", true)
+        }
+        downloadVersionCodes(extension._fromTrack!!)
 
         startCodes.let {
             if (it == null || it.isEmpty()) {
