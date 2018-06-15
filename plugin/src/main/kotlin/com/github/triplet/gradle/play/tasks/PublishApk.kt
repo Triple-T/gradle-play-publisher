@@ -1,4 +1,4 @@
-package com.github.triplet.gradle.play
+package com.github.triplet.gradle.play.tasks
 
 import com.android.build.gradle.api.ApkVariantOutput
 import com.github.triplet.gradle.play.internal.PlayPublishPackageBase
@@ -17,19 +17,19 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import java.io.File
 
-open class PublishApkTask : PlayPublishPackageBase() {
+open class PublishApk : PlayPublishPackageBase() {
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:SkipWhenEmpty
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
-    val inputApks by lazy {
+    internal val inputApks by lazy {
         // TODO: If we take a customizable folder, we can fix #233, #227
         variant.outputs.filterIsInstance<ApkVariantOutput>().map { it.outputFile }
     }
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputDirectory
-    val outputDir by lazy { File(project.buildDir, "${variant.playPath}/apks") }
+    internal val outputDir by lazy { File(project.buildDir, "${variant.playPath}/apks") }
 
     @TaskAction
     fun publishApks(inputs: IncrementalTaskInputs) = write { editId: String ->
@@ -41,11 +41,7 @@ open class PublishApkTask : PlayPublishPackageBase() {
         inputs.outOfDate {
             val file = it.file
             if (inputApks.contains(file)) {
-                project.copy {
-                    it.from(file)
-                    it.into(outputDir)
-                }
-
+                project.copy { it.from(file).into(outputDir) }
                 publishApk(editId, FileContent(MIME_TYPE_APK, file))?.let { publishedApks += it }
             }
         }

@@ -29,19 +29,14 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
                 "Track must be one of ${TrackType.values().joinToString { "'${it.publishedName}'" }}"
             }
         }
-    /**
-     * Choose whether or not to untrack superseded versions automatically. See
-     * https://github.com/Triple-T/gradle-play-publisher#untrack-conflicting-versions. Disabled by
-     * default.
-     */
-    @get:Input
-    var untrackOld = false
+
     /**
      * Specify the initial user percent intended to receive a 'rollout' update (see [track]).
      * Default is 10% == 0.1.
      */
     @get:Input
     var userFraction = 0.1
+
     /**
      * Choose whether or not to throw an error should a Play Store listing detail be too large or
      * simply trim it. Default throws.
@@ -66,11 +61,12 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
                         ResolutionStrategy.values().joinToString { "'${it.publishedName}'" }
             }
         }
+
     /**
      * If the [resolutionStrategy] is auto, optionally compute a new version name from the updated
      * version code. Returning null means the version name should not be changed.
      */
-    @get:Internal("ProcessPackageMetadataTask is always out-of-date. Also, Closures with " +
+    @get:Internal("ProcessPackageMetadata is always out-of-date. Also, Closures with " +
                           "parameters cannot be used as inputs.")
     var versionNameOverride: (versionCode: Int) -> String? = { null }
 

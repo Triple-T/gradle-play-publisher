@@ -14,7 +14,7 @@ import java.io.File
 abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
     @PathSensitive(PathSensitivity.RELATIVE)
     @get:InputDirectory
-    lateinit var releaseNotesDir: File
+    internal lateinit var releaseNotesDir: File
 
     protected fun AndroidPublisher.Edits.updateTracks(editId: String, versions: List<Long>) {
         val track = tracks()
@@ -23,7 +23,7 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
                 ?.firstOrNull { it.track == extension.track } ?: Track()
 
         val releaseTexts = releaseNotesDir.orNull()?.listFiles()?.mapNotNull { locale ->
-            val file = File(locale, "${extension.track}.txt").orNull()
+            val file = File(locale, extension.track).orNull()
                     ?: File(locale, RELEASE_NOTES_DEFAULT_NAME).orNull()
                     ?: return@mapNotNull null
 

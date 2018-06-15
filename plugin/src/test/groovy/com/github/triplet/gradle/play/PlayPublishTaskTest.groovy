@@ -2,6 +2,7 @@ package com.github.triplet.gradle.play
 
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.internal.TrackType
+import com.github.triplet.gradle.play.tasks.PublishApk
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.Apk
@@ -22,7 +23,6 @@ import static org.mockito.ArgumentMatchers.argThat
 import static org.mockito.ArgumentMatchers.eq
 import static org.mockito.ArgumentMatchers.nullable
 import static org.mockito.Mockito.doReturn
-import static org.mockito.Mockito.times
 import static org.mockito.Mockito.verify
 import static org.mockito.MockitoAnnotations.initMocks
 
@@ -112,121 +112,6 @@ class PlayPublishTaskTest {
     }
 
     @Test
-    void whenPublishingToBeta_publishApkRelease_removesBlockingVersionsFromAlpha() {
-        def project = TestHelper.evaluatableProject()
-        project.play {
-            track 'beta'
-            untrackOld true
-        }
-        project.evaluate()
-
-        internalTrack.setReleases([new TrackRelease().setVersionCodes([42L])])
-        alphaTrack.setReleases([new TrackRelease().setVersionCodes([41L, 40L])])
-
-        setMockPublisher(project.tasks.publishApkRelease)
-        publishApk(project.tasks.publishApkRelease)
-
-        verify(editTracksMock).update(
-                eq('com.example.publisher'),
-                eq('424242'),
-                eq('alpha'),
-                emptyTrack())
-    }
-
-    @Test
-    void whenPublishingToBeta_publishApkRelease_doesNotRemoveNonBlockingVersionsFromAlpha() {
-        def project = TestHelper.evaluatableProject()
-        project.play {
-            track 'beta'
-            untrackOld true
-        }
-        project.evaluate()
-
-        internalTrack.setReleases([new TrackRelease().setVersionCodes([44L])])
-        alphaTrack.setReleases([new TrackRelease().setVersionCodes([43L])])
-
-        setMockPublisher(project.tasks.publishApkRelease)
-        publishApk(project.tasks.publishApkRelease)
-
-        verify(editTracksMock).update(
-                eq('com.example.publisher'),
-                eq('424242'),
-                eq('alpha'),
-                trackThatContains(43L))
-    }
-
-    @Test
-    void whenPublishingToProduction_publishApkRelease_removesBlockingVersionFromAlphaAndBeta() {
-        def project = TestHelper.evaluatableProject()
-        project.play {
-            track 'production'
-            untrackOld true
-        }
-        project.evaluate()
-
-        internalTrack.setReleases([new TrackRelease().setVersionCodes([42L])])
-        alphaTrack.setReleases([new TrackRelease().setVersionCodes([40L, 41L])])
-        betaTrack.setReleases([new TrackRelease().setVersionCodes([39L])])
-
-        setMockPublisher(project.tasks.publishApkRelease)
-        publishApk(project.tasks.publishApkRelease)
-
-        verify(editTracksMock).update(
-                eq('com.example.publisher'),
-                eq('424242'),
-                eq('alpha'),
-                emptyTrack())
-
-        verify(editTracksMock).update(
-                eq('com.example.publisher'),
-                eq('424242'),
-                eq('beta'),
-                emptyTrack())
-    }
-
-    @Test
-    void whenPublishingToProduction_publishApkRelease_doesNotRemoveNonBlockingVersionFromAlphaOrBeta() {
-        def project = TestHelper.evaluatableProject()
-        project.play {
-            track 'production'
-            untrackOld true
-        }
-        project.evaluate()
-
-        internalTrack.setReleases([new TrackRelease().setVersionCodes([45L])])
-        alphaTrack.setReleases([new TrackRelease().setVersionCodes([44L])])
-        betaTrack.setReleases([new TrackRelease().setVersionCodes([43L])])
-
-        setMockPublisher(project.tasks.publishApkRelease)
-        publishApk(project.tasks.publishApkRelease)
-
-        verify(editTracksMock).update(
-                eq('com.example.publisher'),
-                eq('424242'),
-                eq('alpha'),
-                trackThatContains(44L))
-
-        verify(editTracksMock).update(
-                eq('com.example.publisher'),
-                eq('424242'),
-                eq('beta'),
-                trackThatContains(43L))
-    }
-
-    @Test
-    void whenFlagNotSet_publishApkRelease_doesNotTouchOtherTracks() {
-        def project = TestHelper.evaluatableProject()
-        project.play {
-            track 'production'
-            untrackOld false
-        }
-        project.evaluate()
-
-        verify(editTracksMock, times(0)).update(anyString(), anyString(), eq('alpha'), nullable(Track.class))
-        verify(editTracksMock, times(0)).update(anyString(), anyString(), eq('beta'), nullable(Track.class))
-    }
-
-    @Test
     void testApplicationIdChange() {
         def project = TestHelper.evaluatableProject()
 
@@ -282,7 +167,7 @@ class PlayPublishTaskTest {
         progressLogger.setAccessible(true)
         progressLogger.get(task).start("Desc", null)
 
-        def publishApk = findBaseTask(task.class, PublishApkTask.class).getDeclaredMethod(
+        def publishApk = findBaseTask(task.class, PublishApk.class).getDeclaredMethod(
                 "publishApk", AndroidPublisher.Edits.class, String.class, FileContent.class)
         publishApk.setAccessible(true)
         publishApk.invoke(task, editsMock, "424242", new FileContent(null, new File("foo")))
