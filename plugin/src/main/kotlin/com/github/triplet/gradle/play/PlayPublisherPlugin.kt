@@ -33,6 +33,9 @@ class PlayPublisherPlugin : Plugin<Project> {
         val extension: PlayPublisherExtension =
                 project.extensions.create(PLAY_PATH, PlayPublisherExtension::class.java)
 
+        val dependencies = project.configurations.getByName("implementation").dependencies
+        dependencies.add(project.dependencies.create("com.github.triplet.gradle:play-publisher-lint:$VERSION"))
+
         val bootstrapAllTask = project.newTask<Task>(
                 "bootstrapAll",
                 "Downloads the Play Store listing metadata for all variants."
