@@ -356,11 +356,11 @@ class GenerateResourcesTest {
     void languageMerge() {
         def project = TestHelper.evaluatableProject()
         def originalTitle = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'src/main/play/listings/en-US/title').text
+                'src/main/play/listings/en-US/title.txt').text
         def originalFullDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'src/main/play/listings/de-DE/fulldescription').text
+                'src/main/play/listings/de-DE/full-description.txt').text
         def originalShortDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'src/staging/play/listings/en-US/shortdescription').text
+                'src/staging/play/listings/en-US/short-description.txt').text
 
         project.android {
             flavorDimensions 'pricing', 'server'
@@ -379,11 +379,11 @@ class GenerateResourcesTest {
         project.tasks.generateProdStagingReleasePlayResources.execute()
 
         def processedTitle = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'build/outputs/play/prodStagingRelease/res/listings/de-DE/title').text
+                'build/outputs/play/prodStagingRelease/res/listings/de-DE/title.txt').text
         def processedFullDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'build/outputs/play/prodStagingRelease/res/listings/de-DE/fulldescription').text
+                'build/outputs/play/prodStagingRelease/res/listings/de-DE/full-description.txt').text
         def processedShortDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
-                'build/outputs/play/prodStagingRelease/res/listings/de-DE/shortdescription').text
+                'build/outputs/play/prodStagingRelease/res/listings/de-DE/short-description.txt').text
 
         assertEquals(originalTitle, processedTitle)
         assertEquals(originalFullDescription, processedFullDescription)
