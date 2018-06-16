@@ -137,7 +137,7 @@ class PlayPublisherPlugin : Plugin<Project> {
             }
 
             val publishBundleTask = project.newTask<PublishBundle>(
-                    "publishBundle$variantName",
+                    "publish${variantName}Bundle",
                     "Uploads App Bundle for $variantName."
             ) {
                 init()
