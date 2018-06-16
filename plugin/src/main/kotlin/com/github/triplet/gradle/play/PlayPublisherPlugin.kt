@@ -52,7 +52,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 "Uploads all Play Store metadata for every variant."
         )
         val publishProductsAllTask = project.newTask<Task>(
-                "publishProductsAll",
+                "publishProducts",
                 "Uploads all Play Store in-app products for every variant."
         )
 
@@ -112,7 +112,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 publishListingAllTask.dependsOn(this)
             }
             val publishProductsTask = project.newTask<PublishProducts>(
-                    "publishProducts$variantName",
+                    "publish${variantName}Products",
                     "Uploads all Play Store in-app products for $variantName."
             ) {
                 init()
