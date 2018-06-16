@@ -48,7 +48,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 "Uploads APK for every variant."
         )
         val publishBundleAllTask = project.newTask<Task>(
-                "publishBundleAll",
+                "publishBundle",
                 "Uploads App Bundle for every variant."
         )
         val publishListingAllTask = project.newTask<Task>(
