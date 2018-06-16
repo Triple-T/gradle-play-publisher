@@ -15,6 +15,7 @@ import com.github.triplet.gradle.play.internal.set
 import com.github.triplet.gradle.play.internal.validate
 import com.github.triplet.gradle.play.tasks.Bootstrap
 import com.github.triplet.gradle.play.tasks.GenerateResources
+import com.github.triplet.gradle.play.tasks.ModifyRelease
 import com.github.triplet.gradle.play.tasks.ProcessPackageMetadata
 import com.github.triplet.gradle.play.tasks.PublishApk
 import com.github.triplet.gradle.play.tasks.PublishListing
@@ -142,7 +143,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 publishAllTask.dependsOn(this)
             }
 
-            project.newTask<ModifyReleaseTask>(
+            project.newTask<ModifyRelease>(
                     "modify$variantName",
                     "Applies release modification options to $variantName."
             ) {

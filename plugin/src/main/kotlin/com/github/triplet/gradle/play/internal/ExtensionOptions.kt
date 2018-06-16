@@ -9,21 +9,7 @@ import org.gradle.api.tasks.options.OptionValues
 internal interface ExtensionOptions {
     @get:Nested val extension: PlayPublisherExtension
 
-    @get:OptionValues("from-track")
-    val fromTrackOptions
-        get() = TrackType.values().map { it.publishedName }
-    @get:Internal
-    @set:Option(
-            option = "from-track",
-            description = "Set the track to which you want the modifications sent."
-    )
-    var fromTrackOption: String
-        get() = throw UnsupportedOperationException()
-        set(value) {
-            extension.fromTrack = value
-        }
-
-    @get:OptionValues("track")
+    @get:OptionValues("track", "from-track")
     val trackOptions
         get() = TrackType.values().map { it.publishedName }
     @get:Internal
@@ -35,6 +21,16 @@ internal interface ExtensionOptions {
         get() = throw UnsupportedOperationException()
         set(value) {
             extension.track = value
+        }
+    @get:Internal
+    @set:Option(
+            option = "from-track",
+            description = "Set the track to which you want the modifications sent."
+    )
+    var fromTrackOption: String
+        get() = throw UnsupportedOperationException()
+        set(value) {
+            extension.fromTrack = value
         }
 
     @get:Internal

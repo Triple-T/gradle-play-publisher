@@ -1,11 +1,10 @@
-package com.github.triplet.gradle.play
+package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.play.internal.PlayPublishPackageBase
-import com.github.triplet.gradle.play.internal.TrackType
 import com.google.api.services.androidpublisher.AndroidPublisher
 import org.gradle.api.tasks.TaskAction
 
-open class ModifyReleaseTask : PlayPublishPackageBase() {
+open class ModifyRelease : PlayPublishPackageBase() {
     init {
         // Always out-of-date since we don't know what's changed on the network
         outputs.upToDateWhen { false }
@@ -15,23 +14,24 @@ open class ModifyReleaseTask : PlayPublishPackageBase() {
     fun modify() = write { editId ->
         progressLogger.start("Modifies release tracks for variant ${variant.name}", null)
 
-        requireNotNull(extension._fromTrack) {
-            progressLogger.progress("No from-track provided to modify", true)
-        }
-        val startCodes = downloadVersionCodes(editId, extension._fromTrack!!)
-        if (startCodes == null || startCodes.isEmpty()) {
-            progressLogger.progress("No versions published on track '${extension.track}' for ${variant.name}", true)
+        val startCodes = downloadVersionCodes(editId)
+        if (startCodes.isEmpty()) {
+            logger.warn("No versions published on track '${extension.track}' for ${variant.name}")
         } else {
             updateTracks(editId, startCodes)
         }
+
         progressLogger.completed()
     }
 
-    private fun AndroidPublisher.Edits.downloadVersionCodes(editId: String, track: TrackType): List<Long>? {
+    private fun AndroidPublisher.Edits.downloadVersionCodes(editId: String): List<Long> {
         progressLogger.progress("Downloading active version codes")
+
+        val fromTrack = requireNotNull(extension._fromTrack) { "A 'fromTrack' must be specified" }
         return tracks().list(variant.applicationId, editId).execute().tracks
-                ?.filter { it.track == track.publishedName }
+                ?.filter { it.track == fromTrack.publishedName }
                 ?.map { it.releases ?: emptyList() }?.flatten()
                 ?.map { it.versionCodes ?: emptyList() }?.flatten()
+                .orEmpty()
     }
 }
