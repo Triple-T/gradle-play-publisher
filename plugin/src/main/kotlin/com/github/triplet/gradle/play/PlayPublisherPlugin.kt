@@ -96,7 +96,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 resDir = File(project.buildDir, "${variant.playPath}/res")
             }
             val publishListingTask = project.newTask<PublishListing>(
-                    "publishListing$variantName",
+                    "publish${variantName}Listing",
                     "Uploads all Play Store metadata for $variantName."
             ) {
                 init()
@@ -107,7 +107,7 @@ class PlayPublisherPlugin : Plugin<Project> {
             }
 
             val processPackageMetadata = project.newTask<ProcessPackageMetadata>(
-                    "processPackageMetadata$variantName",
+                    "process${variantName}Metadata",
                     "Processes packaging metadata for $variantName.",
                     null
             ) {
@@ -117,7 +117,7 @@ class PlayPublisherPlugin : Plugin<Project> {
             }
 
             val publishApkTask = project.newTask<PublishApk>(
-                    "publishApk$variantName",
+                    "publish${variantName}Apk",
                     "Uploads APK for $variantName."
             ) {
                 init()

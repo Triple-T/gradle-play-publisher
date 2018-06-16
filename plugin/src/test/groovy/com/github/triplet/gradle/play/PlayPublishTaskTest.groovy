@@ -2,24 +2,20 @@ package com.github.triplet.gradle.play
 
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.internal.TrackType
-import com.github.triplet.gradle.play.tasks.PublishApk
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.Apk
 import com.google.api.services.androidpublisher.model.AppEdit
 import com.google.api.services.androidpublisher.model.Track
-import com.google.api.services.androidpublisher.model.TrackRelease
 import com.google.api.services.androidpublisher.model.TracksListResponse
 import kotlin.LazyKt
 import org.gradle.api.Task
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatcher
 import org.mockito.Mock
 
 import static org.mockito.ArgumentMatchers.anyString
-import static org.mockito.ArgumentMatchers.argThat
 import static org.mockito.ArgumentMatchers.eq
 import static org.mockito.ArgumentMatchers.nullable
 import static org.mockito.Mockito.doReturn
@@ -145,10 +141,10 @@ class PlayPublishTaskTest {
         project.evaluate()
 
         // Attach the mock
-        setMockPublisher(project.tasks.publishApkPaidRelease)
+        setMockPublisher(project.tasks.publishPaidReleaseApk)
 
         // finally run the task we want to check
-        project.tasks.publishApkPaidRelease.publishApks(inputsMock)
+        project.tasks.publishPaidReleaseApk.publishApks(inputsMock)
 
         // verify that we init the connection with the correct application id
         verify(editsMock).insert('com.example.publisher.paid.release', null)
@@ -161,43 +157,11 @@ class PlayPublishTaskTest {
         field.set(task, LazyKt.lazy { publisherMock })
     }
 
-    private void publishApk(Task task) {
-        def progressLogger = findBaseTask(task.class, PlayPublishTaskBase.class)
-                .getDeclaredField("progressLogger")
-        progressLogger.setAccessible(true)
-        progressLogger.get(task).start("Desc", null)
-
-        def publishApk = findBaseTask(task.class, PublishApk.class).getDeclaredMethod(
-                "publishApk", AndroidPublisher.Edits.class, String.class, FileContent.class)
-        publishApk.setAccessible(true)
-        publishApk.invoke(task, editsMock, "424242", new FileContent(null, new File("foo")))
-    }
-
     private Class<? super Task> findBaseTask(Class<? super Task> start, Class<? super Task> end) {
         if (start == end) {
             return end as Class<? super Task>
         } else {
             return findBaseTask(start.superclass, end)
         }
-    }
-
-    static Track emptyTrack() {
-        return argThat(new ArgumentMatcher<Track>() {
-            @Override
-            boolean matches(Track track) {
-                return track.getReleases().sum {
-                    (it as TrackRelease).getVersionCodes().size()
-                } == 0
-            }
-        })
-    }
-
-    static Track trackThatContains(final Long code) {
-        return argThat(new ArgumentMatcher<Track>() {
-            @Override
-            boolean matches(Track track) {
-                return track.getReleases().find { it.getVersionCodes().contains(code) } != null
-            }
-        })
     }
 }
