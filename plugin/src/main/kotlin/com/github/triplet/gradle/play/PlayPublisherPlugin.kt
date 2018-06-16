@@ -104,6 +104,13 @@ class PlayPublisherPlugin : Plugin<Project> {
 
                 dependsOn(playResourcesTask)
                 publishListingAllTask.dependsOn(this)
+
+                // Remove in v3.0
+                val new = this
+                project.newTask<Task>("publishListing$variantName", "", null) {
+                    dependsOn(new)
+                    doFirst { logger.warn("$name is deprecated, use ${new.name} instead") }
+                }
             }
 
             val processPackageMetadata = project.newTask<ProcessPackageMetadata>(
@@ -127,6 +134,13 @@ class PlayPublisherPlugin : Plugin<Project> {
                 dependsOn(playResourcesTask)
                 dependsOn(variant.assemble)
                 publishApkAllTask.dependsOn(this)
+
+                // Remove in v3.0
+                val new = this
+                project.newTask<Task>("publishApk$variantName", "", null) {
+                    dependsOn(new)
+                    doFirst { logger.warn("$name is deprecated, use ${new.name} instead") }
+                }
             }
 
             project.newTask<Task>(
