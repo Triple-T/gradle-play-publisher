@@ -7,7 +7,7 @@
 * Fill missing metadata with data from the default language - #107, #323
 * Support gradle cache and incremental builds - #304, #308
 * Support different resolution strategies in case of version conflicts - #301
-* Add group tasks to publish all variants at once - #
+* Add group tasks to publish all variants at once - #117, #273
 * Provide publishing tasks even when `signingConfig` is missing - #244, #298
 * Improve error messages and logging - #238, #268
 * Add status indicators and upload progress - #298
