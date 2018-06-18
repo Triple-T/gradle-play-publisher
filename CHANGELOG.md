@@ -33,10 +33,10 @@ Images will only be uploaded if they have changed.
 * Removed `untrackOld`: With the introduction of conflict resolution strategies (#301) 
 this property has become obsolete.
 
-#### Renamed tasks to follow AGP conventions
+#### Simplified Service Account credentials API
 
-For example, `publishApkRelease` -> `publishReleaseApk`. Note: the old tasks are still available for
-now, but will be removed in a future release.
+The `jsonFile` and `pk12File` properties have been replaced with a unified
+`serviceAccountCredentials` property.
 
 **1.2.2 - 2018-05-24**
 
