@@ -4,9 +4,13 @@
 * Bump Android Publisher plugin version to v3
 * Allow overriding configuration via command line options - #326
 * Fully support multi-dimensional flavors - #130, #311
-* Fill missing metadata with data for the default language - #107, #323
+* Fill missing metadata with data from the default language - #107, #323
 * Support gradle cache and incremental builds - #304, #308
 * Support different resolution strategies in case of version conflicts - #301
+* Add group tasks to publish all variants at once - #
+* Provide publishing tasks even when `signingConfig` is missing - #244, #298
+* Improve error messages and logging - #238, #268
+* Add status indicators and upload progress - #298
 
 ***Breaking changes***
 
@@ -22,6 +26,7 @@ For example, english listing files have moved
 ```
 
 *Removed configuration properties*
+
 * Removed `uploadImages`: As this plugin now makes use of gradle's caching system and
 incremental builds (#308), it is no longer required to define this property. 
 Images will only be uploaded if they have changed.
