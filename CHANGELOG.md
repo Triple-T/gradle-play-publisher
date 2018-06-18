@@ -33,6 +33,11 @@ Images will only be uploaded if they have changed.
 * Removed `untrackOld`: With the introduction of conflict resolution strategies (#301) 
 this property has become obsolete.
 
+#### Renamed tasks to follow AGP conventions
+
+For example, `publishApkRelease` -> `publishReleaseApk`. Note: the old tasks are still available for
+now, but will be removed in a future release.
+
 **1.2.2 - 2018-05-24**
 
 * More descriptive error message when texts exceed allowed length - #172
