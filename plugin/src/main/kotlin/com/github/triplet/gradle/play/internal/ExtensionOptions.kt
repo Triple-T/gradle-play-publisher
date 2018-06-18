@@ -9,6 +9,17 @@ import org.gradle.api.tasks.options.OptionValues
 internal interface ExtensionOptions {
     @get:Nested val extension: PlayPublisherExtension
 
+    @get:Internal
+    @set:Option(
+            option = "default-to-app-bundles",
+            description = "Prioritize App Bundles over APKs where applicable."
+    )
+    var defaultToAppBundlesOption: Boolean
+        get() = throw UnsupportedOperationException()
+        set(value) {
+            extension.defaultToAppBundles = value
+        }
+
     @get:OptionValues("track")
     val trackOptions
         get() = TrackType.values().map { it.publishedName }
