@@ -2,7 +2,6 @@ package com.github.triplet.gradle.play
 
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.internal.TrackType
-import com.github.triplet.gradle.play.tasks.PublishApk
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.Apk
@@ -12,6 +11,8 @@ import com.google.api.services.androidpublisher.model.TrackRelease
 import com.google.api.services.androidpublisher.model.TracksListResponse
 import kotlin.LazyKt
 import org.gradle.api.Task
+import org.gradle.api.logging.LogLevel
+import org.gradle.api.logging.Logging
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import org.junit.Before
 import org.junit.Test
@@ -112,6 +113,34 @@ class PlayPublishTaskTest {
     }
 
     @Test
+    void whenPublishing_withOverrideFolder_UploadsOnlySpecifiedFiles() {
+        def project = TestHelper.evaluatableProject()
+        def inputFolder = new File(TestHelper.FIXTURE_WORKING_DIR, "override_output")
+        def expectedPath = new File(inputFolder, "example_1.apk").absolutePath
+        project.play {
+            buildInputFolder inputFolder
+        }
+        project.evaluate()
+
+        setMockPublisher(project.tasks.publishApkRelease)
+        assert(project.tasks.publishApkRelease.inputs.files.files.any {
+            it.absolutePath.substring(1).equalsIgnoreCase(expectedPath)
+        })
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void whenPublishing_withEmptyOverrideFolder_Fails() {
+        def project = TestHelper.evaluatableProject()
+        project.play {
+            buildInputFolder new File(TestHelper.FIXTURE_WORKING_DIR, "not_real_path")
+        }
+        project.evaluate()
+
+        setMockPublisher(project.tasks.publishApkRelease)
+        project.tasks.publishApkRelease.publishApks(inputsMock)
+    }
+
+    @Test
     void testApplicationIdChange() {
         def project = TestHelper.evaluatableProject()
 
@@ -161,18 +190,6 @@ class PlayPublishTaskTest {
         field.set(task, LazyKt.lazy { publisherMock })
     }
 
-    private void publishApk(Task task) {
-        def progressLogger = findBaseTask(task.class, PlayPublishTaskBase.class)
-                .getDeclaredField("progressLogger")
-        progressLogger.setAccessible(true)
-        progressLogger.get(task).start("Desc", null)
-
-        def publishApk = findBaseTask(task.class, PublishApk.class).getDeclaredMethod(
-                "publishApk", AndroidPublisher.Edits.class, String.class, FileContent.class)
-        publishApk.setAccessible(true)
-        publishApk.invoke(task, editsMock, "424242", new FileContent(null, new File("foo")))
-    }
-
     private Class<? super Task> findBaseTask(Class<? super Task> start, Class<? super Task> end) {
         if (start == end) {
             return end as Class<? super Task>
@@ -197,6 +214,15 @@ class PlayPublishTaskTest {
             @Override
             boolean matches(Track track) {
                 return track.getReleases().find { it.getVersionCodes().contains(code) } != null
+            }
+        })
+    }
+
+    static FileContent contentWithName(String name) {
+        return argThat(new ArgumentMatcher<FileContent>() {
+            @Override
+            boolean matches(FileContent content) {
+                return content.file.name == name
             }
         })
     }

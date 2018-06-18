@@ -1,6 +1,7 @@
 package com.github.triplet.gradle.play.tasks
 
 import com.android.build.gradle.api.ApkVariantOutput
+import com.github.triplet.gradle.play.internal.ApkFileFilter
 import com.github.triplet.gradle.play.internal.PlayPublishPackageBase
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.playPath
@@ -24,8 +25,13 @@ open class PublishApk : PlayPublishPackageBase() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
     internal val inputApks by lazy {
-        // TODO: If we take a customizable folder, we can fix #233, #227
-        variant.outputs.filterIsInstance<ApkVariantOutput>().map { it.outputFile }
+        if (extension.buildInputFolder == null) {
+            variant.outputs.filterIsInstance<ApkVariantOutput>().map { it.outputFile }
+        } else {
+            extension.buildInputFolder!!.listFiles(ApkFileFilter).toList().apply {
+                require(isNotEmpty(), { "Build input folder provided, but no APK files found" })
+            }
+        }
     }
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
