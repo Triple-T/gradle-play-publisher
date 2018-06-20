@@ -424,10 +424,10 @@ class PlayPublisherPluginTest {
         }
         project.evaluate()
 
-        assertThat(project.tasks.bootstrapAll, dependsOn('bootstrapReleasePlayResources'))
-        assertThat(project.tasks.publishAll, dependsOn('publishRelease'))
-        assertThat(project.tasks.publishApkAll, dependsOn('publishReleaseApk'))
-        assertThat(project.tasks.publishListingAll, dependsOn('publishReleaseListing'))
+        assertThat(project.tasks.bootstrap, dependsOn('bootstrapReleasePlayResources'))
+        assertThat(project.tasks.publish, dependsOn('publishRelease'))
+        assertThat(project.tasks.publishApk, dependsOn('publishReleaseApk'))
+        assertThat(project.tasks.publishListing, dependsOn('publishReleaseListing'))
     }
 
     @Test
@@ -466,24 +466,24 @@ class PlayPublisherPluginTest {
         }
         project.evaluate()
 
-        assertThat(project.tasks.bootstrapAll, dependsOn('bootstrapDemoFreeReleasePlayResources'))
-        assertThat(project.tasks.publishAll, dependsOn('publishDemoFreeRelease'))
-        assertThat(project.tasks.publishApkAll, dependsOn('publishDemoFreeReleaseApk'))
-        assertThat(project.tasks.publishListingAll, dependsOn('publishDemoFreeReleaseListing'))
+        assertThat(project.tasks.bootstrap, dependsOn('bootstrapDemoFreeReleasePlayResources'))
+        assertThat(project.tasks.publish, dependsOn('publishDemoFreeRelease'))
+        assertThat(project.tasks.publishApk, dependsOn('publishDemoFreeReleaseApk'))
+        assertThat(project.tasks.publishListing, dependsOn('publishDemoFreeReleaseListing'))
 
-        assertThat(project.tasks.bootstrapAll, dependsOn('bootstrapDemoPaidReleasePlayResources'))
-        assertThat(project.tasks.publishAll, dependsOn('publishDemoPaidRelease'))
-        assertThat(project.tasks.publishApkAll, dependsOn('publishDemoPaidReleaseApk'))
-        assertThat(project.tasks.publishListingAll, dependsOn('publishDemoPaidReleaseListing'))
+        assertThat(project.tasks.bootstrap, dependsOn('bootstrapDemoPaidReleasePlayResources'))
+        assertThat(project.tasks.publish, dependsOn('publishDemoPaidRelease'))
+        assertThat(project.tasks.publishApk, dependsOn('publishDemoPaidReleaseApk'))
+        assertThat(project.tasks.publishListing, dependsOn('publishDemoPaidReleaseListing'))
 
-        assertThat(project.tasks.bootstrapAll, dependsOn('bootstrapProductionFreeReleasePlayResources'))
-        assertThat(project.tasks.publishAll, dependsOn('publishProductionFreeRelease'))
-        assertThat(project.tasks.publishApkAll, dependsOn('publishProductionFreeReleaseApk'))
-        assertThat(project.tasks.publishListingAll, dependsOn('publishProductionFreeReleaseListing'))
+        assertThat(project.tasks.bootstrap, dependsOn('bootstrapProductionFreeReleasePlayResources'))
+        assertThat(project.tasks.publish, dependsOn('publishProductionFreeRelease'))
+        assertThat(project.tasks.publishApk, dependsOn('publishProductionFreeReleaseApk'))
+        assertThat(project.tasks.publishListing, dependsOn('publishProductionFreeReleaseListing'))
 
-        assertThat(project.tasks.bootstrapAll, dependsOn('bootstrapProductionPaidReleasePlayResources'))
-        assertThat(project.tasks.publishAll, dependsOn('publishProductionPaidRelease'))
-        assertThat(project.tasks.publishApkAll, dependsOn('publishProductionPaidReleaseApk'))
-        assertThat(project.tasks.publishListingAll, dependsOn('publishProductionPaidReleaseListing'))
+        assertThat(project.tasks.bootstrap, dependsOn('bootstrapProductionPaidReleasePlayResources'))
+        assertThat(project.tasks.publish, dependsOn('publishProductionPaidRelease'))
+        assertThat(project.tasks.publishApk, dependsOn('publishProductionPaidReleaseApk'))
+        assertThat(project.tasks.publishListing, dependsOn('publishProductionPaidReleaseListing'))
     }
 }
