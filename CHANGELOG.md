@@ -33,6 +33,8 @@ TODO: link to README with new structure, add link to migration tool
   (#308) to only upload images if they have changed, this property has become obsolete.
 * `untrackOld`: With the introduction of conflict resolution strategies (#301), this property has
   become obsolete.
+* `errorOnSizeLimit`: The plugin will now always error on size limit to provide deterministic
+  behavior.
 
 ## 1.2.2 - 2018-05-24
 

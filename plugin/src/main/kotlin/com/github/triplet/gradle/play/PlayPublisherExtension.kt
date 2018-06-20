@@ -30,13 +30,6 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
     @get:Input
     var userFraction = 0.1
 
-    /**
-     * Choose whether or not to throw an error should a Play Store listing detail be too large or
-     * simply trim it. Default throws.
-     */
-    @get:Input
-    var errorOnSizeLimit = true
-
     @get:Internal("Backing property for public input")
     internal var _resolutionStrategy = ResolutionStrategy.FAIL
     /**
