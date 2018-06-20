@@ -12,8 +12,8 @@ internal tailrec fun File.findClosestDir(): File {
 internal fun File.climbUpTo(parentName: String): File? =
         if (name == parentName) this else parentFile?.climbUpTo(parentName)
 
-internal fun File.readProcessed(maxLength: Int, error: Boolean) =
-        readText().normalized().takeOrThrow(maxLength, error, this)
+internal fun File.readProcessed(maxLength: Int) =
+        readText().normalized().throwOnOverflow(maxLength, this)
 
 internal fun File.isChildOf(parentName: String) = climbUpTo(parentName) != null
 
@@ -28,10 +28,7 @@ internal fun String.normalized() = replace(Regex("\\r\\n"), "\n").trim()
 
 internal fun String?.nullOrFull() = if (isNullOrBlank()) null else this
 
-private fun String.takeOrThrow(n: Int, error: Boolean, file: File): String {
-    val result = take(n)
-    if (error) check(result.length == length) {
-        "File '$file' has reached the limit of $n characters."
-    }
-    return result
+private fun String.throwOnOverflow(max: Int, file: File): String {
+    check(length <= max) { "File '$file' has reached the limit of $max characters." }
+    return this
 }

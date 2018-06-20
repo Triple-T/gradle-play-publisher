@@ -20,29 +20,19 @@ class ExtensionsTest {
                 .build()
     }
 
-    @Test
-    fun `Long files are trimmed`() {
-        assertThat(project.file(TEST_FILE).readProcessed(2, false)).hasSize(2)
-    }
-
-    @Test
-    fun `Files on the edge are trimmed correctly`() {
-        assertThat(project.file(TEST_FILE).readProcessed(4, false)).hasSize(4)
-    }
-
-    @Test
-    fun `Short files aren't trimmed`() {
-        assertThat(project.file(TEST_FILE).readProcessed(100, false)).hasSize(4)
-    }
-
     @Test(expected = IllegalStateException::class)
-    fun `Throws on overflow`() {
-        project.file(TEST_FILE).readProcessed(1, true)
+    fun `Long files throw overflow`() {
+        project.file(TEST_FILE).readProcessed(1)
     }
 
     @Test
-    fun `File is trimmed`() {
-        project.file(FILE_WITH_LINEBREAK).readProcessed(28, true)
+    fun `Files on the edge don't throw`() {
+        assertThat(project.file(TEST_FILE).readProcessed(4)).hasSize(4)
+    }
+
+    @Test
+    fun `Short files don't throw`() {
+        assertThat(project.file(TEST_FILE).readProcessed(100)).hasSize(4)
     }
 
     @Test
@@ -53,7 +43,6 @@ class ExtensionsTest {
 
     private companion object {
         const val TEST_FILE = "src/main/play/release-notes/en-US/default"
-        const val FILE_WITH_LINEBREAK = "src/main/play/listings/en-US/shortdescription"
 
         val newLine = byteArrayOf(97, 13, 10, 98, 13, 10, 99, 13, 10, 97)
                 .toString(StandardCharsets.UTF_8)

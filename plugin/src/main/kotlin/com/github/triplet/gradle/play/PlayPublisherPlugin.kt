@@ -101,6 +101,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 init()
                 resDir = File(project.buildDir, "${variant.playPath}/res")
             }
+
             val publishListingTask = project.newTask<PublishListing>(
                     "publishListing$variantName",
                     "Uploads all Play Store metadata for $variantName."
