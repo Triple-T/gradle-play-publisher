@@ -36,6 +36,11 @@ TODO: link to README with new structure, add link to migration tool
 * `errorOnSizeLimit`: The plugin will now always error on size limit to provide deterministic
   behavior.
 
+#### Renamed tasks to follow AGP conventions
+
+For example, `publishApkRelease` -> `publishReleaseApk`. Note: the old tasks are still available for
+now, but will be removed in a future release.
+
 ## 1.2.2 - 2018-05-24
 
 * More descriptive error message when texts exceed allowed length - #172
