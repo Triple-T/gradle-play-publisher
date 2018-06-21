@@ -36,10 +36,10 @@ open class PublishApk : PlayPublishPackageBase() {
         variant.outputs.filterIsInstance<ApkVariantOutput>().map { it.outputFile }
     }
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
-    @get:Optional
     @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:Optional
     @get:InputDirectory
-    internal lateinit var expansionFilesDir: File
+    internal val expansionFilesDir by lazy { File(resDir, EXPANSION_FILES_PATH).orNull() }
 
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
