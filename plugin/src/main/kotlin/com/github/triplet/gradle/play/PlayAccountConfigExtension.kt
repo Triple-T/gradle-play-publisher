@@ -12,9 +12,7 @@ data class PlayAccountConfigExtension @JvmOverloads constructor(
         @get:Internal internal val name: String = "", // Needed for Gradle
 
         @get:PathSensitive(PathSensitivity.RELATIVE) @get:InputFile @get:Optional
-        override var jsonFile: File? = null,
-        @get:PathSensitive(PathSensitivity.RELATIVE) @get:InputFile @get:Optional
-        override var pk12File: File? = null,
+        override var serviceAccountCredentials: File? = null,
         @get:PathSensitive(PathSensitivity.RELATIVE) @get:InputFile @get:Optional
         override var serviceAccountEmail: String? = null
 ) : AccountConfig

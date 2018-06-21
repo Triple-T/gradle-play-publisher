@@ -1,5 +1,6 @@
 package com.github.triplet.gradle.play
 
+import com.android.build.gradle.api.ApkVariantOutput
 import com.github.triplet.gradle.play.internal.AccountConfig
 import com.github.triplet.gradle.play.internal.ReleaseStatus
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
@@ -49,12 +50,17 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
         }
 
     /**
-     * If the [resolutionStrategy] is auto, optionally compute a new version name from the updated
-     * version code. Returning null means the version name should not be changed.
+     * If the [resolutionStrategy] is auto, provide extra processing on top of what this plugin
+     * already does. For example, you could update each output's version name using the newly
+     * mutated version codes.
+     *
+     * Note: by the time the output is received, its version code will have been linearly shifted
+     * such that the smallest output's version code is 1 unit greater than the maximum version code
+     * found in the Play Store.
      */
     @get:Internal("ProcessPackageMetadata is always out-of-date. Also, Closures with " +
                           "parameters cannot be used as inputs.")
-    var versionNameOverride: (versionCode: Int) -> String? = { null }
+    var outputProcessor: (ApkVariantOutput.() -> Unit)? = null
 
     @get:Internal("Backing property for public input")
     internal lateinit var _releaseStatus: ReleaseStatus
