@@ -4,6 +4,7 @@ import com.android.build.gradle.AppExtension
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.internal.ACCOUNT_CONFIG
 import com.github.triplet.gradle.play.internal.AccountConfig
+import com.github.triplet.gradle.play.internal.EXPANSION_FILES_PATH
 import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
@@ -130,6 +131,7 @@ class PlayPublisherPlugin : Plugin<Project> {
             ) {
                 init()
                 releaseNotesDir = File(playResourcesTask.resDir, RELEASE_NOTES_PATH)
+                expansionFilesDir = File(playResourcesTask.resDir, EXPANSION_FILES_PATH)
 
                 dependsOn(processPackageMetadata)
                 dependsOn(playResourcesTask)

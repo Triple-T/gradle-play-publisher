@@ -4,12 +4,17 @@ import com.android.build.gradle.api.ApkVariantOutput
 import com.github.triplet.gradle.play.internal.EXPANSION_FILES_PATH
 import com.github.triplet.gradle.play.internal.PlayPublishPackageBase
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
+import com.github.triplet.gradle.play.internal.expansionFileTypes
+import com.github.triplet.gradle.play.internal.isDirectChildOf
+import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.internal.playPath
+import com.github.triplet.gradle.play.internal.safeCreateNewFile
 import com.github.triplet.gradle.play.internal.trackUploadProgress
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.Apk
+import com.google.api.services.androidpublisher.model.ExpansionFile
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Optional
@@ -34,7 +39,7 @@ open class PublishApk : PlayPublishPackageBase() {
     @get:Optional
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputDirectory
-    val expansionFilesDir by lazy { File(resDir, EXPANSION_FILES_PATH) }
+    internal lateinit var expansionFilesDir: File
 
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -48,17 +53,25 @@ open class PublishApk : PlayPublishPackageBase() {
         if (!inputs.isIncremental) project.delete(outputs.files)
 
         val publishedApks = mutableListOf<Apk>()
+        val changedExpansionFiles = mutableListOf<File>()
         inputs.outOfDate {
             val file = it.file
+
             if (inputApks.contains(file)) {
                 project.copy { it.from(file).into(outputDir) }
                 publishApk(editId, FileContent(MIME_TYPE_APK, file))?.let { publishedApks += it }
             }
+
+            if (file.isDirectChildOf(EXPANSION_FILES_PATH)) changedExpansionFiles += file
         }
         inputs.removed { project.delete(File(outputDir, it.file.name)) }
 
         if (publishedApks.isNotEmpty()) {
-            updateTracks(editId, publishedApks.map { it.versionCode.toLong() })
+            val versionCodes = publishedApks.map { it.versionCode }
+            updateTracks(editId, versionCodes.map(Int::toLong))
+            uploadExpansionFiles(editId, versionCodes, changedExpansionFiles)
+        } else if (changedExpansionFiles.isNotEmpty()) {
+            logger.warn("New expansion files cannot be uploaded without a new APK")
         }
 
         progressLogger.completed()
@@ -101,18 +114,59 @@ open class PublishApk : PlayPublishPackageBase() {
                     .execute()
         }
 
-        expansionFilesDir.listFiles()?.forEach {
-            val type = it.nameWithoutExtension
-            expansionfiles().upload(
-                    variant.applicationId,
-                    editId,
-                    apk.versionCode,
-                    type,
-                    FileContent(MIME_TYPE_STREAM, it)
-            ).trackUploadProgress(progressLogger, "$type expansion file").execute()
-        }
-
         return apk
+    }
+
+    private fun AndroidPublisher.Edits.uploadExpansionFiles(
+            editId: String,
+            versionCodes: List<Int>,
+            changedExpansionFiles: List<File>
+    ) {
+        val savedCode = File(outputDir, "${variant.baseName}-oob-code")
+
+        if (changedExpansionFiles.isEmpty()) {
+            val code = savedCode.orNull()?.readText()?.toInt() ?: return
+            versionCodes.forEach {
+                for (type in expansionFileTypes) {
+                    expansionfiles().update(
+                            variant.applicationId,
+                            editId,
+                            it,
+                            type,
+                            ExpansionFile().apply { referencesVersion = code }
+                    ).execute()
+                }
+            }
+        } else {
+            val minCode = versionCodes.min() ?: 1
+
+            savedCode.safeCreateNewFile().writeText(minCode.toString())
+
+            for (file in changedExpansionFiles) {
+                val type = file.nameWithoutExtension
+                expansionfiles().upload(
+                        variant.applicationId,
+                        editId,
+                        minCode,
+                        type,
+                        FileContent(MIME_TYPE_STREAM, file)
+                ).trackUploadProgress(progressLogger, "$type expansion file").execute()
+            }
+
+            progressLogger.progress("Adding expansion files to other APKs")
+            val types = changedExpansionFiles.map { it.nameWithoutExtension }
+            versionCodes.filterNot { it == minCode }.forEach {
+                for (type in types) {
+                    expansionfiles().update(
+                            variant.applicationId,
+                            editId,
+                            it,
+                            type,
+                            ExpansionFile().apply { referencesVersion = minCode }
+                    ).execute()
+                }
+            }
+        }
     }
 
     private companion object {
