@@ -261,12 +261,12 @@ class PlayPublisherPluginTest {
         def project = TestHelper.evaluatableProject()
 
         project.play {
-            jsonFile new File('key.json')
+            serviceAccountCredentials new File('key.json')
         }
 
         project.evaluate()
 
-        assertEquals('key.json', project.extensions.play.jsonFile.name)
+        assertEquals('key.json', project.extensions.play.serviceAccountCredentials.name)
     }
 
     @Test
@@ -275,13 +275,13 @@ class PlayPublisherPluginTest {
 
         project.play {
             serviceAccountEmail = 'service-account@test.com'
-            pk12File = new File('key.p12')
+            serviceAccountCredentials = new File('key.p12')
         }
 
         project.evaluate()
 
         assertEquals('service-account@test.com', project.extensions.play.serviceAccountEmail)
-        assertEquals(new File('key.p12'), project.extensions.play.pk12File)
+        assertEquals(new File('key.p12'), project.extensions.play.serviceAccountCredentials)
     }
 
     @Test
@@ -292,15 +292,15 @@ class PlayPublisherPluginTest {
             playAccountConfigs {
                 defaultAccountConfig {
                     serviceAccountEmail = 'default@exmaple.com'
-                    pk12File = project.file('first-secret.pk12')
+                    serviceAccountCredentials = project.file('first-secret.pk12')
                 }
                 free {
                     serviceAccountEmail = 'first-mail@exmaple.com'
-                    pk12File = project.file('secret.pk12')
+                    serviceAccountCredentials = project.file('secret.pk12')
                 }
                 paid {
                     serviceAccountEmail = 'another-mail@exmaple.com'
-                    pk12File = project.file('another-secret.pk12')
+                    serviceAccountCredentials = project.file('another-secret.pk12')
                 }
             }
 
@@ -350,11 +350,11 @@ class PlayPublisherPluginTest {
             playAccountConfigs {
                 free {
                     serviceAccountEmail = 'free@exmaple.com'
-                    pk12File = project.file('secret.pk12')
+                    serviceAccountCredentials = project.file('secret.pk12')
                 }
                 paid {
                     serviceAccountEmail = 'paid@exmaple.com'
-                    pk12File = project.file('another-secret.pk12')
+                    serviceAccountCredentials = project.file('another-secret.pk12')
                 }
             }
 
@@ -391,7 +391,7 @@ class PlayPublisherPluginTest {
             playAccountConfigs {
                 defaultAccountConfig {
                     serviceAccountEmail = 'default@exmaple.com'
-                    pk12File = project.file('first-secret.pk12')
+                    serviceAccountCredentials = project.file('first-secret.pk12')
                 }
             }
 
@@ -409,19 +409,6 @@ class PlayPublisherPluginTest {
     @Test
     void allTasksExist_AndDependOnBaseTasks_WithNoProductFlavor() {
         def project = TestHelper.evaluatableProject()
-
-        project.android {
-            playAccountConfigs {
-                defaultAccountConfig {
-                    serviceAccountEmail = 'default@exmaple.com'
-                    pk12File = project.file('first-secret.pk12')
-                }
-            }
-
-            defaultConfig {
-                playAccountConfig = playAccountConfigs.defaultAccountConfig
-            }
-        }
         project.evaluate()
 
         assertThat(project.tasks.bootstrap, dependsOn('bootstrapReleasePlayResources'))
@@ -435,17 +422,6 @@ class PlayPublisherPluginTest {
         def project = TestHelper.evaluatableProject()
 
         project.android {
-            playAccountConfigs {
-                defaultAccountConfig {
-                    serviceAccountEmail = 'default@exmaple.com'
-                    pk12File = project.file('first-secret.pk12')
-                }
-            }
-
-            defaultConfig {
-                playAccountConfig = playAccountConfigs.defaultAccountConfig
-            }
-
             flavorDimensions "mode", "variant"
 
             productFlavors {

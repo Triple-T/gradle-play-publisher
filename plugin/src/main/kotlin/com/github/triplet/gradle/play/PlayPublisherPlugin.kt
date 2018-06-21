@@ -65,8 +65,14 @@ class PlayPublisherPlugin : Plugin<Project> {
                         "Signing not ready. Be sure to specify a signingConfig for $variantName")
             }
             accountConfig.run {
-                check(jsonFile != null || pk12File != null && serviceAccountEmail != null) {
-                    "No credentials provided"
+                if (_serviceAccountCredentials.extension.equals("json", true)) {
+                    check(serviceAccountEmail == null) {
+                        "Json credentials cannot specify a Service Account email"
+                    }
+                } else {
+                    check(serviceAccountEmail != null) {
+                        "PKCS12 credentials must also specify a Service Account email"
+                    }
                 }
             }
 
