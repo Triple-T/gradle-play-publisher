@@ -24,24 +24,21 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
 
     private val publisher by lazy {
         val credential = accountConfig.run {
-            val jsonFile = jsonFile
-            val pk12File = pk12File
+            val creds = _serviceAccountCredentials
             val serviceAccountEmail = serviceAccountEmail
             val factory = JacksonFactory.getDefaultInstance()
 
-            if (jsonFile != null) {
-                GoogleCredential.fromStream(jsonFile.inputStream(), transport, factory)
+            if (serviceAccountEmail == null) {
+                GoogleCredential.fromStream(creds.inputStream(), transport, factory)
                         .createScoped(listOf(AndroidPublisherScopes.ANDROIDPUBLISHER))
-            } else if (pk12File != null && serviceAccountEmail != null) {
+            } else {
                 GoogleCredential.Builder()
                         .setTransport(transport)
                         .setJsonFactory(factory)
                         .setServiceAccountId(serviceAccountEmail)
-                        .setServiceAccountPrivateKeyFromP12File(pk12File)
+                        .setServiceAccountPrivateKeyFromP12File(creds)
                         .setServiceAccountScopes(listOf(AndroidPublisherScopes.ANDROIDPUBLISHER))
                         .build()
-            } else {
-                throw IllegalArgumentException("No credentials provided.")
             }
         }
 
