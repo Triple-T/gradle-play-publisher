@@ -23,18 +23,13 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
                 "Track must be one of ${TrackType.values().joinToString { "'${it.publishedName}'" }}"
             }
         }
+
     /**
      * Specify the initial user percent intended to receive a 'rollout' update (see [track]).
      * Default is 10% == 0.1.
      */
     @get:Input
     var userFraction = 0.1
-    /**
-     * Choose whether or not to throw an error should a Play Store listing detail be too large or
-     * simply trim it. Default throws.
-     */
-    @get:Input
-    var errorOnSizeLimit = true
 
     @get:Internal("Backing property for public input")
     internal var _resolutionStrategy = ResolutionStrategy.FAIL
@@ -53,11 +48,12 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
                         ResolutionStrategy.values().joinToString { "'${it.publishedName}'" }
             }
         }
+
     /**
      * If the [resolutionStrategy] is auto, process the outputs such that they will pass validation
      * when uploaded.
      */
-    @get:Internal("ProcessPackageMetadataTask is always out-of-date. Also, Closures with " +
+    @get:Internal("ProcessPackageMetadata is always out-of-date. Also, Closures with " +
                           "parameters cannot be used as inputs.")
     var autoResolutionHandler: (inputs: AutoResolutionInputs) -> Unit =
             AutoResolutionInputs::runDefault

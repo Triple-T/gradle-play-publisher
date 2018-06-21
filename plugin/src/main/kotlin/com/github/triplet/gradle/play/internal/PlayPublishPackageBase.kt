@@ -12,7 +12,7 @@ import java.io.File
 abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
     @PathSensitive(PathSensitivity.RELATIVE)
     @get:InputDirectory
-    lateinit var releaseNotesDir: File
+    internal lateinit var releaseNotesDir: File
 
     protected fun AndroidPublisher.Edits.updateTracks(editId: String, versions: List<Long>) {
         val track = tracks()
@@ -25,11 +25,10 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
                     ?: File(locale, RELEASE_NOTES_DEFAULT_NAME).orNull()
                     ?: return@mapNotNull null
 
-            val recentChanges = file.readProcessed(
-                    RELEASE_NOTES_MAX_LENGTH,
-                    extension.errorOnSizeLimit
-            )
-            LocalizedText().setLanguage(locale.name).setText(recentChanges)
+            LocalizedText().apply {
+                language = locale.name
+                text = file.readProcessed(RELEASE_NOTES_MAX_LENGTH)
+            }
         }
         val trackRelease = TrackRelease().apply {
             releaseNotes = releaseTexts

@@ -1,11 +1,11 @@
-package com.github.triplet.gradle.play
+package com.github.triplet.gradle.play.tasks
 
 import com.android.build.gradle.api.ApkVariantOutput
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import org.gradle.api.tasks.TaskAction
 
-open class ProcessPackageMetadataTask : PlayPublishTaskBase() {
+open class ProcessPackageMetadata : PlayPublishTaskBase() {
     init {
         // Always out-of-date since we don't know what's changed on the network
         outputs.upToDateWhen { false }
