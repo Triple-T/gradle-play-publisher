@@ -6,6 +6,7 @@ import com.github.triplet.gradle.play.internal.PlayPublishPackageBase
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.expansionFileTypes
 import com.github.triplet.gradle.play.internal.isDirectChildOf
+import com.github.triplet.gradle.play.internal.nullOrFull
 import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.internal.safeCreateNewFile
@@ -122,49 +123,51 @@ open class PublishApk : PlayPublishPackageBase() {
             versionCodes: List<Int>,
             changedExpansionFiles: List<File>
     ) {
-        val savedCode = File(outputDir, "${variant.baseName}-oob-code")
+        val savedCodeFiles = expansionFileTypes.map {
+            File(outputDir, "oob-code-${variant.baseName}.$it")
+        }
 
-        if (changedExpansionFiles.isEmpty()) {
-            val code = savedCode.orNull()?.readText()?.toInt() ?: return
-            versionCodes.forEach {
-                for (type in expansionFileTypes) {
-                    expansionfiles().update(
-                            variant.applicationId,
-                            editId,
-                            it,
-                            type,
-                            ExpansionFile().apply { referencesVersion = code }
-                    ).execute()
-                }
-            }
-        } else {
-            val minCode = versionCodes.min() ?: 1
-
-            savedCode.safeCreateNewFile().writeText(minCode.toString())
-
-            for (file in changedExpansionFiles) {
-                val type = file.nameWithoutExtension
-                expansionfiles().upload(
+        progressLogger.progress("Linking expansion files to new APKs")
+        for (file in savedCodeFiles) {
+            val savedCode = file.orNull()?.readText().nullOrFull()?.toInt() ?: continue
+            for (newCode in versionCodes) {
+                expansionfiles().update(
                         variant.applicationId,
                         editId,
-                        minCode,
-                        type,
-                        FileContent(MIME_TYPE_STREAM, file)
-                ).trackUploadProgress(progressLogger, "$type expansion file").execute()
+                        newCode,
+                        file.extension,
+                        ExpansionFile().apply { referencesVersion = savedCode }
+                ).execute()
             }
+        }
 
-            progressLogger.progress("Adding expansion files to other APKs")
-            val types = changedExpansionFiles.map { it.nameWithoutExtension }
-            versionCodes.filterNot { it == minCode }.forEach {
-                for (type in types) {
-                    expansionfiles().update(
-                            variant.applicationId,
-                            editId,
-                            it,
-                            type,
-                            ExpansionFile().apply { referencesVersion = minCode }
-                    ).execute()
-                }
+        val minCode = versionCodes.min() ?: 1
+        for (file in savedCodeFiles) {
+            if (changedExpansionFiles.map { it.nameWithoutExtension }.contains(file.extension)) {
+                file.safeCreateNewFile().writeText(minCode.toString())
+            }
+        }
+
+        for (file in changedExpansionFiles) {
+            val type = file.nameWithoutExtension
+            expansionfiles().upload(
+                    variant.applicationId,
+                    editId,
+                    minCode,
+                    type,
+                    FileContent(MIME_TYPE_STREAM, file)
+            ).trackUploadProgress(progressLogger, "$type expansion file").execute()
+
+            progressLogger.progress("Adding expansion file '$type' to other APKs")
+            for (newCode in versionCodes) {
+                if (newCode == minCode) continue // The upload automatically updates it for us
+                expansionfiles().update(
+                        variant.applicationId,
+                        editId,
+                        newCode,
+                        type,
+                        ExpansionFile().apply { referencesVersion = minCode }
+                ).execute()
             }
         }
     }
