@@ -1,4 +1,4 @@
-package com.github.triplet.gradle.play
+package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.play.internal.AppDetail
 import com.github.triplet.gradle.play.internal.ImageFileFilter
@@ -25,15 +25,17 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import java.io.File
 
-open class PublishListingTask : PlayPublishTaskBase() {
+open class PublishListing : PlayPublishTaskBase() {
     @get:SkipWhenEmpty
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputDirectory
-    lateinit var resDir: File
+    internal lateinit var resDir: File
     @Suppress("MemberVisibilityCanBePrivate") // Needed for Gradle caching to work correctly
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputFile
-    val outputFile by lazy { File(project.buildDir, "${variant.playPath}/listing-cache-key") }
+    internal val outputFile by lazy {
+        File(project.buildDir, "${variant.playPath}/listing-cache-key")
+    }
 
     @TaskAction
     fun publishListing(inputs: IncrementalTaskInputs) {
@@ -76,16 +78,12 @@ open class PublishListingTask : PlayPublishTaskBase() {
     private fun AndroidPublisher.Edits.updateAppDetails(editId: String) {
         progressLogger.progress("Uploading app details")
         val details = AppDetails().apply {
-            val errorOnSizeLimit = extension.errorOnSizeLimit
+            fun AppDetail.read() = File(resDir, fileName).orNull()?.readProcessed(maxLength)
 
-            defaultLanguage = File(resDir, AppDetail.DEFAULT_LANGUAGE.fileName).orNull()
-                    ?.readProcessed(AppDetail.DEFAULT_LANGUAGE.maxLength, errorOnSizeLimit)
-            contactEmail = File(resDir, AppDetail.CONTACT_EMAIL.fileName).orNull()
-                    ?.readProcessed(AppDetail.CONTACT_EMAIL.maxLength, errorOnSizeLimit)
-            contactPhone = File(resDir, AppDetail.CONTACT_PHONE.fileName).orNull()
-                    ?.readProcessed(AppDetail.CONTACT_PHONE.maxLength, errorOnSizeLimit)
-            contactWebsite = File(resDir, AppDetail.CONTACT_WEBSITE.fileName).orNull()
-                    ?.readProcessed(AppDetail.CONTACT_WEBSITE.maxLength, errorOnSizeLimit)
+            defaultLanguage = AppDetail.DEFAULT_LANGUAGE.read()
+            contactEmail = AppDetail.CONTACT_EMAIL.read()
+            contactPhone = AppDetail.CONTACT_PHONE.read()
+            contactWebsite = AppDetail.CONTACT_WEBSITE.read()
         }
 
         details().update(variant.applicationId, editId, details).execute()
@@ -98,18 +96,12 @@ open class PublishListingTask : PlayPublishTaskBase() {
     ) {
         progressLogger.progress("Uploading $locale listing")
         val listing = Listing().apply {
-            val errorOnSizeLimit = extension.errorOnSizeLimit
+            fun ListingDetail.read() = File(listingDir, fileName).orNull()?.readProcessed(maxLength)
 
-            title = File(listingDir, ListingDetail.TITLE.fileName).orNull()
-                    ?.readProcessed(ListingDetail.TITLE.maxLength, errorOnSizeLimit)
-            shortDescription = File(listingDir, ListingDetail.SHORT_DESCRIPTION.fileName)
-                    .orNull()
-                    ?.readProcessed(ListingDetail.SHORT_DESCRIPTION.maxLength, errorOnSizeLimit)
-            fullDescription = File(listingDir, ListingDetail.FULL_DESCRIPTION.fileName)
-                    .orNull()
-                    ?.readProcessed(ListingDetail.FULL_DESCRIPTION.maxLength, errorOnSizeLimit)
-            video = File(listingDir, ListingDetail.VIDEO.fileName).orNull()
-                    ?.readProcessed(ListingDetail.VIDEO.maxLength, errorOnSizeLimit)
+            title = ListingDetail.TITLE.read()
+            shortDescription = ListingDetail.SHORT_DESCRIPTION.read()
+            fullDescription = ListingDetail.FULL_DESCRIPTION.read()
+            video = ListingDetail.VIDEO.read()
         }
 
         try {

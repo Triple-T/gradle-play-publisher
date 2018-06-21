@@ -1,4 +1,4 @@
-package com.github.triplet.gradle.play
+package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.play.internal.AppDetail
 import com.github.triplet.gradle.play.internal.ImageType
@@ -16,10 +16,10 @@ import org.gradle.api.tasks.TaskAction
 import java.io.File
 import java.net.URL
 
-open class BootstrapTask : PlayPublishTaskBase() {
+open class Bootstrap : PlayPublishTaskBase() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputDirectory
-    lateinit var srcDir: File
+    internal lateinit var srcDir: File
 
     init {
         // Always out-of-date since we don't know what's changed on the network

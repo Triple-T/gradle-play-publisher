@@ -5,21 +5,14 @@ import com.google.api.services.androidpublisher.model.LocalizedText
 import com.google.api.services.androidpublisher.model.Track
 import com.google.api.services.androidpublisher.model.TrackRelease
 import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import java.io.File
 
 abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
-    @get:Internal
-    lateinit var resDir: File
-
-    @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
-    @get:Optional
-    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @PathSensitive(PathSensitivity.RELATIVE)
     @get:InputDirectory
-    val releaseNotesDir by lazy { File(resDir, RELEASE_NOTES_PATH) }
+    internal lateinit var releaseNotesDir: File
 
     protected fun AndroidPublisher.Edits.updateTracks(editId: String, versions: List<Long>) {
         val track = tracks()
@@ -32,11 +25,10 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
                     ?: File(locale, RELEASE_NOTES_DEFAULT_NAME).orNull()
                     ?: return@mapNotNull null
 
-            val recentChanges = file.readProcessed(
-                    RELEASE_NOTES_MAX_LENGTH,
-                    extension.errorOnSizeLimit
-            )
-            LocalizedText().setLanguage(locale.name).setText(recentChanges)
+            LocalizedText().apply {
+                language = locale.name
+                text = file.readProcessed(RELEASE_NOTES_MAX_LENGTH)
+            }
         }
         val trackRelease = TrackRelease().apply {
             releaseNotes = releaseTexts
