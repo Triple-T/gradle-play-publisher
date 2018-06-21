@@ -28,6 +28,14 @@ open class ProcessPackageMetadata : PlayPublishTaskBase() {
                 ?.max() ?: 1
 
         val outputs = variant.outputs.filterIsInstance<ApkVariantOutput>()
-        extension.autoResolutionHandler(AutoResolutionInputs(outputs, maxVersionCode))
+        val smallestVersionCode = outputs.map { it.versionCode }.min() ?: 1
+
+        val patch = maxVersionCode - smallestVersionCode + 1
+        if (patch <= 0) return@read // Nothing to do, outputs are already greater than remote
+
+        for (output in outputs) {
+            output.versionCodeOverride = output.versionCode + patch.toInt()
+            extension.outputProcessor?.invoke(output)
+        }
     }
 }
