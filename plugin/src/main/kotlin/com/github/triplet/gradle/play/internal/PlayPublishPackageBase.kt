@@ -29,11 +29,10 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
                     ?: File(locale, RELEASE_NOTES_DEFAULT_NAME).orNull()
                     ?: return@mapNotNull null
 
-            val recentChanges = file.readProcessed(
-                    RELEASE_NOTES_MAX_LENGTH,
-                    extension.errorOnSizeLimit
-            )
-            LocalizedText().setLanguage(locale.name).setText(recentChanges)
+            LocalizedText().apply {
+                language = locale.name
+                text = file.readProcessed(RELEASE_NOTES_MAX_LENGTH)
+            }
         }
         val trackRelease = TrackRelease().apply {
             releaseNotes = releaseTexts
