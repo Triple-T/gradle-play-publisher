@@ -165,9 +165,10 @@ class PlayPublisherPlugin : Plugin<Project> {
 
                 dependsOn(processPackageMetadata)
                 dependsOn(playResourcesTask)
-                (variant as InstallableVariantImpl).variantData
-                        // Remove hack when AGP 3.2 reaches stable channel
-                        .getTaskName("bundle", "")?.let { dependsOn(it) }
+                // Remove hack when AGP 3.2 reaches stable channel
+                project.tasks.findByName(
+                        (variant as InstallableVariantImpl).variantData.getTaskName("bundle", ""))
+                        ?.let { dependsOn(it) }
                         ?: logger.warn("Bundle task not found. Publishing App Bundles may not work.")
                 publishBundleAllTask.dependsOn(this)
             }
