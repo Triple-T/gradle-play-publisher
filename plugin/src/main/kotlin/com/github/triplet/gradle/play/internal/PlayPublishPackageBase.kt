@@ -18,7 +18,7 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:Optional
     @get:InputDirectory
-    internal val releaseNotesDir by lazy { File(resDir, RELEASE_NOTES_PATH) }
+    protected val releaseNotesDir by lazy { File(resDir, RELEASE_NOTES_PATH) }
 
     protected fun AndroidPublisher.Edits.updateTracks(editId: String, versions: List<Long>) {
         progressLogger.progress("Updating tracks")
