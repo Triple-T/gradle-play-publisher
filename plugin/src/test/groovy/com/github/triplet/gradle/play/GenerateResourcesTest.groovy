@@ -27,7 +27,7 @@ class GenerateResourcesTest {
         content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/release/res/release-notes/fr-FR/default').text
         assertEquals('main', content)
 
-        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/outputs/play/release/res/products/sku.json').text
+        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/release/res/products/sku.json').text
         assertEquals(new File(TestHelper.FIXTURE_WORKING_DIR, 'src/main/play/products/sku.json').text, content)
     }
 

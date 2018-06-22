@@ -124,6 +124,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                     doFirst { logger.warn("$name is deprecated, use ${new.name} instead") }
                 }
             }
+
             val publishProductsTask = project.newTask<PublishProducts>(
                     "publish${variantName}Products",
                     "Uploads all Play Store in-app products for $variantName."

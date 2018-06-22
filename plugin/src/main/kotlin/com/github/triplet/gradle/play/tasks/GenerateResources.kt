@@ -144,7 +144,8 @@ open class GenerateResources : DefaultTask() {
      */
     private fun ensureRootsExist() = listOf(
             LISTINGS_PATH,
-            RELEASE_NOTES_PATH
+            RELEASE_NOTES_PATH,
+            PRODUCTS_PATH
     ).map { File(resDir, it) }.forEach {
         it.safeMkdirs()
     }
