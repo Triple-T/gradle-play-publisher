@@ -40,7 +40,7 @@ open class PublishApk : PlayPublishPackageBase() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:Optional
     @get:InputDirectory
-    internal val expansionFilesDir by lazy { File(resDir, EXPANSION_FILES_PATH).orNull() }
+    internal val expansionFilesDir by lazy { File(resDir, EXPANSION_FILES_PATH) }
 
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
