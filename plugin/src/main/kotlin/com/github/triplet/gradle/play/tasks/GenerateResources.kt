@@ -121,6 +121,11 @@ open class GenerateResources : DefaultTask() {
         validateReleaseNotes()
     }
 
+    /**
+     * See https://github.com/gradle/gradle/issues/2016 to understand why this is necessary.
+     * Evaluation happens too early which means we either crash or our directories are ignored. To
+     * circumvent this issue, we simply make sure our inputs always exist.
+     */
     private fun ensureRootsExist() = listOf(
             LISTINGS_PATH,
             RELEASE_NOTES_PATH
