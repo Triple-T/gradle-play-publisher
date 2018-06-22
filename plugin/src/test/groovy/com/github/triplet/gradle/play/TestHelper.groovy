@@ -39,7 +39,7 @@ class TestHelper {
             }
         }
         project.play {
-            jsonFile = new File("Fake")
+            serviceAccountCredentials = new File("fake.json")
         }
 
         return project

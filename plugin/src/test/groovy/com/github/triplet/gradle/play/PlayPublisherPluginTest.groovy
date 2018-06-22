@@ -28,7 +28,7 @@ class PlayPublisherPluginTest {
         project.evaluate()
 
         assertNotNull(project.tasks.publishRelease)
-        assertEquals(project.tasks.publishApkRelease.variant, project.android.applicationVariants[1])
+        assertEquals(project.tasks.publishReleaseApk.variant, project.android.applicationVariants[1])
     }
 
     @Test
@@ -53,8 +53,8 @@ class PlayPublisherPluginTest {
         assertNotNull(project.tasks.publishPaidRelease)
         assertNotNull(project.tasks.publishFreeRelease)
 
-        assertEquals(project.tasks.publishApkFreeRelease.variant, project.android.applicationVariants[3])
-        assertEquals(project.tasks.publishApkPaidRelease.variant, project.android.applicationVariants[1])
+        assertEquals(project.tasks.publishFreeReleaseApk.variant, project.android.applicationVariants[3])
+        assertEquals(project.tasks.publishPaidReleaseApk.variant, project.android.applicationVariants[1])
     }
 
     @Test
@@ -252,8 +252,8 @@ class PlayPublisherPluginTest {
 
         project.evaluate()
 
-        assertNotNull(project.tasks.publishListingFreeRelease)
-        assertNotNull(project.tasks.publishListingPaidRelease)
+        assertNotNull(project.tasks.publishFreeReleaseListing)
+        assertNotNull(project.tasks.publishPaidReleaseListing)
     }
 
     @Test
@@ -284,12 +284,12 @@ class PlayPublisherPluginTest {
         def project = TestHelper.evaluatableProject()
 
         project.play {
-            jsonFile new File('key.json')
+            serviceAccountCredentials new File('key.json')
         }
 
         project.evaluate()
 
-        assertEquals('key.json', project.extensions.play.jsonFile.name)
+        assertEquals('key.json', project.extensions.play.serviceAccountCredentials.name)
     }
 
     @Test
@@ -298,13 +298,13 @@ class PlayPublisherPluginTest {
 
         project.play {
             serviceAccountEmail = 'service-account@test.com'
-            pk12File = new File('key.p12')
+            serviceAccountCredentials = new File('key.p12')
         }
 
         project.evaluate()
 
         assertEquals('service-account@test.com', project.extensions.play.serviceAccountEmail)
-        assertEquals(new File('key.p12'), project.extensions.play.pk12File)
+        assertEquals(new File('key.p12'), project.extensions.play.serviceAccountCredentials)
     }
 
     @Test
@@ -315,15 +315,15 @@ class PlayPublisherPluginTest {
             playAccountConfigs {
                 defaultAccountConfig {
                     serviceAccountEmail = 'default@exmaple.com'
-                    pk12File = project.file('first-secret.pk12')
+                    serviceAccountCredentials = project.file('first-secret.pk12')
                 }
                 free {
                     serviceAccountEmail = 'first-mail@exmaple.com'
-                    pk12File = project.file('secret.pk12')
+                    serviceAccountCredentials = project.file('secret.pk12')
                 }
                 paid {
                     serviceAccountEmail = 'another-mail@exmaple.com'
-                    pk12File = project.file('another-secret.pk12')
+                    serviceAccountCredentials = project.file('another-secret.pk12')
                 }
             }
 
@@ -353,13 +353,13 @@ class PlayPublisherPluginTest {
         assertEquals('first-mail@exmaple.com', project.tasks.bootstrapFreeReleasePlayResources.accountConfig.serviceAccountEmail)
         assertEquals('another-mail@exmaple.com', project.tasks.bootstrapPaidReleasePlayResources.accountConfig.serviceAccountEmail)
 
-        assertEquals('default@exmaple.com', project.tasks.publishApkDefaultFlavorRelease.accountConfig.serviceAccountEmail)
-        assertEquals('first-mail@exmaple.com', project.tasks.publishApkFreeRelease.accountConfig.serviceAccountEmail)
-        assertEquals('another-mail@exmaple.com', project.tasks.publishApkPaidRelease.accountConfig.serviceAccountEmail)
+        assertEquals('default@exmaple.com', project.tasks.publishDefaultFlavorReleaseApk.accountConfig.serviceAccountEmail)
+        assertEquals('first-mail@exmaple.com', project.tasks.publishFreeReleaseApk.accountConfig.serviceAccountEmail)
+        assertEquals('another-mail@exmaple.com', project.tasks.publishPaidReleaseApk.accountConfig.serviceAccountEmail)
 
-        assertEquals('default@exmaple.com', project.tasks.publishListingDefaultFlavorRelease.accountConfig.serviceAccountEmail)
-        assertEquals('first-mail@exmaple.com', project.tasks.publishListingFreeRelease.accountConfig.serviceAccountEmail)
-        assertEquals('another-mail@exmaple.com', project.tasks.publishListingPaidRelease.accountConfig.serviceAccountEmail)
+        assertEquals('default@exmaple.com', project.tasks.publishDefaultFlavorReleaseListing.accountConfig.serviceAccountEmail)
+        assertEquals('first-mail@exmaple.com', project.tasks.publishFreeReleaseListing.accountConfig.serviceAccountEmail)
+        assertEquals('another-mail@exmaple.com', project.tasks.publishPaidReleaseListing.accountConfig.serviceAccountEmail)
     }
 
     @Test
@@ -373,11 +373,11 @@ class PlayPublisherPluginTest {
             playAccountConfigs {
                 free {
                     serviceAccountEmail = 'free@exmaple.com'
-                    pk12File = project.file('secret.pk12')
+                    serviceAccountCredentials = project.file('secret.pk12')
                 }
                 paid {
                     serviceAccountEmail = 'paid@exmaple.com'
-                    pk12File = project.file('another-secret.pk12')
+                    serviceAccountCredentials = project.file('another-secret.pk12')
                 }
             }
 
@@ -414,7 +414,7 @@ class PlayPublisherPluginTest {
             playAccountConfigs {
                 defaultAccountConfig {
                     serviceAccountEmail = 'default@exmaple.com'
-                    pk12File = project.file('first-secret.pk12')
+                    serviceAccountCredentials = project.file('first-secret.pk12')
                 }
             }
 
@@ -425,32 +425,19 @@ class PlayPublisherPluginTest {
         project.evaluate()
 
         assertEquals('default@exmaple.com', project.tasks.bootstrapReleasePlayResources.accountConfig.serviceAccountEmail)
-        assertEquals('default@exmaple.com', project.tasks.publishApkRelease.accountConfig.serviceAccountEmail)
-        assertEquals('default@exmaple.com', project.tasks.publishListingRelease.accountConfig.serviceAccountEmail)
+        assertEquals('default@exmaple.com', project.tasks.publishReleaseApk.accountConfig.serviceAccountEmail)
+        assertEquals('default@exmaple.com', project.tasks.publishReleaseListing.accountConfig.serviceAccountEmail)
     }
 
     @Test
     void allTasksExist_AndDependOnBaseTasks_WithNoProductFlavor() {
         def project = TestHelper.evaluatableProject()
-
-        project.android {
-            playAccountConfigs {
-                defaultAccountConfig {
-                    serviceAccountEmail = 'default@exmaple.com'
-                    pk12File = project.file('first-secret.pk12')
-                }
-            }
-
-            defaultConfig {
-                playAccountConfig = playAccountConfigs.defaultAccountConfig
-            }
-        }
         project.evaluate()
 
-        assertThat(project.tasks.bootstrapAll, dependsOn('bootstrapReleasePlayResources'))
-        assertThat(project.tasks.publishAll, dependsOn('publishRelease'))
-        assertThat(project.tasks.publishApkAll, dependsOn('publishApkRelease'))
-        assertThat(project.tasks.publishListingAll, dependsOn('publishListingRelease'))
+        assertThat(project.tasks.bootstrap, dependsOn('bootstrapReleasePlayResources'))
+        assertThat(project.tasks.publish, dependsOn('publishRelease'))
+        assertThat(project.tasks.publishApk, dependsOn('publishReleaseApk'))
+        assertThat(project.tasks.publishListing, dependsOn('publishReleaseListing'))
         assertThat(project.tasks.modify, dependsOn('modifyRelease'))
     }
 
@@ -459,17 +446,6 @@ class PlayPublisherPluginTest {
         def project = TestHelper.evaluatableProject()
 
         project.android {
-            playAccountConfigs {
-                defaultAccountConfig {
-                    serviceAccountEmail = 'default@exmaple.com'
-                    pk12File = project.file('first-secret.pk12')
-                }
-            }
-
-            defaultConfig {
-                playAccountConfig = playAccountConfigs.defaultAccountConfig
-            }
-
             flavorDimensions "mode", "variant"
 
             productFlavors {
@@ -490,28 +466,28 @@ class PlayPublisherPluginTest {
         }
         project.evaluate()
 
-        assertThat(project.tasks.bootstrapAll, dependsOn('bootstrapDemoFreeReleasePlayResources'))
-        assertThat(project.tasks.publishAll, dependsOn('publishDemoFreeRelease'))
-        assertThat(project.tasks.publishApkAll, dependsOn('publishApkDemoFreeRelease'))
-        assertThat(project.tasks.publishListingAll, dependsOn('publishListingDemoFreeRelease'))
+        assertThat(project.tasks.bootstrap, dependsOn('bootstrapDemoFreeReleasePlayResources'))
+        assertThat(project.tasks.publish, dependsOn('publishDemoFreeRelease'))
+        assertThat(project.tasks.publishApk, dependsOn('publishDemoFreeReleaseApk'))
+        assertThat(project.tasks.publishListing, dependsOn('publishDemoFreeReleaseListing'))
         assertThat(project.tasks.modify, dependsOn('modifyDemoFreeRelease'))
 
-        assertThat(project.tasks.bootstrapAll, dependsOn('bootstrapDemoPaidReleasePlayResources'))
-        assertThat(project.tasks.publishAll, dependsOn('publishDemoPaidRelease'))
-        assertThat(project.tasks.publishApkAll, dependsOn('publishApkDemoPaidRelease'))
-        assertThat(project.tasks.publishListingAll, dependsOn('publishListingDemoPaidRelease'))
+        assertThat(project.tasks.bootstrap, dependsOn('bootstrapDemoPaidReleasePlayResources'))
+        assertThat(project.tasks.publish, dependsOn('publishDemoPaidRelease'))
+        assertThat(project.tasks.publishApk, dependsOn('publishDemoPaidReleaseApk'))
+        assertThat(project.tasks.publishListing, dependsOn('publishDemoPaidReleaseListing'))
         assertThat(project.tasks.modify, dependsOn('modifyDemoPaidRelease'))
 
-        assertThat(project.tasks.bootstrapAll, dependsOn('bootstrapProductionFreeReleasePlayResources'))
-        assertThat(project.tasks.publishAll, dependsOn('publishProductionFreeRelease'))
-        assertThat(project.tasks.publishApkAll, dependsOn('publishApkProductionFreeRelease'))
-        assertThat(project.tasks.publishListingAll, dependsOn('publishListingProductionFreeRelease'))
+        assertThat(project.tasks.bootstrap, dependsOn('bootstrapProductionFreeReleasePlayResources'))
+        assertThat(project.tasks.publish, dependsOn('publishProductionFreeRelease'))
+        assertThat(project.tasks.publishApk, dependsOn('publishProductionFreeReleaseApk'))
+        assertThat(project.tasks.publishListing, dependsOn('publishProductionFreeReleaseListing'))
         assertThat(project.tasks.modify, dependsOn('modifyProductionFreeRelease'))
 
-        assertThat(project.tasks.bootstrapAll, dependsOn('bootstrapProductionPaidReleasePlayResources'))
-        assertThat(project.tasks.publishAll, dependsOn('publishProductionPaidRelease'))
-        assertThat(project.tasks.publishApkAll, dependsOn('publishApkProductionPaidRelease'))
-        assertThat(project.tasks.publishListingAll, dependsOn('publishListingProductionPaidRelease'))
+        assertThat(project.tasks.bootstrap, dependsOn('bootstrapProductionPaidReleasePlayResources'))
+        assertThat(project.tasks.publish, dependsOn('publishProductionPaidRelease'))
+        assertThat(project.tasks.publishApk, dependsOn('publishProductionPaidReleaseApk'))
+        assertThat(project.tasks.publishListing, dependsOn('publishProductionPaidReleaseListing'))
         assertThat(project.tasks.modify, dependsOn('modifyProductionPaidRelease'))
     }
 }

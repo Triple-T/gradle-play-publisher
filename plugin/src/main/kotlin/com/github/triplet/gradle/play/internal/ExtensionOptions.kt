@@ -44,17 +44,6 @@ internal interface ExtensionOptions {
             extension.userFraction = value.toDouble()
         }
 
-    @get:Internal
-    @set:Option(
-            option = "trim-on-size-limit",
-            description = "Trim listing details instead of failing should they be too large."
-    )
-    var trimOnSizeLimitOption: Boolean
-        get() = throw UnsupportedOperationException()
-        set(value) {
-            extension.errorOnSizeLimit = !value
-        }
-
     @get:OptionValues("resolution-strategy")
     val resolutionStrategyOptions
         get() = ResolutionStrategy.values().map { it.publishedName }
