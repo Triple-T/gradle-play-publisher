@@ -15,6 +15,7 @@ import com.github.triplet.gradle.play.internal.isDirectChildOf
 import com.github.triplet.gradle.play.internal.normalized
 import com.github.triplet.gradle.play.internal.nullOrFull
 import com.github.triplet.gradle.play.internal.orNull
+import com.github.triplet.gradle.play.internal.safeMkdirs
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Internal
@@ -82,6 +83,8 @@ open class GenerateResources : DefaultTask() {
                         }
                     }
         }
+
+        ensureRootsExist()
     }
 
     private fun File.validate() {
@@ -132,6 +135,18 @@ open class GenerateResources : DefaultTask() {
         validateListings()
         validateReleaseNotes()
         validateProducts()
+    }
+
+    /**
+     * See https://github.com/gradle/gradle/issues/2016 to understand why this is necessary.
+     * Evaluation happens too early which means we either crash or our directories are ignored. To
+     * circumvent this issue, we simply make sure our inputs always exist.
+     */
+    private fun ensureRootsExist() = listOf(
+            LISTINGS_PATH,
+            RELEASE_NOTES_PATH
+    ).map { File(resDir, it) }.forEach {
+        it.safeMkdirs()
     }
 
     private fun File.findDest() = File(resDir, toRelativeString(findOwner()))
