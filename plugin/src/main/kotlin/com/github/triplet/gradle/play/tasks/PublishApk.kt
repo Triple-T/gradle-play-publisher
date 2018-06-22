@@ -65,7 +65,14 @@ open class PublishApk : PlayPublishPackageBase() {
 
             if (file.isDirectChildOf(EXPANSION_FILES_PATH)) changedExpansionFiles += file
         }
-        inputs.removed { project.delete(File(outputDir, it.file.name)) }
+        inputs.removed {
+            val file = it.file
+
+            project.delete(File(outputDir, file.name))
+            if (file.isDirectChildOf(EXPANSION_FILES_PATH)) {
+                project.delete(getOobCodeFile(file.nameWithoutExtension))
+            }
+        }
 
         if (publishedApks.isNotEmpty()) {
             val versionCodes = publishedApks.map { it.versionCode }
@@ -123,9 +130,7 @@ open class PublishApk : PlayPublishPackageBase() {
             versionCodes: List<Int>,
             changedExpansionFiles: List<File>
     ) {
-        val savedCodeFiles = expansionFileTypes.map {
-            File(outputDir, "oob-code-${variant.baseName}.$it")
-        }
+        val savedCodeFiles = expansionFileTypes.map { getOobCodeFile(it) }
 
         progressLogger.progress("Linking expansion files to new APKs")
         for (file in savedCodeFiles) {
@@ -171,6 +176,8 @@ open class PublishApk : PlayPublishPackageBase() {
             }
         }
     }
+
+    private fun getOobCodeFile(name: String) = File(outputDir, "oob-code-${variant.baseName}.$name")
 
     private companion object {
         const val MIME_TYPE_APK = "application/vnd.android.package-archive"
