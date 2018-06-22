@@ -161,7 +161,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "Uploads App Bundle for $variantName."
             ) {
                 init()
-                releaseNotesDir = File(playResourcesTask.resDir, RELEASE_NOTES_PATH)
+                resDir = playResourcesTask.resDir
 
                 dependsOn(processPackageMetadata)
                 dependsOn(playResourcesTask)
