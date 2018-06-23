@@ -1,8 +1,11 @@
+import org.ajoberstar.grgit.Grgit
+
 plugins {
     id("org.jetbrains.kotlin.jvm")
     id("groovy")
     id("java-gradle-plugin")
-    id("com.vanniktech.maven.publish")
+    id("com.gradle.plugin-publish") version "0.9.10"
+    id("org.ajoberstar.grgit") version "2.2.1"
 }
 
 dependencies {
@@ -30,4 +33,38 @@ gradlePlugin {
             implementationClass = "com.github.triplet.gradle.play.PlayPublisherPlugin"
         }
     }
+}
+
+pluginBundle {
+    website = "https://github.com/Triple-T/gradle-play-publisher"
+    vcsUrl = "https://github.com/Triple-T/gradle-play-publisher"
+    description = "Upload APKs and App Bundles to the Google Play Store"
+
+    (plugins) {
+        "playPublisherPlugin" {
+            id = "com.github.triplet.play"
+            displayName = "Gradle Play Publisher"
+            tags = listOf("android", "google-play")
+        }
+    }
+
+    mavenCoordinates {
+        groupId = "com.github.triplet.gradle"
+        artifactId = "play-publisher"
+    }
+}
+
+afterEvaluate {
+    tasks["jar"].dependsOn(task("applyVersion").doFirst {
+        var pluginVersion = "2.0.0"
+
+        if (System.getenv("TRAVIS_REPO_SLUG") != null) { // Improve local perf
+            // Comment out to release stable version
+            pluginVersion += "-" + Grgit.open {
+                it.dir = rootProject.projectDir
+            }.head().abbreviatedId
+        }
+
+        version = pluginVersion
+    })
 }
