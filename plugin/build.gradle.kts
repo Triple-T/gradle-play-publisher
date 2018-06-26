@@ -59,7 +59,7 @@ pluginBundle {
 }
 
 afterEvaluate {
-    tasks["jar"].dependsOn(task("applyVersion").doFirst {
+    tasks["jar"].dependsOn(task("applyVersion").doLast {
         var pluginVersion = "2.0.0"
 
         if (System.getenv("TRAVIS_REPO_SLUG") != null) { // Improve local perf
