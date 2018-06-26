@@ -52,6 +52,10 @@ pluginBundle {
         groupId = "com.github.triplet.gradle"
         artifactId = "play-publisher"
     }
+
+    withDependencies {
+        checkNotNull(find { it.groupId == "com.android.tools.build" }).scope = "provided"
+    }
 }
 
 afterEvaluate {
