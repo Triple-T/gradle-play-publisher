@@ -35,8 +35,8 @@ gradlePlugin {
 }
 
 afterEvaluate {
-    fun MavenPom.removeTestDependencies() {
-        whenConfigured {
+    fun PomFilterContainer.removeTestDependencies() {
+        pom.whenConfigured {
             dependencies.removeIf {
                 // Stolen from JetBrains' own sample at
                 // https://github.com/JetBrains/kotlin/blob/v1.2.50/buildSrc/src/main/kotlin/plugins/PublishedKotlinModule.kt#L86
@@ -46,14 +46,10 @@ afterEvaluate {
     }
 
     (tasks["uploadArchives"] as? Upload?)?.let {
-        (it.repositories["mavenDeployer"] as? PomFilterContainer?)?.let {
-            it.pom.removeTestDependencies()
-        }
+        (it.repositories["mavenDeployer"] as PomFilterContainer).removeTestDependencies()
     }
 
     (tasks["install"] as? Upload?)?.let {
-        (it.repositories["mavenInstaller"] as? PomFilterContainer?)?.let {
-            it.pom.removeTestDependencies()
-        }
+        (it.repositories["mavenInstaller"] as PomFilterContainer).removeTestDependencies()
     }
 }
