@@ -1,10 +1,6 @@
 package com.github.triplet.gradle.play.internal
 
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.*
 import java.io.File
 
 interface AccountConfig {
@@ -17,11 +13,11 @@ interface AccountConfig {
      */
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFile
+    @get:Optional
     var serviceAccountCredentials: File?
 
     /** Service Account email. Only needed if PKCS12 credentials are used. */
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    @get:InputFile
+    @get:Input
     @get:Optional
     var serviceAccountEmail: String?
 }
