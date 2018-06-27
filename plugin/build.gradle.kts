@@ -45,11 +45,9 @@ afterEvaluate {
         }
     }
 
-    (tasks["uploadArchives"] as? Upload?)?.let {
-        (it.repositories["mavenDeployer"] as PomFilterContainer).removeTestDependencies()
-    }
-
-    (tasks["install"] as? Upload?)?.let {
-        (it.repositories["mavenInstaller"] as PomFilterContainer).removeTestDependencies()
+    tasks.withType<Upload> {
+        repositories.forEach {
+            (it as? PomFilterContainer)?.removeTestDependencies()
+        }
     }
 }
