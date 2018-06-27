@@ -12,8 +12,8 @@ import java.io.File
 data class PlayAccountConfigExtension @JvmOverloads constructor(
         @get:Internal internal val name: String = "", // Needed for Gradle
 
-        @get:PathSensitive(PathSensitivity.RELATIVE) @get:InputFile @get:Optional
+        @get:PathSensitive(PathSensitivity.RELATIVE) @get:Optional @get:InputFile
         override var serviceAccountCredentials: File? = null,
-        @get:Input @get:Optional
+        @get:Optional @get:Input
         override var serviceAccountEmail: String? = null
 ) : AccountConfig

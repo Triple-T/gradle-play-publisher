@@ -17,12 +17,12 @@ interface AccountConfig {
      * PKCS12 to work, the [serviceAccountEmail] must be specified.
      */
     @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:Optional // Optional because it could be set in the `playAccountConfigs`
     @get:InputFile
-    @get:Optional
     var serviceAccountCredentials: File?
 
     /** Service Account email. Only needed if PKCS12 credentials are used. */
-    @get:Input
     @get:Optional
+    @get:Input
     var serviceAccountEmail: String?
 }
