@@ -21,8 +21,9 @@ internal inline fun <reified T : Task> Project.newTask(
         name: String,
         description: String,
         group: String? = PLUGIN_GROUP,
+        vararg args: Any?,
         block: T.() -> Unit = {}
-): T = tasks.create(name, T::class.java).apply {
+): T = tasks.create(name, T::class.java, *args).apply {
     this.description = description
     this.group = group
     block()
