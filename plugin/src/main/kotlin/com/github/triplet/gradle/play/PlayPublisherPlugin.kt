@@ -55,9 +55,10 @@ class PlayPublisherPlugin : Plugin<Project> {
                 "Uploads all Play Store metadata for every variant.",
                 args = *arrayOf(extension)
         )
-        val publishProductsAllTask = project.newTask<Task>(
+        val publishProductsAllTask = project.newTask<LifecycleHelperTask>(
                 "publishProducts",
-                "Uploads all Play Store in-app products for every variant."
+                "Uploads all Play Store in-app products for every variant.",
+                args = *arrayOf(extension)
         )
 
         project.initPlayAccountConfigs(android)
