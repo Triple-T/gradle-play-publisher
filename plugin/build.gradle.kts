@@ -1,3 +1,5 @@
+import org.codehaus.groovy.runtime.InvokerHelper
+
 plugins {
     id("org.jetbrains.kotlin.jvm")
     id("groovy")
@@ -28,6 +30,24 @@ gradlePlugin {
         create("play") {
             id = "com.github.triplet.play"
             implementationClass = "com.github.triplet.gradle.play.PlayPublisherPlugin"
+        }
+    }
+}
+
+afterEvaluate {
+    fun PomFilterContainer.removeTestDependencies() {
+        pom.whenConfigured {
+            dependencies.removeIf {
+                // Stolen from JetBrains' own sample at
+                // https://github.com/JetBrains/kotlin/blob/v1.2.50/buildSrc/src/main/kotlin/plugins/PublishedKotlinModule.kt#L86
+                InvokerHelper.getMetaClass(it).getProperty(it, "scope") == "test"
+            }
+        }
+    }
+
+    tasks.withType<Upload> {
+        repositories.forEach {
+            (it as? PomFilterContainer)?.removeTestDependencies()
         }
     }
 }
