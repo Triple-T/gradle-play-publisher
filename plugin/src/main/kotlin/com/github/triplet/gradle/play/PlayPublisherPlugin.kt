@@ -4,7 +4,6 @@ import com.android.build.gradle.AppExtension
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.internal.ACCOUNT_CONFIG
 import com.github.triplet.gradle.play.internal.AccountConfig
-import com.github.triplet.gradle.play.internal.EXPANSION_FILES_PATH
 import com.github.triplet.gradle.play.internal.LifecycleHelperTask
 import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
