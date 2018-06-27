@@ -12,17 +12,21 @@ internal tailrec fun File.findClosestDir(): File {
 internal fun File.climbUpTo(parentName: String): File? =
         if (name == parentName) this else parentFile?.climbUpTo(parentName)
 
-internal fun File.readProcessed(maxLength: Int) =
-        readText().normalized().throwOnOverflow(maxLength, this)
-
 internal fun File.isChildOf(parentName: String) = climbUpTo(parentName) != null
 
 internal fun File.isDirectChildOf(parentName: String) = parentFile?.name == parentName
 
+internal fun File.safeMkdirs() = apply {
+    check(exists() || mkdirs()) { "Unable to create $this" }
+}
+
 internal fun File.safeCreateNewFile() = apply {
-    check(parentFile.exists() || parentFile.mkdirs()) { "Unable to create $parentFile" }
+    parentFile.safeMkdirs()
     check(exists() || createNewFile()) { "Unable to create $this" }
 }
+
+internal fun File.readProcessed(maxLength: Int) =
+        readText().normalized().throwOnOverflow(maxLength, this)
 
 internal fun String.normalized() = replace(Regex("\\r\\n"), "\n").trim()
 
