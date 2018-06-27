@@ -4,9 +4,9 @@ import com.android.build.gradle.AppExtension
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.internal.ACCOUNT_CONFIG
 import com.github.triplet.gradle.play.internal.AccountConfig
+import com.github.triplet.gradle.play.internal.LifecycleHelperTask
 import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
-import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
 import com.github.triplet.gradle.play.internal.flavorNameOrDefault
 import com.github.triplet.gradle.play.internal.get
 import com.github.triplet.gradle.play.internal.newTask
@@ -33,21 +33,25 @@ class PlayPublisherPlugin : Plugin<Project> {
         val extension: PlayPublisherExtension =
                 project.extensions.create(PLAY_PATH, PlayPublisherExtension::class.java)
 
-        val bootstrapAllTask = project.newTask<Task>(
+        val bootstrapAllTask = project.newTask<LifecycleHelperTask>(
                 "bootstrap",
-                "Downloads the Play Store listing metadata for all variants."
+                "Downloads the Play Store listing metadata for all variants.",
+                args = *arrayOf(extension)
         )
-        val publishAllTask = project.newTask<Task>(
+        val publishAllTask = project.newTask<LifecycleHelperTask>(
                 "publish",
-                "Uploads APK or App Bundle and all Play Store metadata for every variant."
+                "Uploads APK or App Bundle and all Play Store metadata for every variant.",
+                args = *arrayOf(extension)
         )
-        val publishApkAllTask = project.newTask<Task>(
+        val publishApkAllTask = project.newTask<LifecycleHelperTask>(
                 "publishApk",
-                "Uploads APK for every variant."
+                "Uploads APK for every variant.",
+                args = *arrayOf(extension)
         )
-        val publishListingAllTask = project.newTask<Task>(
+        val publishListingAllTask = project.newTask<LifecycleHelperTask>(
                 "publishListing",
-                "Uploads all Play Store metadata for every variant."
+                "Uploads all Play Store metadata for every variant.",
+                args = *arrayOf(extension)
         )
 
         project.initPlayAccountConfigs(android)
@@ -135,7 +139,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "Uploads APK for $variantName."
             ) {
                 init()
-                releaseNotesDir = File(playResourcesTask.resDir, RELEASE_NOTES_PATH)
+                resDir = playResourcesTask.resDir
 
                 dependsOn(processPackageMetadata)
                 dependsOn(playResourcesTask)
@@ -150,9 +154,10 @@ class PlayPublisherPlugin : Plugin<Project> {
                 }
             }
 
-            project.newTask<Task>(
+            project.newTask<LifecycleHelperTask>(
                     "publish$variantName",
-                    "Uploads all Play Store metadata for $variantName."
+                    "Uploads all Play Store metadata for $variantName.",
+                    args = *arrayOf(extension)
             ) {
                 dependsOn(publishApkTask)
                 dependsOn(publishListingTask)
