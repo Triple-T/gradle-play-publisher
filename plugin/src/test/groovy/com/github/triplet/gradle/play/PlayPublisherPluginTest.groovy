@@ -257,6 +257,29 @@ class PlayPublisherPluginTest {
     }
 
     @Test
+    void testModifyTask() {
+        def project = TestHelper.evaluatableProject()
+
+        project.android {
+            flavorDimensions 'pricing'
+
+            productFlavors {
+                free {
+                    dimension 'pricing'
+                }
+                paid {
+                    dimension 'pricing'
+                }
+            }
+        }
+
+        project.evaluate()
+
+        assertNotNull(project.tasks.modifyFreeRelease)
+        assertNotNull(project.tasks.modifyPaidRelease)
+    }
+
+    @Test
     void testJsonFileBackwardsCompatibility() {
         def project = TestHelper.evaluatableProject()
 
@@ -415,6 +438,7 @@ class PlayPublisherPluginTest {
         assertThat(project.tasks.publish, dependsOn('publishRelease'))
         assertThat(project.tasks.publishApk, dependsOn('publishReleaseApk'))
         assertThat(project.tasks.publishListing, dependsOn('publishReleaseListing'))
+        assertThat(project.tasks.modify, dependsOn('modifyRelease'))
     }
 
     @Test
@@ -446,20 +470,24 @@ class PlayPublisherPluginTest {
         assertThat(project.tasks.publish, dependsOn('publishDemoFreeRelease'))
         assertThat(project.tasks.publishApk, dependsOn('publishDemoFreeReleaseApk'))
         assertThat(project.tasks.publishListing, dependsOn('publishDemoFreeReleaseListing'))
+        assertThat(project.tasks.modify, dependsOn('modifyDemoFreeRelease'))
 
         assertThat(project.tasks.bootstrap, dependsOn('bootstrapDemoPaidReleasePlayResources'))
         assertThat(project.tasks.publish, dependsOn('publishDemoPaidRelease'))
         assertThat(project.tasks.publishApk, dependsOn('publishDemoPaidReleaseApk'))
         assertThat(project.tasks.publishListing, dependsOn('publishDemoPaidReleaseListing'))
+        assertThat(project.tasks.modify, dependsOn('modifyDemoPaidRelease'))
 
         assertThat(project.tasks.bootstrap, dependsOn('bootstrapProductionFreeReleasePlayResources'))
         assertThat(project.tasks.publish, dependsOn('publishProductionFreeRelease'))
         assertThat(project.tasks.publishApk, dependsOn('publishProductionFreeReleaseApk'))
         assertThat(project.tasks.publishListing, dependsOn('publishProductionFreeReleaseListing'))
+        assertThat(project.tasks.modify, dependsOn('modifyProductionFreeRelease'))
 
         assertThat(project.tasks.bootstrap, dependsOn('bootstrapProductionPaidReleasePlayResources'))
         assertThat(project.tasks.publish, dependsOn('publishProductionPaidRelease'))
         assertThat(project.tasks.publishApk, dependsOn('publishProductionPaidReleaseApk'))
         assertThat(project.tasks.publishListing, dependsOn('publishProductionPaidReleaseListing'))
+        assertThat(project.tasks.modify, dependsOn('modifyProductionPaidRelease'))
     }
 }

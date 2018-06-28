@@ -24,6 +24,26 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
             }
         }
 
+    @get:Internal("Backing property for public input")
+    internal var _fromTrack: TrackType? = null
+    /**
+     * Specify the track for your app that will be modified. May be one of internal, alpha, beta, rollout,
+     * or production. Default is internal.
+     */
+    @get:Input
+    internal var fromTrack
+        get() = _fromTrack?.publishedName
+        set(value) {
+            if (value.isNullOrBlank()) {
+                _fromTrack = null
+                return
+            }
+
+            _fromTrack = requireNotNull(TrackType.values().find { it.publishedName == value }) {
+                "Track to modify must be one of ${TrackType.values().joinToString { "'${it.publishedName}'" }}"
+            }
+        }
+
     /**
      * Specify the initial user percent intended to receive a 'rollout' update (see [track]).
      * Default is 10% == 0.1.

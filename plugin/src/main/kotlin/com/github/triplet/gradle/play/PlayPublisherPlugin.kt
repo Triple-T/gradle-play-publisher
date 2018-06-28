@@ -15,6 +15,7 @@ import com.github.triplet.gradle.play.internal.set
 import com.github.triplet.gradle.play.internal.validate
 import com.github.triplet.gradle.play.tasks.Bootstrap
 import com.github.triplet.gradle.play.tasks.GenerateResources
+import com.github.triplet.gradle.play.tasks.ModifyRelease
 import com.github.triplet.gradle.play.tasks.ProcessPackageMetadata
 import com.github.triplet.gradle.play.tasks.PublishApk
 import com.github.triplet.gradle.play.tasks.PublishListing
@@ -52,6 +53,10 @@ class PlayPublisherPlugin : Plugin<Project> {
                 "publishListing",
                 "Uploads all Play Store metadata for every variant.",
                 args = *arrayOf(extension)
+        )
+        val modifyAllTask = project.newTask<Task>(
+                "modify",
+                "Applies release modification options to all published variants."
         )
 
         project.initPlayAccountConfigs(android)
@@ -162,6 +167,14 @@ class PlayPublisherPlugin : Plugin<Project> {
                 dependsOn(publishApkTask)
                 dependsOn(publishListingTask)
                 publishAllTask.dependsOn(this)
+            }
+
+            project.newTask<ModifyRelease>(
+                    "modify$variantName",
+                    "Applies release modification options to $variantName."
+            ) {
+                init()
+                modifyAllTask.dependsOn(this)
             }
         }
 
