@@ -12,7 +12,10 @@ import java.io.File
 import java.net.URI
 
 @RunWith(Parameterized::class)
-class CompatibilityTest(val agpVersion: String) {
+class CompatibilityTest(
+        val agpVersion: String,
+        val gradleVersion: String
+) {
     private lateinit var testProject: Project
     private lateinit var pluginProjectDir: File
 
@@ -26,10 +29,10 @@ class CompatibilityTest(val agpVersion: String) {
 
     @Test
     fun pluginIsCompatible() {
-        assert(pluginTest(agpVersion))
+        assert(pluginTest())
     }
 
-    private fun pluginTest(appAgpVersion: String): Boolean {
+    private fun pluginTest(): Boolean {
         val pluginJar = File(pluginProjectDir, "/build/libs")
                 .listFiles()
                 .first {
@@ -47,7 +50,7 @@ class CompatibilityTest(val agpVersion: String) {
                 jcenter()
             }
             dependencies {
-                classpath 'com.android.tools.build:gradle:$appAgpVersion'
+                classpath 'com.android.tools.build:gradle:$agpVersion'
                 classpath files("$pluginJar")
             }
         }
@@ -70,17 +73,23 @@ class CompatibilityTest(val agpVersion: String) {
                 versionName "1.0"
             }
         }
+
+        play {
+            serviceAccountCredentials = file('some-file.json')
+        }
         """)
+
+        val gradleDist = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
 
         GradleRunner.create()
                 .withPluginClasspath()
-                .withGradleDistribution(URI(GRADLE_DIST))
+                .withGradleDistribution(URI(gradleDist))
                 .withProjectDir(testProject.projectDir)
                 .withArguments("tasks")
                 .build()
         GradleRunner.create()
                 .withPluginClasspath()
-                .withGradleDistribution(URI(GRADLE_DIST))
+                .withGradleDistribution(URI(gradleDist))
                 .withProjectDir(testProject.projectDir)
                 .withArguments("clean")
                 .build()
@@ -94,10 +103,13 @@ class CompatibilityTest(val agpVersion: String) {
     }
 
     private companion object {
-        const val GRADLE_DIST = "https://services.gradle.org/distributions/gradle-4.6-all.zip"
-
         @JvmStatic
-        @Parameterized.Parameters(name = "{index}: {0}")
-        fun agpVersions() = listOf("3.0.1", "3.1.3", "3.2.0-beta02")
+        @Parameterized.Parameters(name = "agpVersion: {0}, gradleVersion {1}")
+        fun parameters() = listOf(
+                arrayOf("3.0.1", "4.6"),
+                arrayOf("3.0.1", "4.8"),
+                arrayOf("3.1.3", "4.6"),
+                arrayOf("3.1.3", "4.8")
+        )
     }
 }
