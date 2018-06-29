@@ -51,3 +51,7 @@ afterEvaluate {
         }
     }
 }
+
+// our integration tests need a fully compiled jar
+tasks["check"].dependsOn(tasks["assemble"])
+tasks["test"].dependsOn(tasks["assemble"])
