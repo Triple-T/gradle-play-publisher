@@ -22,14 +22,12 @@ open class PublishBundle : PlayPublishPackageBase() {
     @get:InputFile
     val bundle by lazy {
         // TODO: If we take a customizable folder, we can fix #233, #227
-        File(project.buildDir, "outputs/bundle/${variant.name}/bundle.aab")
+        File(project.buildDir, "outputs/bundle/${variant.name}/${project.name}.aab")
     }
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputDirectory
-    val outputDir by lazy {
-        File(project.buildDir, "${variant.playPath}/bundles/${variant.name}")
-    }
+    val outputDir by lazy { File(project.buildDir, "${variant.playPath}/bundles") }
 
     @TaskAction
     fun publishBundle(inputs: IncrementalTaskInputs) = write { editId: String ->
