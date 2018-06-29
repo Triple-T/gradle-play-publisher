@@ -175,7 +175,9 @@ class PlayPublisherPlugin : Plugin<Project> {
                 project.tasks.findByName(
                         (variant as InstallableVariantImpl).variantData.getTaskName("bundle", ""))
                         ?.let { dependsOn(it) }
-                        ?: logger.warn("Bundle task not found. Publishing App Bundles may not work.")
+                        ?: logger.warn("Bundle task not found, make sure to use " +
+                                               "'com.android.tools.build:gradle:3.2.+'. " +
+                                               "Publishing App Bundles may not work.")
                 publishBundleAllTask.dependsOn(this)
             }
 
