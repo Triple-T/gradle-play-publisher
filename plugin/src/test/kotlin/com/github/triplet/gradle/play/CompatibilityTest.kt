@@ -52,6 +52,12 @@ class CompatibilityTest(
             dependencies {
                 classpath 'com.android.tools.build:gradle:$agpVersion'
                 classpath files("$pluginJar")
+
+                // manually defining transitive dependencies for our plugin
+                // as we don't have the pom but only the compiled jar
+                classpath('com.google.apis:google-api-services-androidpublisher:v3-rev12-1.23.0') {
+                    exclude group: 'com.google.guava', module: 'guava-jdk5'
+                }
             }
         }
 
