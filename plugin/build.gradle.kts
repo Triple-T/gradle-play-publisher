@@ -52,12 +52,12 @@ afterEvaluate {
     }
 }
 
-(tasks["test"] as Test).let { test ->
-    // our integration tests need a fully compiled jar
-    test.dependsOn(tasks["assemble"])
+tasks.withType<Test> {
+    // Our integration tests need a fully compiled jar
+    dependsOn("assemble")
 
-    // those tests also need to know which version code was built
-    property("VERSION_NAME")?.let {
-        test.systemProperty("VERSION_NAME", it)
+    // Those tests also need to know which version code was built
+    project.property("VERSION_NAME")?.let {
+        systemProperty("VERSION_NAME", it)
     }
 }

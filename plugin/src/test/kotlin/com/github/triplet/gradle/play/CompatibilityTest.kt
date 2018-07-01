@@ -40,6 +40,7 @@ class CompatibilityTest(
                 .absoluteFile
                 .invariantSeparatorsPath
 
+        // language=gradle
         File(testProject.projectDir, "build.gradle").writeText("""
         buildscript {
             repositories {
@@ -50,8 +51,8 @@ class CompatibilityTest(
                 classpath 'com.android.tools.build:gradle:$agpVersion'
                 classpath files("$pluginJar")
 
-                // manually defining transitive dependencies for our plugin
-                // as we don't have the pom but only the compiled jar
+                // Manually define transitive dependencies for our plugin since we don't have the
+                // POM to fetch them for us
                 classpath('com.google.apis:google-api-services-androidpublisher:v3-rev12-1.23.0') {
                     exclude group: 'com.google.guava', module: 'guava-jdk5'
                 }
@@ -109,12 +110,12 @@ class CompatibilityTest(
         @JvmStatic
         @Parameterized.Parameters(name = "agpVersion: {0}, gradleVersion {1}")
         fun parameters() = listOf(
-                // agp 3.0.1, requires at least gradle 4.1
+                // AGP 3.0.1, requires at least gradle 4.1
                 arrayOf("3.0.1", "4.2"),
                 arrayOf("3.0.1", "4.3"),
-                // agp 3.1.3, requires at least gradle 4.4
+                // AGP 3.1.3, requires at least gradle 4.4
                 arrayOf("3.1.3", "4.4"),
-                // agp 3.2.0, requires at least gradle 4.6
+                // AGP 3.2.0, requires at least gradle 4.6
                 arrayOf("3.2.0-beta02", "4.6"),
                 arrayOf("3.2.0-beta02", "4.8")
         )
