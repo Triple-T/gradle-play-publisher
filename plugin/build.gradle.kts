@@ -51,3 +51,13 @@ afterEvaluate {
         }
     }
 }
+
+tasks.withType<Test> {
+    // Our integration tests need a fully compiled jar
+    dependsOn("assemble")
+
+    // Those tests also need to know which version code was built
+    project.property("VERSION_NAME")?.let {
+        systemProperty("VERSION_NAME", it)
+    }
+}

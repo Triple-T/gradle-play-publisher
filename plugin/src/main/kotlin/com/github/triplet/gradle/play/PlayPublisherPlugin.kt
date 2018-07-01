@@ -35,24 +35,20 @@ class PlayPublisherPlugin : Plugin<Project> {
 
         val bootstrapAllTask = project.newTask<LifecycleHelperTask>(
                 "bootstrap",
-                "Downloads the Play Store listing metadata for all variants.",
-                args = *arrayOf(extension)
-        )
+                "Downloads the Play Store listing metadata for all variants."
+        ) { this.extension = extension }
         val publishAllTask = project.newTask<LifecycleHelperTask>(
                 "publish",
-                "Uploads APK or App Bundle and all Play Store metadata for every variant.",
-                args = *arrayOf(extension)
-        )
+                "Uploads APK or App Bundle and all Play Store metadata for every variant."
+        ) { this.extension = extension }
         val publishApkAllTask = project.newTask<LifecycleHelperTask>(
                 "publishApk",
-                "Uploads APK for every variant.",
-                args = *arrayOf(extension)
-        )
+                "Uploads APK for every variant."
+        ) { this.extension = extension }
         val publishListingAllTask = project.newTask<LifecycleHelperTask>(
                 "publishListing",
-                "Uploads all Play Store metadata for every variant.",
-                args = *arrayOf(extension)
-        )
+                "Uploads all Play Store metadata for every variant."
+        ) { this.extension = extension }
 
         project.initPlayAccountConfigs(android)
         android.applicationVariants.whenObjectAdded { variant ->
@@ -156,9 +152,10 @@ class PlayPublisherPlugin : Plugin<Project> {
 
             project.newTask<LifecycleHelperTask>(
                     "publish$variantName",
-                    "Uploads all Play Store metadata for $variantName.",
-                    args = *arrayOf(extension)
+                    "Uploads all Play Store metadata for $variantName."
             ) {
+                this.extension = extension
+
                 dependsOn(publishApkTask)
                 dependsOn(publishListingTask)
                 publishAllTask.dependsOn(this)
