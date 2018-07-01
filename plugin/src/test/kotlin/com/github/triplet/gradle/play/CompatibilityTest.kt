@@ -13,15 +13,16 @@ import java.net.URI
 
 @RunWith(Parameterized::class)
 class CompatibilityTest(
-        val agpVersion: String,
-        val gradleVersion: String
+        private val agpVersion: String,
+        private val gradleVersion: String
 ) {
+    private val pluginBinaryDir = File("build/libs")
+    private val pluginVersionName = System.getProperty("VERSION_NAME")
+
     private lateinit var testProject: Project
-    private lateinit var pluginProjectDir: File
 
     @Before
     fun setup() {
-        pluginProjectDir = File(".")
         testProject = ProjectBuilder.builder()
                 .withProjectDir(File("src/test/fixtures/android_app"))
                 .build()
@@ -33,14 +34,9 @@ class CompatibilityTest(
     }
 
     private fun pluginTest(): Boolean {
-        val pluginJar = File(pluginProjectDir, "/build/libs")
+        val pluginJar = pluginBinaryDir
                 .listFiles()
-                .first {
-                    // This is ugly, we just want the proper jar from the build folder
-                    it.name.endsWith("jar") &&
-                            !it.name.contains("javadoc", true) &&
-                            !it.name.contains("sources", true)
-                }
+                .first { it.name.endsWith("$pluginVersionName.jar") }
                 .absolutePath
 
         File(testProject.projectDir, "build.gradle").writeText("""
