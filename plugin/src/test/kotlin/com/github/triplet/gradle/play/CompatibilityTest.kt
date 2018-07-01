@@ -37,7 +37,8 @@ class CompatibilityTest(
         val pluginJar = pluginBinaryDir
                 .listFiles()
                 .first { it.name.endsWith("$pluginVersionName.jar") }
-                .absolutePath
+                .absoluteFile
+                .invariantSeparatorsPath
 
         File(testProject.projectDir, "build.gradle").writeText("""
         buildscript {
