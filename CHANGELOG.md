@@ -11,6 +11,7 @@
 * Provide publishing tasks even when `signingConfig` is missing - #244, #298
 * Improve error messages and logging - #238, #268
 * Add status indicators and upload progress - #298
+* Support Android App Bundles - #262, #319
 
 ### Breaking changes
 

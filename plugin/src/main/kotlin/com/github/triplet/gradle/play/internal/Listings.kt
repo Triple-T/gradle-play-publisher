@@ -20,14 +20,24 @@ internal object ImageFileFilter : FileFilter {
     override fun accept(file: File) = file.extension.toLowerCase() in imageExtensions
 }
 
-internal enum class ListingDetail(val fileName: String, val maxLength: Int = Int.MAX_VALUE) {
+internal interface Detail {
+    val fileName: String
+}
+
+internal enum class ListingDetail(
+        override val fileName: String,
+        val maxLength: Int = Int.MAX_VALUE
+) : Detail {
     TITLE("title", 50),
     SHORT_DESCRIPTION("shortdescription", 80),
     FULL_DESCRIPTION("fulldescription", 4000),
     VIDEO("video"),
 }
 
-internal enum class AppDetail(val fileName: String, val maxLength: Int = Int.MAX_VALUE) {
+internal enum class AppDetail(
+        override val fileName: String,
+        val maxLength: Int = Int.MAX_VALUE
+) : Detail {
     CONTACT_EMAIL("contactEmail"),
     CONTACT_PHONE("contactPhone"),
     CONTACT_WEBSITE("contactWebsite"),
@@ -35,10 +45,10 @@ internal enum class AppDetail(val fileName: String, val maxLength: Int = Int.MAX
 }
 
 internal enum class ImageType(
-        val fileName: String,
+        override val fileName: String,
         val constraints: ImageSize = ImageSize(320, 320, 3840, 3840),
         val maxNum: Int = 8
-) {
+) : Detail {
     ICON("icon", ImageSize(512, 512), 1),
     FEATURE_GRAPHIC("featureGraphic", ImageSize(1024, 500), 1),
     PROMO_GRAPHIC("promoGraphic", ImageSize(180, 120), 1),

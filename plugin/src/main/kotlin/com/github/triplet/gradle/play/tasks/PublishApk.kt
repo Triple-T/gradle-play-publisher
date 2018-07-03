@@ -2,14 +2,15 @@ package com.github.triplet.gradle.play.tasks
 
 import com.android.build.gradle.api.ApkVariantOutput
 import com.github.triplet.gradle.play.internal.EXPANSION_FILES_PATH
+import com.github.triplet.gradle.play.internal.MIME_TYPE_STREAM
 import com.github.triplet.gradle.play.internal.PlayPublishPackageBase
-import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.expansionFileTypes
 import com.github.triplet.gradle.play.internal.isDirectChildOf
 import com.github.triplet.gradle.play.internal.nullOrFull
 import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.internal.safeCreateNewFile
+import com.github.triplet.gradle.play.internal.safeMkdirs
 import com.github.triplet.gradle.play.internal.trackUploadProgress
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
@@ -40,7 +41,7 @@ open class PublishApk : PlayPublishPackageBase() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:Optional
     @get:InputDirectory
-    internal val expansionFilesDir by lazy { File(resDir, EXPANSION_FILES_PATH) }
+    internal val expansionFilesDir by lazy { File(resDir, EXPANSION_FILES_PATH).safeMkdirs() }
 
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -85,42 +86,16 @@ open class PublishApk : PlayPublishPackageBase() {
         progressLogger.completed()
     }
 
-    private fun AndroidPublisher.Edits.publishApk(editId: String, apkFile: FileContent): Apk? {
+    private fun AndroidPublisher.Edits.publishApk(editId: String, content: FileContent): Apk? {
         val apk = try {
-            apks().upload(variant.applicationId, editId, apkFile)
+            apks().upload(variant.applicationId, editId, content)
                     .trackUploadProgress(progressLogger, "APK")
                     .execute()
         } catch (e: GoogleJsonResponseException) {
-            val isConflict = e.details.errors.all {
-                it.reason == "apkUpgradeVersionConflict" || it.reason == "apkNoUpgradePath"
-            }
-            if (isConflict) {
-                when (extension._resolutionStrategy) {
-                    ResolutionStrategy.AUTO -> throw IllegalStateException(
-                            "Concurrent uploads for variant ${variant.name}. Make sure to " +
-                                    "synchronously upload your APKs such that they don't conflict.",
-                            e
-                    )
-                    ResolutionStrategy.FAIL -> throw IllegalStateException(
-                            "Version code ${variant.versionCode} is too low for variant ${variant.name}.",
-                            e
-                    )
-                    ResolutionStrategy.IGNORE -> logger.warn(
-                            "Ignoring APK ($apkFile) for version code ${variant.versionCode}")
-                }
-                return null
-            } else {
-                throw e
-            }
+            return e.handleUploadFailures(content.file)
         }
 
-        if (variant.mappingFile?.exists() == true) {
-            val content = FileContent(MIME_TYPE_STREAM, variant.mappingFile)
-            deobfuscationfiles()
-                    .upload(variant.applicationId, editId, apk.versionCode, "proguard", content)
-                    .trackUploadProgress(progressLogger, "mapping file")
-                    .execute()
-        }
+        handlePackageDetails(editId, apk.versionCode)
 
         return apk
     }
@@ -181,6 +156,5 @@ open class PublishApk : PlayPublishPackageBase() {
 
     private companion object {
         const val MIME_TYPE_APK = "application/vnd.android.package-archive"
-        const val MIME_TYPE_STREAM = "application/octet-stream"
     }
 }
