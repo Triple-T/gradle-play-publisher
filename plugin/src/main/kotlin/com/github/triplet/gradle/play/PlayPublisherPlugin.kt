@@ -2,6 +2,7 @@ package com.github.triplet.gradle.play
 
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.api.ApplicationVariant
+import com.android.build.gradle.internal.api.InstallableVariantImpl
 import com.github.triplet.gradle.play.internal.ACCOUNT_CONFIG
 import com.github.triplet.gradle.play.internal.AccountConfig
 import com.github.triplet.gradle.play.internal.LifecycleHelperTask
@@ -17,6 +18,7 @@ import com.github.triplet.gradle.play.tasks.Bootstrap
 import com.github.triplet.gradle.play.tasks.GenerateResources
 import com.github.triplet.gradle.play.tasks.ProcessPackageMetadata
 import com.github.triplet.gradle.play.tasks.PublishApk
+import com.github.triplet.gradle.play.tasks.PublishBundle
 import com.github.triplet.gradle.play.tasks.PublishListing
 import groovy.lang.GroovyObject
 import org.gradle.api.Plugin
@@ -44,6 +46,10 @@ class PlayPublisherPlugin : Plugin<Project> {
         val publishApkAllTask = project.newTask<LifecycleHelperTask>(
                 "publishApk",
                 "Uploads APK for every variant."
+        ) { this.extension = extension }
+        val publishBundleAllTask = project.newTask<LifecycleHelperTask>(
+                "publishBundle",
+                "Uploads App Bundle for every variant."
         ) { this.extension = extension }
         val publishListingAllTask = project.newTask<LifecycleHelperTask>(
                 "publishListing",
@@ -139,7 +145,8 @@ class PlayPublisherPlugin : Plugin<Project> {
 
                 dependsOn(processPackageMetadata)
                 dependsOn(playResourcesTask)
-                dependsOn(variant.assemble)
+                variant.assemble?.let { dependsOn(it) }
+                        ?: logger.warn("Assemble task not found. Publishing APKs may not work.")
                 publishApkAllTask.dependsOn(this)
 
                 // Remove in v3.0
@@ -150,13 +157,33 @@ class PlayPublisherPlugin : Plugin<Project> {
                 }
             }
 
+            val publishBundleTask = project.newTask<PublishBundle>(
+                    "publish${variantName}Bundle",
+                    "Uploads App Bundle for $variantName."
+            ) {
+                init()
+                resDir = playResourcesTask.resDir
+
+                dependsOn(processPackageMetadata)
+                dependsOn(playResourcesTask)
+                // Remove hack when AGP 3.2 reaches stable channel
+                project.tasks.findByName(
+                        (variant as InstallableVariantImpl).variantData.getTaskName("bundle", ""))
+                        ?.let { dependsOn(it) }
+                        ?: logger.warn("Bundle task not found, make sure to use " +
+                                               "'com.android.tools.build:gradle' v3.2+. " +
+                                               "Publishing App Bundles may not work.")
+                publishBundleAllTask.dependsOn(this)
+            }
+
             project.newTask<LifecycleHelperTask>(
                     "publish$variantName",
-                    "Uploads all Play Store metadata for $variantName."
+                    "Uploads APK or App Bundle and all Play Store metadata for $variantName."
             ) {
                 this.extension = extension
 
-                dependsOn(publishApkTask)
+                dependsOn(
+                        if (extension.defaultToAppBundles) publishBundleTask else publishApkTask)
                 dependsOn(publishListingTask)
                 publishAllTask.dependsOn(this)
             }
