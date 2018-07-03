@@ -16,22 +16,23 @@ import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.internal.playPath
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.CacheableTask
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import java.io.File
-import javax.inject.Inject
 
 @CacheableTask
-open class GenerateResources @Inject constructor(
-        private val variant: ApplicationVariant
-) : DefaultTask() {
+open class GenerateResources : DefaultTask() {
+    @get:Internal
+    internal lateinit var variant: ApplicationVariant
+
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputDirectory
-    internal val resDir = File(project.buildDir, "${variant.playPath}/res")
+    internal val resDir by lazy { File(project.buildDir, "${variant.playPath}/res") }
 
     private val resSrcDirs: List<File> by lazy {
         variant.sourceSets.map { project.file("src/${it.name}/$PLAY_PATH") }
@@ -43,7 +44,7 @@ open class GenerateResources @Inject constructor(
         }.lastOrNull() // Pick the most specialized option available. E.g. `paidProdRelease`
     }
 
-    init {
+    fun init() {
         for (dir in resSrcDirs) {
             inputs.dir(dir).skipWhenEmpty().withPathSensitivity(PathSensitivity.RELATIVE)
         }

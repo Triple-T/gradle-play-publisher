@@ -91,9 +91,11 @@ class PlayPublisherPlugin : Plugin<Project> {
             val playResourcesTask = project.newTask<GenerateResources>(
                     "generate${variantName}PlayResources",
                     "Collects Play Store resources for $variantName.",
-                    null,
-                    variant
-            )
+                    null
+            ) {
+                this.variant = variant
+                init()
+            }
 
             val publishListingTask = project.newTask<PublishListing>(
                     "publish${variantName}Listing",
