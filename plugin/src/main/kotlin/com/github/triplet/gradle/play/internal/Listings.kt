@@ -2,7 +2,6 @@ package com.github.triplet.gradle.play.internal
 
 import java.io.File
 import java.io.FileFilter
-import javax.xml.soap.Detail
 
 internal const val RELEASE_NOTES_DEFAULT_NAME = "default"
 internal const val RELEASE_NOTES_MAX_LENGTH = 500
