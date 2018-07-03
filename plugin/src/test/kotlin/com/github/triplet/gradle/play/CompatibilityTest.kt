@@ -110,13 +110,14 @@ class CompatibilityTest(
         @JvmStatic
         @Parameterized.Parameters(name = "agpVersion: {0}, gradleVersion {1}")
         fun parameters() = listOf(
-                // AGP 3.0.1, requires at least gradle 4.1
-                arrayOf("3.0.1", "4.2"),
-                arrayOf("3.0.1", "4.3"),
-                // AGP 3.1.3, requires at least gradle 4.4
+                // AGP 3.0.1 requires at least gradle 4.1
+                arrayOf("3.0.1", "4.1"),
+                // AGP 3.1.3 requires at least gradle 4.4
                 arrayOf("3.1.3", "4.4"),
-                // AGP 3.2.0, requires at least gradle 4.6
+                // AGP 3.2.0 requires at least gradle 4.6
                 arrayOf("3.2.0-beta02", "4.6"),
+
+                // Run against the latest versions
                 arrayOf("3.2.0-beta02", "4.8")
         )
     }
