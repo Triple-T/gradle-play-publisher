@@ -1,5 +1,7 @@
 package com.github.triplet.gradle.play.internal
 
+import com.google.api.client.googleapis.json.GoogleJsonResponseException
+import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.LocalizedText
 import com.google.api.services.androidpublisher.model.Track
@@ -18,7 +20,7 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:Optional
     @get:InputDirectory
-    internal val releaseNotesDir by lazy { File(resDir, RELEASE_NOTES_PATH) }
+    internal val releaseNotesDir by lazy { File(resDir, RELEASE_NOTES_PATH).safeMkdirs() }
 
     protected fun AndroidPublisher.Edits.updateTracks(editId: String, versions: List<Long>) {
         progressLogger.progress("Updating tracks")
@@ -51,5 +53,40 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
         tracks()
                 .update(variant.applicationId, editId, extension.track, track)
                 .execute()
+    }
+
+    protected fun GoogleJsonResponseException.handleUploadFailures(file: File): Nothing? {
+        val isConflict = details.errors.all {
+            it.reason == "apkUpgradeVersionConflict" || it.reason == "apkNoUpgradePath"
+        }
+        if (isConflict) {
+            when (extension._resolutionStrategy) {
+                ResolutionStrategy.AUTO -> throw IllegalStateException(
+                        "Concurrent uploads for variant ${variant.name}. Make sure to " +
+                                "synchronously upload your APKs such that they don't conflict.",
+                        this
+                )
+                ResolutionStrategy.FAIL -> throw IllegalStateException(
+                        "Version code ${variant.versionCode} is too low for variant ${variant.name}.",
+                        this
+                )
+                ResolutionStrategy.IGNORE -> logger.warn(
+                        "Ignoring APK ($file) for version code ${variant.versionCode}")
+            }
+            return null
+        } else {
+            throw this
+        }
+    }
+
+    protected fun AndroidPublisher.Edits.handlePackageDetails(editId: String, versionCode: Int) {
+        val file = variant.mappingFile
+        if (file != null && file.length() > 0) {
+            val mapping = FileContent(MIME_TYPE_STREAM, file)
+            deobfuscationfiles()
+                    .upload(variant.applicationId, editId, versionCode, "proguard", mapping)
+                    .trackUploadProgress(progressLogger, "mapping file")
+                    .execute()
+        }
     }
 }
