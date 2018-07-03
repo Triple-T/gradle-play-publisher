@@ -4,7 +4,7 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.http.javanet.NetHttpTransport
 
 internal const val PLUGIN_NAME = "gradle-play-publisher"
-internal const val PLUGIN_GROUP = "Play Store"
+internal const val PLUGIN_GROUP = "Publishing"
 
 internal const val ACCOUNT_CONFIG = "playAccountConfig"
 
