@@ -16,7 +16,9 @@ import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.AppDetails
 import com.google.api.services.androidpublisher.model.Listing
-import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.file.FileCollection
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -26,10 +28,22 @@ import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import java.io.File
 
 open class PublishListing : PlayPublishTaskBase() {
-    @get:SkipWhenEmpty
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    @get:InputDirectory
+    @get:Internal
     internal lateinit var resDir: File
+    @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:SkipWhenEmpty
+    @get:InputFiles
+    protected val targetFiles: FileCollection by lazy {
+        val appDetails = project.fileTree(resDir).apply {
+            // We can't simply use `project.files` because Gradle would expect those to exist for
+            // stuff like `@SkipWhenEmpty` to work.
+            for (detail in AppDetail.values()) include("/${detail.fileName}")
+        }
+        val listings = project.fileTree(File(resDir, LISTINGS_PATH))
+
+        appDetails + listings
+    }
     @Suppress("MemberVisibilityCanBePrivate") // Needed for Gradle caching to work correctly
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputFile
