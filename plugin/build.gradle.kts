@@ -8,12 +8,18 @@ plugins {
 }
 
 dependencies {
-    implementation("com.android.tools.build:gradle:3.0.1")
+    // Using compileOnly because every android project applies
+    // its own version of the Android Plugin.
+    // We're staying on 3.0.1 so we don't accidentally use APIs
+    // that are not available in the client project
+    compileOnly("com.android.tools.build:gradle:3.0.1")
+
     implementation("com.google.apis:google-api-services-androidpublisher:v3-rev12-1.23.0") {
         exclude("com.google.guava", "guava-jdk5") // Remove when upgrading to AGP 3.1+
     }
     implementation(kotlin("stdlib-jdk7"))
 
+    testImplementation("com.android.tools.build:gradle:3.0.1")
     testImplementation(kotlin("test"))
     testImplementation("junit:junit:4.12")
     testImplementation("org.mockito:mockito-core:2.18.3")
