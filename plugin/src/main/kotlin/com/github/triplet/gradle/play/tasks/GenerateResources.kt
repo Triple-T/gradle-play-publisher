@@ -29,7 +29,6 @@ open class GenerateResources : DefaultTask() {
     @get:Internal
     internal lateinit var variant: ApplicationVariant
 
-    @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputDirectory
     internal val resDir by lazy { File(project.buildDir, "${variant.playPath}/res") }

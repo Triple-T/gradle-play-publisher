@@ -44,7 +44,7 @@ open class PublishListing : PlayPublishTaskBase() {
 
         appDetails + listings
     }
-    @Suppress("MemberVisibilityCanBePrivate") // Needed for Gradle caching to work correctly
+    @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputFile
     protected val outputFile by lazy {
