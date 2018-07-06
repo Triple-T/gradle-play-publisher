@@ -1,4 +1,5 @@
 import org.codehaus.groovy.runtime.InvokerHelper
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile
 
 plugins {
     id("org.jetbrains.kotlin.jvm")
@@ -29,6 +30,12 @@ dependencies {
 java {
     sourceCompatibility = JavaVersion.VERSION_1_7
     targetCompatibility = JavaVersion.VERSION_1_7
+}
+
+tasks.withType<KotlinJvmCompile> {
+    kotlinOptions {
+        freeCompilerArgs += "-Xjsr305=strict"
+    }
 }
 
 gradlePlugin {
