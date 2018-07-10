@@ -2,9 +2,9 @@ import org.codehaus.groovy.runtime.InvokerHelper
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile
 
 plugins {
+    `java-gradle-plugin`
+    `kotlin-dsl`
     id("org.jetbrains.kotlin.jvm")
-    id("groovy")
-    id("java-gradle-plugin")
     id("com.vanniktech.maven.publish")
 }
 

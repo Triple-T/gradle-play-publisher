@@ -67,8 +67,8 @@ open class PublishListing : PlayPublishTaskBase() {
             invalidatedImageType()?.let { changedImages += it to this }
         }
 
-        inputs.outOfDate { it.file.process() }
-        inputs.removed { it.file.process() }
+        inputs.outOfDate { file.process() }
+        inputs.removed { file.process() }
 
         write { editId ->
             progressLogger.start("Uploads app metadata for variant ${variant.name}", null)
