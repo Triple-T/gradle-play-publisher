@@ -56,7 +56,7 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
     }
 
     protected fun GoogleJsonResponseException.handleUploadFailures(file: File): Nothing? {
-        val isConflict = details.errors.all {
+        val isConflict = details?.errors.orEmpty().all {
             it.reason == "apkUpgradeVersionConflict" || it.reason == "apkNoUpgradePath"
         }
         if (isConflict) {

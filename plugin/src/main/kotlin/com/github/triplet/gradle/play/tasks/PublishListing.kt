@@ -121,7 +121,7 @@ open class PublishListing : PlayPublishTaskBase() {
         try {
             listings().update(variant.applicationId, editId, locale, listing).execute()
         } catch (e: GoogleJsonResponseException) {
-            if (e.details.errors.any { it.reason == "unsupportedListingLanguage" }) {
+            if (e.details?.errors.orEmpty().any { it.reason == "unsupportedListingLanguage" }) {
                 // Rethrow for clarity
                 throw IllegalArgumentException("Unsupported locale $locale", e)
             } else {
