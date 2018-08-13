@@ -42,7 +42,7 @@ class ExtensionsTest {
     }
 
     private companion object {
-        const val TEST_FILE = "src/main/play/release-notes/en-US/default"
+        const val TEST_FILE = "src/main/play/release-notes/en-US/default.txt"
 
         val newLine = byteArrayOf(97, 13, 10, 98, 13, 10, 99, 13, 10, 97)
                 .toString(StandardCharsets.UTF_8)
