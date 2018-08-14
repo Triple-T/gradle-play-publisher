@@ -2,11 +2,13 @@ package com.github.triplet.gradle.play.tasks
 
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.internal.AppDetail
+import com.github.triplet.gradle.play.internal.EXPANSION_FILES_PATH
 import com.github.triplet.gradle.play.internal.LISTINGS_PATH
 import com.github.triplet.gradle.play.internal.LocaleFileFilter
 import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
 import com.github.triplet.gradle.play.internal.climbUpTo
+import com.github.triplet.gradle.play.internal.expansionFileTypes
 import com.github.triplet.gradle.play.internal.findClosestDir
 import com.github.triplet.gradle.play.internal.isChildOf
 import com.github.triplet.gradle.play.internal.isDirectChildOf
@@ -109,13 +111,31 @@ open class GenerateResources : DefaultTask() {
             releaseNotes.validateLocales()
         }
 
+        fun validateExpansionFiles() {
+            val expansionFiles = climbUpTo(EXPANSION_FILES_PATH) ?: return
+            check(expansionFiles.isDirectChildOf(PLAY_PATH)) {
+                "Expansion files ($expansionFiles) must be under the '$PLAY_PATH' folder"
+            }
+            checkNotNull(expansionFiles.listFiles()) {
+                "$expansionFiles must be a folder"
+            }.forEach {
+                val name = it.nameWithoutExtension
+                check(expansionFileTypes.contains(name)) {
+                    "Invalid expansion file type: $name. Must be one of " +
+                            expansionFileTypes.joinToString { "'$it'" }
+                }
+            }
+        }
+
         val areRootsValid = climbUpTo(LISTINGS_PATH) != null
                 || climbUpTo(RELEASE_NOTES_PATH) != null
+                || climbUpTo(EXPANSION_FILES_PATH) != null
                 || isDirectChildOf(PLAY_PATH)
         check(areRootsValid) { "Unknown file: $this" }
 
         validateListings()
         validateReleaseNotes()
+        validateExpansionFiles()
     }
 
     private fun File.findDest() = File(resDir, toRelativeString(findOwner()))
