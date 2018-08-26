@@ -107,7 +107,6 @@ class PlayPublisherPlugin : Plugin<Project> {
                     null
             ) {
                 this.variant = variant
-                init()
                 resDir = File(project.buildDir, "${variant.playPath}/res")
             }
 
