@@ -5,6 +5,7 @@ import com.github.triplet.gradle.play.internal.AccountConfig
 import com.github.triplet.gradle.play.internal.ReleaseStatus
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.TrackType
+import com.github.triplet.gradle.play.internal.validatedTrack
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 
@@ -17,32 +18,53 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
     var defaultToAppBundles = false // App Bundles require Google Play App Signing
 
     @get:Internal("Backing property for public input")
+    internal var _fromTrack: TrackType? = null
+    /**
+     * Specify the track from which to promote a release. That is, the specified track will be
+     * promoted to [track].
+     *
+     * See [track] for valid values.
+     */
+    @get:Input
+    var fromTrack
+        get() = (_fromTrack ?: TrackType.INTERNAL).publishedName
+        set(value) {
+            _fromTrack = validatedTrack(value)
+        }
+
+    @get:Internal("Backing property for public input")
     internal var _track = TrackType.INTERNAL
     /**
-     * Specify the track in which to upload your app. May be one of internal, alpha, beta, rollout,
-     * or production. Default is internal.
+     * Specify the track in which to upload your app.
+     *
+     * May be one of internal, alpha, beta, rollout, or production. Default is internal.
      */
     @get:Input
     var track
         get() = _track.publishedName
         set(value) {
-            _track = requireNotNull(TrackType.values().find { it.publishedName == value }) {
-                "Track must be one of ${TrackType.values().joinToString { "'${it.publishedName}'" }}"
-            }
+            _track = validatedTrack(value)
         }
 
+    @get:Internal("Backing property for public input")
+    internal var _userFraction: Double? = null
     /**
      * Specify the initial user percent intended to receive a 'rollout' update (see [track]).
      * Default is 10% == 0.1.
      */
     @get:Input
-    var userFraction = 0.1
+    var userFraction: Double
+        get() = _userFraction ?: 0.1
+        set(value) {
+            _userFraction = value
+        }
 
     @get:Internal("Backing property for public input")
     internal var _resolutionStrategy = ResolutionStrategy.FAIL
     /**
-     * Specify the resolution strategy to employ when a version conflict occurs. May be one of auto,
-     * fail, or ignore. Default is ignore.
+     * Specify the resolution strategy to employ when a version conflict occurs.
+     *
+     * May be one of auto, fail, or ignore. Default is ignore.
      */
     @get:Input
     var resolutionStrategy
@@ -70,19 +92,24 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
     var outputProcessor: (ApkVariantOutput.() -> Unit)? = null
 
     @get:Internal("Backing property for public input")
-    internal lateinit var _releaseStatus: ReleaseStatus
+    internal var _releaseStatus: ReleaseStatus? = null
     /**
-     * Specify the status to apply to the uploaded app release. May be one of completed, draft,
-     * halted, or inProgress. Default is completed for all tracks except rollout where inProgress is
-     * the default.
+     * Specify the status to apply to the uploaded app release.
+     *
+     * May be one of completed, draft, halted, or inProgress. Default is completed for all tracks
+     * except rollout where inProgress is the default.
      */
     @get:Input
-    var releaseStatus
-        get() = when {
-            ::_releaseStatus.isInitialized -> _releaseStatus
-            _track == TrackType.ROLLOUT -> ReleaseStatus.IN_PROGRESS
-            else -> ReleaseStatus.COMPLETED
-        }.publishedName
+    var releaseStatus: String
+        get() {
+            val status = _releaseStatus ?: if (_track == TrackType.ROLLOUT) {
+                ReleaseStatus.IN_PROGRESS
+            } else {
+                ReleaseStatus.COMPLETED
+            }
+
+            return status.publishedName
+        }
         set(value) {
             _releaseStatus = requireNotNull(
                     ReleaseStatus.values().find { it.publishedName == value }

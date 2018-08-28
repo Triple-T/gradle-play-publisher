@@ -25,34 +25,62 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
     protected fun AndroidPublisher.Edits.updateTracks(editId: String, versions: List<Long>) {
         progressLogger.progress("Updating tracks")
 
-        val releaseTexts = releaseNotesDir.listFiles()?.mapNotNull { locale ->
-            val file = File(locale, "${extension.track}.txt").orNull()
-                    ?: File(locale, RELEASE_NOTES_DEFAULT_NAME).orNull()
-                    ?: return@mapNotNull null
+        val track = Track().apply {
+            track = extension.track
+            releases = listOf(TrackRelease().applyChanges(versions))
+        }
+        tracks()
+                .update(variant.applicationId, editId, extension.track, track)
+                .execute()
+    }
+
+    protected fun TrackRelease.applyChanges(
+            versionCodes: List<Long>? = null,
+            updateStatus: Boolean = true,
+            useDefaultReleaseNotes: Boolean = true,
+            updateFraction: Boolean = true
+    ): TrackRelease {
+        versionCodes?.let { this.versionCodes = it }
+        if (updateStatus) status = extension.releaseStatus
+
+        val releaseNotes = releaseNotesDir.listFiles().orEmpty().mapNotNull { locale ->
+            val file = File(locale, "${extension.track}.txt").orNull() ?: run {
+                if (useDefaultReleaseNotes) {
+                    File(locale, RELEASE_NOTES_DEFAULT_NAME).orNull()
+                } else {
+                    null
+                } ?: return@mapNotNull null
+            }
 
             LocalizedText().apply {
                 language = locale.name
                 text = file.readProcessed(RELEASE_NOTES_MAX_LENGTH)
             }
         }
-        val trackRelease = TrackRelease().apply {
-            releaseNotes = releaseTexts
-            status = extension.releaseStatus
-            userFraction = if (extension._releaseStatus == ReleaseStatus.IN_PROGRESS) {
-                extension.userFraction
+        if (releaseNotes.isNotEmpty()) {
+            val existingReleaseNotes = this.releaseNotes.orEmpty()
+            this.releaseNotes = if (existingReleaseNotes.isNotEmpty()) {
+                val merged = releaseNotes.toMutableList()
+
+                for (existing in existingReleaseNotes) {
+                    if (merged.none { it.language == existing.language }) merged += existing
+                }
+
+                merged
             } else {
-                null
+                releaseNotes
             }
-            versionCodes = versions
         }
 
-        val track = Track().apply {
-            track = extension.track
-            releases = listOf(trackRelease)
+        if (updateFraction) {
+            val status = extension.releaseStatus
+            userFraction = if (
+                    status == ReleaseStatus.IN_PROGRESS.publishedName ||
+                    status == ReleaseStatus.HALTED.publishedName
+            ) extension.userFraction else null
         }
-        tracks()
-                .update(variant.applicationId, editId, extension.track, track)
-                .execute()
+
+        return this
     }
 
     protected fun GoogleJsonResponseException.handleUploadFailures(file: File): Nothing? {

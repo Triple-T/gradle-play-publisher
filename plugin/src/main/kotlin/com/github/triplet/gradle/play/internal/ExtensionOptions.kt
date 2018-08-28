@@ -20,9 +20,19 @@ internal interface ExtensionOptions {
             extension.defaultToAppBundles = value
         }
 
-    @get:OptionValues("track")
+    @get:OptionValues("from-track", "track")
     val trackOptions
         get() = TrackType.values().map { it.publishedName }
+    @get:Internal
+    @set:Option(
+            option = "from-track",
+            description = "Set the track from which to promote a release."
+    )
+    var fromTrackOption: String
+        get() = throw UnsupportedOperationException()
+        set(value) {
+            extension.fromTrack = value
+        }
     @get:Internal
     @set:Option(
             option = "track",

@@ -18,6 +18,7 @@ import com.github.triplet.gradle.play.internal.validateRuntime
 import com.github.triplet.gradle.play.tasks.Bootstrap
 import com.github.triplet.gradle.play.tasks.GenerateResources
 import com.github.triplet.gradle.play.tasks.ProcessPackageMetadata
+import com.github.triplet.gradle.play.tasks.PromoteRelease
 import com.github.triplet.gradle.play.tasks.PublishApk
 import com.github.triplet.gradle.play.tasks.PublishBundle
 import com.github.triplet.gradle.play.tasks.PublishListing
@@ -53,6 +54,10 @@ class PlayPublisherPlugin : Plugin<Project> {
         val publishBundleAllTask = project.newTask<LifecycleHelperTask>(
                 "publishBundle",
                 "Uploads App Bundle for every variant."
+        ) { this.extension = extension }
+        val promoteReleaseAllTask = project.newTask<LifecycleHelperTask>(
+                "promoteArtifact",
+                "Promotes a release for every variant."
         ) { this.extension = extension }
         val publishListingAllTask = project.newTask<LifecycleHelperTask>(
                 "publishListing",
@@ -177,6 +182,17 @@ class PlayPublisherPlugin : Plugin<Project> {
                                                "'com.android.tools.build:gradle' v3.2+. " +
                                                "Publishing App Bundles may not work.")
                 publishBundleAllTask.dependsOn(this)
+            }
+
+            project.newTask<PromoteRelease>(
+                    "promote${variantName}Artifact",
+                    "Promotes a release for $variantName."
+            ) {
+                init()
+                resDir = playResourcesTask.resDir
+
+                dependsOn(playResourcesTask)
+                promoteReleaseAllTask.dependsOn(this)
             }
 
             project.newTask<LifecycleHelperTask>(
