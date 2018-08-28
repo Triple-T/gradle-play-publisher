@@ -22,7 +22,7 @@ private val ProductFlavor.extras
     get() = requireNotNull((this as ExtensionAware).the<ExtraPropertiesExtension>())
 
 private val isConfigurationAvoidanceSupported =
-        GradleVersion.current() >= GradleVersion.version("4.9")
+        GradleVersion.current() >= GradleVersion.version("4.10")
 
 internal inline fun <reified T : Task> Project.newTask(
         name: String,
