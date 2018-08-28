@@ -40,7 +40,8 @@ internal inline fun <reified T : Task> Project.newTask(
         val register = tasks.register(name, config)
         register
     } else {
-        DefaultProvider { task(name, config) }
+        val task = task(name, config)
+        DefaultProvider { task }
     }
 }
 
