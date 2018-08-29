@@ -2,6 +2,7 @@ package com.github.triplet.gradle.play
 
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.api.ApplicationVariant
+import com.android.build.gradle.internal.api.InstallableVariantImpl
 import com.github.triplet.gradle.play.internal.ACCOUNT_CONFIG
 import com.github.triplet.gradle.play.internal.AccountConfig
 import com.github.triplet.gradle.play.internal.LifecycleHelperTask
@@ -11,20 +12,25 @@ import com.github.triplet.gradle.play.internal.get
 import com.github.triplet.gradle.play.internal.newTask
 import com.github.triplet.gradle.play.internal.set
 import com.github.triplet.gradle.play.internal.validate
+import com.github.triplet.gradle.play.internal.validateRuntime
 import com.github.triplet.gradle.play.tasks.Bootstrap
 import com.github.triplet.gradle.play.tasks.GenerateResources
 import com.github.triplet.gradle.play.tasks.ProcessPackageMetadata
 import com.github.triplet.gradle.play.tasks.PublishApk
+import com.github.triplet.gradle.play.tasks.PublishBundle
 import com.github.triplet.gradle.play.tasks.PublishListing
 import groovy.lang.GroovyObject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.ExtensionAware
+import org.gradle.kotlin.dsl.the
 
 class PlayPublisherPlugin : Plugin<Project> {
     override fun apply(project: Project) {
-        val android = requireNotNull(project.extensions.get<AppExtension>()) {
+        validateRuntime()
+
+        val android = requireNotNull(project.the<AppExtension>()) {
             "The 'com.android.application' plugin is required."
         }
         val extension: PlayPublisherExtension =
@@ -42,22 +48,26 @@ class PlayPublisherPlugin : Plugin<Project> {
                 "publishApk",
                 "Uploads APK for every variant."
         ) { this.extension = extension }
+        val publishBundleAllTask = project.newTask<LifecycleHelperTask>(
+                "publishBundle",
+                "Uploads App Bundle for every variant."
+        ) { this.extension = extension }
         val publishListingAllTask = project.newTask<LifecycleHelperTask>(
                 "publishListing",
                 "Uploads all Play Store metadata for every variant."
         ) { this.extension = extension }
 
         project.initPlayAccountConfigs(android)
-        android.applicationVariants.whenObjectAdded { variant ->
-            if (variant.buildType.isDebuggable) {
-                project.logger.info("Skipping debuggable build type ${variant.buildType.name}.")
+        android.applicationVariants.whenObjectAdded {
+            if (buildType.isDebuggable) {
+                project.logger.info("Skipping debuggable build type ${buildType.name}.")
                 return@whenObjectAdded
             }
 
-            val accountConfig = android.getAccountConfig(variant) ?: extension
-            val variantName = variant.name.capitalize()
+            val accountConfig = android.getAccountConfig(this) ?: extension
+            val variantName = name.capitalize()
 
-            if (!variant.isSigningReady) {
+            if (!isSigningReady) {
                 project.logger.error(
                         "Signing not ready. Be sure to specify a signingConfig for $variantName")
             }
@@ -75,7 +85,7 @@ class PlayPublisherPlugin : Plugin<Project> {
 
             fun PlayPublishTaskBase.init() {
                 this.extension = extension
-                this.variant = variant
+                this.variant = this@whenObjectAdded
                 this.accountConfig = accountConfig
             }
 
@@ -93,7 +103,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "Collects Play Store resources for $variantName.",
                     null
             ) {
-                this.variant = variant
+                variant = this@whenObjectAdded
                 init()
             }
 
@@ -134,7 +144,8 @@ class PlayPublisherPlugin : Plugin<Project> {
 
                 dependsOn(processPackageMetadata)
                 dependsOn(playResourcesTask)
-                dependsOn(variant.assemble)
+                variant.assemble?.let { dependsOn(it) }
+                        ?: logger.warn("Assemble task not found. Publishing APKs may not work.")
                 publishApkAllTask.dependsOn(this)
 
                 // Remove in v3.0
@@ -145,13 +156,33 @@ class PlayPublisherPlugin : Plugin<Project> {
                 }
             }
 
+            val publishBundleTask = project.newTask<PublishBundle>(
+                    "publish${variantName}Bundle",
+                    "Uploads App Bundle for $variantName."
+            ) {
+                init()
+                resDir = playResourcesTask.resDir
+
+                dependsOn(processPackageMetadata)
+                dependsOn(playResourcesTask)
+                // Remove hack when AGP 3.2 reaches stable channel
+                project.tasks.findByName(
+                        (variant as InstallableVariantImpl).variantData.getTaskName("bundle", ""))
+                        ?.let { dependsOn(it) }
+                        ?: logger.warn("Bundle task not found, make sure to use " +
+                                               "'com.android.tools.build:gradle' v3.2+. " +
+                                               "Publishing App Bundles may not work.")
+                publishBundleAllTask.dependsOn(this)
+            }
+
             project.newTask<LifecycleHelperTask>(
                     "publish$variantName",
-                    "Uploads all Play Store metadata for $variantName."
+                    "Uploads APK or App Bundle and all Play Store metadata for $variantName."
             ) {
                 this.extension = extension
 
-                dependsOn(publishApkTask)
+                dependsOn(
+                        if (extension.defaultToAppBundles) publishBundleTask else publishApkTask)
                 dependsOn(publishListingTask)
                 publishAllTask.dependsOn(this)
             }
@@ -167,7 +198,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 "playAccountConfigs", container(PlayAccountConfigExtension::class.java))
         android.defaultConfig[ACCOUNT_CONFIG] = null
         android.productFlavors.whenObjectAdded {
-            it[ACCOUNT_CONFIG] = android.defaultConfig[ACCOUNT_CONFIG]
+            this[ACCOUNT_CONFIG] = android.defaultConfig[ACCOUNT_CONFIG]
         }
     }
 

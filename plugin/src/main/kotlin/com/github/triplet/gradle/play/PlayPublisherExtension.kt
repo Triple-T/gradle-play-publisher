@@ -9,6 +9,13 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 
 open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension() {
+    /**
+     * Choose the default packaging method. Either App Bundles or APKs. Affects tasks like
+     * `publish`.
+     */
+    @get:Input
+    var defaultToAppBundles = false // App Bundles require Google Play App Signing
+
     @get:Internal("Backing property for public input")
     internal var _track = TrackType.INTERNAL
     /**
