@@ -55,15 +55,14 @@ open class GenerateResources : DefaultTask() {
         val changedDefaults = mutableListOf<File>()
 
         inputs.outOfDate {
-            val file = it.file
             file.validate()
 
             defaultLocale?.let {
                 if (file.isChildOf(LISTINGS_PATH) && file.isChildOf(it)) changedDefaults += file
             }
-            project.copy { it.from(file).into(file.findClosestDir().findDest()) }
+            project.copy { from(file).into(file.findClosestDir().findDest()) }
         }
-        inputs.removed { project.delete(it.file.findDest()) }
+        inputs.removed { project.delete(file.findDest()) }
 
         for (default in changedDefaults.reversed().distinctBy { it.name }) {
             val listings = default.findDest().climbUpTo(LISTINGS_PATH)!!
@@ -74,9 +73,8 @@ open class GenerateResources : DefaultTask() {
                     .map { File(it, relativePath) }
                     .filter { !it.exists() }
                     .forEach {
-                        project.copy { spec ->
-                            spec.from(default)
-                            spec.into(File(resDir, it.parentFile.toRelativeString(resDir)))
+                        project.copy {
+                            from(default).into(File(resDir, it.parentFile.toRelativeString(resDir)))
                         }
                     }
         }
