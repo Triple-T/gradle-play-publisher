@@ -59,7 +59,9 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
         }
         if (releaseNotes.isNotEmpty()) {
             val existingReleaseNotes = this.releaseNotes.orEmpty()
-            this.releaseNotes = if (existingReleaseNotes.isNotEmpty()) {
+            this.releaseNotes = if (existingReleaseNotes.isEmpty()) {
+                releaseNotes
+            } else {
                 val merged = releaseNotes.toMutableList()
 
                 for (existing in existingReleaseNotes) {
@@ -67,8 +69,6 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
                 }
 
                 merged
-            } else {
-                releaseNotes
             }
         }
 
