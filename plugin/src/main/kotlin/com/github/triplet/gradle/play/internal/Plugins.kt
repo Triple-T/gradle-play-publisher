@@ -37,8 +37,7 @@ internal inline fun <reified T : Task> Project.newTask(
     }
 
     return if (isConfigurationAvoidanceSupported) {
-        val register = tasks.register(name, config)
-        register
+        tasks.register(name, config)
     } else {
         val task = task(name, config)
         DefaultProvider { task }
