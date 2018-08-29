@@ -22,7 +22,8 @@ open class PublishBundle : PlayPublishPackageBase() {
     @get:InputFile
     val bundle by lazy {
         // TODO: If we take a customizable folder, we can fix #233, #227
-        File(project.buildDir, "outputs/bundle/${variant.name}/${project.name}.aab")
+        val archivesBaseName = project.properties["archivesBaseName"] as String
+        File(project.buildDir, "outputs/bundle/${variant.name}/${archivesBaseName}.aab")
     }
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -36,19 +37,15 @@ open class PublishBundle : PlayPublishPackageBase() {
         if (!inputs.isIncremental) project.delete(outputs.files)
 
         inputs.outOfDate {
-            val file = it.file
             if (file == bundle) {
-                project.copy {
-                    it.from(file)
-                    it.into(outputDir)
-                }
+                project.copy { from(file).into(outputDir) }
 
                 publishBundle(editId, FileContent(MIME_TYPE_STREAM, file))?.let {
                     updateTracks(editId, listOf(it.versionCode.toLong()))
                 }
             }
         }
-        inputs.removed { project.delete(File(outputDir, it.file.name)) }
+        inputs.removed { project.delete(File(outputDir, file.name)) }
 
         progressLogger.completed()
     }
