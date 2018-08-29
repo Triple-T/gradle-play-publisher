@@ -39,13 +39,12 @@ open class PublishApk : PlayPublishPackageBase() {
 
         val publishedApks = mutableListOf<Apk>()
         inputs.outOfDate {
-            val file = it.file
             if (inputApks.contains(file)) {
-                project.copy { it.from(file).into(outputDir) }
+                project.copy { from(file).into(outputDir) }
                 publishApk(editId, FileContent(MIME_TYPE_APK, file))?.let { publishedApks += it }
             }
         }
-        inputs.removed { project.delete(File(outputDir, it.file.name)) }
+        inputs.removed { project.delete(File(outputDir, file.name)) }
 
         if (publishedApks.isNotEmpty()) {
             updateTracks(editId, publishedApks.map { it.versionCode.toLong() })

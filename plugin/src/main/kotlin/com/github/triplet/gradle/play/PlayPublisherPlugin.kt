@@ -27,13 +27,14 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.ExtensionAware
+import org.gradle.kotlin.dsl.the
 import java.io.File
 
 class PlayPublisherPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         validateRuntime()
 
-        val android = requireNotNull(project.extensions.get<AppExtension>()) {
+        val android = requireNotNull(project.the<AppExtension>()) {
             "The 'com.android.application' plugin is required."
         }
         val extension: PlayPublisherExtension =
@@ -65,16 +66,16 @@ class PlayPublisherPlugin : Plugin<Project> {
         ) { this.extension = extension }
 
         project.initPlayAccountConfigs(android)
-        android.applicationVariants.whenObjectAdded { variant ->
-            if (variant.buildType.isDebuggable) {
-                project.logger.info("Skipping debuggable build type ${variant.buildType.name}.")
+        android.applicationVariants.whenObjectAdded {
+            if (buildType.isDebuggable) {
+                project.logger.info("Skipping debuggable build type ${buildType.name}.")
                 return@whenObjectAdded
             }
 
-            val accountConfig = android.getAccountConfig(variant) ?: extension
-            val variantName = variant.name.capitalize()
+            val accountConfig = android.getAccountConfig(this) ?: extension
+            val variantName = name.capitalize()
 
-            if (!variant.isSigningReady) {
+            if (!isSigningReady) {
                 project.logger.error(
                         "Signing not ready. Be sure to specify a signingConfig for $variantName")
             }
@@ -92,7 +93,7 @@ class PlayPublisherPlugin : Plugin<Project> {
 
             fun PlayPublishTaskBase.init() {
                 this.extension = extension
-                this.variant = variant
+                this.variant = this@whenObjectAdded
                 this.accountConfig = accountConfig
             }
 
@@ -111,7 +112,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "Collects Play Store resources for $variantName.",
                     null
             ) {
-                this.variant = variant
+                variant = this@whenObjectAdded
                 init()
                 resDir = File(project.buildDir, "${variant.playPath}/res")
             }
@@ -218,7 +219,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 "playAccountConfigs", container(PlayAccountConfigExtension::class.java))
         android.defaultConfig[ACCOUNT_CONFIG] = null
         android.productFlavors.whenObjectAdded {
-            it[ACCOUNT_CONFIG] = android.defaultConfig[ACCOUNT_CONFIG]
+            this[ACCOUNT_CONFIG] = android.defaultConfig[ACCOUNT_CONFIG]
         }
     }
 
