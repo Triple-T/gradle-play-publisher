@@ -26,7 +26,7 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
         progressLogger.progress("Updating tracks")
 
         val releaseTexts = releaseNotesDir.listFiles()?.mapNotNull { locale ->
-            val file = File(locale, extension.track).orNull()
+            val file = File(locale, "${extension.track}.txt").orNull()
                     ?: File(locale, RELEASE_NOTES_DEFAULT_NAME).orNull()
                     ?: return@mapNotNull null
 
@@ -56,7 +56,7 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
     }
 
     protected fun GoogleJsonResponseException.handleUploadFailures(file: File): Nothing? {
-        val isConflict = details.errors.all {
+        val isConflict = details?.errors.orEmpty().all {
             it.reason == "apkUpgradeVersionConflict" || it.reason == "apkNoUpgradePath"
         }
         if (isConflict) {

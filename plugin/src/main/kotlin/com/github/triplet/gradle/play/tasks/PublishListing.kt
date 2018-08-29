@@ -121,7 +121,7 @@ open class PublishListing : PlayPublishTaskBase() {
         try {
             listings().update(variant.applicationId, editId, locale, listing).execute()
         } catch (e: GoogleJsonResponseException) {
-            if (e.details.errors.any { it.reason == "unsupportedListingLanguage" }) {
+            if (e.details?.errors.orEmpty().any { it.reason == "unsupportedListingLanguage" }) {
                 // Rethrow for clarity
                 throw IllegalArgumentException("Unsupported locale $locale", e)
             } else {
@@ -136,7 +136,7 @@ open class PublishListing : PlayPublishTaskBase() {
             type: ImageType,
             imageDir: File
     ) {
-        val typeName = type.fileName
+        val typeName = type.publishedName
         val files = imageDir.listFiles()
                 ?.sorted()
                 ?.map { FileContent(MIME_TYPE_IMAGE, it) } ?: return
@@ -150,8 +150,7 @@ open class PublishListing : PlayPublishTaskBase() {
             "You can only upload ${type.maxNum} graphic(s) for the $typeName"
         }
 
-        progressLogger.progress(
-                "Uploading $locale listing graphics for type '${type.fileName}'")
+        progressLogger.progress("Uploading $locale listing graphics for type '$typeName'")
         images().deleteall(variant.applicationId, editId, locale, typeName).execute()
         for (file in files) {
             images()
@@ -169,7 +168,7 @@ open class PublishListing : PlayPublishTaskBase() {
     }
 
     private fun File.invalidatedImageType() =
-            ImageType.values().find { isDirectChildOf(it.fileName) }
+            ImageType.values().find { isDirectChildOf(it.dirName) }
 
     private fun File.findLocale() = climbUpTo(LISTINGS_PATH)
             ?.let { relativeTo(it).invariantSeparatorsPath }

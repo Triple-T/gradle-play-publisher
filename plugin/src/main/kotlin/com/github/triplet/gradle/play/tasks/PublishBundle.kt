@@ -22,7 +22,8 @@ open class PublishBundle : PlayPublishPackageBase() {
     @get:InputFile
     val bundle by lazy {
         // TODO: If we take a customizable folder, we can fix #233, #227
-        File(project.buildDir, "outputs/bundle/${variant.name}/${project.name}.aab")
+        val archivesBaseName = project.properties["archivesBaseName"] as String
+        File(project.buildDir, "outputs/bundle/${variant.name}/${archivesBaseName}.aab")
     }
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
