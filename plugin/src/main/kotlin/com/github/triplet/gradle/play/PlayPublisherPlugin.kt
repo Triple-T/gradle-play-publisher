@@ -120,25 +120,20 @@ class PlayPublisherPlugin : Plugin<Project> {
                 resDir = playResourcesTask.get().resDir
 
                 dependsOn(playResourcesTask)
-
-                // Remove in v3.0
-                val new = this
-                project.newTask("publishListing$variantName", "", null) {
-                    dependsOn(new)
-                    doFirst { logger.warn("$name is deprecated, use ${new.name} instead") }
-                }
             }
             publishListingAllTask.configure { dependsOn(publishListingTask) }
+            // TODO Remove in v3.0
+            project.newTask("publishListing$variantName", "", null) {
+                dependsOn(publishListingTask)
+                doFirst { logger.warn("$name is deprecated, use ${publishListingTask.get().name} instead") }
+            }
 
             val processPackageMetadata = project.newTask<ProcessPackageMetadata>(
                     "process${variantName}Metadata",
                     "Processes packaging metadata for $variantName.",
                     null
-            ) {
-                init()
-
-                variant.checkManifest.dependsOn(this)
-            }
+            ) { init() }
+            checkManifest.dependsOn(processPackageMetadata)
 
             val publishApkTask = project.newTask<PublishApk>(
                     "publish${variantName}Apk",
@@ -151,15 +146,13 @@ class PlayPublisherPlugin : Plugin<Project> {
                 dependsOn(playResourcesTask)
                 variant.assemble?.let { dependsOn(it) }
                         ?: logger.warn("Assemble task not found. Publishing APKs may not work.")
-
-                // Remove in v3.0
-                val new = this
-                project.newTask("publishApk$variantName", "", null) {
-                    dependsOn(new)
-                    doFirst { logger.warn("$name is deprecated, use ${new.name} instead") }
-                }
             }
             publishApkAllTask.configure { dependsOn(publishApkTask) }
+            // TODO Remove in v3.0
+            project.newTask("publishApk$variantName", "", null) {
+                dependsOn(publishApkTask)
+                doFirst { logger.warn("$name is deprecated, use ${publishApkTask.get().name} instead") }
+            }
 
             val publishBundleTask = project.newTask<PublishBundle>(
                     "publish${variantName}Bundle",
