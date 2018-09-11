@@ -7,7 +7,6 @@ import com.github.triplet.gradle.play.internal.ACCOUNT_CONFIG
 import com.github.triplet.gradle.play.internal.AccountConfig
 import com.github.triplet.gradle.play.internal.LifecycleHelperTask
 import com.github.triplet.gradle.play.internal.PLAY_PATH
-import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.internal.configure
 import com.github.triplet.gradle.play.internal.get
@@ -27,7 +26,6 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.kotlin.dsl.the
-import java.io.File
 
 @Suppress("unused") // Used by Gradle
 class PlayPublisherPlugin : Plugin<Project> {
@@ -132,7 +130,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "Uploads all Play Store in-app products for $variantName."
             ) {
                 init()
-                productsDir = File(playResourcesTask.get().resDir, PRODUCTS_PATH)
+                resDir = playResourcesTask.get().resDir
 
                 dependsOn(playResourcesTask)
             }

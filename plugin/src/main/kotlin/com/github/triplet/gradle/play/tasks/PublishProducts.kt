@@ -7,6 +7,7 @@ import com.github.triplet.gradle.play.internal.playPath
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.model.InAppProduct
 import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -16,10 +17,14 @@ import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import java.io.File
 
 open class PublishProducts : PlayPublishTaskBase() {
+    @get:Internal
+    internal lateinit var resDir: File
+    @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:SkipWhenEmpty
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputDirectory
-    lateinit var productsDir: File
+    protected val productsDir by lazy { File(resDir, PRODUCTS_PATH) }
+
     @Suppress("MemberVisibilityCanBePrivate") // Needed for Gradle caching to work correctly
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputFile
