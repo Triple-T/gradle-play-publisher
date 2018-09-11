@@ -5,9 +5,11 @@ import com.github.triplet.gradle.play.internal.GRAPHICS_PATH
 import com.github.triplet.gradle.play.internal.ImageType
 import com.github.triplet.gradle.play.internal.LISTINGS_PATH
 import com.github.triplet.gradle.play.internal.ListingDetail
+import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
+import com.github.triplet.gradle.play.internal.flavorNameOrDefault
 import com.github.triplet.gradle.play.internal.nullOrFull
 import com.github.triplet.gradle.play.internal.safeCreateNewFile
 import com.google.api.client.json.jackson2.JacksonFactory
@@ -20,9 +22,12 @@ import java.io.File
 import java.net.URL
 
 open class Bootstrap : PlayPublishTaskBase() {
+    @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputDirectory
-    internal lateinit var srcDir: File
+    protected val srcDir: File by lazy {
+        project.file("src/${variant.flavorNameOrDefault}/$PLAY_PATH")
+    }
 
     init {
         // Always out-of-date since we don't know what's changed on the network

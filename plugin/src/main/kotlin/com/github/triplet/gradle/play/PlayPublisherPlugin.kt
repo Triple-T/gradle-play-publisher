@@ -10,10 +10,8 @@ import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.internal.configure
-import com.github.triplet.gradle.play.internal.flavorNameOrDefault
 import com.github.triplet.gradle.play.internal.get
 import com.github.triplet.gradle.play.internal.newTask
-import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.internal.set
 import com.github.triplet.gradle.play.internal.validate
 import com.github.triplet.gradle.play.internal.validateRuntime
@@ -29,7 +27,6 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.kotlin.dsl.the
-import java.io.File
 
 @Suppress("unused") // Used by Gradle
 class PlayPublisherPlugin : Plugin<Project> {
@@ -102,10 +99,7 @@ class PlayPublisherPlugin : Plugin<Project> {
             val bootstrapTask = project.newTask<Bootstrap>(
                     "bootstrap${variantName}PlayResources",
                     "Downloads the Play Store listing metadata for $variantName."
-            ) {
-                init()
-                srcDir = project.file("src/${variant.flavorNameOrDefault}/$PLAY_PATH")
-            }
+            ) { init() }
             bootstrapAllTask.configure { dependsOn(bootstrapTask) }
 
             val playResourcesTask = project.newTask<GenerateResources>(
@@ -114,7 +108,6 @@ class PlayPublisherPlugin : Plugin<Project> {
                     null
             ) {
                 variant = this@whenObjectAdded
-                resDir = File(project.buildDir, "${variant.playPath}/res")
             }
 
             val publishListingTask = project.newTask<PublishListing>(

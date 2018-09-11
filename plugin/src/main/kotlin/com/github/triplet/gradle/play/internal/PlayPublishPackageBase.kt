@@ -20,7 +20,7 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:Optional
     @get:InputDirectory
-    internal val releaseNotesDir
+    protected val releaseNotesDir
         get() = File(resDir, RELEASE_NOTES_PATH).orNull()
 
     protected fun AndroidPublisher.Edits.updateTracks(editId: String, versions: List<Long>) {
