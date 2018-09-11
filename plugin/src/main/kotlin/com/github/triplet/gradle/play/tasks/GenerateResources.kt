@@ -17,10 +17,12 @@ import com.github.triplet.gradle.play.internal.nullOrFull
 import com.github.triplet.gradle.play.internal.orNull
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.CacheableTask
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import java.io.File
@@ -34,20 +36,17 @@ open class GenerateResources : DefaultTask() {
     @get:OutputDirectory
     lateinit var resDir: File
 
-    private val resSrcDirs: List<File> by lazy {
-        variant.sourceSets.map { project.file("src/${it.name}/$PLAY_PATH") }
+    @get:SkipWhenEmpty
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:InputFiles
+    protected val resSrcDirs by lazy {
+        variant.sourceSets.map { project.fileTree("src/${it.name}/$PLAY_PATH") }
     }
     private val defaultLocale by lazy {
         resSrcDirs.mapNotNull {
-            File(it, AppDetail.DEFAULT_LANGUAGE.fileName).orNull()
+            File(it.dir, AppDetail.DEFAULT_LANGUAGE.fileName).orNull()
                     ?.readText()?.normalized().nullOrFull()
         }.lastOrNull() // Pick the most specialized option available. E.g. `paidProdRelease`
-    }
-
-    fun init() {
-        for (dir in resSrcDirs) {
-            inputs.dir(dir).skipWhenEmpty().withPathSensitivity(PathSensitivity.RELATIVE)
-        }
     }
 
     @TaskAction
@@ -57,15 +56,14 @@ open class GenerateResources : DefaultTask() {
         val changedDefaults = mutableListOf<File>()
 
         inputs.outOfDate {
-            val file = it.file
             file.validate()
 
             defaultLocale?.let {
                 if (file.isChildOf(LISTINGS_PATH) && file.isChildOf(it)) changedDefaults += file
             }
-            project.copy { it.from(file).into(file.findClosestDir().findDest()) }
+            project.copy { from(file).into(file.findClosestDir().findDest()) }
         }
-        inputs.removed { project.delete(it.file.findDest()) }
+        inputs.removed { project.delete(file.findDest()) }
 
         for (default in changedDefaults.reversed().distinctBy { it.name }) {
             val listings = default.findDest().climbUpTo(LISTINGS_PATH)!!
@@ -76,9 +74,8 @@ open class GenerateResources : DefaultTask() {
                     .map { File(it, relativePath) }
                     .filter { !it.exists() }
                     .forEach {
-                        project.copy { spec ->
-                            spec.from(default)
-                            spec.into(File(resDir, it.parentFile.toRelativeString(resDir)))
+                        project.copy {
+                            from(default).into(File(resDir, it.parentFile.toRelativeString(resDir)))
                         }
                     }
         }
@@ -136,5 +133,5 @@ open class GenerateResources : DefaultTask() {
 
     private fun File.findDest() = File(resDir, toRelativeString(findOwner()))
 
-    private fun File.findOwner() = resSrcDirs.single { startsWith(it) }
+    private fun File.findOwner() = resSrcDirs.map { it.dir }.single { startsWith(it) }
 }

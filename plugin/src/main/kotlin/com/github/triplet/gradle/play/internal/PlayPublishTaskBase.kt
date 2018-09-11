@@ -59,7 +59,7 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
             request.execute().id
         } catch (e: GoogleJsonResponseException) {
             // Rethrow for clarity
-            if (e.details.errors.any { it.reason == "applicationNotFound" }) {
+            if (e.details?.errors.orEmpty().any { it.reason == "applicationNotFound" }) {
                 throw IllegalArgumentException(
                         "No application found for the package name ${variant.applicationId}. " +
                                 "The first version of your app must be uploaded via the " +

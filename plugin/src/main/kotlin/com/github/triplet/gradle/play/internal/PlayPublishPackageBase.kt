@@ -20,13 +20,14 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:Optional
     @get:InputDirectory
-    internal val releaseNotesDir by lazy { File(resDir, RELEASE_NOTES_PATH).safeMkdirs() }
+    internal val releaseNotesDir
+        get() = File(resDir, RELEASE_NOTES_PATH).orNull()
 
     protected fun AndroidPublisher.Edits.updateTracks(editId: String, versions: List<Long>) {
         progressLogger.progress("Updating tracks")
 
-        val releaseTexts = releaseNotesDir.listFiles()?.mapNotNull { locale ->
-            val file = File(locale, extension.track).orNull()
+        val releaseTexts = releaseNotesDir?.listFiles()?.mapNotNull { locale ->
+            val file = File(locale, "${extension.track}.txt").orNull()
                     ?: File(locale, RELEASE_NOTES_DEFAULT_NAME).orNull()
                     ?: return@mapNotNull null
 
@@ -56,7 +57,7 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
     }
 
     protected fun GoogleJsonResponseException.handleUploadFailures(file: File): Nothing? {
-        val isConflict = details.errors.all {
+        val isConflict = details?.errors.orEmpty().all {
             it.reason == "apkUpgradeVersionConflict" || it.reason == "apkNoUpgradePath"
         }
         if (isConflict) {
