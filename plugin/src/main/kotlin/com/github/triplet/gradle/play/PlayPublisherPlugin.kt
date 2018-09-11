@@ -20,6 +20,7 @@ import com.github.triplet.gradle.play.tasks.ProcessPackageMetadata
 import com.github.triplet.gradle.play.tasks.PublishApk
 import com.github.triplet.gradle.play.tasks.PublishBundle
 import com.github.triplet.gradle.play.tasks.PublishListing
+import com.github.triplet.gradle.play.tasks.PublishProducts
 import groovy.lang.GroovyObject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -56,6 +57,10 @@ class PlayPublisherPlugin : Plugin<Project> {
         val publishListingAllTask = project.newTask<LifecycleHelperTask>(
                 "publishListing",
                 "Uploads all Play Store metadata for every variant."
+        ) { this.extension = extension }
+        val publishProductsAllTask = project.newTask<LifecycleHelperTask>(
+                "publishProducts",
+                "Uploads all Play Store in-app products for every variant."
         ) { this.extension = extension }
 
         project.initPlayAccountConfigs(android)
@@ -120,6 +125,17 @@ class PlayPublisherPlugin : Plugin<Project> {
                 doFirst { logger.warn("$name is deprecated, use ${publishListingTask.get().name} instead") }
             }
 
+            val publishProductsTask = project.newTask<PublishProducts>(
+                    "publish${variantName}Products",
+                    "Uploads all Play Store in-app products for $variantName."
+            ) {
+                init()
+                resDir = playResourcesTask.get().resDir
+
+                dependsOn(playResourcesTask)
+            }
+            publishProductsAllTask.configure { dependsOn(publishProductsTask) }
+
             val processPackageMetadata = project.newTask<ProcessPackageMetadata>(
                     "process${variantName}Metadata",
                     "Processes packaging metadata for $variantName.",
@@ -174,6 +190,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 dependsOn(
                         if (extension.defaultToAppBundles) publishBundleTask else publishApkTask)
                 dependsOn(publishListingTask)
+                dependsOn(publishProductsTask)
             }
             publishAllTask.configure { dependsOn(publishTask) }
         }

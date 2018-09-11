@@ -22,7 +22,8 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
     protected val progressLogger: ProgressLogger = services[ProgressLoggerFactory::class.java]
             .newOperation(javaClass)
 
-    private val publisher by lazy {
+    @get:Internal
+    protected val publisher: AndroidPublisher by lazy {
         val credential = accountConfig.run {
             val creds = _serviceAccountCredentials
             val serviceAccountEmail = serviceAccountEmail

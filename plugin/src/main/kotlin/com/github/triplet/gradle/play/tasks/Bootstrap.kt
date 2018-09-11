@@ -6,11 +6,13 @@ import com.github.triplet.gradle.play.internal.ImageType
 import com.github.triplet.gradle.play.internal.LISTINGS_PATH
 import com.github.triplet.gradle.play.internal.ListingDetail
 import com.github.triplet.gradle.play.internal.PLAY_PATH
+import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
 import com.github.triplet.gradle.play.internal.flavorNameOrDefault
 import com.github.triplet.gradle.play.internal.nullOrFull
 import com.github.triplet.gradle.play.internal.safeCreateNewFile
+import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.AndroidPublisher
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
@@ -39,6 +41,7 @@ open class Bootstrap : PlayPublishTaskBase() {
         bootstrapAppDetails(editId)
         bootstrapListing(editId)
         bootstrapReleaseNotes(editId)
+        bootstrapProducts()
 
         progressLogger.completed()
     }
@@ -112,6 +115,15 @@ open class Bootstrap : PlayPublishTaskBase() {
                         .safeCreateNewFile()
                         .writeText(it.text)
             }
+        }
+    }
+
+    private fun bootstrapProducts() {
+        progressLogger.progress("Downloading in-app products")
+        publisher.inappproducts().list(variant.applicationId).execute().inappproduct.forEach {
+            JacksonFactory.getDefaultInstance()
+                    .toPrettyString(it)
+                    .write(srcDir, "$PRODUCTS_PATH/${it.sku}.json")
         }
     }
 
