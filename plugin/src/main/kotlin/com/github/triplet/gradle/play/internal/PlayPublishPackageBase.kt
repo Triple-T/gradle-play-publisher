@@ -20,7 +20,8 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:Optional
     @get:InputDirectory
-    internal val releaseNotesDir by lazy { File(resDir, RELEASE_NOTES_PATH).safeMkdirs() }
+    internal val releaseNotesDir
+        get() = File(resDir, RELEASE_NOTES_PATH).orNull()
 
     protected fun AndroidPublisher.Edits.updateTracks(editId: String, versions: List<Long>) {
         progressLogger.progress("Updating tracks")
@@ -43,7 +44,7 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
         versionCodes?.let { this.versionCodes = it }
         if (updateStatus) status = extension.releaseStatus
 
-        val releaseNotes = releaseNotesDir.listFiles().orEmpty().mapNotNull { locale ->
+        val releaseNotes = releaseNotesDir?.listFiles().orEmpty().mapNotNull { locale ->
             val file = File(locale, "${extension.track}.txt").orNull() ?: run {
                 if (useDefaultReleaseNotes) {
                     File(locale, RELEASE_NOTES_DEFAULT_NAME).orNull()

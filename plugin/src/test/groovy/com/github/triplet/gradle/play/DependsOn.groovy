@@ -1,6 +1,7 @@
 package com.github.triplet.gradle.play
 
 import org.gradle.api.Task
+import org.gradle.api.tasks.TaskProvider
 import org.hamcrest.Description
 import org.hamcrest.TypeSafeMatcher
 
@@ -19,6 +20,10 @@ class DependsOn extends TypeSafeMatcher<Task> {
     @Override
     protected boolean matchesSafely(Task task) {
         return task.dependsOn.any {
+            if (it instanceof TaskProvider && (it as TaskProvider).get().name == mDependsOn) {
+                return true
+            }
+
             if (it instanceof Task && (it as Task).name == mDependsOn) {
                 return true
             }
