@@ -27,6 +27,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.kotlin.dsl.the
+import java.io.File
 
 @Suppress("unused") // Used by Gradle
 class PlayPublisherPlugin : Plugin<Project> {
