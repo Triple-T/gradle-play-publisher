@@ -35,8 +35,8 @@ open class PublishProducts : PlayPublishTaskBase() {
             if (invalidatesProduct()) changedProducts += this
         }
 
-        inputs.outOfDate { it.file.process() }
-        inputs.removed { it.file.process() }
+        inputs.outOfDate { file.process() }
+        inputs.removed { file.process() }
 
         progressLogger.start("Uploads in-app products for variant ${variant.name}", null)
         publisher.inappproducts().apply {
