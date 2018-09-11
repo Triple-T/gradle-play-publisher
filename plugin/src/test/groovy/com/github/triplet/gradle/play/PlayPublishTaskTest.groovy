@@ -1,7 +1,7 @@
 package com.github.triplet.gradle.play
 
-import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.internal.TrackType
+import com.github.triplet.gradle.play.tasks.internal.PlayPublishTaskBase
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.Apk

@@ -2,9 +2,9 @@ package com.github.triplet.gradle.play.tasks
 
 import com.android.build.VariantOutput.OutputType
 import com.android.build.gradle.api.ApkVariantOutput
-import com.github.triplet.gradle.play.internal.PlayPublishPackageBase
 import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.internal.trackUploadProgress
+import com.github.triplet.gradle.play.tasks.internal.PlayPublishPackageBase
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
