@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile
 plugins {
     `java-gradle-plugin`
     `kotlin-dsl`
+    groovy
     id("com.vanniktech.maven.publish")
 }
 
