@@ -1,17 +1,33 @@
 ## 2.0.0 - to be released
 
-* Convert plugin to Kotlin
-* Bump Android Publisher plugin version to v3
+### Features and improvements
+
+* Support Android App Bundles - #262, #319
+* Support promoting existing releases - #389, #284, #104
+* Support publishing in-app purchases - #322, #181
 * Allow overriding configuration via command line options - #326
+* Allow bootstrapping only certain listing metadata - #375, #372
 * Fully support multi-dimensional flavors - #130, #311
 * Fill missing metadata with data from the default language - #107, #323
-* Support gradle cache and incremental builds - #304, #308
+* Support Gradle cache and incremental builds - #304, #308
+* Support Gradle task configuration avoidance - #388
 * Support different resolution strategies in case of version conflicts - #301
 * Add group tasks to publish all variants at once - #117, #273
-* Provide publishing tasks even when `signingConfig` is missing - #244, #298
+* Move all public tasks to "Publishing" group instead of "Play Store" - #365
 * Improve error messages and logging - #238, #268
 * Add status indicators and upload progress - #298
-* Support Android App Bundles - #262, #319
+
+### Bug fixes
+
+* Don't upload the universal APK if splits are provided - #393, #380
+* Provide publishing tasks even when `signingConfig` is missing - #244, #298
+* Don't upload 0 byte mapping files - #370, #319
+* A ton of other fixes we didn't track 😅
+
+### Maintenance
+
+* Convert plugin to Kotlin
+* Bump Android Publisher plugin version to v3
 
 ### Breaking changes
 
@@ -46,6 +62,10 @@ The `jsonFile` and `pk12File` properties have been replaced with a unified
 
 For example, `publishApkRelease` -> `publishReleaseApk`. Note: the old tasks are still available for
 now, but will be removed in a future release.
+
+#### AGP no longer bundled
+
+The AGP needs to be depended on explicitly.
 
 ## 1.2.2 - 2018-05-24
 
