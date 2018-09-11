@@ -13,6 +13,7 @@ import com.github.triplet.gradle.play.internal.isDirectChildOf
 import com.github.triplet.gradle.play.internal.normalized
 import com.github.triplet.gradle.play.internal.nullOrFull
 import com.github.triplet.gradle.play.internal.orNull
+import com.github.triplet.gradle.play.internal.playPath
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.InputFiles
@@ -32,7 +33,7 @@ open class GenerateResources : DefaultTask() {
 
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputDirectory
-    lateinit var resDir: File
+    internal val resDir by lazy { File(project.buildDir, "${variant.playPath}/res") }
 
     @get:SkipWhenEmpty
     @get:PathSensitive(PathSensitivity.RELATIVE)
