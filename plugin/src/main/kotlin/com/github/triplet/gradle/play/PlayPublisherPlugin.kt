@@ -177,7 +177,7 @@ class PlayPublisherPlugin : Plugin<Project> {
             }
             publishBundleAllTask.configure { dependsOn(publishBundleTask) }
 
-            val promoteArtifactTask = project.newTask<PromoteRelease>(
+            val promoteReleaseTask = project.newTask<PromoteRelease>(
                     "promote${variantName}Artifact",
                     "Promotes a release for $variantName."
             ) {
@@ -186,7 +186,7 @@ class PlayPublisherPlugin : Plugin<Project> {
 
                 dependsOn(playResourcesTask)
             }
-            promoteReleaseAllTask.configure { dependsOn(promoteArtifactTask) }
+            promoteReleaseAllTask.configure { dependsOn(promoteReleaseTask) }
 
             val publishTask = project.newTask<LifecycleHelperTask>(
                     "publish$variantName",
