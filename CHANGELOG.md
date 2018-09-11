@@ -12,7 +12,6 @@
 * Improve error messages and logging - #238, #268
 * Add status indicators and upload progress - #298
 * Support Android App Bundles - #262, #319
-* Support uploading in-app products - #181, #322
 
 ### Breaking changes
 
