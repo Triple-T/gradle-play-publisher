@@ -28,6 +28,7 @@
 
 * Convert plugin to Kotlin
 * Bump Android Publisher plugin version to v3
+* Moved package from `de.triplet.gradle.play` to `com.github.triplet.gradle.play`
 
 ### Breaking changes
 
