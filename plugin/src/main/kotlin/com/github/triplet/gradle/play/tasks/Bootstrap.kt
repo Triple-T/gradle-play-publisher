@@ -120,7 +120,7 @@ open class Bootstrap : PlayPublishTaskBase() {
 
     private fun bootstrapProducts() {
         progressLogger.progress("Downloading in-app products")
-        publisher.inappproducts().list(variant.applicationId).execute().inappproduct.forEach {
+        publisher.inappproducts().list(variant.applicationId).execute().inappproduct?.forEach {
             JacksonFactory.getDefaultInstance()
                     .toPrettyString(it)
                     .write(srcDir, "$PRODUCTS_PATH/${it.sku}.json")
