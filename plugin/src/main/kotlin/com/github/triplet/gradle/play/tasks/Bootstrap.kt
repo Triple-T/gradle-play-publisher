@@ -108,7 +108,7 @@ open class Bootstrap : PlayPublishTaskBase() {
     private fun AndroidPublisher.Edits.bootstrapReleaseNotes(editId: String) {
         progressLogger.progress("Downloading release notes")
         tracks().list(variant.applicationId, editId).execute().tracks?.forEach { track ->
-            track.releases.maxBy {
+            track.releases?.maxBy {
                 it.versionCodes?.max() ?: Long.MIN_VALUE
             }?.releaseNotes?.forEach {
                 File(srcDir, "$RELEASE_NOTES_PATH/${it.language}/${track.track}.txt")
