@@ -108,7 +108,7 @@ open class Bootstrap : PlayPublishTaskBase() {
     private fun AndroidPublisher.Edits.bootstrapReleaseNotes(editId: String) {
         progressLogger.progress("Downloading release notes")
         tracks().list(variant.applicationId, editId).execute().tracks?.forEach { track ->
-            track.releases.maxBy {
+            track.releases?.maxBy {
                 it.versionCodes?.max() ?: Long.MIN_VALUE
             }?.releaseNotes?.forEach {
                 File(srcDir, "$RELEASE_NOTES_PATH/${it.language}/${track.track}.txt")
@@ -120,7 +120,7 @@ open class Bootstrap : PlayPublishTaskBase() {
 
     private fun bootstrapProducts() {
         progressLogger.progress("Downloading in-app products")
-        publisher.inappproducts().list(variant.applicationId).execute().inappproduct.forEach {
+        publisher.inappproducts().list(variant.applicationId).execute().inappproduct?.forEach {
             JacksonFactory.getDefaultInstance()
                     .toPrettyString(it)
                     .write(srcDir, "$PRODUCTS_PATH/${it.sku}.json")
