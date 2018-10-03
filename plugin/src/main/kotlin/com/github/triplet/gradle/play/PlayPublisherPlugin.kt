@@ -19,6 +19,8 @@ import com.github.triplet.gradle.play.tasks.PublishApk
 import com.github.triplet.gradle.play.tasks.PublishBundle
 import com.github.triplet.gradle.play.tasks.PublishListing
 import com.github.triplet.gradle.play.tasks.PublishProducts
+import com.github.triplet.gradle.play.tasks.internal.BootstrapLifecycleHelperTask
+import com.github.triplet.gradle.play.tasks.internal.BootstrapOptionsHolder
 import com.github.triplet.gradle.play.tasks.internal.LifecycleHelperTask
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishTaskBase
 import groovy.lang.GroovyObject
