@@ -19,8 +19,6 @@ import com.github.triplet.gradle.play.tasks.PublishApk
 import com.github.triplet.gradle.play.tasks.PublishBundle
 import com.github.triplet.gradle.play.tasks.PublishListing
 import com.github.triplet.gradle.play.tasks.PublishProducts
-import com.github.triplet.gradle.play.tasks.internal.BootstrapLifecycleHelperTask
-import com.github.triplet.gradle.play.tasks.internal.BootstrapOptionsHolder
 import com.github.triplet.gradle.play.tasks.internal.LifecycleHelperTask
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishTaskBase
 import groovy.lang.GroovyObject
@@ -144,7 +142,12 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "Processes packaging metadata for $variantName.",
                     null
             ) { init() }
-            checkManifest.dependsOn(processPackageMetadata)
+            try {
+                checkManifestProvider.configure { dependsOn(processPackageMetadata) }
+            } catch (e: NoSuchMethodError) {
+                @Suppress("DEPRECATION")
+                checkManifest.dependsOn(processPackageMetadata)
+            }
 
             val publishApkTask = project.newTask<PublishApk>(
                     "publish${variantName}Apk",
@@ -155,7 +158,12 @@ class PlayPublisherPlugin : Plugin<Project> {
 
                 dependsOn(processPackageMetadata)
                 dependsOn(playResourcesTask)
-                variant.assemble?.let { dependsOn(it) }
+                try {
+                    variant.assembleProvider
+                } catch (e: NoSuchMethodError) {
+                    @Suppress("DEPRECATION")
+                    variant.assemble
+                }?.let { dependsOn(it) }
                         ?: logger.warn("Assemble task not found. Publishing APKs may not work.")
             }
             publishApkAllTask.configure { dependsOn(publishApkTask) }

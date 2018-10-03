@@ -8,11 +8,8 @@ import com.github.triplet.gradle.play.internal.ListingDetail
 import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
-import com.github.triplet.gradle.play.internal.flavorNameOrDefault
 import com.github.triplet.gradle.play.internal.nullOrFull
 import com.github.triplet.gradle.play.internal.safeCreateNewFile
-import com.github.triplet.gradle.play.tasks.internal.BootstrapOptions
-import com.github.triplet.gradle.play.tasks.internal.BootstrapOptionsHolder
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishTaskBase
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.AndroidPublisher
@@ -110,7 +107,7 @@ open class Bootstrap : PlayPublishTaskBase(), BootstrapOptions by BootstrapOptio
     private fun AndroidPublisher.Edits.bootstrapReleaseNotes(editId: String) {
         progressLogger.progress("Downloading release notes")
         tracks().list(variant.applicationId, editId).execute().tracks?.forEach { track ->
-            track.releases.maxBy {
+            track.releases?.maxBy {
                 it.versionCodes?.max() ?: Long.MIN_VALUE
             }?.releaseNotes?.forEach {
                 File(srcDir, "$RELEASE_NOTES_PATH/${it.language}/${track.track}.txt")
@@ -122,7 +119,7 @@ open class Bootstrap : PlayPublishTaskBase(), BootstrapOptions by BootstrapOptio
 
     private fun bootstrapProducts() {
         progressLogger.progress("Downloading in-app products")
-        publisher.inappproducts().list(variant.applicationId).execute().inappproduct.forEach {
+        publisher.inappproducts().list(variant.applicationId).execute().inappproduct?.forEach {
             JacksonFactory.getDefaultInstance()
                     .toPrettyString(it)
                     .write(srcDir, "$PRODUCTS_PATH/${it.sku}.json")
