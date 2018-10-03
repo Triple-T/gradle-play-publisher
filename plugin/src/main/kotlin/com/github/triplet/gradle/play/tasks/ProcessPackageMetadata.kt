@@ -1,8 +1,8 @@
 package com.github.triplet.gradle.play.tasks
 
 import com.android.build.gradle.api.ApkVariantOutput
-import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
+import com.github.triplet.gradle.play.tasks.internal.PlayPublishTaskBase
 import org.gradle.api.tasks.TaskAction
 
 open class ProcessPackageMetadata : PlayPublishTaskBase() {

@@ -1,5 +1,14 @@
-package com.github.triplet.gradle.play.internal
+package com.github.triplet.gradle.play.tasks.internal
 
+import com.github.triplet.gradle.play.internal.MIME_TYPE_STREAM
+import com.github.triplet.gradle.play.internal.RELEASE_NOTES_DEFAULT_NAME
+import com.github.triplet.gradle.play.internal.RELEASE_NOTES_MAX_LENGTH
+import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
+import com.github.triplet.gradle.play.internal.ReleaseStatus
+import com.github.triplet.gradle.play.internal.ResolutionStrategy
+import com.github.triplet.gradle.play.internal.orNull
+import com.github.triplet.gradle.play.internal.readProcessed
+import com.github.triplet.gradle.play.internal.trackUploadProgress
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher

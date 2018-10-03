@@ -1,6 +1,9 @@
-package com.github.triplet.gradle.play.internal
+package com.github.triplet.gradle.play.tasks.internal
 
 import com.github.triplet.gradle.play.PlayPublisherExtension
+import com.github.triplet.gradle.play.internal.ReleaseStatus
+import com.github.triplet.gradle.play.internal.ResolutionStrategy
+import com.github.triplet.gradle.play.internal.TrackType
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.options.Option
