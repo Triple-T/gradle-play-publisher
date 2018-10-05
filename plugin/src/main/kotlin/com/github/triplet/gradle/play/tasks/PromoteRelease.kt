@@ -1,6 +1,6 @@
 package com.github.triplet.gradle.play.tasks
 
-import com.github.triplet.gradle.play.internal.PlayPublishPackageBase
+import com.github.triplet.gradle.play.tasks.internal.PlayPublishPackageBase
 import org.gradle.api.tasks.TaskAction
 
 open class PromoteRelease : PlayPublishPackageBase() {
