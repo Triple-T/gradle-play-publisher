@@ -9,6 +9,7 @@ import org.junit.Test
 
 import static DependsOn.dependsOn
 import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertFalse
 import static org.junit.Assert.assertNotNull
 import static org.junit.Assert.assertThat
 import static org.junit.Assert.assertTrue
@@ -461,5 +462,16 @@ class PlayPublisherPluginTest {
         assertThat(project.tasks.publish, dependsOn('publishProductionPaidRelease'))
         assertThat(project.tasks.publishApk, dependsOn('publishProductionPaidReleaseApk'))
         assertThat(project.tasks.publishListing, dependsOn('publishProductionPaidReleaseListing'))
+    }
+
+    @Test
+    void signedBuildsCanBeAssembledWithoutCredsWhenResStratNotAuto() {
+        def project = TestHelper.evaluatableProject()
+        project.evaluate()
+
+        def processTask = project.tasks.processReleaseMetadata
+        processTask.execute() // Hack: we should be using the GradleRunner to run a real build
+
+        assertFalse(processTask.didWork)
     }
 }
