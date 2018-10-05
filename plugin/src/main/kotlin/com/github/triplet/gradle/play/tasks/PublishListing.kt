@@ -5,12 +5,12 @@ import com.github.triplet.gradle.play.internal.ImageFileFilter
 import com.github.triplet.gradle.play.internal.ImageType
 import com.github.triplet.gradle.play.internal.LISTINGS_PATH
 import com.github.triplet.gradle.play.internal.ListingDetail
-import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.internal.climbUpTo
 import com.github.triplet.gradle.play.internal.isDirectChildOf
 import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.internal.readProcessed
+import com.github.triplet.gradle.play.tasks.internal.PlayPublishTaskBase
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
@@ -44,10 +44,10 @@ open class PublishListing : PlayPublishTaskBase() {
 
         appDetails + listings
     }
-    @Suppress("MemberVisibilityCanBePrivate") // Needed for Gradle caching to work correctly
+    @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputFile
-    internal val outputFile by lazy {
+    protected val outputFile by lazy {
         File(project.buildDir, "${variant.playPath}/listing-cache-key")
     }
 

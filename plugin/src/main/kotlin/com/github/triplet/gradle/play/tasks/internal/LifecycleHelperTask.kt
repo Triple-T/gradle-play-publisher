@@ -1,4 +1,4 @@
-package com.github.triplet.gradle.play.internal
+package com.github.triplet.gradle.play.tasks.internal
 
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import org.gradle.api.DefaultTask

@@ -5,14 +5,10 @@ import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.internal.api.InstallableVariantImpl
 import com.github.triplet.gradle.play.internal.ACCOUNT_CONFIG
 import com.github.triplet.gradle.play.internal.AccountConfig
-import com.github.triplet.gradle.play.internal.LifecycleHelperTask
 import com.github.triplet.gradle.play.internal.PLAY_PATH
-import com.github.triplet.gradle.play.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.internal.configure
-import com.github.triplet.gradle.play.internal.flavorNameOrDefault
 import com.github.triplet.gradle.play.internal.get
 import com.github.triplet.gradle.play.internal.newTask
-import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.internal.set
 import com.github.triplet.gradle.play.internal.validate
 import com.github.triplet.gradle.play.internal.validateRuntime
@@ -23,12 +19,14 @@ import com.github.triplet.gradle.play.tasks.PromoteRelease
 import com.github.triplet.gradle.play.tasks.PublishApk
 import com.github.triplet.gradle.play.tasks.PublishBundle
 import com.github.triplet.gradle.play.tasks.PublishListing
+import com.github.triplet.gradle.play.tasks.PublishProducts
+import com.github.triplet.gradle.play.tasks.internal.LifecycleHelperTask
+import com.github.triplet.gradle.play.tasks.internal.PlayPublishTaskBase
 import groovy.lang.GroovyObject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.kotlin.dsl.the
-import java.io.File
 
 @Suppress("unused") // Used by Gradle
 class PlayPublisherPlugin : Plugin<Project> {
@@ -64,6 +62,10 @@ class PlayPublisherPlugin : Plugin<Project> {
         val publishListingAllTask = project.newTask<LifecycleHelperTask>(
                 "publishListing",
                 "Uploads all Play Store metadata for every variant."
+        ) { this.extension = extension }
+        val publishProductsAllTask = project.newTask<LifecycleHelperTask>(
+                "publishProducts",
+                "Uploads all Play Store in-app products for every variant."
         ) { this.extension = extension }
 
         project.initPlayAccountConfigs(android)
@@ -101,10 +103,7 @@ class PlayPublisherPlugin : Plugin<Project> {
             val bootstrapTask = project.newTask<Bootstrap>(
                     "bootstrap${variantName}PlayResources",
                     "Downloads the Play Store listing metadata for $variantName."
-            ) {
-                init()
-                srcDir = project.file("src/${variant.flavorNameOrDefault}/$PLAY_PATH")
-            }
+            ) { init() }
             bootstrapAllTask.configure { dependsOn(bootstrapTask) }
 
             val playResourcesTask = project.newTask<GenerateResources>(
@@ -113,7 +112,6 @@ class PlayPublisherPlugin : Plugin<Project> {
                     null
             ) {
                 variant = this@whenObjectAdded
-                resDir = File(project.buildDir, "${variant.playPath}/res")
             }
 
             val publishListingTask = project.newTask<PublishListing>(
@@ -132,12 +130,28 @@ class PlayPublisherPlugin : Plugin<Project> {
                 doFirst { logger.warn("$name is deprecated, use ${publishListingTask.get().name} instead") }
             }
 
+            val publishProductsTask = project.newTask<PublishProducts>(
+                    "publish${variantName}Products",
+                    "Uploads all Play Store in-app products for $variantName."
+            ) {
+                init()
+                resDir = playResourcesTask.get().resDir
+
+                dependsOn(playResourcesTask)
+            }
+            publishProductsAllTask.configure { dependsOn(publishProductsTask) }
+
             val processPackageMetadata = project.newTask<ProcessPackageMetadata>(
                     "process${variantName}Metadata",
                     "Processes packaging metadata for $variantName.",
                     null
             ) { init() }
-            checkManifest.dependsOn(processPackageMetadata)
+            try {
+                checkManifestProvider.configure { dependsOn(processPackageMetadata) }
+            } catch (e: NoSuchMethodError) {
+                @Suppress("DEPRECATION")
+                checkManifest.dependsOn(processPackageMetadata)
+            }
 
             val publishApkTask = project.newTask<PublishApk>(
                     "publish${variantName}Apk",
@@ -148,7 +162,12 @@ class PlayPublisherPlugin : Plugin<Project> {
 
                 dependsOn(processPackageMetadata)
                 dependsOn(playResourcesTask)
-                variant.assemble?.let { dependsOn(it) }
+                try {
+                    variant.assembleProvider
+                } catch (e: NoSuchMethodError) {
+                    @Suppress("DEPRECATION")
+                    variant.assemble
+                }?.let { dependsOn(it) }
                         ?: logger.warn("Assemble task not found. Publishing APKs may not work.")
             }
             publishApkAllTask.configure { dependsOn(publishApkTask) }
@@ -197,6 +216,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 dependsOn(
                         if (extension.defaultToAppBundles) publishBundleTask else publishApkTask)
                 dependsOn(publishListingTask)
+                dependsOn(publishProductsTask)
             }
             publishAllTask.configure { dependsOn(publishTask) }
         }
