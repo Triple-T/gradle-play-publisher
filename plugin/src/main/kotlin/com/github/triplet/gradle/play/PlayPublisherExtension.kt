@@ -23,7 +23,9 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
      * Specify the track from which to promote a release. That is, the specified track will be
      * promoted to [track].
      *
-     * See [track] for valid values.
+     * See [track] for valid values. The default is determined dynamically from the most unstable
+     * release available for promotion. That is, if there is a stable release and an alpha release,
+     * the alpha will be chosen.
      */
     @get:Input
     var fromTrack
