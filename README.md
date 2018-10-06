@@ -18,6 +18,9 @@
 Gradle Play Publisher is a Gradle plugin that allows you to upload your App Bundle or APK and other
 app details to the Google Play Store.
 
+> **Note:** this README targets the `v2.0.0` betas. Documentation for the latest stable release is
+available [here](https://github.com/Triple-T/gradle-play-publisher/blob/1.2.2/README.md).
+
 ## Table of contents
 
 1. [Quickstart guide](#quickstart-guide)
@@ -250,8 +253,8 @@ play {
 If an artifact already exists with a version code greater than or equal to the one you're trying to
 upload, an error will be thrown when attempting to publish the new artifact. You have two options:
 
-* Ignore the error and continue
-* Automatically pick the correct version code so you don't have to manually update it
+* Ignore the error and continue (`ignore`)
+* Automatically pick the correct version code so you don't have to manually update it (`auto`)
 
 Example configuration:
 
@@ -330,12 +333,12 @@ Directory: `play/listings/[language]/graphics` where `language` is defined as in
 section
 
 Image files are organized a bit differently than in previous sections. Instead of the file name, the
-parent directory's name is used as the media type. This is because multiple images can be provided
+parent directory's name is used as the media type. This is because multiple images may be provided
 for the same media type. While file names are arbitrary, they will be uploaded in alphabetical order
 and presented on the Play Store as such. Therefore, we recommend using a number as the file name
 (`1.png` for example). Both PNG and JPEG images are supported.
 
-Directory | # of images
+Directory | Max # of images
 --- | ---
 `icon` | 1
 `feature-graphic` | 1
@@ -351,15 +354,17 @@ Directory | # of images
 
 Run `./gradlew publishProducts`.
 
-Manually setting up in-app purchase files is not recommended. [Bootstrap them instead](#quickstart).
+Manually setting up in-app purchase files is not recommended. [Bootstrap them instead](#quickstart)
+with `./gradlew bootstrap --products`.
 
 ## Advanced topics
 
 ### Using CLI options
 
 All configuration options available in the `play` block are also available as CLI options so you
-don't have to update your build file. For example, to configure `play.track` on demand, use the
-`--track` option. `camelCase` options are converted to `kebab-case` ones.
+don't have to update your build file when making one-time changes. For example, to configure
+`play.track` on demand, use the `--track` option. `camelCase` options are converted to
+`kebab-case` ones.
 
 To get a list of options and their quick documentation, use `./gradlew help --task [task]` where
 `task` is something like `publishBundle`.
