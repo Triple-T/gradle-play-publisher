@@ -9,14 +9,14 @@ open class ProcessPackageMetadata : PlayPublishTaskBase() {
     init {
         // Always out-of-date since we don't know what's changed on the network
         outputs.upToDateWhen { false }
+
+        onlyIf { extension._resolutionStrategy == ResolutionStrategy.AUTO }
     }
 
     @TaskAction
     fun process() {
         progressLogger.start("Updates APK/Bundle metadata for variant ${variant.name}", null)
-
-        if (extension._resolutionStrategy == ResolutionStrategy.AUTO) processVersionCodes()
-
+        processVersionCodes()
         progressLogger.completed()
     }
 
