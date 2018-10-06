@@ -11,6 +11,8 @@ import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
 import com.github.triplet.gradle.play.internal.flavorNameOrDefault
 import com.github.triplet.gradle.play.internal.nullOrFull
 import com.github.triplet.gradle.play.internal.safeCreateNewFile
+import com.github.triplet.gradle.play.tasks.internal.BootstrapOptions
+import com.github.triplet.gradle.play.tasks.internal.BootstrapOptionsHolder
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishTaskBase
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.AndroidPublisher
@@ -21,7 +23,7 @@ import org.gradle.api.tasks.TaskAction
 import java.io.File
 import java.net.URL
 
-open class Bootstrap : PlayPublishTaskBase() {
+open class Bootstrap : PlayPublishTaskBase(), BootstrapOptions by BootstrapOptionsHolder {
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputDirectory
@@ -38,10 +40,10 @@ open class Bootstrap : PlayPublishTaskBase() {
     fun bootstrap() = read { editId ->
         progressLogger.start("Downloads resources for variant ${variant.name}", null)
 
-        bootstrapAppDetails(editId)
-        bootstrapListing(editId)
-        bootstrapReleaseNotes(editId)
-        bootstrapProducts()
+        if (downloadAppDetails) bootstrapAppDetails(editId)
+        if (downloadListings) bootstrapListings(editId)
+        if (downloadReleaseNotes) bootstrapReleaseNotes(editId)
+        if (downloadProducts) bootstrapProducts()
 
         progressLogger.completed()
     }
@@ -58,7 +60,7 @@ open class Bootstrap : PlayPublishTaskBase() {
         details.defaultLanguage.nullOrFull()?.write(AppDetail.DEFAULT_LANGUAGE)
     }
 
-    private fun AndroidPublisher.Edits.bootstrapListing(editId: String) {
+    private fun AndroidPublisher.Edits.bootstrapListings(editId: String) {
         progressLogger.progress("Fetching listings")
         val listings = listings()
                 .list(variant.applicationId, editId)
