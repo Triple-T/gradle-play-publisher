@@ -27,15 +27,17 @@ internal fun validateRuntime() {
     }
 }
 
+internal fun validatedTrack(value: String) = requireNotNull(
+        TrackType.values().find { it.publishedName == value }
+) { "Track must be one of ${TrackType.values().joinToString { "'${it.publishedName}'" }}" }
+
 /**
  * Check the compatibility of [PlayPublisherExtension.track] and
  * [PlayPublisherExtension.releaseStatus].
  * For reference: [https://developers.google.com/android-publisher/api-ref/edits/tracks]
  */
 internal fun PlayPublisherExtension.validate() {
-    _releaseStatus = ReleaseStatus.fromString(releaseStatus)
-
-    val usesRolloutStatues = rolloutStatuses.contains(_releaseStatus)
+    val usesRolloutStatues = rolloutStatuses.map { it.publishedName }.contains(releaseStatus)
     if (_track == TrackType.ROLLOUT) {
         check(usesRolloutStatues) {
             "'rollout' track must use the 'inProgress' or 'halted' statues."
