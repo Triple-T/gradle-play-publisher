@@ -43,6 +43,15 @@ open class PromoteRelease : PlayPublishPackageBase() {
                     updateFraction = extension._userFraction != null
             )
         }
+
+        // Duplicate statues are not allowed, so keep only the unique statuses from highest version
+        // codes.
+        track.releases = track.releases.sortedByDescending {
+            it.versionCodes?.max()
+        }.distinctBy {
+            it.status
+        }
+
         tracks().update(variant.applicationId, editId, extension.track, track).execute()
 
         progressLogger.completed()
