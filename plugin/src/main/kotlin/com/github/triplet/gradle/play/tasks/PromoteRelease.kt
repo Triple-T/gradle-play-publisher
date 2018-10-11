@@ -44,8 +44,8 @@ open class PromoteRelease : PlayPublishPackageBase() {
             )
         }
 
-        // Duplicate statues are not allowed, so keep only the unique statuses from highest version
-        // codes.
+        // Duplicate statuses are not allowed, so only keep the unique ones from the highest version
+        // code.
         track.releases = track.releases.sortedByDescending {
             it.versionCodes?.max()
         }.distinctBy {
