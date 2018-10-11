@@ -96,7 +96,9 @@ open class Bootstrap : PlayPublishTaskBase(), BootstrapOptions by BootstrapOptio
                                 .safeCreateNewFile()
                                 .outputStream()
                                 .use { stream ->
-                                    URL(image.url).openStream().use { it.copyTo(stream) }
+                                    URL(image.url + HIGH_RES_IMAGE_REQUEST).openStream().use {
+                                        it.copyTo(stream)
+                                    }
                                 }
                     }
                 }
@@ -131,4 +133,8 @@ open class Bootstrap : PlayPublishTaskBase(), BootstrapOptions by BootstrapOptio
 
     private fun String.write(dir: File, fileName: String) =
             File(dir, fileName).safeCreateNewFile().writeText(this)
+
+    private companion object {
+        const val HIGH_RES_IMAGE_REQUEST = "=h16383" // Max res: 2^14 - 1
+    }
 }
