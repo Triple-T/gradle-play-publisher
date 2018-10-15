@@ -11,9 +11,7 @@ plugins {
 dependencies {
     compileOnly("com.android.tools.build:gradle:3.3.0-alpha12")
 
-    implementation("com.google.apis:google-api-services-androidpublisher:v3-rev12-1.23.0") {
-        exclude("com.google.guava", "guava-jdk5") // Remove when upgrading to AGP 3.1+
-    }
+    implementation("com.google.apis:google-api-services-androidpublisher:v3-rev12-1.23.0")
 
     testImplementation("com.android.tools.build:gradle:3.0.1")
     testImplementation(kotlin("test"))
