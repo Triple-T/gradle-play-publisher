@@ -16,6 +16,8 @@ import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.AppDetails
 import com.google.api.services.androidpublisher.model.Listing
+import com.google.common.hash.Hashing
+import com.google.common.io.Files
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
@@ -149,6 +151,15 @@ open class PublishListing : PlayPublishTaskBase() {
         check(files.size <= type.maxNum) {
             "You can only upload ${type.maxNum} graphic(s) for the $typeName"
         }
+
+        val remoteHashes = images().list(variant.applicationId, editId, locale, typeName).execute()
+                .images.orEmpty()
+                .map { it.sha1 }
+        val localHashes = files.map {
+            @Suppress("DEPRECATION") // The API only provides SHA1 hashes
+            Files.asByteSource(it.file).hash(Hashing.sha1()).toString()
+        }
+        if (remoteHashes == localHashes) return
 
         progressLogger.progress("Uploading $locale listing graphics for type '$typeName'")
         images().deleteall(variant.applicationId, editId, locale, typeName).execute()
