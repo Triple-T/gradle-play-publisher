@@ -21,6 +21,7 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import java.io.File
+import java.io.FileNotFoundException
 import java.net.URL
 
 open class Bootstrap : PlayPublishTaskBase(), BootstrapOptions by BootstrapOptionsHolder {
@@ -95,8 +96,14 @@ open class Bootstrap : PlayPublishTaskBase(), BootstrapOptions by BootstrapOptio
                         File(imageDir, "${image.id}.png")
                                 .safeCreateNewFile()
                                 .outputStream()
-                                .use { stream ->
-                                    URL(image.url).openStream().use { it.copyTo(stream) }
+                                .use { local ->
+                                    val remote = try {
+                                        URL(image.url + HIGH_RES_IMAGE_REQUEST).openStream()
+                                    } catch (e: FileNotFoundException) {
+                                        URL(image.url).openStream()
+                                    }
+
+                                    remote.use { it.copyTo(local) }
                                 }
                     }
                 }
@@ -131,4 +138,8 @@ open class Bootstrap : PlayPublishTaskBase(), BootstrapOptions by BootstrapOptio
 
     private fun String.write(dir: File, fileName: String) =
             File(dir, fileName).safeCreateNewFile().writeText(this)
+
+    private companion object {
+        const val HIGH_RES_IMAGE_REQUEST = "=h16383" // Max res: 2^14 - 1
+    }
 }
