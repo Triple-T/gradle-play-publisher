@@ -36,10 +36,11 @@ internal inline fun <reified T : Task> Project.newTask(
         block()
     }
 
+    val safeName = if (tasks.findByName(name) == null) name else "gpp" + name.capitalize()
     return if (isConfigurationAvoidanceSupported) {
-        tasks.register(name, config)
+        tasks.register(safeName, config)
     } else {
-        val task = task(name, config)
+        val task = task(safeName, config)
         DefaultProvider { task }
     }
 }
