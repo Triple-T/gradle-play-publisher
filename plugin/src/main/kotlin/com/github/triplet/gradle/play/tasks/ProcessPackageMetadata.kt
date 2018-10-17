@@ -35,7 +35,7 @@ open class ProcessPackageMetadata : PlayPublishTaskBase() {
 
         for ((i, output) in outputs.withIndex()) {
             output.versionCodeOverride = output.versionCode + patch.toInt() + i
-            extension.outputProcessor?.invoke(output)
+            extension.outputProcessor?.execute(output)
         }
     }
 }
