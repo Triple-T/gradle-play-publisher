@@ -18,9 +18,6 @@
 Gradle Play Publisher is a Gradle plugin that allows you to upload your App Bundle or APK and other
 app details to the Google Play Store.
 
-> **Note:** this README targets the `v2.0.0` betas. Documentation for the latest stable release is
-available [here](https://github.com/Triple-T/gradle-play-publisher/blob/1.2.2/README.md).
-
 ## Table of contents
 
 1. [Quickstart guide](#quickstart-guide)
@@ -99,7 +96,7 @@ buildscript {
 
     dependencies {
         // ...
-        classpath("com.github.triplet.gradle:play-publisher:2.0.0-beta1")
+        classpath("com.github.triplet.gradle:play-publisher:2.0.0")
     }
 }
 ```
@@ -127,7 +124,7 @@ buildscript {
 
     dependencies {
         // ...
-        classpath 'com.github.triplet.gradle:play-publisher:2.0.0-SNAPSHOT'
+        classpath 'com.github.triplet.gradle:play-publisher:2.1.0-SNAPSHOT'
     }
 }
 ```
