@@ -127,11 +127,6 @@ class PlayPublisherPlugin : Plugin<Project> {
                 dependsOn(playResourcesTask)
             }
             publishListingAllTask.configure { dependsOn(publishListingTask) }
-            // TODO Remove in v3.0
-            project.newTask("publishListing$variantName", "", null) {
-                dependsOn(publishListingTask)
-                doFirst { logger.warn("$name is deprecated, use ${publishListingTask.get().name} instead") }
-            }
 
             val publishProductsTask = project.newTask<PublishProducts>(
                     "publish${variantName}Products",
@@ -174,11 +169,6 @@ class PlayPublisherPlugin : Plugin<Project> {
                         ?: logger.warn("Assemble task not found. Publishing APKs may not work.")
             }
             publishApkAllTask.configure { dependsOn(publishApkTask) }
-            // TODO Remove in v3.0
-            project.newTask("publishApk$variantName", "", null) {
-                dependsOn(publishApkTask)
-                doFirst { logger.warn("$name is deprecated, use ${publishApkTask.get().name} instead") }
-            }
 
             val publishBundleTask = project.newTask<PublishBundle>(
                     "publish${variantName}Bundle",
