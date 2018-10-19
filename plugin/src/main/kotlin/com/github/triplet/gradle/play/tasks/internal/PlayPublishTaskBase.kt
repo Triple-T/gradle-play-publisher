@@ -54,19 +54,23 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
         }.setApplicationName(PLUGIN_NAME).build()
     }
 
-    protected fun read(block: AndroidPublisher.Edits.(editId: String) -> Unit) {
+    protected fun read(skipIfNotFound: Boolean = false, block: AndroidPublisher.Edits.(editId: String) -> Unit) {
         val edits = publisher.edits()
         val request = edits.insert(variant.applicationId, null)
 
         val id = try {
             request.execute().id
         } catch (e: GoogleJsonResponseException) {
-            // Rethrow for clarity
-            if (e.details?.errors.orEmpty().any { it.reason == "applicationNotFound" }) {
-                throw IllegalArgumentException(
-                        "No application found for the package name ${variant.applicationId}. " +
-                                "The first version of your app must be uploaded via the " +
-                                "Play Store console.", e)
+            if (e.isApplicationNotFound) {
+                if (skipIfNotFound) {
+                    null
+                } else {
+                    // Rethrow for clarity
+                    throw IllegalArgumentException(
+                            "No application found for the package name ${variant.applicationId}. " +
+                                    "The first version of your app must be uploaded via the " +
+                                    "Play Store console.", e)
+                }
             } else if (e.statusCode == 401) {
                 throw IllegalArgumentException("Invalid service account credentials.", e)
             } else {
@@ -74,11 +78,17 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
             }
         }
 
-        edits.block(id)
+        // If application wasn't found we might want to skip calling the block altogether
+        if (id != null) {
+            edits.block(id)
+        }
     }
 
     protected fun write(block: AndroidPublisher.Edits.(editId: String) -> Unit) = read {
         block(it)
         commit(variant.applicationId, it).execute()
     }
+
+    private val GoogleJsonResponseException.isApplicationNotFound
+        get() = details?.errors.orEmpty().any { it.reason == "applicationNotFound" }
 }
