@@ -89,7 +89,7 @@ class CompatibilityTest(
                 .withPluginClasspath()
                 .withGradleDistribution(URI(gradleDist))
                 .withProjectDir(testProject.projectDir)
-                .withArguments("tasks")
+                .withArguments("checkReleaseManifest")
                 .build()
         GradleRunner.create()
                 .withPluginClasspath()
