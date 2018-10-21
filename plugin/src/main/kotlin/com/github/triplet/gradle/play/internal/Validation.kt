@@ -2,6 +2,7 @@ package com.github.triplet.gradle.play.internal
 
 import com.android.builder.model.Version
 import com.github.triplet.gradle.play.PlayPublisherExtension
+import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import org.gradle.util.GradleVersion
 
 private val MIN_GRADLE_VERSION: GradleVersion = GradleVersion.version("4.1")
@@ -48,3 +49,6 @@ internal fun PlayPublisherExtension.validate() {
         }
     }
 }
+
+internal infix fun GoogleJsonResponseException.has(error: String) =
+        details?.errors.orEmpty().any { it.reason == error }

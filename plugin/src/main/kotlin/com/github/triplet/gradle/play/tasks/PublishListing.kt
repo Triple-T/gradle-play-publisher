@@ -6,6 +6,7 @@ import com.github.triplet.gradle.play.internal.ImageType
 import com.github.triplet.gradle.play.internal.LISTINGS_PATH
 import com.github.triplet.gradle.play.internal.ListingDetail
 import com.github.triplet.gradle.play.internal.climbUpTo
+import com.github.triplet.gradle.play.internal.has
 import com.github.triplet.gradle.play.internal.isDirectChildOf
 import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.internal.playPath
@@ -123,7 +124,7 @@ open class PublishListing : PlayPublishTaskBase() {
         try {
             listings().update(variant.applicationId, editId, locale, listing).execute()
         } catch (e: GoogleJsonResponseException) {
-            if (e.details?.errors.orEmpty().any { it.reason == "unsupportedListingLanguage" }) {
+            if (e has "unsupportedListingLanguage") {
                 // Rethrow for clarity
                 throw IllegalArgumentException("Unsupported locale $locale", e)
             } else {

@@ -6,6 +6,7 @@ import com.github.triplet.gradle.play.internal.RELEASE_NOTES_MAX_LENGTH
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
 import com.github.triplet.gradle.play.internal.ReleaseStatus
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
+import com.github.triplet.gradle.play.internal.has
 import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.internal.readProcessed
 import com.github.triplet.gradle.play.internal.trackUploadProgress
@@ -93,27 +94,25 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
         return this
     }
 
-    protected fun GoogleJsonResponseException.handleUploadFailures(file: File): Nothing? {
-        val isConflict = details?.errors.orEmpty().all {
-            it.reason == "apkUpgradeVersionConflict" || it.reason == "apkNoUpgradePath"
-        }
+    protected fun handleUploadFailures(e: GoogleJsonResponseException, file: File): Nothing? {
+        val isConflict = e has "apkUpgradeVersionConflict" || e has "apkNoUpgradePath"
         if (isConflict) {
             when (extension._resolutionStrategy) {
                 ResolutionStrategy.AUTO -> throw IllegalStateException(
                         "Concurrent uploads for variant ${variant.name}. Make sure to " +
                                 "synchronously upload your APKs such that they don't conflict.",
-                        this
+                        e
                 )
                 ResolutionStrategy.FAIL -> throw IllegalStateException(
                         "Version code ${variant.versionCode} is too low for variant ${variant.name}.",
-                        this
+                        e
                 )
                 ResolutionStrategy.IGNORE -> logger.warn(
                         "Ignoring APK ($file) for version code ${variant.versionCode}")
             }
             return null
         } else {
-            throw this
+            throw e
         }
     }
 

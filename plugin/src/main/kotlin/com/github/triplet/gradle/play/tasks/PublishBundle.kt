@@ -59,7 +59,7 @@ open class PublishBundle : PlayPublishPackageBase() {
                     .trackUploadProgress(progressLogger, "App Bundle")
                     .execute()
         } catch (e: GoogleJsonResponseException) {
-            return e.handleUploadFailures(content.file)
+            return handleUploadFailures(e, content.file)
         }
 
         handlePackageDetails(editId, bundle.versionCode)

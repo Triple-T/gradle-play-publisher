@@ -62,7 +62,7 @@ open class PublishApk : PlayPublishPackageBase() {
                     .trackUploadProgress(progressLogger, "APK")
                     .execute()
         } catch (e: GoogleJsonResponseException) {
-            return e.handleUploadFailures(content.file)
+            return handleUploadFailures(e, content.file)
         }
 
         handlePackageDetails(editId, apk.versionCode)

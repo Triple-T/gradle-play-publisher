@@ -4,6 +4,7 @@ import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.AccountConfig
 import com.github.triplet.gradle.play.internal.PLUGIN_NAME
+import com.github.triplet.gradle.play.internal.has
 import com.github.triplet.gradle.play.internal.transport
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
@@ -64,7 +65,7 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
         val id = try {
             request.execute().id
         } catch (e: GoogleJsonResponseException) {
-            if (e.isApplicationNotFound) {
+            if (e has "applicationNotFound") {
                 if (skipIfNotFound) {
                     return
                 } else {
@@ -88,7 +89,4 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
         block(it)
         commit(variant.applicationId, it).execute()
     }
-
-    private val GoogleJsonResponseException.isApplicationNotFound
-        get() = details?.errors.orEmpty().any { it.reason == "applicationNotFound" }
 }
