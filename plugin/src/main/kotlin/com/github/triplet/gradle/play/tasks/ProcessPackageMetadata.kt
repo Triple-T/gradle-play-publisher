@@ -20,7 +20,7 @@ open class ProcessPackageMetadata : PlayPublishTaskBase() {
         progressLogger.completed()
     }
 
-    private fun processVersionCodes() = read { editId ->
+    private fun processVersionCodes() = read(true) { editId ->
         progressLogger.progress("Downloading active version codes")
         val maxVersionCode = tracks().list(variant.applicationId, editId).execute().tracks
                 ?.map { it.releases ?: emptyList() }?.flatten()
