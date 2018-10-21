@@ -53,6 +53,9 @@ internal fun <T : Task> Provider<T>.configure(block: T.() -> Unit) {
     }
 }
 
+internal fun Task.dependsOnCompat(lazy: Provider<out Task>) =
+        dependsOn(if (isConfigurationAvoidanceSupported) lazy else lazy.get())
+
 internal operator fun ProductFlavor.get(name: String) = extras[name]
 
 internal operator fun ProductFlavor.set(name: String, value: Any?) {
