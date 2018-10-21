@@ -54,7 +54,10 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
         }.setApplicationName(PLUGIN_NAME).build()
     }
 
-    protected fun read(skipIfNotFound: Boolean = false, block: AndroidPublisher.Edits.(editId: String) -> Unit) {
+    protected fun read(
+            skipIfNotFound: Boolean = false,
+            block: AndroidPublisher.Edits.(editId: String) -> Unit
+    ) {
         val edits = publisher.edits()
         val request = edits.insert(variant.applicationId, null)
 
@@ -63,7 +66,7 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
         } catch (e: GoogleJsonResponseException) {
             if (e.isApplicationNotFound) {
                 if (skipIfNotFound) {
-                    null
+                    return
                 } else {
                     // Rethrow for clarity
                     throw IllegalArgumentException(
@@ -78,10 +81,7 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
             }
         }
 
-        // If application wasn't found we might want to skip calling the block altogether
-        if (id != null) {
-            edits.block(id)
-        }
+        edits.block(id)
     }
 
     protected fun write(block: AndroidPublisher.Edits.(editId: String) -> Unit) = read {
