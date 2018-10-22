@@ -99,7 +99,7 @@ buildscript {
 
     dependencies {
         // ...
-        classpath("com.github.triplet.gradle:play-publisher:2.0.0-beta1")
+        classpath("com.github.triplet.gradle:play-publisher:2.0.0-beta2")
     }
 }
 ```
