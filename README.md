@@ -90,7 +90,7 @@ for GPP to work (go to Settings -> Developer account -> Users & permissions):
 
 In your root `build.gradle(.kts)` file, add the Gradle Play Publisher dependency:
 
-<details><summary>Kotlin</summary>
+<details open><summary>Kotlin</summary>
 
 ```kt
 buildscript {
@@ -130,7 +130,7 @@ buildscript {
 Then apply it to each individual `com.android.application` module where you want to use GPP.
 For example, `app/build.gradle(.kts)` is a commonly used app module:
 
-<details><summary>Kotlin</summary>
+<details open><summary>Kotlin</summary>
 
 ```kt
 plugins {
@@ -156,7 +156,7 @@ If you're prepared to cut yourself on the bleeding edge of GPP development, snap
 available from
 [Sonatype's `snapshots` repository](https://oss.sonatype.org/content/repositories/snapshots/):
 
-<details><summary>Kotlin</summary>
+<details open><summary>Kotlin</summary>
 
 ```kt
 buildscript {
