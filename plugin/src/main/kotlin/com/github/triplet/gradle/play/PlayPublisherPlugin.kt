@@ -1,16 +1,13 @@
 package com.github.triplet.gradle.play
 
 import com.android.build.gradle.AppExtension
-import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.internal.api.InstallableVariantImpl
-import com.github.triplet.gradle.play.internal.ACCOUNT_CONFIG
-import com.github.triplet.gradle.play.internal.AccountConfig
 import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.configure
 import com.github.triplet.gradle.play.internal.dependsOnCompat
-import com.github.triplet.gradle.play.internal.get
+import com.github.triplet.gradle.play.internal.mergeWith
 import com.github.triplet.gradle.play.internal.newTask
-import com.github.triplet.gradle.play.internal.set
+import com.github.triplet.gradle.play.internal.requireCreds
 import com.github.triplet.gradle.play.internal.validate
 import com.github.triplet.gradle.play.internal.validateRuntime
 import com.github.triplet.gradle.play.tasks.Bootstrap
@@ -25,7 +22,6 @@ import com.github.triplet.gradle.play.tasks.internal.BootstrapLifecycleHelperTas
 import com.github.triplet.gradle.play.tasks.internal.BootstrapOptionsHolder
 import com.github.triplet.gradle.play.tasks.internal.LifecycleHelperTask
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishTaskBase
-import groovy.lang.GroovyObject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
@@ -39,39 +35,40 @@ class PlayPublisherPlugin : Plugin<Project> {
         val android = requireNotNull(project.the<AppExtension>()) {
             "The 'com.android.application' plugin is required."
         }
-        val extension: PlayPublisherExtension =
+        val baseExtension: PlayPublisherExtension =
                 project.extensions.create(PLAY_PATH, PlayPublisherExtension::class.java)
+        val extensionContainer = project.container(PlayPublisherExtension::class.java)
 
         val bootstrapAllTask = project.newTask<BootstrapLifecycleHelperTask>(
                 "bootstrap",
                 "Downloads the Play Store listing metadata for all variants."
-        ) { this.extension = extension }
+        ) { extension = baseExtension }
         val publishAllTask = project.newTask<LifecycleHelperTask>(
                 "publish",
                 "Uploads APK or App Bundle and all Play Store metadata for every variant."
-        ) { this.extension = extension }
+        ) { extension = baseExtension }
         val publishApkAllTask = project.newTask<LifecycleHelperTask>(
                 "publishApk",
                 "Uploads APK for every variant."
-        ) { this.extension = extension }
+        ) { extension = baseExtension }
         val publishBundleAllTask = project.newTask<LifecycleHelperTask>(
                 "publishBundle",
                 "Uploads App Bundle for every variant."
-        ) { this.extension = extension }
+        ) { extension = baseExtension }
         val promoteReleaseAllTask = project.newTask<LifecycleHelperTask>(
                 "promoteArtifact",
                 "Promotes a release for every variant."
-        ) { this.extension = extension }
+        ) { extension = baseExtension }
         val publishListingAllTask = project.newTask<LifecycleHelperTask>(
                 "publishListing",
                 "Uploads all Play Store metadata for every variant."
-        ) { this.extension = extension }
+        ) { extension = baseExtension }
         val publishProductsAllTask = project.newTask<LifecycleHelperTask>(
                 "publishProducts",
                 "Uploads all Play Store in-app products for every variant."
-        ) { this.extension = extension }
+        ) { extension = baseExtension }
 
-        project.initPlayAccountConfigs(android)
+        (android as ExtensionAware).extensions.add("playConfigs", extensionContainer)
         BootstrapOptionsHolder.reset()
         android.applicationVariants.whenObjectAdded {
             if (buildType.isDebuggable) {
@@ -79,15 +76,17 @@ class PlayPublisherPlugin : Plugin<Project> {
                 return@whenObjectAdded
             }
 
-            val accountConfig = android.getAccountConfig(this) ?: extension
+            val extension = productFlavors.mapNotNull {
+                extensionContainer.findByName(it.name)
+            }.singleOrNull().mergeWith(baseExtension)
             val variantName = name.capitalize()
 
             if (!isSigningReady) {
                 project.logger.error(
                         "Signing not ready. Be sure to specify a signingConfig for $variantName")
             }
-            accountConfig.run {
-                if (_serviceAccountCredentials.extension.equals("json", true)) {
+            extension.run {
+                if (requireCreds().extension.equals("json", true)) {
                     check(serviceAccountEmail == null) {
                         "Json credentials cannot specify a Service Account email"
                     }
@@ -101,7 +100,6 @@ class PlayPublisherPlugin : Plugin<Project> {
             fun PlayPublishTaskBase.init() {
                 this.extension = extension
                 this.variant = this@whenObjectAdded
-                this.accountConfig = accountConfig
             }
 
             val bootstrapTask = project.newTask<Bootstrap>(
@@ -223,28 +221,10 @@ class PlayPublisherPlugin : Plugin<Project> {
                 dependsOnCompat(publishProductsTask)
             }
             publishAllTask.configure { dependsOnCompat(publishTask) }
+
+            project.afterEvaluate {
+                extension.validate()
+            }
         }
-
-        project.afterEvaluate {
-            extension.validate()
-        }
-    }
-
-    private fun Project.initPlayAccountConfigs(android: AppExtension) {
-        (android as ExtensionAware).extensions.add(
-                "playAccountConfigs", container(PlayAccountConfigExtension::class.java))
-        android.defaultConfig[ACCOUNT_CONFIG] = null
-        android.productFlavors.whenObjectAdded {
-            this[ACCOUNT_CONFIG] = android.defaultConfig[ACCOUNT_CONFIG]
-        }
-    }
-
-    private fun AppExtension.getAccountConfig(variant: ApplicationVariant): AccountConfig? {
-        val flavorAccountConfig = variant.productFlavors
-                .mapNotNull { (it as GroovyObject).getProperty(ACCOUNT_CONFIG) }
-                .singleOrNull() as? AccountConfig
-        val defaultAccountConfig = defaultConfig[ACCOUNT_CONFIG] as? AccountConfig
-
-        return flavorAccountConfig ?: defaultAccountConfig
     }
 }

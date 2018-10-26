@@ -39,7 +39,7 @@ internal fun validatedTrack(value: String) = requireNotNull(
  */
 internal fun PlayPublisherExtension.validate() {
     val usesRolloutStatues = rolloutStatuses.map { it.publishedName }.contains(releaseStatus)
-    if (_track == TrackType.ROLLOUT) {
+    if (trackOrDefault == TrackType.ROLLOUT) {
         check(usesRolloutStatues) {
             "'rollout' track must use the 'inProgress' or 'halted' statues."
         }
@@ -48,6 +48,10 @@ internal fun PlayPublisherExtension.validate() {
             "Track must be of type 'rollout' to use 'inProgress' or 'halted' statues."
         }
     }
+}
+
+internal fun PlayPublisherExtension.requireCreds() = checkNotNull(serviceAccountCredentials) {
+    "No credentials provided"
 }
 
 internal infix fun GoogleJsonResponseException.has(error: String) =

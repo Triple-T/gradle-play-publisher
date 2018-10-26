@@ -2,6 +2,7 @@ package com.github.triplet.gradle.play.tasks
 
 import com.android.build.gradle.api.ApkVariantOutput
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
+import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishTaskBase
 import org.gradle.api.tasks.TaskAction
 
@@ -10,7 +11,7 @@ open class ProcessPackageMetadata : PlayPublishTaskBase() {
         // Always out-of-date since we don't know what's changed on the network
         outputs.upToDateWhen { false }
 
-        onlyIf { extension._resolutionStrategy == ResolutionStrategy.AUTO }
+        onlyIf { extension.resolutionStrategyOrDefault == ResolutionStrategy.AUTO }
     }
 
     @TaskAction
@@ -35,7 +36,7 @@ open class ProcessPackageMetadata : PlayPublishTaskBase() {
 
         for ((i, output) in outputs.withIndex()) {
             output.versionCodeOverride = output.versionCode + patch.toInt() + i
-            extension.outputProcessor?.execute(output)
+            extension._outputProcessor?.execute(output)
         }
     }
 }

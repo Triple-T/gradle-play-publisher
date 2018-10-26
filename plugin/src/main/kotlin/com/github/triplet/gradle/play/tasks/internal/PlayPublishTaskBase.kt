@@ -2,9 +2,9 @@ package com.github.triplet.gradle.play.tasks.internal
 
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.PlayPublisherExtension
-import com.github.triplet.gradle.play.internal.AccountConfig
 import com.github.triplet.gradle.play.internal.PLUGIN_NAME
 import com.github.triplet.gradle.play.internal.has
+import com.github.triplet.gradle.play.internal.requireCreds
 import com.github.triplet.gradle.play.internal.transport
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
@@ -20,7 +20,6 @@ import org.gradle.internal.logging.progress.ProgressLoggerFactory
 abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
     @get:Nested override lateinit var extension: PlayPublisherExtension
     @get:Internal internal lateinit var variant: ApplicationVariant
-    @get:Nested internal lateinit var accountConfig: AccountConfig
 
     @get:Internal
     protected val progressLogger: ProgressLogger = services[ProgressLoggerFactory::class.java]
@@ -28,8 +27,8 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
 
     @get:Internal
     protected val publisher: AndroidPublisher by lazy {
-        val credential = accountConfig.run {
-            val creds = _serviceAccountCredentials
+        val credential = extension.run {
+            val creds = requireCreds()
             val serviceAccountEmail = serviceAccountEmail
             val factory = JacksonFactory.getDefaultInstance()
 

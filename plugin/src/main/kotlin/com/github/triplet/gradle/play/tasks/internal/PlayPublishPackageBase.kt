@@ -9,6 +9,7 @@ import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.has
 import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.internal.readProcessed
+import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
 import com.github.triplet.gradle.play.internal.trackUploadProgress
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
@@ -97,7 +98,7 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
     protected fun handleUploadFailures(e: GoogleJsonResponseException, file: File): Nothing? {
         val isConflict = e has "apkUpgradeVersionConflict" || e has "apkNoUpgradePath"
         if (isConflict) {
-            when (extension._resolutionStrategy) {
+            when (extension.resolutionStrategyOrDefault) {
                 ResolutionStrategy.AUTO -> throw IllegalStateException(
                         "Concurrent uploads for variant ${variant.name}. Make sure to " +
                                 "synchronously upload your APKs such that they don't conflict.",
