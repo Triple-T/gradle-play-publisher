@@ -47,6 +47,7 @@ available [here](https://github.com/Triple-T/gradle-play-publisher/blob/1.2.2/RE
    1. [Using CLI options](#using-cli-options)
    1. [Encrypting Service Account keys](#encrypting-service-account-keys)
    1. [Using multiple Service Accounts](#using-multiple-service-accounts)
+   1. [Combining releases](#combining-releases)
 
 ## Quickstart guide
 
@@ -475,6 +476,74 @@ android {
 
 play {
     // Defaults
+}
+```
+
+</details>
+
+### Combining releases
+
+If you want to publish multiple product flavors together or upload a wear APK with your app, you'll
+need to combine multiple changes together before committing the release. This is achieved through
+the commit property:
+
+<details open><summary>Kotlin</summary>
+
+```kt
+android {
+    // ...
+
+    flavorDimensions("api")
+    productFlavors {
+        register("oreo") {
+            // ...
+        }
+
+        register("pie") {
+            // ...
+        }
+
+        playConfigs {
+            register("pie") {
+                commit = true
+            }
+        }
+    }
+}
+
+play {
+    commit = false
+}
+```
+
+</details>
+
+<details><summary>Groovy</summary>
+
+```groovy
+android {
+    // ...
+
+    flavorDimensions 'api'
+    productFlavors {
+        oreo {
+            // ...
+        }
+
+        pie {
+            // ...
+        }
+
+        playConfigs {
+            pie {
+                commit true
+            }
+        }
+    }
+}
+
+play {
+    commit false
 }
 ```
 

@@ -23,6 +23,17 @@ internal interface ExtensionOptions {
             extension.defaultToAppBundles = value
         }
 
+    @get:Internal
+    @set:Option(
+            option = "skip-commit",
+            description = "Doesn't commit changes from this build."
+    )
+    var skipCommitOption: Boolean
+        get() = throw UnsupportedOperationException()
+        set(value) {
+            extension.commit = !value
+        }
+
     @get:OptionValues("from-track", "track")
     val trackOptions
         get() = TrackType.values().map { it.publishedName }

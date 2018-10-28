@@ -11,7 +11,9 @@ internal const val LISTINGS_PATH = "listings"
 internal const val GRAPHICS_PATH = "graphics"
 internal const val RELEASE_NOTES_PATH = "release-notes"
 internal const val PRODUCTS_PATH = "products"
-internal const val RESOURCES_OUTPUT_PATH = "generated/gpp"
+internal const val OUTPUT_PATH = "gpp"
+internal const val RESOURCES_OUTPUT_PATH = "generated/$OUTPUT_PATH"
+internal const val EDIT_ID_FILE = "$OUTPUT_PATH/edit-id.txt"
 
 internal const val MIME_TYPE_STREAM = "application/octet-stream"
 
