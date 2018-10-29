@@ -413,15 +413,15 @@ android {
             setDimension("version")
             // ...
         }
+    }
 
-        playConfigs {
-            register("firstCustomer") {
-                serviceAccountCredentials = file("customer-one-key.json")
-            }
-    
-            register("secondCustomer") {
-                serviceAccountCredentials = file("customer-two-key.json")
-            }
+    playConfigs {
+        register("firstCustomer") {
+            serviceAccountCredentials = file("customer-one-key.json")
+        }
+
+        register("secondCustomer") {
+            serviceAccountCredentials = file("customer-two-key.json")
         }
     }
 }
@@ -460,15 +460,15 @@ android {
             dimension 'version'
             // ...
         }
+    }
 
-        playConfigs {
-            firstCustomer {
-                serviceAccountCredentials file('customer-one-key.json')
-            }
-    
-            secondCustomer {
-                serviceAccountCredentials file('customer-two-key.json')
-            }
+    playConfigs {
+        firstCustomer {
+            serviceAccountCredentials file('customer-one-key.json')
+        }
+
+        secondCustomer {
+            serviceAccountCredentials file('customer-two-key.json')
         }
     }
 }
