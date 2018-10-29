@@ -502,11 +502,11 @@ android {
         register("pie") {
             // ...
         }
+    }
 
-        playConfigs {
-            register("pie") {
-                commit = true
-            }
+    playConfigs {
+        register("pie") {
+            commit = true
         }
     }
 }
@@ -533,11 +533,11 @@ android {
         pie {
             // ...
         }
+    }
 
-        playConfigs {
-            pie {
-                commit true
-            }
+    playConfigs {
+        pie {
+            commit true
         }
     }
 }
