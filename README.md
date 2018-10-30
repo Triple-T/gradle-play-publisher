@@ -87,6 +87,8 @@ for GPP to work (go to Settings -> Developer account -> Users & permissions):
 
 In your root `build.gradle(.kts)` file, add the Gradle Play Publisher dependency:
 
+<details open><summary>Kotlin</summary>
+
 ```kt
 buildscript {
     repositories {
@@ -101,19 +103,75 @@ buildscript {
 }
 ```
 
+</details>
+
+<details><summary>Groovy</summary>
+
+```groovy
+buildscript {
+    repositories {
+        // ...
+        jcenter()
+    }
+
+    dependencies {
+        // ...
+        classpath 'com.github.triplet.gradle:play-publisher:2.0.0-beta2'
+    }
+}
+```
+
+</details>
+</br>
+
 Then apply it to each individual `com.android.application` module where you want to use GPP.
 For example, `app/build.gradle(.kts)` is a commonly used app module:
+
+<details open><summary>Kotlin</summary>
+
+```kt
+plugins {
+    id("com.android.application")
+    id("com.github.triplet.play")
+}
+```
+
+</details>
+
+<details><summary>Groovy</summary>
 
 ```groovy
 apply plugin: 'com.android.application'
 apply plugin: 'com.github.triplet.play'
 ```
 
+</details>
+
 #### Snapshot builds
 
 If you're prepared to cut yourself on the bleeding edge of GPP development, snapshot builds are
 available from
 [Sonatype's `snapshots` repository](https://oss.sonatype.org/content/repositories/snapshots/):
+
+<details open><summary>Kotlin</summary>
+
+```kt
+buildscript {
+    repositories {
+        // ...
+        maven("https://oss.sonatype.org/content/repositories/snapshots")
+    }
+
+    dependencies {
+        // ...
+        classpath("com.github.triplet.gradle:play-publisher:2.0.0-SNAPSHOT")
+    }
+}
+```
+
+</details>
+
+<details><summary>Groovy</summary>
 
 ```groovy
 buildscript {
@@ -128,6 +186,8 @@ buildscript {
     }
 }
 ```
+
+</details>
 
 ### Authenticating Gradle Play Publisher
 
@@ -270,7 +330,7 @@ For example, you could update you app's version name based on the new version co
 play {
     // ...
     resolutionStrategy = "auto"
-    outputProcessor = { // this: ApkVariantOutput
+    outputProcessor { // this: ApkVariantOutput
         versionNameOverride = "$versionNameOverride.$versionCode"
     }
 }
@@ -382,6 +442,8 @@ you might need and ways to encrypt your real keys for a few common CI servers:
 
 If you need to publish each build flavor to a separate Play Store account, GPP supports flavor
 specific `playAccountConfigs`:
+
+<!-- TODO add Kotlin language support -->
 
 ```groovy
 android {

@@ -4,6 +4,7 @@ import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.AccountConfig
 import com.github.triplet.gradle.play.internal.PLUGIN_NAME
+import com.github.triplet.gradle.play.internal.has
 import com.github.triplet.gradle.play.internal.transport
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
@@ -54,19 +55,26 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
         }.setApplicationName(PLUGIN_NAME).build()
     }
 
-    protected fun read(block: AndroidPublisher.Edits.(editId: String) -> Unit) {
+    protected fun read(
+            skipIfNotFound: Boolean = false,
+            block: AndroidPublisher.Edits.(editId: String) -> Unit
+    ) {
         val edits = publisher.edits()
         val request = edits.insert(variant.applicationId, null)
 
         val id = try {
             request.execute().id
         } catch (e: GoogleJsonResponseException) {
-            // Rethrow for clarity
-            if (e.details?.errors.orEmpty().any { it.reason == "applicationNotFound" }) {
-                throw IllegalArgumentException(
-                        "No application found for the package name ${variant.applicationId}. " +
-                                "The first version of your app must be uploaded via the " +
-                                "Play Store console.", e)
+            if (e has "applicationNotFound") {
+                if (skipIfNotFound) {
+                    return
+                } else {
+                    // Rethrow for clarity
+                    throw IllegalArgumentException(
+                            "No application found for the package name ${variant.applicationId}. " +
+                                    "The first version of your app must be uploaded via the " +
+                                    "Play Store console.", e)
+                }
             } else if (e.statusCode == 401) {
                 throw IllegalArgumentException("Invalid service account credentials.", e)
             } else {

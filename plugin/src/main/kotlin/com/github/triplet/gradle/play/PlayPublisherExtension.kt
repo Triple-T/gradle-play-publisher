@@ -6,9 +6,11 @@ import com.github.triplet.gradle.play.internal.ReleaseStatus
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.TrackType
 import com.github.triplet.gradle.play.internal.validatedTrack
+import org.gradle.api.Action
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 
+@Suppress("PropertyName")
 open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension() {
     /**
      * Choose the default packaging method. Either App Bundles or APKs. Affects tasks like
@@ -80,6 +82,10 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
             }
         }
 
+    @get:Internal("ProcessPackageMetadata is always out-of-date. Also, Closures with " +
+                          "parameters cannot be used as inputs.")
+    internal var outputProcessor: Action<ApkVariantOutput>? = null
+
     /**
      * If the [resolutionStrategy] is auto, provide extra processing on top of what this plugin
      * already does. For example, you could update each output's version name using the newly
@@ -89,9 +95,10 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
      * such that the smallest output's version code is 1 unit greater than the maximum version code
      * found in the Play Store.
      */
-    @get:Internal("ProcessPackageMetadata is always out-of-date. Also, Closures with " +
-                          "parameters cannot be used as inputs.")
-    var outputProcessor: (ApkVariantOutput.() -> Unit)? = null
+    @Suppress("unused") // Public API
+    fun outputProcessor(processor: Action<ApkVariantOutput>) {
+        outputProcessor = processor
+    }
 
     @get:Internal("Backing property for public input")
     internal var _releaseStatus: ReleaseStatus? = null
