@@ -290,23 +290,15 @@ class PlayPublisherPluginTest {
         def project = TestHelper.evaluatableProject()
 
         project.android {
-            playAccountConfigs {
-                defaultAccountConfig {
-                    serviceAccountEmail = 'default@exmaple.com'
-                    serviceAccountCredentials = project.file('first-secret.pk12')
-                }
+            playConfigs {
                 free {
-                    serviceAccountEmail = 'first-mail@exmaple.com'
                     serviceAccountCredentials = project.file('secret.pk12')
+                    serviceAccountEmail = 'first-mail@exmaple.com'
                 }
                 paid {
-                    serviceAccountEmail = 'another-mail@exmaple.com'
                     serviceAccountCredentials = project.file('another-secret.pk12')
+                    serviceAccountEmail = 'another-mail@exmaple.com'
                 }
-            }
-
-            defaultConfig {
-                playAccountConfig = playAccountConfigs.defaultAccountConfig
             }
 
             flavorDimensions 'pricing'
@@ -317,27 +309,29 @@ class PlayPublisherPluginTest {
                 }
                 free {
                     dimension 'pricing'
-                    playAccountConfig = playAccountConfigs.free
                 }
                 paid {
                     dimension 'pricing'
-                    playAccountConfig = playAccountConfigs.paid
                 }
             }
         }
+        project.play {
+            serviceAccountCredentials = project.file('first-secret.pk12')
+            serviceAccountEmail = 'default@exmaple.com'
+        }
         project.evaluate()
 
-        assertEquals('default@exmaple.com', project.tasks.bootstrapDefaultFlavorReleasePlayResources.accountConfig.serviceAccountEmail)
-        assertEquals('first-mail@exmaple.com', project.tasks.bootstrapFreeReleasePlayResources.accountConfig.serviceAccountEmail)
-        assertEquals('another-mail@exmaple.com', project.tasks.bootstrapPaidReleasePlayResources.accountConfig.serviceAccountEmail)
+        assertEquals('default@exmaple.com', project.tasks.bootstrapDefaultFlavorReleasePlayResources.extension.serviceAccountEmail)
+        assertEquals('first-mail@exmaple.com', project.tasks.bootstrapFreeReleasePlayResources.extension.serviceAccountEmail)
+        assertEquals('another-mail@exmaple.com', project.tasks.bootstrapPaidReleasePlayResources.extension.serviceAccountEmail)
 
-        assertEquals('default@exmaple.com', project.tasks.publishDefaultFlavorReleaseApk.accountConfig.serviceAccountEmail)
-        assertEquals('first-mail@exmaple.com', project.tasks.publishFreeReleaseApk.accountConfig.serviceAccountEmail)
-        assertEquals('another-mail@exmaple.com', project.tasks.publishPaidReleaseApk.accountConfig.serviceAccountEmail)
+        assertEquals('default@exmaple.com', project.tasks.publishDefaultFlavorReleaseApk.extension.serviceAccountEmail)
+        assertEquals('first-mail@exmaple.com', project.tasks.publishFreeReleaseApk.extension.serviceAccountEmail)
+        assertEquals('another-mail@exmaple.com', project.tasks.publishPaidReleaseApk.extension.serviceAccountEmail)
 
-        assertEquals('default@exmaple.com', project.tasks.publishDefaultFlavorReleaseListing.accountConfig.serviceAccountEmail)
-        assertEquals('first-mail@exmaple.com', project.tasks.publishFreeReleaseListing.accountConfig.serviceAccountEmail)
-        assertEquals('another-mail@exmaple.com', project.tasks.publishPaidReleaseListing.accountConfig.serviceAccountEmail)
+        assertEquals('default@exmaple.com', project.tasks.publishDefaultFlavorReleaseListing.extension.serviceAccountEmail)
+        assertEquals('first-mail@exmaple.com', project.tasks.publishFreeReleaseListing.extension.serviceAccountEmail)
+        assertEquals('another-mail@exmaple.com', project.tasks.publishPaidReleaseListing.extension.serviceAccountEmail)
     }
 
     @Test
@@ -348,14 +342,14 @@ class PlayPublisherPluginTest {
 
             flavorDimensions "mode", "variant"
 
-            playAccountConfigs {
+            playConfigs {
                 free {
-                    serviceAccountEmail = 'free@exmaple.com'
                     serviceAccountCredentials = project.file('secret.pk12')
+                    serviceAccountEmail = 'free@exmaple.com'
                 }
                 paid {
-                    serviceAccountEmail = 'paid@exmaple.com'
                     serviceAccountCredentials = project.file('another-secret.pk12')
+                    serviceAccountEmail = 'paid@exmaple.com'
                 }
             }
 
@@ -368,43 +362,33 @@ class PlayPublisherPluginTest {
                 }
                 free {
                     dimension = "variant"
-                    playAccountConfig = playAccountConfigs.free
                 }
                 paid {
                     dimension = "variant"
-                    playAccountConfig = playAccountConfigs.paid
                 }
             }
         }
         project.evaluate()
 
-        assertEquals('free@exmaple.com', project.tasks.bootstrapDemoFreeReleasePlayResources.accountConfig.serviceAccountEmail)
-        assertEquals('paid@exmaple.com', project.tasks.bootstrapDemoPaidReleasePlayResources.accountConfig.serviceAccountEmail)
-        assertEquals('free@exmaple.com', project.tasks.bootstrapProductionFreeReleasePlayResources.accountConfig.serviceAccountEmail)
-        assertEquals('paid@exmaple.com', project.tasks.bootstrapProductionPaidReleasePlayResources.accountConfig.serviceAccountEmail)
+        assertEquals('free@exmaple.com', project.tasks.bootstrapDemoFreeReleasePlayResources.extension.serviceAccountEmail)
+        assertEquals('paid@exmaple.com', project.tasks.bootstrapDemoPaidReleasePlayResources.extension.serviceAccountEmail)
+        assertEquals('free@exmaple.com', project.tasks.bootstrapProductionFreeReleasePlayResources.extension.serviceAccountEmail)
+        assertEquals('paid@exmaple.com', project.tasks.bootstrapProductionPaidReleasePlayResources.extension.serviceAccountEmail)
     }
 
     @Test
     void testNoProductFlavors() {
         def project = TestHelper.evaluatableProject()
 
-        project.android {
-            playAccountConfigs {
-                defaultAccountConfig {
-                    serviceAccountEmail = 'default@exmaple.com'
-                    serviceAccountCredentials = project.file('first-secret.pk12')
-                }
-            }
-
-            defaultConfig {
-                playAccountConfig = playAccountConfigs.defaultAccountConfig
-            }
+        project.play {
+            serviceAccountCredentials = project.file('first-secret.pk12')
+            serviceAccountEmail = 'default@exmaple.com'
         }
         project.evaluate()
 
-        assertEquals('default@exmaple.com', project.tasks.bootstrapReleasePlayResources.accountConfig.serviceAccountEmail)
-        assertEquals('default@exmaple.com', project.tasks.publishReleaseApk.accountConfig.serviceAccountEmail)
-        assertEquals('default@exmaple.com', project.tasks.publishReleaseListing.accountConfig.serviceAccountEmail)
+        assertEquals('default@exmaple.com', project.tasks.bootstrapReleasePlayResources.extension.serviceAccountEmail)
+        assertEquals('default@exmaple.com', project.tasks.publishReleaseApk.extension.serviceAccountEmail)
+        assertEquals('default@exmaple.com', project.tasks.publishReleaseListing.extension.serviceAccountEmail)
     }
 
     @Test

@@ -1,23 +1,64 @@
 package com.github.triplet.gradle.play
 
 import com.android.build.gradle.api.ApkVariantOutput
-import com.github.triplet.gradle.play.internal.AccountConfig
 import com.github.triplet.gradle.play.internal.ReleaseStatus
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.TrackType
+import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
+import com.github.triplet.gradle.play.internal.trackOrDefault
 import com.github.triplet.gradle.play.internal.validatedTrack
 import org.gradle.api.Action
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
+import java.io.File
 
 @Suppress("PropertyName")
-open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension() {
+open class PlayPublisherExtension @JvmOverloads constructor(
+        @get:Internal internal val name: String = "default" // Needed for Gradle
+) {
+    @get:Internal("Backing property for public input")
+    internal var _serviceAccountCredentials: File? = null
+    /**
+     * Service Account authentication file. Json is preferred, but PKCS12 is also supported. For
+     * PKCS12 to work, the [serviceAccountEmail] must be specified.
+     */
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:InputFile
+    var serviceAccountCredentials
+        get() = _serviceAccountCredentials
+        set(value) {
+            _serviceAccountCredentials = value
+        }
+
+    @get:Internal("Backing property for public input")
+    internal var _serviceAccountEmail: String? = null
+    /** Service Account email. Only needed if PKCS12 credentials are used. */
+    @get:Optional
+    @get:Input
+    var serviceAccountEmail
+        get() = _serviceAccountEmail
+        set(value) {
+            _serviceAccountEmail = value
+        }
+
+    @get:Internal("Backing property for public input")
+    internal var _defaultToAppBundles: Boolean? = null
     /**
      * Choose the default packaging method. Either App Bundles or APKs. Affects tasks like
      * `publish`.
+     *
+     * Defaults to false because App Bundles require Google Play App Signing to be configured.
      */
     @get:Input
-    var defaultToAppBundles = false // App Bundles require Google Play App Signing
+    var defaultToAppBundles
+        get() = _defaultToAppBundles ?: false
+        set(value) {
+            _defaultToAppBundles = value
+        }
 
     @get:Internal("Backing property for public input")
     internal var _fromTrack: TrackType? = null
@@ -37,7 +78,7 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
         }
 
     @get:Internal("Backing property for public input")
-    internal var _track = TrackType.INTERNAL
+    internal var _track: TrackType? = null
     /**
      * Specify the track in which to upload your app.
      *
@@ -45,7 +86,7 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
      */
     @get:Input
     var track
-        get() = _track.publishedName
+        get() = trackOrDefault.publishedName
         set(value) {
             _track = validatedTrack(value)
         }
@@ -64,7 +105,7 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
         }
 
     @get:Internal("Backing property for public input")
-    internal var _resolutionStrategy = ResolutionStrategy.FAIL
+    internal var _resolutionStrategy: ResolutionStrategy? = null
     /**
      * Specify the resolution strategy to employ when a version conflict occurs.
      *
@@ -72,7 +113,7 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
      */
     @get:Input
     var resolutionStrategy
-        get() = _resolutionStrategy.publishedName
+        get() = resolutionStrategyOrDefault.publishedName
         set(value) {
             _resolutionStrategy = requireNotNull(
                     ResolutionStrategy.values().find { it.publishedName == value }
@@ -84,7 +125,7 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
 
     @get:Internal("ProcessPackageMetadata is always out-of-date. Also, Closures with " +
                           "parameters cannot be used as inputs.")
-    internal var outputProcessor: Action<ApkVariantOutput>? = null
+    internal var _outputProcessor: Action<ApkVariantOutput>? = null
 
     /**
      * If the [resolutionStrategy] is auto, provide extra processing on top of what this plugin
@@ -97,7 +138,7 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
      */
     @Suppress("unused") // Public API
     fun outputProcessor(processor: Action<ApkVariantOutput>) {
-        outputProcessor = processor
+        _outputProcessor = processor
     }
 
     @get:Internal("Backing property for public input")
@@ -111,7 +152,7 @@ open class PlayPublisherExtension : AccountConfig by PlayAccountConfigExtension(
     @get:Input
     var releaseStatus: String
         get() {
-            val status = _releaseStatus ?: if (_track == TrackType.ROLLOUT) {
+            val status = _releaseStatus ?: if (trackOrDefault == TrackType.ROLLOUT) {
                 ReleaseStatus.IN_PROGRESS
             } else {
                 ReleaseStatus.COMPLETED

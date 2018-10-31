@@ -6,8 +6,6 @@ import com.google.api.client.http.javanet.NetHttpTransport
 internal const val PLUGIN_NAME = "gradle-play-publisher"
 internal const val PLUGIN_GROUP = "Publishing"
 
-internal const val ACCOUNT_CONFIG = "playAccountConfig"
-
 internal const val PLAY_PATH = "play"
 internal const val LISTINGS_PATH = "listings"
 internal const val GRAPHICS_PATH = "graphics"

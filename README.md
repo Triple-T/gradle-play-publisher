@@ -444,30 +444,98 @@ you might need and ways to encrypt your real keys for a few common CI servers:
 ### Using multiple Service Accounts
 
 If you need to publish each build flavor to a separate Play Store account, GPP supports flavor
-specific `playAccountConfigs`:
+specific `play` configurations through the `playConfigs` block:
 
-<!-- TODO add Kotlin language support -->
+<details open><summary>Kotlin</summary>
 
-```groovy
+```kt
 android {
-    playAccountConfigs {
-        firstCustomerAccount {
-            serviceAccountCredentials = file('customer-one-key.json')
+    // ...
+
+    flavorDimensions("customer", "version")
+    productFlavors {
+        register("firstCustomer") {
+            setDimension("customer")
+            // ...
         }
 
-        secondCustomerAccount {
-            serviceAccountCredentials = file('customer-two-key.json')
+        register("secondCustomer") {
+            setDimension("customer")
+            // ...
+        }
+
+        register("demo") {
+            setDimension("version")
+            // ...
+        }
+
+        register("full") {
+            setDimension("version")
+            // ...
         }
     }
 
-    productFlavors {
-        firstCustomer {
-            playAccountConfig = playAccountConfigs.firstCustomerAccount
+    playConfigs {
+        register("firstCustomer") {
+            serviceAccountCredentials = file("customer-one-key.json")
         }
 
-        secondCustomer {
-            playAccountConfig = playAccountConfigs.secondCustomerAccount
+        register("secondCustomer") {
+            serviceAccountCredentials = file("customer-two-key.json")
         }
     }
 }
+
+play {
+    // Defaults
+}
 ```
+
+</details>
+
+<details><summary>Groovy</summary>
+
+```groovy
+android {
+    // ...
+
+    flavorDimensions 'customer', 'version'
+    productFlavors {
+        firstCustomer {
+            dimension 'customer'
+            // ...
+        }
+
+        secondCustomer {
+            dimension 'customer'
+            // ...
+        }
+
+        demo {
+            dimension 'version'
+            // ...
+        }
+
+        full {
+            dimension 'version'
+            // ...
+        }
+    }
+
+    playConfigs {
+        firstCustomer {
+            serviceAccountCredentials file('customer-one-key.json')
+        }
+
+        secondCustomer {
+            serviceAccountCredentials file('customer-two-key.json')
+        }
+    }
+}
+
+play {
+    // Defaults
+}
+```
+
+</details>
