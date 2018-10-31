@@ -531,10 +531,6 @@ android {
         secondCustomer {
             serviceAccountCredentials file('customer-two-key.json')
         }
-
-        secondCustomer {
-            serviceAccountCredentials file('customer-two-key.json')
-        }
     }
 }
 
