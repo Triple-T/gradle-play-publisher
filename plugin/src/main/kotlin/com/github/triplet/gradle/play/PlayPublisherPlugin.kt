@@ -78,7 +78,9 @@ class PlayPublisherPlugin : Plugin<Project> {
 
             val extension = productFlavors.mapNotNull {
                 extensionContainer.findByName(it.name)
-            }.singleOrNull().mergeWith(baseExtension)
+            }.singleOrNull().let {
+                it ?: extensionContainer.findByName(buildType.name)
+            }.mergeWith(baseExtension)
             val variantName = name.capitalize()
 
             if (!isSigningReady) {
