@@ -2,6 +2,9 @@ package com.github.triplet.gradle.play.internal
 
 import java.io.File
 
+internal val File.parents
+    get() = generateSequence(parentFile) { it.parentFile }
+
 internal fun File.orNull() = if (exists()) this else null
 
 internal tailrec fun File.findClosestDir(): File {
