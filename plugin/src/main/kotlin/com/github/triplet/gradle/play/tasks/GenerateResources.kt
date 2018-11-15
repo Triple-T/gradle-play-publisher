@@ -15,6 +15,7 @@ import com.github.triplet.gradle.play.internal.isDirectChildOf
 import com.github.triplet.gradle.play.internal.normalized
 import com.github.triplet.gradle.play.internal.nullOrFull
 import com.github.triplet.gradle.play.internal.orNull
+import com.github.triplet.gradle.play.internal.parents
 import com.github.triplet.gradle.play.internal.playPath
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.CacheableTask
@@ -121,10 +122,11 @@ open class GenerateResources : DefaultTask() {
             }
         }
 
-        val areRootsValid = climbUpTo(LISTINGS_PATH) != null
-                || climbUpTo(RELEASE_NOTES_PATH) != null
-                || climbUpTo(PRODUCTS_PATH) != null
+        val areRootsValid = (name == PLAY_PATH && parents.none { it.name == PLAY_PATH })
                 || isDirectChildOf(PLAY_PATH)
+                || isChildOf(LISTINGS_PATH)
+                || isChildOf(RELEASE_NOTES_PATH)
+                || isChildOf(PRODUCTS_PATH)
         check(areRootsValid) { "Unknown file: $this" }
 
         validateListings()
