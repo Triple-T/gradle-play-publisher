@@ -3,8 +3,6 @@ package com.github.triplet.gradle.play
 import com.github.triplet.gradle.play.internal.ReleaseStatus
 import com.github.triplet.gradle.play.internal.TrackType
 import org.gradle.api.ProjectConfigurationException
-import org.gradle.api.internal.plugins.PluginApplicationException
-import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Test
 
 import static DependsOn.dependsOn
@@ -15,13 +13,6 @@ import static org.junit.Assert.assertThat
 import static org.junit.Assert.assertTrue
 
 class PlayPublisherPluginTest {
-
-    @Test(expected = PluginApplicationException.class)
-    void testThrowsOnLibraryProjects() {
-        def project = ProjectBuilder.builder().build()
-        project.apply plugin: 'com.android.library'
-        project.apply plugin: 'com.github.triplet.play'
-    }
 
     @Test
     void testCreatesDefaultTask() {
