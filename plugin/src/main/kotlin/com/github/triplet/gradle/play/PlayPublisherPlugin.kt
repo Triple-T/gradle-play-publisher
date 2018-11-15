@@ -1,6 +1,7 @@
 package com.github.triplet.gradle.play
 
 import com.android.build.gradle.AppExtension
+import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.internal.api.InstallableVariantImpl
 import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.configure
@@ -26,15 +27,19 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.kotlin.dsl.the
+import org.gradle.kotlin.dsl.withType
 
 @Suppress("unused") // Used by Gradle
 class PlayPublisherPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         validateRuntime()
 
-        val android = requireNotNull(project.the<AppExtension>()) {
-            "The 'com.android.application' plugin is required."
+        project.plugins.withType<AppPlugin> {
+            applyInternal(project)
         }
+    }
+
+    private fun applyInternal(project: Project) {
         val baseExtension: PlayPublisherExtension =
                 project.extensions.create(PLAY_PATH, PlayPublisherExtension::class.java)
         val extensionContainer = project.container(PlayPublisherExtension::class.java)
@@ -68,6 +73,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 "Uploads all Play Store in-app products for every variant."
         ) { extension = baseExtension }
 
+        val android = project.the<AppExtension>()
         (android as ExtensionAware).extensions.add("playConfigs", extensionContainer)
         BootstrapOptionsHolder.reset()
         android.applicationVariants.whenObjectAdded {

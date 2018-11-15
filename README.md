@@ -11,14 +11,14 @@
         <img src="https://img.shields.io/travis/Triple-T/gradle-play-publisher/master.svg?style=flat-square" />
     </a>
     <a href="https://search.maven.org/search?q=g:com.github.triplet.gradle%20AND%20a:play-publisher&core=gav">
-        <img src="https://maven-badges.herokuapp.com/maven-central/com.github.triplet.gradle/play-publisher/badge.svg" />
+        <img src="https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/com/github/triplet/play/com.github.triplet.play.gradle.plugin/maven-metadata.xml.svg?label=Gradle%20Plugins%20Portal" />
     </a>
 </p>
 
 Gradle Play Publisher is a Gradle plugin that allows you to upload your App Bundle or APK and other
 app details to the Google Play Store.
 
-> **Note:** this README targets the `v2.0.0` betas. Documentation for the latest stable release is
+> **Note:** this README targets the `v2.0.0` betas and release candidates. Documentation for the latest stable release is
 available [here](https://github.com/Triple-T/gradle-play-publisher/blob/1.2.2/README.md).
 
 ## Table of contents
@@ -89,54 +89,15 @@ for GPP to work (go to Settings -> Developer account -> Users & permissions):
 
 ### Installation
 
-In your root `build.gradle(.kts)` file, add the Gradle Play Publisher dependency:
-
-<details open><summary>Kotlin</summary>
-
-```kt
-buildscript {
-    repositories {
-        // ...
-        jcenter()
-    }
-
-    dependencies {
-        // ...
-        classpath("com.github.triplet.gradle:play-publisher:2.0.0-beta2")
-    }
-}
-```
-
-</details>
-
-<details><summary>Groovy</summary>
-
-```groovy
-buildscript {
-    repositories {
-        // ...
-        jcenter()
-    }
-
-    dependencies {
-        // ...
-        classpath 'com.github.triplet.gradle:play-publisher:2.0.0-beta2'
-    }
-}
-```
-
-</details>
-</br>
-
-Then apply it to each individual `com.android.application` module where you want to use GPP.
-For example, `app/build.gradle(.kts)` is a commonly used app module:
+Apply the plugin to each individual `com.android.application` module where you want to use GPP
+through the `plugins {}` DSL:
 
 <details open><summary>Kotlin</summary>
 
 ```kt
 plugins {
     id("com.android.application")
-    id("com.github.triplet.play")
+    id("com.github.triplet.play") version "2.0.0-rc2"
 }
 ```
 
@@ -145,8 +106,10 @@ plugins {
 <details><summary>Groovy</summary>
 
 ```groovy
-apply plugin: 'com.android.application'
-apply plugin: 'com.github.triplet.play'
+plugins {
+    id 'com.android.application'
+    id 'com.github.triplet.play' version '2.0.0-rc2'
+}
 ```
 
 </details>

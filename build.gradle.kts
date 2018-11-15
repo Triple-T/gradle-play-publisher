@@ -3,10 +3,6 @@ buildscript {
         google()
         jcenter()
     }
-
-    dependencies {
-        classpath("com.vanniktech:gradle-maven-publish-plugin:0.2.0")
-    }
 }
 
 plugins {
