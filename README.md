@@ -88,54 +88,15 @@ for GPP to work (go to Settings -> Developer account -> Users & permissions):
 
 ### Installation
 
-In your root `build.gradle(.kts)` file, add the Gradle Play Publisher dependency:
-
-<details open><summary>Kotlin</summary>
-
-```kt
-buildscript {
-    repositories {
-        // ...
-        jcenter()
-    }
-
-    dependencies {
-        // ...
-        classpath("com.github.triplet.gradle:play-publisher:2.0.0-beta2")
-    }
-}
-```
-
-</details>
-
-<details><summary>Groovy</summary>
-
-```groovy
-buildscript {
-    repositories {
-        // ...
-        jcenter()
-    }
-
-    dependencies {
-        // ...
-        classpath 'com.github.triplet.gradle:play-publisher:2.0.0-beta2'
-    }
-}
-```
-
-</details>
-</br>
-
-Then apply it to each individual `com.android.application` module where you want to use GPP.
-For example, `app/build.gradle(.kts)` is a commonly used app module:
+Apply the plugin to each individual `com.android.application` module where you want to use GPP
+through the `plugins {}` DSL:
 
 <details open><summary>Kotlin</summary>
 
 ```kt
 plugins {
     id("com.android.application")
-    id("com.github.triplet.play")
+    id("com.github.triplet.play") version "2.0.0-rc2"
 }
 ```
 
@@ -144,8 +105,10 @@ plugins {
 <details><summary>Groovy</summary>
 
 ```groovy
-apply plugin: 'com.android.application'
-apply plugin: 'com.github.triplet.play'
+plugins {
+    id 'com.android.application'
+    id 'com.github.triplet.play' version '2.0.0-rc2'
+}
 ```
 
 </details>
