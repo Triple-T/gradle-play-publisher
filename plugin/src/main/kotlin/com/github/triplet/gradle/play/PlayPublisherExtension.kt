@@ -4,6 +4,7 @@ import com.android.build.gradle.api.ApkVariantOutput
 import com.github.triplet.gradle.play.internal.ReleaseStatus
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.TrackType
+import com.github.triplet.gradle.play.internal.releaseStatusOrDefault
 import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
 import com.github.triplet.gradle.play.internal.trackOrDefault
 import com.github.triplet.gradle.play.internal.validatedTrack
@@ -151,15 +152,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      */
     @get:Input
     var releaseStatus: String
-        get() {
-            val status = _releaseStatus ?: if (trackOrDefault == TrackType.ROLLOUT) {
-                ReleaseStatus.IN_PROGRESS
-            } else {
-                ReleaseStatus.COMPLETED
-            }
-
-            return status.publishedName
-        }
+        get() = releaseStatusOrDefault.publishedName
         set(value) {
             _releaseStatus = requireNotNull(
                     ReleaseStatus.values().find { it.publishedName == value }

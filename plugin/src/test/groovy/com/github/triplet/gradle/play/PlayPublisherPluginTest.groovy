@@ -1,8 +1,5 @@
 package com.github.triplet.gradle.play
 
-import com.github.triplet.gradle.play.internal.ReleaseStatus
-import com.github.triplet.gradle.play.internal.TrackType
-import org.gradle.api.ProjectConfigurationException
 import org.junit.Test
 
 import static DependsOn.dependsOn
@@ -10,7 +7,6 @@ import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertFalse
 import static org.junit.Assert.assertNotNull
 import static org.junit.Assert.assertThat
-import static org.junit.Assert.assertTrue
 
 class PlayPublisherPluginTest {
 
@@ -55,139 +51,6 @@ class PlayPublisherPluginTest {
         project.evaluate()
 
         assertEquals('internal', project.extensions.findByName('play').track)
-    }
-
-    @Test
-    void test_InternalTrackWithDraftStatus_Evaluates() {
-        assertTrue(evaluateProjectWithTrackAndStatus(TrackType.INTERNAL, ReleaseStatus.DRAFT))
-    }
-
-    @Test
-    void test_InternalTrackWithCompletedStatus_Evaluates() {
-        assertTrue(evaluateProjectWithTrackAndStatus(TrackType.INTERNAL, ReleaseStatus.COMPLETED))
-    }
-
-    @Test(expected = ProjectConfigurationException)
-    void test_InternalTrackWithInProgressStatus_Fails() {
-        evaluateProjectWithTrackAndStatus(TrackType.INTERNAL, ReleaseStatus.IN_PROGRESS)
-    }
-
-    @Test(expected = ProjectConfigurationException)
-    void test_InternalTrackWithHaltedStatus_Fails() {
-        evaluateProjectWithTrackAndStatus(TrackType.INTERNAL, ReleaseStatus.HALTED)
-    }
-
-    @Test
-    void test_AlphaTrackWithDraftStatus_Evaluates() {
-        assertTrue(evaluateProjectWithTrackAndStatus(TrackType.ALPHA, ReleaseStatus.DRAFT))
-    }
-
-    @Test
-    void test_AlphaTrackWithCompletedStatus_Evaluates() {
-        assertTrue(evaluateProjectWithTrackAndStatus(TrackType.ALPHA, ReleaseStatus.COMPLETED))
-    }
-
-    @Test(expected = ProjectConfigurationException)
-    void test_AlphaTrackWithInProgressStatus_Fails() {
-        evaluateProjectWithTrackAndStatus(TrackType.ALPHA, ReleaseStatus.IN_PROGRESS)
-    }
-
-    @Test(expected = ProjectConfigurationException)
-    void test_AlphaTrackWithHaltedStatus_Fails() {
-        evaluateProjectWithTrackAndStatus(TrackType.ALPHA, ReleaseStatus.HALTED)
-    }
-
-    @Test
-    void test_BetaTrackWithDraftStatus_Evaluates() {
-        assertTrue(evaluateProjectWithTrackAndStatus(TrackType.BETA, ReleaseStatus.DRAFT))
-    }
-
-    @Test
-    void test_BetaTrackWithCompletedStatus_Evaluates() {
-        assertTrue(evaluateProjectWithTrackAndStatus(TrackType.BETA, ReleaseStatus.COMPLETED))
-    }
-
-    @Test(expected = ProjectConfigurationException)
-    void test_BetaTrackWithInProgressStatus_Fails() {
-        evaluateProjectWithTrackAndStatus(TrackType.BETA, ReleaseStatus.IN_PROGRESS)
-    }
-
-    @Test(expected = ProjectConfigurationException)
-    void test_BetaTrackWithHaltedStatus_Fails() {
-        evaluateProjectWithTrackAndStatus(TrackType.BETA, ReleaseStatus.HALTED)
-    }
-
-    @Test
-    void test_ProductionTrackWithDraftStatus_Evaluates() {
-        assertTrue(evaluateProjectWithTrackAndStatus(TrackType.PRODUCTION, ReleaseStatus.DRAFT))
-    }
-
-    @Test
-    void test_ProductionTrackWithCompletedStatus_Evaluates() {
-        assertTrue(evaluateProjectWithTrackAndStatus(TrackType.PRODUCTION, ReleaseStatus.COMPLETED))
-    }
-
-    @Test(expected = ProjectConfigurationException)
-    void test_ProductionTrackWithInProgressStatus_Fails() {
-        evaluateProjectWithTrackAndStatus(TrackType.PRODUCTION, ReleaseStatus.IN_PROGRESS)
-    }
-
-    @Test(expected = ProjectConfigurationException)
-    void test_ProductionTrackWithHaltedStatus_Fails() {
-        evaluateProjectWithTrackAndStatus(TrackType.PRODUCTION, ReleaseStatus.HALTED)
-    }
-
-    @Test(expected = ProjectConfigurationException)
-    void test_RolloutTrackWithDraftStatus_Fails() {
-        evaluateProjectWithTrackAndStatus(TrackType.ROLLOUT, ReleaseStatus.DRAFT)
-    }
-
-    @Test(expected = ProjectConfigurationException)
-    void test_RolloutTrackWithCompletedStatus_Fails() {
-        evaluateProjectWithTrackAndStatus(TrackType.ROLLOUT, ReleaseStatus.COMPLETED)
-    }
-
-    @Test
-    void test_RolloutTrackWithHaltedStatus_Evaluates() {
-        assertTrue(evaluateProjectWithTrackAndStatus(TrackType.ROLLOUT, ReleaseStatus.HALTED))
-    }
-
-    @Test
-    void test_RolloutTrackWithInProgressStatus_Evaluates() {
-        assertTrue(evaluateProjectWithTrackAndStatus(TrackType.ROLLOUT, ReleaseStatus.IN_PROGRESS))
-    }
-
-    @Test
-    void test_ProjectWithTracksAndNoStatus_defaults() {
-        assertEquals('completed',
-                evaluateProjectWithTrack(TrackType.INTERNAL).extensions.findByName('play').releaseStatus)
-        assertEquals('completed',
-                evaluateProjectWithTrack(TrackType.ALPHA).extensions.findByName('play').releaseStatus)
-        assertEquals('completed',
-                evaluateProjectWithTrack(TrackType.BETA).extensions.findByName('play').releaseStatus)
-        assertEquals('completed',
-                evaluateProjectWithTrack(TrackType.PRODUCTION).extensions.findByName('play').releaseStatus)
-        assertEquals('inProgress',
-                evaluateProjectWithTrack(TrackType.ROLLOUT).extensions.findByName('play').releaseStatus)
-    }
-
-    private evaluateProjectWithTrackAndStatus(TrackType trackType, ReleaseStatus status) {
-        def project = TestHelper.evaluatableProject()
-        project.play {
-            track trackType.publishedName
-            releaseStatus status.publishedName
-        }
-        project.evaluate()
-        return true
-    }
-
-    private evaluateProjectWithTrack(TrackType trackType) {
-        def project = TestHelper.evaluatableProject()
-        project.play {
-            track trackType.publishedName
-        }
-        project.evaluate()
-        return project
     }
 
     @Test
