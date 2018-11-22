@@ -61,7 +61,9 @@ open class GenerateResources : DefaultTask() {
             file.validate()
 
             defaultLocale?.let {
-                if (file.isChildOf(LISTINGS_PATH) && file.isChildOf(it)) changedDefaults += file
+                if (file.isFile && file.isChildOf(LISTINGS_PATH) && file.isChildOf(it)) {
+                    changedDefaults += file
+                }
             }
             project.copy { from(file).into(file.findClosestDir().findDest()) }
         }
