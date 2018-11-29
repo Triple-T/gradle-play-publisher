@@ -40,7 +40,11 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
 
         val track = if (extension.releaseStatusOrDefault == ReleaseStatus.IN_PROGRESS) {
             tracks().get(variant.applicationId, editId, extension.track).execute().apply {
-                releases = releases.orEmpty() + listOf(TrackRelease().applyChanges(versions))
+                val keep = releases.orEmpty().filter {
+                    it.status == ReleaseStatus.COMPLETED.publishedName ||
+                            it.status == ReleaseStatus.DRAFT.publishedName
+                }
+                releases = keep + listOf(TrackRelease().applyChanges(versions))
             }
         } else {
             Track().apply {
