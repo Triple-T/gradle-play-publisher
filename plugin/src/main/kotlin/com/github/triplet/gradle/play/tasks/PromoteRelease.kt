@@ -13,7 +13,11 @@ open class PromoteRelease : PlayPublishPackageBase() {
     fun promote() = write { editId: String ->
         progressLogger.start("Promotes artifacts for variant ${variant.name}", null)
 
-        val tracks = tracks().list(variant.applicationId, editId).execute().tracks.orEmpty()
+        val tracks = tracks().list(variant.applicationId, editId).execute()
+                .tracks.orEmpty()
+                .filter {
+                    it.releases.orEmpty().flatMap { it.versionCodes.orEmpty() }.isNotEmpty()
+                }
 
         if (tracks.isEmpty()) {
             logger.warn("Nothing to promote. Did you mean to run publish?")
@@ -30,9 +34,6 @@ open class PromoteRelease : PlayPublishPackageBase() {
                     "${name.capitalize()} track has no active artifacts"
                 }
             }
-        }
-        check(track.releases.orEmpty().flatMap { it.versionCodes.orEmpty() }.isNotEmpty()) {
-            "${track.track.capitalize()} track has no releases"
         }
         progressLogger.progress("Promoting '${track.track}' release to '${extension.track}'")
 
