@@ -53,9 +53,7 @@ class CompatibilityTest(
 
                 // Manually define transitive dependencies for our plugin since we don't have the
                 // POM to fetch them for us
-                classpath('com.google.apis:google-api-services-androidpublisher:v3-rev12-1.23.0') {
-                    exclude group: 'com.google.guava', module: 'guava-jdk5'
-                }
+                classpath('com.google.apis:google-api-services-androidpublisher:v3-rev12-1.23.0')
             }
         }
 
@@ -63,16 +61,12 @@ class CompatibilityTest(
         apply plugin: 'com.github.triplet.play'
 
         android {
-            compileSdkVersion 27
-            buildToolsVersion '27.0.3'
-            lintOptions {
-                abortOnError false
-            }
+            compileSdkVersion 28
 
             defaultConfig {
                 applicationId "com.github.triplet.gradle.play.test"
                 minSdkVersion 21
-                targetSdkVersion 27
+                targetSdkVersion 28
                 versionCode 1
                 versionName "1.0"
             }
@@ -82,6 +76,7 @@ class CompatibilityTest(
             serviceAccountCredentials = file('some-file.json')
         }
         """)
+        File(testProject.projectDir, "settings.gradle").writeText("")
 
         val gradleDist = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
 
@@ -104,6 +99,7 @@ class CompatibilityTest(
     @After
     fun cleanup() {
         File(testProject.projectDir, "build.gradle").delete()
+        File(testProject.projectDir, "settings.gradle").delete()
     }
 
     private companion object {
@@ -112,7 +108,7 @@ class CompatibilityTest(
         fun parameters() = listOf(
                 arrayOf("3.1.4", "4.4"), // Oldest supported
                 arrayOf("3.2.0", "4.6"), // Latest stable
-                arrayOf("3.4.0-alpha06", "4.10.1") // Latest
+                arrayOf("3.4.0-alpha06", "5.0") // Latest
         )
     }
 }
