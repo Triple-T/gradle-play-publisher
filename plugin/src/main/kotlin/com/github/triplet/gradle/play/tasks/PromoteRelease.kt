@@ -31,7 +31,7 @@ open class PromoteRelease : PlayPublishPackageBase() {
                 }
             }
         }
-        check(track.releases.orEmpty().map { it.versionCodes.orEmpty() }.flatten().isNotEmpty()) {
+        check(track.releases.orEmpty().flatMap { it.versionCodes.orEmpty() }.isNotEmpty()) {
             "${track.track.capitalize()} track has no releases"
         }
         progressLogger.progress("Promoting '${track.track}' release to '${extension.track}'")
