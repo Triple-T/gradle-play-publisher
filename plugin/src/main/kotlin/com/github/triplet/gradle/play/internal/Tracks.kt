@@ -5,7 +5,6 @@ internal enum class TrackType(val publishedName: String) {
     INTERNAL("internal"),
     ALPHA("alpha"),
     BETA("beta"),
-    ROLLOUT("rollout"),
     PRODUCTION("production")
 }
 
@@ -13,9 +12,5 @@ internal enum class ReleaseStatus(val publishedName: String) {
     COMPLETED("completed"),
     DRAFT("draft"),
     HALTED("halted"),
-    IN_PROGRESS("inProgress");
-
-    companion object {
-        fun fromString(value: String) = values().first { it.publishedName.equals(value, true) }
-    }
+    IN_PROGRESS("inProgress")
 }

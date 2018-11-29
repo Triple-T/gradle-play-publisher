@@ -61,7 +61,8 @@ internal interface ExtensionOptions {
     @get:Internal
     @set:Option(
             option = "user-fraction",
-            description = "Set the user percent intended to receive a 'rollout' update. 10% == 0.1"
+            description = "Set the user fraction intended to receive an 'inProgress' release. " +
+                    "Ex: 0.1 == 10%"
     )
     var userFractionOption: String
         get() = throw UnsupportedOperationException()

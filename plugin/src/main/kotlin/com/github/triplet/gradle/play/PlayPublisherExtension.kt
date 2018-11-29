@@ -52,7 +52,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      * Choose the default packaging method. Either App Bundles or APKs. Affects tasks like
      * `publish`.
      *
-     * Defaults to false because App Bundles require Google Play App Signing to be configured.
+     * Defaults to `false` because App Bundles require Google Play App Signing to be configured.
      */
     @get:Input
     var defaultToAppBundles
@@ -95,7 +95,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
     /**
      * Specify the track in which to upload your app.
      *
-     * May be one of internal, alpha, beta, rollout, or production. Default is internal.
+     * May be one of `internal`, `alpha`, `beta`, or `production`. Defaults to `internal`.
      */
     @get:Input
     var track
@@ -107,8 +107,10 @@ open class PlayPublisherExtension @JvmOverloads constructor(
     @get:Internal("Backing property for public input")
     internal var _userFraction: Double? = null
     /**
-     * Specify the initial user percent intended to receive a 'rollout' update (see [track]).
-     * Default is 10% == 0.1.
+     * Specify the initial user fraction intended to receive an `inProgress` release. Defaults to
+     * 0.1 (10%).
+     *
+     * @see releaseStatus
      */
     @get:Input
     var userFraction: Double
@@ -122,7 +124,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
     /**
      * Specify the resolution strategy to employ when a version conflict occurs.
      *
-     * May be one of auto, fail, or ignore. Default is ignore.
+     * May be one of `auto`, `fail`, or `ignore`. Defaults to `fail`.
      */
     @get:Input
     var resolutionStrategy
@@ -159,8 +161,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
     /**
      * Specify the status to apply to the uploaded app release.
      *
-     * May be one of completed, draft, halted, or inProgress. Default is completed for all tracks
-     * except rollout where inProgress is the default.
+     * May be one of `completed`, `draft`, `halted`, or `inProgress`. Defaults to `completed`.
      */
     @get:Input
     var releaseStatus: String
