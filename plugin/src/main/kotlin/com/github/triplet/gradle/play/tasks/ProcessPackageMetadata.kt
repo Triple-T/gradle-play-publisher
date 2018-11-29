@@ -24,8 +24,8 @@ open class ProcessPackageMetadata : PlayPublishTaskBase() {
     private fun processVersionCodes() = read(true) { editId ->
         progressLogger.progress("Downloading active version codes")
         val maxVersionCode = tracks().list(variant.applicationId, editId).execute().tracks
-                ?.map { it.releases ?: emptyList() }?.flatten()
-                ?.map { it.versionCodes ?: emptyList() }?.flatten()
+                ?.flatMap { it.releases.orEmpty() }
+                ?.flatMap { it.versionCodes.orEmpty() }
                 ?.max() ?: 1
 
         val outputs = variant.outputs.filterIsInstance<ApkVariantOutput>()
