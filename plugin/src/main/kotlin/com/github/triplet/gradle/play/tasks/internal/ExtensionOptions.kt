@@ -26,7 +26,7 @@ internal interface ExtensionOptions {
     @get:Internal
     @set:Option(
             option = "skip-commit",
-            description = "Doesn't commit changes from this build."
+            description = "Don't commit changes from this build."
     )
     var skipCommitOption: Boolean
         get() = throw UnsupportedOperationException()

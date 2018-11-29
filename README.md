@@ -571,3 +571,9 @@ play {
 ```
 
 </details>
+
+The `commit` option can be used for any legal combined updates across any number of build
+invocations. The only hard requirement is for a task with `commit = true` to be run _last_. Should
+that not already be the case, Gradle's
+[`mustRunAfter`](https://docs.gradle.org/current/dsl/org.gradle.api.Task.html#org.gradle.api.Task:mustRunAfter(java.lang.Object[]))
+DSL will come in handy.

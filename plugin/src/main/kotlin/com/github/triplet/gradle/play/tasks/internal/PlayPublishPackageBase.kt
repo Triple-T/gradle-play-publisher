@@ -40,7 +40,7 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
 
         val track = if (hasSavedEdit) {
             tracks().get(variant.applicationId, editId, extension.track).execute().apply {
-                releases = if (releases.orEmpty().isEmpty()) {
+                releases = if (releases.isNullOrEmpty()) {
                     listOf(TrackRelease().applyChanges(versions))
                 } else {
                     releases.map {
