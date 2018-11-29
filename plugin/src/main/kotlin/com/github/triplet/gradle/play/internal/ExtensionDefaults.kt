@@ -7,12 +7,6 @@ internal val PlayPublisherExtension.releaseStatusOrDefault
     get() = _releaseStatus ?: ReleaseStatus.COMPLETED
 internal val PlayPublisherExtension.resolutionStrategyOrDefault
     get() = _resolutionStrategy ?: ResolutionStrategy.FAIL
-internal val PlayPublisherExtension.releaseStatusOrDefault
-    get() = _releaseStatus ?: if (trackOrDefault == TrackType.ROLLOUT) {
-        ReleaseStatus.IN_PROGRESS
-    } else {
-        ReleaseStatus.COMPLETED
-    }
 
 internal fun PlayPublisherExtension?.mergeWith(
         default: PlayPublisherExtension
