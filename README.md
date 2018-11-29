@@ -488,11 +488,11 @@ android {
 
     playConfigs {
         firstCustomer {
-            serviceAccountCredentials file('customer-one-key.json')
+            serviceAccountCredentials = file('customer-one-key.json')
         }
 
         secondCustomer {
-            serviceAccountCredentials file('customer-two-key.json')
+            serviceAccountCredentials = file('customer-two-key.json')
         }
     }
 }
@@ -560,13 +560,13 @@ android {
 
     playConfigs {
         pie {
-            commit true
+            commit = true
         }
     }
 }
 
 play {
-    commit false
+    commit = false
 }
 ```
 
