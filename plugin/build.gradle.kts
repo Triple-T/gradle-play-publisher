@@ -9,17 +9,15 @@ plugins {
 }
 
 dependencies {
-    compileOnly("com.android.tools.build:gradle:3.3.0-alpha12")
+    compileOnly("com.android.tools.build:gradle:3.4.0-alpha06")
 
-    implementation("com.google.apis:google-api-services-androidpublisher:v3-rev12-1.23.0") {
-        exclude("com.google.guava", "guava-jdk5") // Remove when upgrading to AGP 3.1+
-    }
+    implementation("com.google.apis:google-api-services-androidpublisher:v3-rev20181113-1.27.0")
 
-    testImplementation("com.android.tools.build:gradle:3.0.1")
+    testImplementation("com.android.tools.build:gradle:3.1.4")
     testImplementation(kotlin("test"))
     testImplementation("junit:junit:4.12")
-    testImplementation("org.mockito:mockito-core:2.18.3")
-    testImplementation("org.assertj:assertj-core:3.10.0")
+    testImplementation("org.mockito:mockito-core:2.23.4")
+    testImplementation("org.assertj:assertj-core:3.11.1")
 }
 
 java {
