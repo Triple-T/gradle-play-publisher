@@ -9,6 +9,7 @@ import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.has
 import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.internal.readProcessed
+import com.github.triplet.gradle.play.internal.releaseStatusOrDefault
 import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
 import com.github.triplet.gradle.play.internal.trackUploadProgress
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
@@ -37,10 +38,21 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
     protected fun AndroidPublisher.Edits.updateTracks(editId: String, versions: List<Long>) {
         progressLogger.progress("Updating tracks")
 
-        val track = Track().apply {
-            track = extension.track
-            releases = listOf(TrackRelease().applyChanges(versions))
+        val track = if (extension.releaseStatusOrDefault == ReleaseStatus.IN_PROGRESS) {
+            tracks().get(variant.applicationId, editId, extension.track).execute().apply {
+                val keep = releases.orEmpty().filter {
+                    it.status == ReleaseStatus.COMPLETED.publishedName ||
+                            it.status == ReleaseStatus.DRAFT.publishedName
+                }
+                releases = keep + listOf(TrackRelease().applyChanges(versions))
+            }
+        } else {
+            Track().apply {
+                track = extension.track
+                releases = listOf(TrackRelease().applyChanges(versions))
+            }
         }
+
         tracks()
                 .update(variant.applicationId, editId, extension.track, track)
                 .execute()

@@ -9,7 +9,6 @@ import com.github.triplet.gradle.play.internal.dependsOnCompat
 import com.github.triplet.gradle.play.internal.mergeWith
 import com.github.triplet.gradle.play.internal.newTask
 import com.github.triplet.gradle.play.internal.requireCreds
-import com.github.triplet.gradle.play.internal.validate
 import com.github.triplet.gradle.play.internal.validateRuntime
 import com.github.triplet.gradle.play.tasks.Bootstrap
 import com.github.triplet.gradle.play.tasks.GenerateResources
@@ -227,10 +226,6 @@ class PlayPublisherPlugin : Plugin<Project> {
                 dependsOnCompat(publishProductsTask)
             }
             publishAllTask.configure { dependsOnCompat(publishTask) }
-
-            project.afterEvaluate {
-                extension.validate()
-            }
         }
     }
 }
