@@ -34,7 +34,7 @@ tasks.withType<KotlinJvmCompile> {
 }
 
 group = "com.github.triplet.gradle"
-version = "2.0.0"
+version = "2.1.0-SNAPSHOT"
 
 gradlePlugin {
     plugins.create("play") {
