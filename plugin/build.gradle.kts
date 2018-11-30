@@ -139,4 +139,6 @@ tasks.withType<Test> {
 
     // Those tests also need to know which version was built
     systemProperty("VERSION_NAME", version)
+
+    testLogging.events("passed", "failed", "skipped")
 }
