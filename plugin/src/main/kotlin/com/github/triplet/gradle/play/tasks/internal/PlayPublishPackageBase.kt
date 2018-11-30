@@ -44,7 +44,11 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
                     listOf(TrackRelease().applyChanges(versions))
                 } else {
                     releases.map {
-                        it.applyChanges(it.versionCodes.orEmpty() + versions)
+                        if (it.status == extension.releaseStatusOrDefault.publishedName) {
+                            it.applyChanges(it.versionCodes.orEmpty() + versions)
+                        } else {
+                            it
+                        }
                     }
                 }
             }
