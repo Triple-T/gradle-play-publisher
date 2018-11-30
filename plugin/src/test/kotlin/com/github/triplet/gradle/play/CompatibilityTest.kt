@@ -76,7 +76,6 @@ class CompatibilityTest(
             serviceAccountCredentials = file('some-file.json')
         }
         """)
-        File(testProject.projectDir, "settings.gradle").writeText("")
 
         val gradleDist = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
 
@@ -99,7 +98,6 @@ class CompatibilityTest(
     @After
     fun cleanup() {
         File(testProject.projectDir, "build.gradle").delete()
-        File(testProject.projectDir, "settings.gradle").delete()
     }
 
     private companion object {

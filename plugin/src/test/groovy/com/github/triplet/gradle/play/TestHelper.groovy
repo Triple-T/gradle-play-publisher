@@ -11,7 +11,6 @@ class TestHelper {
 
     static final FIXTURE_WORKING_DIR = new File('src/test/fixtures/android_app')
     private static final BUILD_FILE = new File(FIXTURE_WORKING_DIR, "build.gradle")
-    private static final SETTINGS_FILE = new File(FIXTURE_WORKING_DIR, "settings.gradle")
 
     static Project fixtureProject() {
         def project = ProjectBuilder.builder().withProjectDir(FIXTURE_WORKING_DIR).build()
@@ -89,7 +88,6 @@ class TestHelper {
             serviceAccountCredentials = file('some-file.json')
         }
         """)
-        SETTINGS_FILE.write("")
 
         return GradleConnector.newConnector().forProjectDirectory(FIXTURE_WORKING_DIR).connect()
     }
@@ -104,6 +102,5 @@ class TestHelper {
 
     static void cleanup() {
         BUILD_FILE.delete()
-        SETTINGS_FILE.delete()
     }
 }
