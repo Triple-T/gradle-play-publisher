@@ -9,7 +9,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import java.io.File
-import java.net.URI
 
 @RunWith(Parameterized::class)
 class CompatibilityTest(
@@ -77,17 +76,15 @@ class CompatibilityTest(
         }
         """)
 
-        val gradleDist = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
-
         GradleRunner.create()
                 .withPluginClasspath()
-                .withGradleDistribution(URI(gradleDist))
+                .withGradleVersion(gradleVersion)
                 .withProjectDir(testProject.projectDir)
                 .withArguments("checkReleaseManifest")
                 .build()
         GradleRunner.create()
                 .withPluginClasspath()
-                .withGradleDistribution(URI(gradleDist))
+                .withGradleVersion(gradleVersion)
                 .withProjectDir(testProject.projectDir)
                 .withArguments("clean")
                 .build()

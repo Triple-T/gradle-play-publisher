@@ -27,13 +27,13 @@ class TestHelper {
         project.apply plugin: 'com.android.application'
         project.apply plugin: 'com.github.triplet.play'
         project.android {
-            compileSdkVersion 27
+            compileSdkVersion 28
 
             defaultConfig {
                 versionCode 1
                 versionName '1.0'
-                minSdkVersion 27
-                targetSdkVersion 27
+                minSdkVersion 28
+                targetSdkVersion 28
             }
 
             buildTypes {
