@@ -52,7 +52,7 @@ class CompatibilityTest(
 
                 // Manually define transitive dependencies for our plugin since we don't have the
                 // POM to fetch them for us
-                classpath('com.google.apis:google-api-services-androidpublisher:v3-rev12-1.23.0')
+                classpath('com.google.apis:google-api-services-androidpublisher:v3-rev20181113-1.27.0')
             }
         }
 

@@ -1,10 +1,9 @@
 package com.github.triplet.gradle.play
 
+import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Test
 
-import static com.github.triplet.gradle.play.TestHelper.cleanup
-import static com.github.triplet.gradle.play.TestHelper.executeConnection
-import static com.github.triplet.gradle.play.TestHelper.generateConnection
+import static com.github.triplet.gradle.play.TestHelper.execute
 import static junit.framework.TestCase.assertEquals
 import static org.junit.Assert.assertTrue
 
@@ -12,13 +11,7 @@ class GenerateResourcesTest {
 
     @Test
     void testResourcesAreCopiedIntoOutputFolder() {
-        // language=gradle
-        def connection = generateConnection("")
-
-        executeConnection(connection, "clean")
-        executeConnection(connection, "generateReleasePlayResources")
-
-        cleanup()
+        execute("", "clean", "generateReleasePlayResources")
 
         assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp').exists())
         assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/release').exists())
@@ -34,27 +27,25 @@ class GenerateResourcesTest {
         assertEquals(new File(TestHelper.FIXTURE_WORKING_DIR, 'src/main/play/products/sku.json').text, content)
     }
 
-    @Test(expected = IllegalStateException)
+    @Test
     void invalidProductThrows() {
         // language=gradle
-        def connection = generateConnection("""
+        def config = """
             flavorDimensions 'pricing'
 
             productFlavors {
                 invalidProduct { dimension 'pricing' }
             }
-        """)
+        """
+        def result = execute(config, true, "clean", "generateInvalidProductReleasePlayResources")
 
-        executeConnection(connection, "clean")
-        executeConnection(connection, "generateInvalidProductReleasePlayResources")
-
-        cleanup()
+        assertEquals(TaskOutcome.FAILED, result.task(":generateInvalidProductReleasePlayResources").outcome)
     }
 
     @Test
     void testFlavorsOverrideMain() {
         // language=gradle
-        def connection = generateConnection("""
+        def config = """
             flavorDimensions 'pricing'
 
             productFlavors {
@@ -65,10 +56,8 @@ class GenerateResourcesTest {
                     dimension 'pricing'
                 }
             }
-        """)
-
-        executeConnection(connection, "clean")
-        executeConnection(connection, "generateFreeReleasePlayResources")
+        """
+        execute(config, "clean", "generateFreeReleasePlayResources")
 
         assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp').exists())
         assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/freeRelease').exists())
@@ -83,7 +72,7 @@ class GenerateResourcesTest {
         content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/freeRelease/res/release-notes/en-US/default.txt').text
         assertEquals('free', content)
 
-        executeConnection(connection, "generatePaidReleasePlayResources")
+        execute(config, "generatePaidReleasePlayResources")
 
         content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/paidRelease/res/release-notes/de-DE/default.txt').text
         assertEquals('paid german', content)
@@ -91,23 +80,17 @@ class GenerateResourcesTest {
         assertEquals('main', content)
         content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/paidRelease/res/release-notes/en-US/default.txt').text
         assertEquals('paid english', content)
-
-        cleanup()
     }
 
     @Test
     void testBuildTypeOverridesMain() {
         // language=gradle
-        def connection = generateConnection("""
+        def config = """
             buildTypes {
                 dogfood.initWith(buildTypes.release)
             }
-        """)
-
-        executeConnection(connection, "clean")
-        executeConnection(connection, "generateDogfoodPlayResources")
-
-        cleanup()
+        """
+        execute(config, "clean", "generateDogfoodPlayResources")
 
         def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/dogfood/res/release-notes/en-US/default.txt').text
         assertEquals('dogfood english', content)
@@ -116,7 +99,7 @@ class GenerateResourcesTest {
     @Test
     void testBuildTypeOverridesFlavor() {
         // language=gradle
-        def connection = generateConnection("""
+        def config = """
             flavorDimensions 'pricing'
 
             productFlavors {
@@ -131,12 +114,8 @@ class GenerateResourcesTest {
             buildTypes {
                 dogfood.initWith(buildTypes.release)
             }
-        """)
-
-        executeConnection(connection, "clean")
-        executeConnection(connection, "generatePaidDogfoodPlayResources")
-
-        cleanup()
+        """
+        execute(config, "clean", "generatePaidDogfoodPlayResources")
 
         def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/paidDogfood/res/release-notes/en-US/default.txt').text
         assertEquals('dogfood english', content)
@@ -145,7 +124,7 @@ class GenerateResourcesTest {
     @Test
     void testVariantOverridesBuildType() {
         // language=gradle
-        def connection = generateConnection("""
+        def config = """
             flavorDimensions 'pricing'
 
             productFlavors {
@@ -160,12 +139,8 @@ class GenerateResourcesTest {
             buildTypes {
                 dogfood.initWith(buildTypes.release)
             }
-        """)
-
-        executeConnection(connection, "clean")
-        executeConnection(connection, "generateFreeDogfoodPlayResources")
-
-        cleanup()
+        """
+        execute(config, "clean", "generateFreeDogfoodPlayResources")
 
         def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/freeDogfood/res/release-notes/en-US/default.txt').text
         assertEquals('free dogfood english', content)
@@ -179,7 +154,7 @@ class GenerateResourcesTest {
                 'src/freeStagingDogfood/play/listings/en-US/full-description.txt').text
 
         // language=gradle
-        def connection = generateConnection("""
+        def config = """
             flavorDimensions 'pricing', 'server'
 
             productFlavors {
@@ -192,12 +167,8 @@ class GenerateResourcesTest {
             buildTypes {
                 dogfood.initWith(buildTypes.release)
             }
-        """)
-
-        executeConnection(connection, "clean")
-        executeConnection(connection, "generateFreeStagingDogfoodPlayResources")
-
-        cleanup()
+        """
+        execute(config, "clean", "generateFreeStagingDogfoodPlayResources")
 
         def processedReleaseNotes = new File(TestHelper.FIXTURE_WORKING_DIR,
                 'build/generated/gpp/freeStagingDogfood/res/release-notes/en-US/default.txt').text
@@ -208,38 +179,34 @@ class GenerateResourcesTest {
         assertEquals(originalFullDescription, processedFullDescription)
     }
 
-    @Test(expected = IllegalStateException)
+    @Test
     void invalidLocaleThrows() {
         // language=gradle
-        def connection = generateConnection("""
+        def config = """
             flavorDimensions 'pricing'
 
             productFlavors {
                 invalidLocale { dimension 'pricing' }
             }
-        """)
+        """
+        def result = execute(config, true, "clean", "generateInvalidLocaleReleasePlayResources")
 
-        executeConnection(connection, "clean")
-        executeConnection(connection, "generateInvalidLocaleReleasePlayResources")
-
-        cleanup()
+        assertEquals(TaskOutcome.FAILED, result.task(":generateInvalidLocaleReleasePlayResources").outcome)
     }
 
-    @Test(expected = IllegalStateException)
+    @Test
     void fileInWrongDirThrows() {
         // language=gradle
-        def connection = generateConnection("""
+        def config = """
             flavorDimensions 'pricing'
 
             productFlavors {
                 unknownFile { dimension 'pricing' }
             }
-        """)
+        """
+        def result = execute(config, true, "clean", "generateUnknownFileReleasePlayResources")
 
-        executeConnection(connection, "clean")
-        executeConnection(connection, "generateUnknownFileReleasePlayResources")
-
-        cleanup()
+        assertEquals(TaskOutcome.FAILED, result.task(":generateUnknownFileReleasePlayResources").outcome)
     }
 
     @Test
@@ -250,7 +217,7 @@ class GenerateResourcesTest {
                 'src/freeStagingRelease/play/listings/en-US/full-description.txt').text
 
         // language=gradle
-        def connection = generateConnection("""
+        def config = """
             flavorDimensions 'pricing', 'server'
 
             productFlavors {
@@ -259,12 +226,8 @@ class GenerateResourcesTest {
                 staging { dimension 'server' }
                 prod { dimension 'server' }
             }
-        """)
-
-        executeConnection(connection, "clean")
-        executeConnection(connection, "generateFreeStagingReleasePlayResources")
-
-        cleanup()
+        """
+        execute(config, "clean", "generateFreeStagingReleasePlayResources")
 
         def processedReleaseNotes = new File(TestHelper.FIXTURE_WORKING_DIR,
                 'build/generated/gpp/freeStagingRelease/res/release-notes/en-US/default.txt').text
@@ -283,7 +246,7 @@ class GenerateResourcesTest {
                 'src/free/play/listings/en-US/short-description.txt').text
 
         // language=gradle
-        def connection = generateConnection("""
+        def config = """
             flavorDimensions 'pricing', 'server'
 
             productFlavors {
@@ -292,12 +255,8 @@ class GenerateResourcesTest {
                 staging { dimension 'server' }
                 prod { dimension 'server' }
             }
-        """)
-
-        executeConnection(connection, "clean")
-        executeConnection(connection, "generateFreeStagingReleasePlayResources")
-
-        cleanup()
+        """
+        execute(config, "clean", "generateFreeStagingReleasePlayResources")
 
         def processedFullDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
                 'build/generated/gpp/freeStagingRelease/res/listings/en-US/full-description.txt').text
@@ -314,7 +273,7 @@ class GenerateResourcesTest {
                 'src/prod/play/release-notes/en-US/default.txt').text
 
         // language=gradle
-        def connection = generateConnection("""
+        def config = """
             flavorDimensions 'server', 'pricing'
 
             productFlavors {
@@ -323,12 +282,8 @@ class GenerateResourcesTest {
                 staging { dimension 'server' }
                 prod { dimension 'server' }
             }
-        """)
-
-        executeConnection(connection, "clean")
-        executeConnection(connection, "generateProdFreeReleasePlayResources")
-
-        cleanup()
+        """
+        execute(config, "clean", "generateProdFreeReleasePlayResources")
 
         def processedReleaseNotes = new File(TestHelper.FIXTURE_WORKING_DIR,
                 'build/generated/gpp/prodFreeRelease/res/release-notes/en-US/default.txt').text
@@ -344,7 +299,7 @@ class GenerateResourcesTest {
                 'src/main/play/listings/en-US/title.txt').text
 
         // language=gradle
-        def connection = generateConnection("""
+        def config = """
             flavorDimensions 'pricing', 'server'
 
             productFlavors {
@@ -353,12 +308,8 @@ class GenerateResourcesTest {
                 staging { dimension 'server' }
                 prod { dimension 'server' }
             }
-        """)
-
-        executeConnection(connection, "clean")
-        executeConnection(connection, "generateFreeStagingReleasePlayResources")
-
-        cleanup()
+        """
+        execute(config, "clean", "generateFreeStagingReleasePlayResources")
 
         def processedFullDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
                 'build/generated/gpp/freeStagingRelease/res/listings/en-US/full-description.txt').text
@@ -379,7 +330,7 @@ class GenerateResourcesTest {
                 'src/staging/play/listings/en-US/short-description.txt').text
 
         // language=gradle
-        def connection = generateConnection("""
+        def config = """
             flavorDimensions 'pricing', 'server'
 
             productFlavors {
@@ -388,12 +339,8 @@ class GenerateResourcesTest {
                 staging { dimension 'server' }
                 prod { dimension 'pricing' }
             }
-        """)
-
-        executeConnection(connection, "clean")
-        executeConnection(connection, "generateProdStagingReleasePlayResources")
-
-        cleanup()
+        """
+        execute(config, "clean", "generateProdStagingReleasePlayResources")
 
         def processedTitle = new File(TestHelper.FIXTURE_WORKING_DIR,
                 'build/generated/gpp/prodStagingRelease/res/listings/de-DE/title.txt').text

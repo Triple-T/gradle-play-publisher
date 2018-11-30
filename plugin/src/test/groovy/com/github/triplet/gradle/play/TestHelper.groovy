@@ -3,9 +3,8 @@ package com.github.triplet.gradle.play
 import com.github.triplet.gradle.play.internal.IoKt
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
-import org.gradle.tooling.BuildException
-import org.gradle.tooling.GradleConnector
-import org.gradle.tooling.ProjectConnection
+import org.gradle.testkit.runner.BuildResult
+import org.gradle.testkit.runner.GradleRunner
 
 class TestHelper {
 
@@ -49,7 +48,11 @@ class TestHelper {
         return project
     }
 
-    static ProjectConnection generateConnection(String androidConfig) {
+    static BuildResult execute(String androidConfig, String... tasks) {
+        execute(androidConfig, false, tasks)
+    }
+
+    static BuildResult execute(String androidConfig, boolean expectFailure, String... tasks) {
         // language=gradle
         BUILD_FILE.write("""
         buildscript {
@@ -63,7 +66,7 @@ class TestHelper {
 
                 // Manually define transitive dependencies for our plugin since we don't have the
                 // POM to fetch them for us
-                classpath('com.google.apis:google-api-services-androidpublisher:v3-rev12-1.23.0')
+                classpath('com.google.apis:google-api-services-androidpublisher:v3-rev20181113-1.27.0')
             }
         }
 
@@ -89,18 +92,15 @@ class TestHelper {
         }
         """)
 
-        return GradleConnector.newConnector().forProjectDirectory(FIXTURE_WORKING_DIR).connect()
-    }
+        def runner = GradleRunner.create()
+                .withPluginClasspath()
+                .withProjectDir(FIXTURE_WORKING_DIR)
+                .withArguments(tasks)
 
-    static void executeConnection(ProjectConnection connection, String task) {
         try {
-            connection.newBuild().forTasks(task).run()
-        } catch (BuildException e) {
-            throw e.cause.cause.cause
+            if (expectFailure) return runner.buildAndFail() else return runner.build()
+        } finally {
+            BUILD_FILE.delete()
         }
-    }
-
-    static void cleanup() {
-        BUILD_FILE.delete()
     }
 }
