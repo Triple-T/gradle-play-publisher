@@ -3,6 +3,7 @@ package com.github.triplet.gradle.play
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Test
 
+import static com.github.triplet.gradle.play.TestHelper.FIXTURE_WORKING_DIR
 import static com.github.triplet.gradle.play.TestHelper.execute
 import static junit.framework.TestCase.assertEquals
 import static org.junit.Assert.assertTrue
@@ -13,18 +14,18 @@ class GenerateResourcesTest {
     void testResourcesAreCopiedIntoOutputFolder() {
         execute("", "clean", "generateReleasePlayResources")
 
-        assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp').exists())
-        assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/release').exists())
-        assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/release/res/listings/en-US').exists())
-        assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/release/res/listings/fr-FR').exists())
+        assertTrue(new File(FIXTURE_WORKING_DIR, 'build/generated/gpp').exists())
+        assertTrue(new File(FIXTURE_WORKING_DIR, 'build/generated/gpp/release').exists())
+        assertTrue(new File(FIXTURE_WORKING_DIR, 'build/generated/gpp/release/res/listings/en-US').exists())
+        assertTrue(new File(FIXTURE_WORKING_DIR, 'build/generated/gpp/release/res/listings/fr-FR').exists())
 
-        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/release/res/release-notes/en-US/default.txt').text
+        def content = new File(FIXTURE_WORKING_DIR, 'build/generated/gpp/release/res/release-notes/en-US/default.txt').text
         assertEquals('main', content)
-        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/release/res/release-notes/fr-FR/default.txt').text
+        content = new File(FIXTURE_WORKING_DIR, 'build/generated/gpp/release/res/release-notes/fr-FR/default.txt').text
         assertEquals('main', content)
 
-        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/release/res/products/sku.json').text
-        assertEquals(new File(TestHelper.FIXTURE_WORKING_DIR, 'src/main/play/products/sku.json').text, content)
+        content = new File(FIXTURE_WORKING_DIR, 'build/generated/gpp/release/res/products/sku.json').text
+        assertEquals(new File(FIXTURE_WORKING_DIR, 'src/main/play/products/sku.json').text, content)
     }
 
     @Test
@@ -59,26 +60,26 @@ class GenerateResourcesTest {
         """
         execute(config, "clean", "generateFreeReleasePlayResources")
 
-        assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp').exists())
-        assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/freeRelease').exists())
-        assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/freeRelease/res/listings/de-DE').exists())
-        assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/freeRelease/res/listings/en-US').exists())
-        assertTrue(new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/freeRelease/res/listings/fr-FR').exists())
+        assertTrue(new File(FIXTURE_WORKING_DIR, 'build/generated/gpp').exists())
+        assertTrue(new File(FIXTURE_WORKING_DIR, 'build/generated/gpp/freeRelease').exists())
+        assertTrue(new File(FIXTURE_WORKING_DIR, 'build/generated/gpp/freeRelease/res/listings/de-DE').exists())
+        assertTrue(new File(FIXTURE_WORKING_DIR, 'build/generated/gpp/freeRelease/res/listings/en-US').exists())
+        assertTrue(new File(FIXTURE_WORKING_DIR, 'build/generated/gpp/freeRelease/res/listings/fr-FR').exists())
 
-        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/freeRelease/res/release-notes/de-DE/default.txt').text
+        def content = new File(FIXTURE_WORKING_DIR, 'build/generated/gpp/freeRelease/res/release-notes/de-DE/default.txt').text
         assertEquals('free german', content)
-        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/freeRelease/res/release-notes/fr-FR/default.txt').text
+        content = new File(FIXTURE_WORKING_DIR, 'build/generated/gpp/freeRelease/res/release-notes/fr-FR/default.txt').text
         assertEquals('main', content)
-        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/freeRelease/res/release-notes/en-US/default.txt').text
+        content = new File(FIXTURE_WORKING_DIR, 'build/generated/gpp/freeRelease/res/release-notes/en-US/default.txt').text
         assertEquals('free', content)
 
         execute(config, "generatePaidReleasePlayResources")
 
-        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/paidRelease/res/release-notes/de-DE/default.txt').text
+        content = new File(FIXTURE_WORKING_DIR, 'build/generated/gpp/paidRelease/res/release-notes/de-DE/default.txt').text
         assertEquals('paid german', content)
-        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/paidRelease/res/release-notes/fr-FR/default.txt').text
+        content = new File(FIXTURE_WORKING_DIR, 'build/generated/gpp/paidRelease/res/release-notes/fr-FR/default.txt').text
         assertEquals('main', content)
-        content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/paidRelease/res/release-notes/en-US/default.txt').text
+        content = new File(FIXTURE_WORKING_DIR, 'build/generated/gpp/paidRelease/res/release-notes/en-US/default.txt').text
         assertEquals('paid english', content)
     }
 
@@ -92,7 +93,7 @@ class GenerateResourcesTest {
         """
         execute(config, "clean", "generateDogfoodPlayResources")
 
-        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/dogfood/res/release-notes/en-US/default.txt').text
+        def content = new File(FIXTURE_WORKING_DIR, 'build/generated/gpp/dogfood/res/release-notes/en-US/default.txt').text
         assertEquals('dogfood english', content)
     }
 
@@ -117,7 +118,7 @@ class GenerateResourcesTest {
         """
         execute(config, "clean", "generatePaidDogfoodPlayResources")
 
-        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/paidDogfood/res/release-notes/en-US/default.txt').text
+        def content = new File(FIXTURE_WORKING_DIR, 'build/generated/gpp/paidDogfood/res/release-notes/en-US/default.txt').text
         assertEquals('dogfood english', content)
     }
 
@@ -142,15 +143,15 @@ class GenerateResourcesTest {
         """
         execute(config, "clean", "generateFreeDogfoodPlayResources")
 
-        def content = new File(TestHelper.FIXTURE_WORKING_DIR, 'build/generated/gpp/freeDogfood/res/release-notes/en-US/default.txt').text
+        def content = new File(FIXTURE_WORKING_DIR, 'build/generated/gpp/freeDogfood/res/release-notes/en-US/default.txt').text
         assertEquals('free dogfood english', content)
     }
 
     @Test
     void multidimensionalResourcesAreNotOverwritten() {
-        def originalReleaseNotes = new File(TestHelper.FIXTURE_WORKING_DIR,
+        def originalReleaseNotes = new File(FIXTURE_WORKING_DIR,
                 'src/freeStagingDogfood/play/release-notes/en-US/default.txt').text
-        def originalFullDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
+        def originalFullDescription = new File(FIXTURE_WORKING_DIR,
                 'src/freeStagingDogfood/play/listings/en-US/full-description.txt').text
 
         // language=gradle
@@ -170,9 +171,9 @@ class GenerateResourcesTest {
         """
         execute(config, "clean", "generateFreeStagingDogfoodPlayResources")
 
-        def processedReleaseNotes = new File(TestHelper.FIXTURE_WORKING_DIR,
+        def processedReleaseNotes = new File(FIXTURE_WORKING_DIR,
                 'build/generated/gpp/freeStagingDogfood/res/release-notes/en-US/default.txt').text
-        def processedFullDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
+        def processedFullDescription = new File(FIXTURE_WORKING_DIR,
                 'build/generated/gpp/freeStagingDogfood/res/listings/en-US/full-description.txt').text
 
         assertEquals(originalReleaseNotes, processedReleaseNotes)
@@ -211,9 +212,9 @@ class GenerateResourcesTest {
 
     @Test
     void multidimensionalFlavorsMerge() {
-        def originalReleaseNotes = new File(TestHelper.FIXTURE_WORKING_DIR,
+        def originalReleaseNotes = new File(FIXTURE_WORKING_DIR,
                 'src/freeStaging/play/release-notes/en-US/default.txt').text
-        def originalFullDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
+        def originalFullDescription = new File(FIXTURE_WORKING_DIR,
                 'src/freeStagingRelease/play/listings/en-US/full-description.txt').text
 
         // language=gradle
@@ -229,9 +230,9 @@ class GenerateResourcesTest {
         """
         execute(config, "clean", "generateFreeStagingReleasePlayResources")
 
-        def processedReleaseNotes = new File(TestHelper.FIXTURE_WORKING_DIR,
+        def processedReleaseNotes = new File(FIXTURE_WORKING_DIR,
                 'build/generated/gpp/freeStagingRelease/res/release-notes/en-US/default.txt').text
-        def processedFullDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
+        def processedFullDescription = new File(FIXTURE_WORKING_DIR,
                 'build/generated/gpp/freeStagingRelease/res/listings/en-US/full-description.txt').text
 
         assertEquals(originalReleaseNotes, processedReleaseNotes)
@@ -240,9 +241,9 @@ class GenerateResourcesTest {
 
     @Test
     void flavorMerge() {
-        def originalFullDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
+        def originalFullDescription = new File(FIXTURE_WORKING_DIR,
                 'src/freeStagingRelease/play/listings/en-US/full-description.txt').text
-        def originalShortDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
+        def originalShortDescription = new File(FIXTURE_WORKING_DIR,
                 'src/free/play/listings/en-US/short-description.txt').text
 
         // language=gradle
@@ -258,9 +259,9 @@ class GenerateResourcesTest {
         """
         execute(config, "clean", "generateFreeStagingReleasePlayResources")
 
-        def processedFullDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
+        def processedFullDescription = new File(FIXTURE_WORKING_DIR,
                 'build/generated/gpp/freeStagingRelease/res/listings/en-US/full-description.txt').text
-        def processedShortDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
+        def processedShortDescription = new File(FIXTURE_WORKING_DIR,
                 'build/generated/gpp/freeStagingRelease/res/listings/en-US/short-description.txt').text
 
         assertEquals(originalFullDescription, processedFullDescription)
@@ -269,7 +270,7 @@ class GenerateResourcesTest {
 
     @Test
     void flavorDimensionOrderDeterminesConflictingFlavorWinner() {
-        def originalReleaseNotes = new File(TestHelper.FIXTURE_WORKING_DIR,
+        def originalReleaseNotes = new File(FIXTURE_WORKING_DIR,
                 'src/prod/play/release-notes/en-US/default.txt').text
 
         // language=gradle
@@ -285,7 +286,7 @@ class GenerateResourcesTest {
         """
         execute(config, "clean", "generateProdFreeReleasePlayResources")
 
-        def processedReleaseNotes = new File(TestHelper.FIXTURE_WORKING_DIR,
+        def processedReleaseNotes = new File(FIXTURE_WORKING_DIR,
                 'build/generated/gpp/prodFreeRelease/res/release-notes/en-US/default.txt').text
 
         assertEquals(originalReleaseNotes, processedReleaseNotes)
@@ -293,9 +294,9 @@ class GenerateResourcesTest {
 
     @Test
     void mainMerge() {
-        def originalFullDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
+        def originalFullDescription = new File(FIXTURE_WORKING_DIR,
                 'src/freeStagingRelease/play/listings/en-US/full-description.txt').text
-        def originalTitle = new File(TestHelper.FIXTURE_WORKING_DIR,
+        def originalTitle = new File(FIXTURE_WORKING_DIR,
                 'src/main/play/listings/en-US/title.txt').text
 
         // language=gradle
@@ -311,9 +312,9 @@ class GenerateResourcesTest {
         """
         execute(config, "clean", "generateFreeStagingReleasePlayResources")
 
-        def processedFullDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
+        def processedFullDescription = new File(FIXTURE_WORKING_DIR,
                 'build/generated/gpp/freeStagingRelease/res/listings/en-US/full-description.txt').text
-        def processedTitle = new File(TestHelper.FIXTURE_WORKING_DIR,
+        def processedTitle = new File(FIXTURE_WORKING_DIR,
                 'build/generated/gpp/freeStagingRelease/res/listings/en-US/title.txt').text
 
         assertEquals(originalFullDescription, processedFullDescription)
@@ -322,11 +323,11 @@ class GenerateResourcesTest {
 
     @Test
     void languageMerge() {
-        def originalTitle = new File(TestHelper.FIXTURE_WORKING_DIR,
+        def originalTitle = new File(FIXTURE_WORKING_DIR,
                 'src/main/play/listings/en-US/title.txt').text
-        def originalFullDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
+        def originalFullDescription = new File(FIXTURE_WORKING_DIR,
                 'src/main/play/listings/de-DE/full-description.txt').text
-        def originalShortDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
+        def originalShortDescription = new File(FIXTURE_WORKING_DIR,
                 'src/staging/play/listings/en-US/short-description.txt').text
 
         // language=gradle
@@ -342,11 +343,11 @@ class GenerateResourcesTest {
         """
         execute(config, "clean", "generateProdStagingReleasePlayResources")
 
-        def processedTitle = new File(TestHelper.FIXTURE_WORKING_DIR,
+        def processedTitle = new File(FIXTURE_WORKING_DIR,
                 'build/generated/gpp/prodStagingRelease/res/listings/de-DE/title.txt').text
-        def processedFullDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
+        def processedFullDescription = new File(FIXTURE_WORKING_DIR,
                 'build/generated/gpp/prodStagingRelease/res/listings/de-DE/full-description.txt').text
-        def processedShortDescription = new File(TestHelper.FIXTURE_WORKING_DIR,
+        def processedShortDescription = new File(FIXTURE_WORKING_DIR,
                 'build/generated/gpp/prodStagingRelease/res/listings/de-DE/short-description.txt').text
 
         assertEquals(originalTitle, processedTitle)
