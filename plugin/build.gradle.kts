@@ -31,6 +31,11 @@ tasks.withType<KotlinJvmCompile> {
     }
 }
 
+tasks.named("clean").configure {
+    val base = "src/test/fixtures/android_app/"
+    delete(base + ".gradle", base + "build", base + "userHome")
+}
+
 group = "com.github.triplet.gradle"
 version = "2.0.0-rc2"
 

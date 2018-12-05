@@ -9,8 +9,12 @@ plugins {
     id("com.github.ben-manes.versions") version "0.20.0"
 }
 
-tasks.withType<Wrapper>().configureEach {
+tasks.wrapper {
     distributionType = Wrapper.DistributionType.ALL
+}
+
+tasks.register("clean") {
+    delete("build")
 }
 
 allprojects {
