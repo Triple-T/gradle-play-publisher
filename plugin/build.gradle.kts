@@ -31,7 +31,7 @@ tasks.withType<KotlinJvmCompile> {
     }
 }
 
-tasks.named("clean").configure {
+tasks.named<Delete>("clean").configure {
     val base = "src/test/fixtures/android_app/"
     delete(base + ".gradle", base + "build", base + "userHome")
 }

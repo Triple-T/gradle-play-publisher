@@ -13,7 +13,7 @@ tasks.wrapper {
     distributionType = Wrapper.DistributionType.ALL
 }
 
-tasks.register("clean") {
+tasks.register<Delete>("clean") {
     delete("build")
 }
 
