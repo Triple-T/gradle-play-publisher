@@ -1,5 +1,6 @@
 package com.github.triplet.gradle.play
 
+import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Test
 
 import static DependsOn.dependsOn
@@ -299,5 +300,12 @@ class PlayPublisherPluginTest {
         assertThat(project.tasks.publish, dependsOn('publishProductionPaidRelease'))
         assertThat(project.tasks.publishApk, dependsOn('publishProductionPaidReleaseApk'))
         assertThat(project.tasks.publishListing, dependsOn('publishProductionPaidReleaseListing'))
+    }
+
+    @Test
+    void signedBuildsCanBeAssembledWithoutCredsWhenResStratNotAuto() {
+        def result = TestHelper.execute("", "processReleaseMetadata")
+
+        assertEquals(TaskOutcome.SKIPPED, result.task(":processReleaseMetadata").outcome)
     }
 }
