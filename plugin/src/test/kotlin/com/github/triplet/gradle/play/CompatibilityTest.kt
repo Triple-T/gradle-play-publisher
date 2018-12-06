@@ -70,10 +70,6 @@ class CompatibilityTest(
                 versionName "1.0"
             }
         }
-
-        play {
-            serviceAccountCredentials = file('some-file.json')
-        }
         """)
 
         GradleRunner.create()

@@ -29,8 +29,13 @@ internal fun validatedTrack(value: String) = requireNotNull(
         TrackType.values().find { it.publishedName == value }
 ) { "Track must be one of ${TrackType.values().joinToString { "'${it.publishedName}'" }}" }
 
-internal fun PlayPublisherExtension.requireCreds() = checkNotNull(serviceAccountCredentials) {
-    "No credentials provided"
+internal fun PlayPublisherExtension.areCredsValid(): Boolean {
+    val creds = _serviceAccountCredentials ?: return false
+    return if (creds.extension.equals("json", true)) {
+        serviceAccountEmail == null
+    } else {
+        serviceAccountEmail != null
+    }
 }
 
 internal infix fun GoogleJsonResponseException.has(error: String) =

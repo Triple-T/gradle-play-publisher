@@ -3,8 +3,8 @@ package com.github.triplet.gradle.play.tasks.internal
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.PLUGIN_NAME
+import com.github.triplet.gradle.play.internal.areCredsValid
 import com.github.triplet.gradle.play.internal.has
-import com.github.triplet.gradle.play.internal.requireCreds
 import com.github.triplet.gradle.play.internal.transport
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
@@ -28,8 +28,8 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
     @get:Internal
     protected val publisher: AndroidPublisher by lazy {
         val credential = extension.run {
-            val creds = requireCreds()
-            val serviceAccountEmail = serviceAccountEmail
+            val creds = _serviceAccountCredentials!!
+            val serviceAccountEmail = _serviceAccountEmail
             val factory = JacksonFactory.getDefaultInstance()
 
             if (serviceAccountEmail == null) {
@@ -52,6 +52,10 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
                 connectTimeout = 100_000
             })
         }.setApplicationName(PLUGIN_NAME).build()
+    }
+
+    init {
+        onlyIf { extension.areCredsValid() }
     }
 
     protected fun read(
