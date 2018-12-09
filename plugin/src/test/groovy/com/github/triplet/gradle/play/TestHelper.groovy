@@ -41,6 +41,9 @@ class TestHelper {
                 }
             }
         }
+        project.play {
+            serviceAccountCredentials = new File("fake.json")
+        }
 
         return project
     }
@@ -82,6 +85,10 @@ class TestHelper {
             }
 
             ${androidConfig}
+        }
+
+        play {
+            serviceAccountCredentials = file('some-file.json')
         }
         """)
 
