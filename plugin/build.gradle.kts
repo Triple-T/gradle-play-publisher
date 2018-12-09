@@ -13,7 +13,7 @@ dependencies {
 
     implementation("com.google.apis:google-api-services-androidpublisher:v3-rev20181113-1.27.0")
 
-    testImplementation("com.android.tools.build:gradle:3.1.4")
+    testImplementation("com.android.tools.build:gradle:3.4.0-alpha06")
     testImplementation(kotlin("test"))
     testImplementation("junit:junit:4.12")
     testImplementation("org.mockito:mockito-core:2.23.4")
