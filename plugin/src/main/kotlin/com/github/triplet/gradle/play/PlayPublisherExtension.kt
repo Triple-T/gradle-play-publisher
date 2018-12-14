@@ -162,32 +162,4 @@ open class PlayPublisherExtension @JvmOverloads constructor(
                         ReleaseStatus.values().joinToString { "'${it.publishedName}'" }
             }
         }
-
-    @get:Internal("Backing property for readTimeout")
-    internal var _readTimeout: Int? = null
-
-    /**
-     * Specify Timeout in milliseconds to read data from an established connection.
-     *
-     */
-    @get:Input
-    var readTimeout
-        get() = _readTimeout ?: 100_000
-        set(value) {
-            _readTimeout = value
-        }
-
-    @get:Internal("Backing property for connectTimeout")
-    internal var _connectTimeout: Int? = null
-
-    /**
-     * Specify Timeout in milliseconds to establish a connection.
-     *
-     */
-    @get:Input
-    var connectTimeout
-        get() = _connectTimeout ?: 100_000
-        set(value) {
-            _connectTimeout = value
-        }
 }
