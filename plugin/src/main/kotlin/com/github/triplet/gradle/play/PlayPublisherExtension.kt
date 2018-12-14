@@ -162,4 +162,19 @@ open class PlayPublisherExtension @JvmOverloads constructor(
                         ReleaseStatus.values().joinToString { "'${it.publishedName}'" }
             }
         }
+
+    @get:Internal("Backing property for public input")
+    internal var _customTruststore: Boolean? = null
+    /**
+     * Chose to use the truststore defined in javax.javax.net.ssl.trustStore with password defined in
+     * javax.net.ssl.trustStorePassword.
+     *
+     * Defaults to `false`.
+     */
+    @get:Input
+    var customTruststore
+        get() = _customTruststore ?: false
+        set(value) {
+            _customTruststore = value
+        }
 }

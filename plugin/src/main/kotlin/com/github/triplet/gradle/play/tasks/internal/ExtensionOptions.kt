@@ -86,4 +86,15 @@ internal interface ExtensionOptions {
         set(value) {
             extension.releaseStatus = value
         }
+
+    @get:Internal
+    @set:Option(
+            option = "use-custom-truststore",
+            description = "Use truststore defined in javax.net.ssl.trustStore for connections to google."
+    )
+    var customTruststoreOption: Boolean
+        get() = throw UnsupportedOperationException()
+        set(value) {
+            extension.customTruststore = value
+        }
 }
