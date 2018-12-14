@@ -312,4 +312,43 @@ class PlayPublisherPluginTest {
 
         assertFalse(processTask.didWork)
     }
+
+    @Test
+    void testConnectTimeout() {
+        def project = TestHelper.evaluatableProject()
+
+        project.play {
+            connectTimeout 2000000
+        }
+
+        project.evaluate()
+
+        assertEquals(2000000, project.extensions.findByName('connectTimeout').connecTimeout, 0)
+    }
+
+    @Test
+    void testReadTimeout() {
+        def project = TestHelper.evaluatableProject()
+
+        project.play {
+            readTimeout 2000000
+        }
+
+        project.evaluate()
+
+        assertEquals(2000000, project.extensions.findByName('readTimeout').readTimeout, 0)
+    }
+
+    @Test
+    void testDefaultReadTimeoutAndConnectTimeout() {
+        def project = TestHelper.evaluatableProject()
+
+        project.play {
+        }
+
+        project.evaluate()
+
+        assertEquals(100_000, project.extensions.findByName('readTimeout').readTimeout, 0)
+        assertEquals(100_000, project.extensions.findByName('connectTimeout').connectTimeout, 0)
+    }
 }
