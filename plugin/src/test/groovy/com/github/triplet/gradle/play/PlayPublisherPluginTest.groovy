@@ -323,7 +323,7 @@ class PlayPublisherPluginTest {
 
         project.evaluate()
 
-        assertEquals(2000000, project.extensions.findByName('connectTimeout').connecTimeout, 0)
+        assertEquals(2000000, project.extensions.findByName('play').connectTimeout, 0)
     }
 
     @Test
@@ -336,7 +336,7 @@ class PlayPublisherPluginTest {
 
         project.evaluate()
 
-        assertEquals(2000000, project.extensions.findByName('readTimeout').readTimeout, 0)
+        assertEquals(2000000, project.extensions.findByName('play').readTimeout, 0)
     }
 
     @Test
@@ -348,7 +348,7 @@ class PlayPublisherPluginTest {
 
         project.evaluate()
 
-        assertEquals(100_000, project.extensions.findByName('readTimeout').readTimeout, 0)
-        assertEquals(100_000, project.extensions.findByName('connectTimeout').connectTimeout, 0)
+        assertEquals(100_000, project.extensions.findByName('play').readTimeout, 0)
+        assertEquals(100_000, project.extensions.findByName('play').connectTimeout, 0)
     }
 }
