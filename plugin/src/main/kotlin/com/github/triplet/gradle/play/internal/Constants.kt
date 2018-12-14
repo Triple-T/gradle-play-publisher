@@ -1,6 +1,5 @@
 package com.github.triplet.gradle.play.internal
 
-import com.google.api.client.googleapis.GoogleUtils
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.http.javanet.NetHttpTransport
 import java.io.FileInputStream
@@ -19,19 +18,23 @@ internal const val RESOURCES_OUTPUT_PATH = "generated/gpp"
 
 internal const val MIME_TYPE_STREAM = "application/octet-stream"
 
-internal val transport: NetHttpTransport by lazy { buildTransport() }
+internal val transport: NetHttpTransport by lazy { GoogleNetHttpTransport.newTrustedTransport() }
 
-internal fun buildTransport(): NetHttpTransport {
+internal fun buildCustomTransport(): NetHttpTransport? {
     val trustStore: String? = System.getProperty("javax.net.ssl.trustStore", null)
     val trustStorePassword: String? = System.getProperty("javax.net.ssl.trustStorePassword", null)
 
-    return if (trustStore != null && trustStorePassword != null) {
-
-        val ks = KeyStore.getInstance(KeyStore.getDefaultType())
-        FileInputStream(trustStore).use { fis -> ks.load(fis, trustStorePassword.toCharArray()) }
-
-        NetHttpTransport.Builder().trustCertificates(ks).build()
+    return if (trustStore != null) {
+        try {
+            val ks = KeyStore.getInstance(KeyStore.getDefaultType())
+            FileInputStream(trustStore).use { fis -> ks.load(fis, trustStorePassword?.toCharArray()) }
+            NetHttpTransport.Builder().trustCertificates(ks).build()
+        } catch (e: Exception){
+            // if anything goes wrong, return null
+            null
+        }
     } else {
-        GoogleNetHttpTransport.newTrustedTransport()
+        // if no truststore is defined return null
+        null
     }
 }

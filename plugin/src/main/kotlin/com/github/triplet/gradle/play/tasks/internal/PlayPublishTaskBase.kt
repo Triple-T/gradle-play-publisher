@@ -6,8 +6,10 @@ import com.github.triplet.gradle.play.internal.PLUGIN_NAME
 import com.github.triplet.gradle.play.internal.has
 import com.github.triplet.gradle.play.internal.requireCreds
 import com.github.triplet.gradle.play.internal.transport
+import com.github.triplet.gradle.play.internal.buildCustomTransport
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
+import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.AndroidPublisherScopes
@@ -27,17 +29,23 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
 
     @get:Internal
     protected val publisher: AndroidPublisher by lazy {
+        val httpTransport: NetHttpTransport =  if(extension.customTruststore){
+            transport
+        } else {
+            buildCustomTransport() ?: transport
+        }
+
         val credential = extension.run {
             val creds = requireCreds()
             val serviceAccountEmail = serviceAccountEmail
             val factory = JacksonFactory.getDefaultInstance()
 
             if (serviceAccountEmail == null) {
-                GoogleCredential.fromStream(creds.inputStream(), transport, factory)
+                GoogleCredential.fromStream(creds.inputStream(), httpTransport, factory)
                         .createScoped(listOf(AndroidPublisherScopes.ANDROIDPUBLISHER))
             } else {
                 GoogleCredential.Builder()
-                        .setTransport(transport)
+                        .setTransport(httpTransport)
                         .setJsonFactory(factory)
                         .setServiceAccountId(serviceAccountEmail)
                         .setServiceAccountPrivateKeyFromP12File(creds)
@@ -46,7 +54,7 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
             }
         }
 
-        AndroidPublisher.Builder(transport, JacksonFactory.getDefaultInstance()) {
+        AndroidPublisher.Builder(httpTransport, JacksonFactory.getDefaultInstance()) {
             credential.initialize(it.apply {
                 readTimeout = 100_000
                 connectTimeout = 100_000
