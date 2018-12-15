@@ -30,9 +30,9 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
     @get:Internal
     protected val publisher: AndroidPublisher by lazy {
         val httpTransport: NetHttpTransport =  if(extension.customTruststore){
-            transport
-        } else {
             buildCustomTransport() ?: transport
+        } else {
+            transport
         }
 
         val credential = extension.run {
