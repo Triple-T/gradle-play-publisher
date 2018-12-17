@@ -41,7 +41,7 @@ gradlePlugin {
         id = "com.github.triplet.play"
         displayName = "Gradle Play Publisher"
         description = "Gradle Play Publisher allows you to upload your App Bundle or APK " +
-            "and other app details to the Google Play Store."
+                "and other app details to the Google Play Store."
         implementationClass = "com.github.triplet.gradle.play.PlayPublisherPlugin"
     }
 }
@@ -58,7 +58,7 @@ pluginBundle {
 }
 
 publishing {
-        repositories {
+    repositories {
         maven {
             name = "Snapshots"
             url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
@@ -85,8 +85,8 @@ afterEvaluate {
         pom {
             name.set("Google Play Publisher")
             description.set("Gradle Play Publisher is a plugin that allows you to upload your " +
-                "App Bundle or APK and other app details to the " +
-                "Google Play Store.")
+                                    "App Bundle or APK and other app details to the " +
+                                    "Google Play Store.")
             url.set("https://github.com/Triple-T/gradle-play-publisher")
 
             licenses {
