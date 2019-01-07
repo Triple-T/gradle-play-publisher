@@ -25,14 +25,9 @@ internal fun buildCustomTransport(): NetHttpTransport? {
     val trustStorePassword: String? = System.getProperty("javax.net.ssl.trustStorePassword", null)
 
     return if (trustStore != null) {
-        try {
-            val ks = KeyStore.getInstance(KeyStore.getDefaultType())
-            FileInputStream(trustStore).use { fis -> ks.load(fis, trustStorePassword?.toCharArray()) }
-            NetHttpTransport.Builder().trustCertificates(ks).build()
-        } catch (e: Exception){
-            // if anything goes wrong, return null
-            null
-        }
+        val ks = KeyStore.getInstance(KeyStore.getDefaultType())
+        FileInputStream(trustStore).use { fis -> ks.load(fis, trustStorePassword?.toCharArray()) }
+        NetHttpTransport.Builder().trustCertificates(ks).build()
     } else {
         // if no truststore is defined return null
         null
