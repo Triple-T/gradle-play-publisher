@@ -516,6 +516,3 @@ Example for your system gradle.properties
 systemProp.javax.net.ssl.trustStore=/path/to/your/truststore.ks
 systemProp.javax.net.ssl.trustStorePassword=YourTruststorePassword
 ```
-
-If `customTruststore` is not enabled, `javax.net.ssl.trustStore` is not defined or there is any error
-while loading the custom truststore GPP falls back to the default behavior.
