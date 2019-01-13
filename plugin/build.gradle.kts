@@ -9,11 +9,11 @@ plugins {
 }
 
 dependencies {
-    compileOnly("com.android.tools.build:gradle:3.4.0-alpha06")
+    compileOnly("com.android.tools.build:gradle:3.4.0-alpha10")
 
-    implementation("com.google.apis:google-api-services-androidpublisher:v3-rev20181113-1.27.0")
+    implementation("com.google.apis:google-api-services-androidpublisher:v3-rev46-1.25.0")
 
-    testImplementation("com.android.tools.build:gradle:3.4.0-alpha06")
+    testImplementation("com.android.tools.build:gradle:3.4.0-alpha10")
     testImplementation(kotlin("test"))
     testImplementation("junit:junit:4.12")
     testImplementation("org.mockito:mockito-core:2.23.4")
@@ -25,13 +25,18 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_7
 }
 
-tasks.withType<KotlinJvmCompile> {
+tasks.withType<KotlinJvmCompile>().configureEach {
     kotlinOptions {
         freeCompilerArgs += "-Xjsr305=strict"
     }
 }
 
-tasks.named<Delete>("clean").configure {
+tasks.withType<ValidateTaskProperties>().configureEach {
+    enableStricterValidation = true
+    failOnWarning = true
+}
+
+tasks.named<Delete>("clean") {
     val base = "src/test/fixtures/android_app/"
     delete(base + ".gradle", base + "build", base + "userHome")
 }
