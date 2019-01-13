@@ -23,7 +23,7 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
     @get:Nested override lateinit var extension: PlayPublisherExtension
     @get:Internal internal lateinit var variant: ApplicationVariant
 
-    protected val workerExecutor = project.serviceOf<WorkerExecutor>()
+    @get:Internal protected val workerExecutor = project.serviceOf<WorkerExecutor>()
     @get:Internal
     protected val progressLogger: ProgressLogger = services[ProgressLoggerFactory::class.java]
             .newOperation(javaClass)
