@@ -52,7 +52,7 @@ class CompatibilityTest(
 
                 // Manually define transitive dependencies for our plugin since we don't have the
                 // POM to fetch them for us
-                classpath('com.google.apis:google-api-services-androidpublisher:v3-rev20181113-1.27.0')
+                classpath('com.google.apis:google-api-services-androidpublisher:v3-rev46-1.25.0')
             }
         }
 
@@ -101,9 +101,9 @@ class CompatibilityTest(
         @JvmStatic
         @Parameterized.Parameters(name = "agpVersion: {0}, gradleVersion {1}")
         fun parameters() = listOf(
-                arrayOf("3.1.4", "4.4"), // Oldest supported
+                arrayOf("3.1.0", "4.4"), // Oldest supported
                 arrayOf("3.2.0", "4.6"), // Latest stable
-                arrayOf("3.4.0-alpha06", "5.0") // Latest
+                arrayOf("3.4.0-alpha10", "5.1") // Latest
         )
     }
 }
