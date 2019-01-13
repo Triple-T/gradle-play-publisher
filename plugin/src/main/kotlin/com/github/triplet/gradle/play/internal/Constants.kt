@@ -18,18 +18,19 @@ internal const val RESOURCES_OUTPUT_PATH = "generated/gpp"
 
 internal const val MIME_TYPE_STREAM = "application/octet-stream"
 
-internal val transport: NetHttpTransport by lazy { GoogleNetHttpTransport.newTrustedTransport() }
+internal val transport: NetHttpTransport
+    get() {
+        val trustStore: String? = System.getProperty("javax.net.ssl.trustStore", null)
+        val trustStorePassword: String? =
+                System.getProperty("javax.net.ssl.trustStorePassword", null)
 
-internal fun buildCustomTransport(): NetHttpTransport? {
-    val trustStore: String? = System.getProperty("javax.net.ssl.trustStore", null)
-    val trustStorePassword: String? = System.getProperty("javax.net.ssl.trustStorePassword", null)
-
-    return if (trustStore != null) {
-        val ks = KeyStore.getInstance(KeyStore.getDefaultType())
-        FileInputStream(trustStore).use { fis -> ks.load(fis, trustStorePassword?.toCharArray()) }
-        NetHttpTransport.Builder().trustCertificates(ks).build()
-    } else {
-        // if no truststore is defined return null
-        null
+        return if (trustStore == null) {
+            GoogleNetHttpTransport.newTrustedTransport()
+        } else {
+            val ks = KeyStore.getInstance(KeyStore.getDefaultType())
+            FileInputStream(trustStore).use { fis ->
+                ks.load(fis, trustStorePassword?.toCharArray())
+            }
+            NetHttpTransport.Builder().trustCertificates(ks).build()
+        }
     }
-}

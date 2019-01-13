@@ -44,6 +44,7 @@ app details to the Google Play Store.
    1. [Using CLI options](#using-cli-options)
    1. [Encrypting Service Account keys](#encrypting-service-account-keys)
    1. [Using multiple Service Accounts](#using-multiple-service-accounts)
+   1. [Using HTTPS proxies](#using-https-proxies)
 
 ## Quickstart guide
 
@@ -500,21 +501,15 @@ play {
 
 </details>
 
-### Usage in an environment with an HTTPS-proxy
-If you need to use GPP behind an HTTPS-proxy and it fails with a `SSLHandshakeException` you can
-enable `customTruststore` and provide your own truststore via the `javax.net.ssl.trustStore` property
-(e.g. in your systems gradle.properties)
-```kt
-play {
-    // ...
-    customTruststore = true
-}
-```
+### Using HTTPS proxies
 
-Example for your system gradle.properties
-```
+If you need to use GPP behind an HTTPS-proxy, but it fails with an `SSLHandshakeException`, you can
+provide your own truststore via the `javax.net.ssl.trustStore` property in your project's
+`gradle.properties`:
+
+```properties
 systemProp.javax.net.ssl.trustStore=/path/to/your/truststore.ks
 systemProp.javax.net.ssl.trustStorePassword=YourTruststorePassword
 ```
 
-If `customTruststore` is not enabled, `javax.net.ssl.trustStore` is not defined GPP falls back to the default behavior.
+GPP will automatically pick it up and use your proxy.
