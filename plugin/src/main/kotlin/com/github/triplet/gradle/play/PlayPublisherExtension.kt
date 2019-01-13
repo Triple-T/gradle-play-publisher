@@ -3,11 +3,9 @@ package com.github.triplet.gradle.play
 import com.android.build.gradle.api.ApkVariantOutput
 import com.github.triplet.gradle.play.internal.ReleaseStatus
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
-import com.github.triplet.gradle.play.internal.TrackType
 import com.github.triplet.gradle.play.internal.releaseStatusOrDefault
 import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
 import com.github.triplet.gradle.play.internal.trackOrDefault
-import com.github.triplet.gradle.play.internal.validatedTrack
 import org.gradle.api.Action
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
@@ -74,7 +72,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
         }
 
     @get:Internal("Backing property for public input")
-    internal var _fromTrack: TrackType? = null
+    internal var _fromTrack: String? = null
     /**
      * Specify the track from which to promote a release. That is, the specified track will be
      * promoted to [track].
@@ -85,23 +83,24 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      */
     @get:Input
     var fromTrack
-        get() = (_fromTrack ?: TrackType.INTERNAL).publishedName
+        get() = _fromTrack ?: track
         set(value) {
-            _fromTrack = validatedTrack(value)
+            _fromTrack = value
         }
 
     @get:Internal("Backing property for public input")
-    internal var _track: TrackType? = null
+    internal var _track: String? = null
     /**
      * Specify the track in which to upload your app.
      *
-     * May be one of `internal`, `alpha`, `beta`, or `production`. Defaults to `internal`.
+     * May be one of `internal`, `alpha`, `beta`, `production`, or a custom track. Defaults to
+     * `internal`.
      */
     @get:Input
     var track
-        get() = trackOrDefault.publishedName
+        get() = trackOrDefault
         set(value) {
-            _track = validatedTrack(value)
+            _track = value
         }
 
     @get:Internal("Backing property for public input")

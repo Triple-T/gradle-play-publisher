@@ -56,8 +56,8 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
 
         AndroidPublisher.Builder(transport, JacksonFactory.getDefaultInstance()) {
             credential.initialize(it.apply {
-                readTimeout = 100_000
-                connectTimeout = 100_000
+                readTimeout = 300_000
+                connectTimeout = 300_000
             })
         }.setApplicationName(PLUGIN_NAME).build()
     }
@@ -87,7 +87,10 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
 
                 return read(skipIfNotFound, block)
             } else if (e.statusCode == 401) {
-                throw IllegalArgumentException("Invalid service account credentials.", e)
+                throw IllegalArgumentException(
+                            "Service account not authenticated. See the README for instructions: " +
+                                    "https://github.com/Triple-T/gradle-play-publisher/" +
+                                    "blob/master/README.md#service-account", e)
             } else {
                 throw e
             }

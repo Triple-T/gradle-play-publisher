@@ -66,15 +66,6 @@ class PlayPublisherPluginTest {
         assertEquals('production', project.extensions.findByName('play').track)
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    void testThrowsOnInvalidTrack() {
-        def project = TestHelper.evaluatableProject()
-
-        project.play {
-            track 'gamma'
-        }
-    }
-
     @Test
     void testUserFraction() {
         def project = TestHelper.evaluatableProject()
