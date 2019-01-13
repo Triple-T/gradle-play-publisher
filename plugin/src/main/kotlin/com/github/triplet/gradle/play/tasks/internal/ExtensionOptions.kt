@@ -3,7 +3,6 @@ package com.github.triplet.gradle.play.tasks.internal
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.ReleaseStatus
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
-import com.github.triplet.gradle.play.internal.TrackType
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.options.Option
@@ -23,9 +22,6 @@ internal interface ExtensionOptions {
             extension.defaultToAppBundles = value
         }
 
-    @get:OptionValues("from-track", "track")
-    val trackOptions
-        get() = TrackType.values().map { it.publishedName }
     @get:Internal
     @set:Option(
             option = "from-track",
