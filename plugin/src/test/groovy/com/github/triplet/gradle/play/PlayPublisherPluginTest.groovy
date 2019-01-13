@@ -1,10 +1,10 @@
 package com.github.triplet.gradle.play
 
+import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Test
 
 import static DependsOn.dependsOn
 import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertFalse
 import static org.junit.Assert.assertNotNull
 import static org.junit.Assert.assertThat
 
@@ -295,12 +295,8 @@ class PlayPublisherPluginTest {
 
     @Test
     void signedBuildsCanBeAssembledWithoutCredsWhenResStratNotAuto() {
-        def project = TestHelper.evaluatableProject()
-        project.evaluate()
+        def result = TestHelper.execute("", "processReleaseMetadata")
 
-        def processTask = project.tasks.processReleaseMetadata
-        processTask.execute() // Hack: we should be using the GradleRunner to run a real build
-
-        assertFalse(processTask.didWork)
+        assertEquals(TaskOutcome.SKIPPED, result.task(":processReleaseMetadata").outcome)
     }
 }

@@ -9,7 +9,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import java.io.File
-import java.net.URI
 
 @RunWith(Parameterized::class)
 class CompatibilityTest(
@@ -53,9 +52,7 @@ class CompatibilityTest(
 
                 // Manually define transitive dependencies for our plugin since we don't have the
                 // POM to fetch them for us
-                classpath('com.google.apis:google-api-services-androidpublisher:v3-rev12-1.23.0') {
-                    exclude group: 'com.google.guava', module: 'guava-jdk5'
-                }
+                classpath('com.google.apis:google-api-services-androidpublisher:v3-rev46-1.25.0')
             }
         }
 
@@ -63,16 +60,12 @@ class CompatibilityTest(
         apply plugin: 'com.github.triplet.play'
 
         android {
-            compileSdkVersion 27
-            buildToolsVersion '27.0.3'
-            lintOptions {
-                abortOnError false
-            }
+            compileSdkVersion 28
 
             defaultConfig {
                 applicationId "com.github.triplet.gradle.play.test"
                 minSdkVersion 21
-                targetSdkVersion 27
+                targetSdkVersion 28
                 versionCode 1
                 versionName "1.0"
             }
@@ -83,17 +76,15 @@ class CompatibilityTest(
         }
         """)
 
-        val gradleDist = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
-
         GradleRunner.create()
                 .withPluginClasspath()
-                .withGradleDistribution(URI(gradleDist))
+                .withGradleVersion(gradleVersion)
                 .withProjectDir(testProject.projectDir)
                 .withArguments("checkReleaseManifest")
                 .build()
         GradleRunner.create()
                 .withPluginClasspath()
-                .withGradleDistribution(URI(gradleDist))
+                .withGradleVersion(gradleVersion)
                 .withProjectDir(testProject.projectDir)
                 .withArguments("clean")
                 .build()
@@ -110,9 +101,9 @@ class CompatibilityTest(
         @JvmStatic
         @Parameterized.Parameters(name = "agpVersion: {0}, gradleVersion {1}")
         fun parameters() = listOf(
-                arrayOf("3.0.1", "4.1"), // Oldest supported
+                arrayOf("3.1.0", "4.4"), // Oldest supported
                 arrayOf("3.2.0", "4.6"), // Latest stable
-                arrayOf("3.3.0-alpha12", "4.10.1") // Latest
+                arrayOf("3.4.0-alpha10", "5.1") // Latest
         )
     }
 }
