@@ -1,6 +1,5 @@
 package com.github.triplet.gradle.play
 
-import com.github.triplet.gradle.play.internal.TrackType
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishTaskBase
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
@@ -70,10 +69,10 @@ class PlayPublishTaskTest {
     final Track alphaTrack = new Track()
     final Track betaTrack = new Track()
     final List<Track> tracksList = [
-            new Track().setTrack(TrackType.INTERNAL.publishedName),
-            new Track().setTrack(TrackType.ALPHA.publishedName),
-            new Track().setTrack(TrackType.BETA.publishedName),
-            new Track().setTrack(TrackType.PRODUCTION.publishedName)
+            new Track().setTrack("internal"),
+            new Track().setTrack("alpha"),
+            new Track().setTrack("beta"),
+            new Track().setTrack("production")
     ]
     final TracksListResponse tracksListResponse = new TracksListResponse().setTracks(tracksList)
 

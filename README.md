@@ -10,16 +10,13 @@
     <a href="https://travis-ci.org/Triple-T/gradle-play-publisher">
         <img src="https://img.shields.io/travis/Triple-T/gradle-play-publisher/master.svg?style=flat-square" />
     </a>
-    <a href="https://search.maven.org/search?q=g:com.github.triplet.gradle%20AND%20a:play-publisher&core=gav">
+    <a href="https://plugins.gradle.org/plugin/com.github.triplet.play">
         <img src="https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/com/github/triplet/play/com.github.triplet.play.gradle.plugin/maven-metadata.xml.svg?label=Gradle%20Plugins%20Portal" />
     </a>
 </p>
 
 Gradle Play Publisher is a Gradle plugin that allows you to upload your App Bundle or APK and other
 app details to the Google Play Store.
-
-> **Note:** this README targets the `v2.0.0` betas and release candidates. Documentation for the latest stable release is
-available [here](https://github.com/Triple-T/gradle-play-publisher/blob/1.2.2/README.md).
 
 ## Table of contents
 
@@ -96,7 +93,7 @@ through the `plugins {}` DSL:
 ```kt
 plugins {
     id("com.android.application")
-    id("com.github.triplet.play") version "2.0.0-rc2"
+    id("com.github.triplet.play") version "2.0.0"
 }
 ```
 
@@ -107,7 +104,7 @@ plugins {
 ```groovy
 plugins {
     id 'com.android.application'
-    id 'com.github.triplet.play' version '2.0.0-rc2'
+    id 'com.github.triplet.play' version '2.0.0'
 }
 ```
 
@@ -130,7 +127,7 @@ buildscript {
 
     dependencies {
         // ...
-        classpath("com.github.triplet.gradle:play-publisher:2.0.0-SNAPSHOT")
+        classpath("com.github.triplet.gradle:play-publisher:2.1.0-SNAPSHOT")
     }
 }
 ```
@@ -148,7 +145,7 @@ buildscript {
 
     dependencies {
         // ...
-        classpath 'com.github.triplet.gradle:play-publisher:2.0.0-SNAPSHOT'
+        classpath 'com.github.triplet.gradle:play-publisher:2.1.0-SNAPSHOT'
     }
 }
 ```
@@ -196,8 +193,8 @@ artifacts.
 
 Several options are available to customize how your artifacts are published:
 
-* `track` is the target stage for an artifact, i.e. alpha/beta/prod
-* `releaseStatus` is the type of release, i.e. draft/completed/in progress
+* `track` is the target stage for an artifact, i.e. `internal`/`alpha`/`beta`/`production`
+* `releaseStatus` is the type of release, i.e. `completed`/`draft`/`inProgress`/`halted`
 * `userFraction` is the percentage of users who will received a staged release
 
 Example configuration:
@@ -487,11 +484,11 @@ android {
 
     playConfigs {
         firstCustomer {
-            serviceAccountCredentials file('customer-one-key.json')
+            serviceAccountCredentials = file('customer-one-key.json')
         }
 
         secondCustomer {
-            serviceAccountCredentials file('customer-two-key.json')
+            serviceAccountCredentials = file('customer-two-key.json')
         }
     }
 }

@@ -25,10 +25,6 @@ internal fun validateRuntime() {
     }
 }
 
-internal fun validatedTrack(value: String) = requireNotNull(
-        TrackType.values().find { it.publishedName == value }
-) { "Track must be one of ${TrackType.values().joinToString { "'${it.publishedName}'" }}" }
-
 internal fun PlayPublisherExtension.areCredsValid(): Boolean {
     val creds = _serviceAccountCredentials ?: return false
     return if (creds.extension.equals("json", true)) {

@@ -29,9 +29,8 @@ open class PromoteRelease : PlayPublishPackageBase() {
             if (from == null) {
                 tracks.last() // Tracks are always ordered from most to least stable
             } else {
-                val name = from.publishedName
-                checkNotNull(tracks.find { it.track.equals(name, true) }) {
-                    "${name.capitalize()} track has no active artifacts"
+                checkNotNull(tracks.find { it.track.equals(from, true) }) {
+                    "${from.capitalize()} track has no active artifacts"
                 }
             }
         }
