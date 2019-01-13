@@ -10,7 +10,7 @@
     <a href="https://travis-ci.org/Triple-T/gradle-play-publisher">
         <img src="https://img.shields.io/travis/Triple-T/gradle-play-publisher/master.svg?style=flat-square" />
     </a>
-    <a href="https://search.maven.org/search?q=g:com.github.triplet.gradle%20AND%20a:play-publisher&core=gav">
+    <a href="https://plugins.gradle.org/plugin/com.github.triplet.play">
         <img src="https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/com/github/triplet/play/com.github.triplet.play.gradle.plugin/maven-metadata.xml.svg?label=Gradle%20Plugins%20Portal" />
     </a>
 </p>
@@ -194,7 +194,7 @@ artifacts.
 Several options are available to customize how your artifacts are published:
 
 * `track` is the target stage for an artifact, i.e. alpha/beta/prod
-* `releaseStatus` is the type of release, i.e. draft/completed/in progress
+* `releaseStatus` is the type of release, i.e. draft/completed/inProgress
 * `userFraction` is the percentage of users who will received a staged release
 
 Example configuration:
@@ -484,11 +484,11 @@ android {
 
     playConfigs {
         firstCustomer {
-            serviceAccountCredentials file('customer-one-key.json')
+            serviceAccountCredentials = file('customer-one-key.json')
         }
 
         secondCustomer {
-            serviceAccountCredentials file('customer-two-key.json')
+            serviceAccountCredentials = file('customer-two-key.json')
         }
     }
 }

@@ -48,8 +48,8 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
 
         AndroidPublisher.Builder(transport, JacksonFactory.getDefaultInstance()) {
             credential.initialize(it.apply {
-                readTimeout = 100_000
-                connectTimeout = 100_000
+                readTimeout = 300_000
+                connectTimeout = 300_000
             })
         }.setApplicationName(PLUGIN_NAME).build()
     }
