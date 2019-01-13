@@ -2,7 +2,7 @@ package com.github.triplet.gradle.play.internal
 
 import com.github.triplet.gradle.play.PlayPublisherExtension
 
-internal val PlayPublisherExtension.trackOrDefault get() = _track ?: TrackType.INTERNAL
+internal val PlayPublisherExtension.trackOrDefault get() = _track ?: "internal"
 internal val PlayPublisherExtension.releaseStatusOrDefault
     get() = _releaseStatus ?: ReleaseStatus.COMPLETED
 internal val PlayPublisherExtension.resolutionStrategyOrDefault
