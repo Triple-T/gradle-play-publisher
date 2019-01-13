@@ -5,7 +5,6 @@ import com.google.api.client.http.javanet.NetHttpTransport
 import java.io.FileInputStream
 import java.security.KeyStore
 
-
 internal const val PLUGIN_NAME = "gradle-play-publisher"
 internal const val PLUGIN_GROUP = "Publishing"
 
