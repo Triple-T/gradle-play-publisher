@@ -27,7 +27,7 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
     @get:Internal internal lateinit var variant: ApplicationVariant
 
     private val savedEditId = File(project.rootProject.buildDir, EDIT_ID_FILE)
-    protected val hasSavedEdit get() = savedEditId.exists()
+    @get:Internal protected val hasSavedEdit get() = savedEditId.exists()
 
     @get:Internal
     protected val progressLogger: ProgressLogger = services[ProgressLoggerFactory::class.java]
