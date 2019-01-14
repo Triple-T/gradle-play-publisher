@@ -1,10 +1,5 @@
 package com.github.triplet.gradle.play.internal
 
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
-import com.google.api.client.http.javanet.NetHttpTransport
-import java.io.FileInputStream
-import java.security.KeyStore
-
 internal const val PLUGIN_NAME = "gradle-play-publisher"
 internal const val PLUGIN_GROUP = "Publishing"
 
@@ -16,20 +11,3 @@ internal const val PRODUCTS_PATH = "products"
 internal const val RESOURCES_OUTPUT_PATH = "generated/gpp"
 
 internal const val MIME_TYPE_STREAM = "application/octet-stream"
-
-internal val transport: NetHttpTransport
-    get() {
-        val trustStore: String? = System.getProperty("javax.net.ssl.trustStore", null)
-        val trustStorePassword: String? =
-                System.getProperty("javax.net.ssl.trustStorePassword", null)
-
-        return if (trustStore == null) {
-            GoogleNetHttpTransport.newTrustedTransport()
-        } else {
-            val ks = KeyStore.getInstance(KeyStore.getDefaultType())
-            FileInputStream(trustStore).use { fis ->
-                ks.load(fis, trustStorePassword?.toCharArray())
-            }
-            NetHttpTransport.Builder().trustCertificates(ks).build()
-        }
-    }
