@@ -58,6 +58,7 @@ open class GenerateResources : DefaultTask() {
         val changedDefaults = mutableListOf<File>()
 
         inputs.outOfDate {
+            if (isHidden(file)) return@outOfDate
             file.validate()
 
             defaultLocale?.let {
@@ -89,7 +90,7 @@ open class GenerateResources : DefaultTask() {
         fun File.validateLocales() {
             checkNotNull(listFiles()) {
                 "$this must be a folder"
-            }.forEach {
+            }.filterNot(::isHidden).forEach {
                 check(it.isDirectory && LocaleFileFilter.accept(it)) {
                     "Invalid locale: ${it.name}"
                 }
@@ -119,7 +120,7 @@ open class GenerateResources : DefaultTask() {
             }
             checkNotNull(products.listFiles()) {
                 "$products must be a folder"
-            }.forEach {
+            }.filterNot(::isHidden).forEach {
                 check(JsonFileFilter.accept(it)) { "In-app product files must be JSON." }
             }
         }
@@ -135,6 +136,8 @@ open class GenerateResources : DefaultTask() {
         validateReleaseNotes()
         validateProducts()
     }
+
+    private fun isHidden(file: File) = file.name.startsWith(".")
 
     private fun File.findDest() = File(resDir, toRelativeString(findOwner()))
 

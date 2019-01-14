@@ -43,7 +43,10 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
                                     "Play Store console.", e)
                 }
             } else if (e.statusCode == 401) {
-                throw IllegalArgumentException("Invalid service account credentials.", e)
+                throw IllegalArgumentException(
+                            "Service account not authenticated. See the README for instructions: " +
+                                    "https://github.com/Triple-T/gradle-play-publisher/" +
+                                    "blob/master/README.md#service-account", e)
             } else {
                 throw e
             }

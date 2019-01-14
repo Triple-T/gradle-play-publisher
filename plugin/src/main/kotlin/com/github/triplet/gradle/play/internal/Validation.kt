@@ -5,8 +5,8 @@ import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import org.gradle.util.GradleVersion
 
-private val MIN_GRADLE_VERSION: GradleVersion = GradleVersion.version("4.1")
-private const val MIN_AGP_VERSION: String = "3.0.1"
+private val MIN_GRADLE_VERSION: GradleVersion = GradleVersion.version("4.4")
+private const val MIN_AGP_VERSION: String = "3.1.0"
 
 internal fun validateRuntime() {
     val gradleVersion = GradleVersion.current()
@@ -24,10 +24,6 @@ internal fun validateRuntime() {
                 "instructions at https://developer.android.com/studio/releases/gradle-plugin."
     }
 }
-
-internal fun validatedTrack(value: String) = requireNotNull(
-        TrackType.values().find { it.publishedName == value }
-) { "Track must be one of ${TrackType.values().joinToString { "'${it.publishedName}'" }}" }
 
 internal fun PlayPublisherExtension.requireCreds() = checkNotNull(serviceAccountCredentials) {
     "No credentials provided"
