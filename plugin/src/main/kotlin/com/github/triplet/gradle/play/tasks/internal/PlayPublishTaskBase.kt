@@ -2,15 +2,9 @@ package com.github.triplet.gradle.play.tasks.internal
 
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.PlayPublisherExtension
-import com.github.triplet.gradle.play.internal.PLUGIN_NAME
 import com.github.triplet.gradle.play.internal.has
-import com.github.triplet.gradle.play.internal.requireCreds
-import com.github.triplet.gradle.play.internal.transport
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
-import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.AndroidPublisher
-import com.google.api.services.androidpublisher.AndroidPublisherScopes
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
@@ -26,33 +20,7 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
             .newOperation(javaClass)
 
     @get:Internal
-    protected val publisher: AndroidPublisher by lazy {
-        val credential = extension.run {
-            val creds = requireCreds()
-            val serviceAccountEmail = serviceAccountEmail
-            val factory = JacksonFactory.getDefaultInstance()
-
-            if (serviceAccountEmail == null) {
-                GoogleCredential.fromStream(creds.inputStream(), transport, factory)
-                        .createScoped(listOf(AndroidPublisherScopes.ANDROIDPUBLISHER))
-            } else {
-                GoogleCredential.Builder()
-                        .setTransport(transport)
-                        .setJsonFactory(factory)
-                        .setServiceAccountId(serviceAccountEmail)
-                        .setServiceAccountPrivateKeyFromP12File(creds)
-                        .setServiceAccountScopes(listOf(AndroidPublisherScopes.ANDROIDPUBLISHER))
-                        .build()
-            }
-        }
-
-        AndroidPublisher.Builder(transport, JacksonFactory.getDefaultInstance()) {
-            credential.initialize(it.apply {
-                readTimeout = 300_000
-                connectTimeout = 300_000
-            })
-        }.setApplicationName(PLUGIN_NAME).build()
-    }
+    protected val publisher by lazy { extension.buildPublisher() }
 
     protected fun read(
             skipIfNotFound: Boolean = false,
