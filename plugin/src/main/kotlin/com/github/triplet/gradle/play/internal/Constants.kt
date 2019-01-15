@@ -4,6 +4,7 @@ internal const val PLUGIN_NAME = "gradle-play-publisher"
 internal const val PLUGIN_GROUP = "Publishing"
 
 internal const val PLAY_PATH = "play"
+internal const val PLAY_CONFIGS_PATH = "playConfigs"
 internal const val LISTINGS_PATH = "listings"
 internal const val GRAPHICS_PATH = "graphics"
 internal const val RELEASE_NOTES_PATH = "release-notes"

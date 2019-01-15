@@ -25,8 +25,13 @@ internal fun validateRuntime() {
     }
 }
 
-internal fun PlayPublisherExtension.requireCreds() = checkNotNull(serviceAccountCredentials) {
-    "No credentials provided"
+internal fun PlayPublisherExtension.areCredsValid(): Boolean {
+    val creds = _serviceAccountCredentials ?: return false
+    return if (creds.extension.equals("json", true)) {
+        serviceAccountEmail == null
+    } else {
+        serviceAccountEmail != null
+    }
 }
 
 internal infix fun GoogleJsonResponseException.has(error: String) =
