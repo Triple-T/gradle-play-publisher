@@ -2,7 +2,6 @@ package com.github.triplet.gradle.play.tasks.internal
 
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.PLUGIN_NAME
-import com.github.triplet.gradle.play.internal.requireCreds
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.http.javanet.NetHttpTransport
@@ -14,8 +13,8 @@ import java.security.KeyStore
 
 internal fun PlayPublisherExtension.buildPublisher(): AndroidPublisher {
     val transport = buildTransport()
-    val creds = requireCreds()
-    val serviceAccountEmail = serviceAccountEmail
+    val creds = _serviceAccountCredentials!!
+    val serviceAccountEmail = _serviceAccountEmail
     val factory = JacksonFactory.getDefaultInstance()
 
     val credential = if (serviceAccountEmail == null) {

@@ -2,10 +2,10 @@ package com.github.triplet.gradle.play.tasks.internal
 
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.PlayPublisherExtension
+import com.github.triplet.gradle.play.internal.areCredsValid
 import com.github.triplet.gradle.play.internal.has
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.services.androidpublisher.AndroidPublisher
-import com.google.api.services.androidpublisher.AndroidPublisherScopes
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
@@ -49,9 +49,9 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
                 }
             } else if (e.statusCode == 401) {
                 throw IllegalArgumentException(
-                            "Service account not authenticated. See the README for instructions: " +
-                                    "https://github.com/Triple-T/gradle-play-publisher/" +
-                                    "blob/master/README.md#service-account", e)
+                        "Service account not authenticated. See the README for instructions: " +
+                                "https://github.com/Triple-T/gradle-play-publisher/" +
+                                "blob/master/README.md#service-account", e)
             } else {
                 throw e
             }
