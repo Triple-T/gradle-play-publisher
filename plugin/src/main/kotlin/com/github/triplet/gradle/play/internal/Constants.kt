@@ -1,8 +1,5 @@
 package com.github.triplet.gradle.play.internal
 
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
-import com.google.api.client.http.javanet.NetHttpTransport
-
 internal const val PLUGIN_NAME = "gradle-play-publisher"
 internal const val PLUGIN_GROUP = "Publishing"
 
@@ -16,5 +13,3 @@ internal const val RESOURCES_OUTPUT_PATH = "generated/$OUTPUT_PATH"
 internal const val EDIT_ID_FILE = "$OUTPUT_PATH/edit-id.txt"
 
 internal const val MIME_TYPE_STREAM = "application/octet-stream"
-
-internal val transport: NetHttpTransport by lazy { GoogleNetHttpTransport.newTrustedTransport() }

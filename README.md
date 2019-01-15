@@ -45,6 +45,7 @@ app details to the Google Play Store.
    1. [Encrypting Service Account keys](#encrypting-service-account-keys)
    1. [Using multiple Service Accounts](#using-multiple-service-accounts)
    1. [Combining releases](#combining-releases)
+   1. [Using HTTPS proxies](#using-https-proxies)
 
 ## Quickstart guide
 
@@ -574,3 +575,16 @@ invocations. The only hard requirement is for a task with `commit = true` to be 
 that not already be the case, Gradle's
 [`mustRunAfter`](https://docs.gradle.org/current/dsl/org.gradle.api.Task.html#org.gradle.api.Task:mustRunAfter(java.lang.Object[]))
 DSL will come in handy.
+
+### Using HTTPS proxies
+
+If you need to use GPP behind an HTTPS-proxy, but it fails with an `SSLHandshakeException`, you can
+provide your own truststore via the `javax.net.ssl.trustStore` property in your project's
+`gradle.properties`:
+
+```properties
+systemProp.javax.net.ssl.trustStore=/path/to/your/truststore.ks
+systemProp.javax.net.ssl.trustStorePassword=YourTruststorePassword
+```
+
+GPP will automatically pick it up and use your proxy.
