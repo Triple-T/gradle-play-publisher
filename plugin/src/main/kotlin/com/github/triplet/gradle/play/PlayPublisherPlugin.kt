@@ -87,7 +87,7 @@ class PlayPublisherPlugin : Plugin<Project> {
             }.singleOrNull().mergeWith(baseExtension)
             val variantName = name.capitalize()
 
-            if (!isSigningReady) {
+            if (!isSigningReady && !outputsAreSigned) {
                 project.logger.error(
                         "Signing not ready. Be sure to specify a signingConfig for $variantName")
             }
