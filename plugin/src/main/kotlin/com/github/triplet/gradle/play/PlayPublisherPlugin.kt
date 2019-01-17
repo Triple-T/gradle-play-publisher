@@ -3,12 +3,13 @@ package com.github.triplet.gradle.play
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.internal.api.InstallableVariantImpl
+import com.github.triplet.gradle.play.internal.PLAY_CONFIGS_PATH
 import com.github.triplet.gradle.play.internal.PLAY_PATH
+import com.github.triplet.gradle.play.internal.areCredsValid
 import com.github.triplet.gradle.play.internal.configure
 import com.github.triplet.gradle.play.internal.dependsOnCompat
 import com.github.triplet.gradle.play.internal.mergeWith
 import com.github.triplet.gradle.play.internal.newTask
-import com.github.triplet.gradle.play.internal.requireCreds
 import com.github.triplet.gradle.play.internal.validateRuntime
 import com.github.triplet.gradle.play.tasks.Bootstrap
 import com.github.triplet.gradle.play.tasks.GenerateResources
@@ -73,7 +74,7 @@ class PlayPublisherPlugin : Plugin<Project> {
         ) { extension = baseExtension }
 
         val android = project.the<AppExtension>()
-        (android as ExtensionAware).extensions.add("playConfigs", extensionContainer)
+        (android as ExtensionAware).extensions.add(PLAY_CONFIGS_PATH, extensionContainer)
         BootstrapOptionsHolder.reset()
         android.applicationVariants.whenObjectAdded {
             if (buildType.isDebuggable) {
@@ -88,20 +89,9 @@ class PlayPublisherPlugin : Plugin<Project> {
             }.mergeWith(baseExtension)
             val variantName = name.capitalize()
 
-            if (!isSigningReady) {
+            if (!isSigningReady && !outputsAreSigned) {
                 project.logger.error(
                         "Signing not ready. Be sure to specify a signingConfig for $variantName")
-            }
-            extension.run {
-                if (requireCreds().extension.equals("json", true)) {
-                    check(serviceAccountEmail == null) {
-                        "Json credentials cannot specify a Service Account email"
-                    }
-                } else {
-                    check(serviceAccountEmail != null) {
-                        "PKCS12 credentials must also specify a Service Account email"
-                    }
-                }
             }
 
             fun PlayPublishTaskBase.init() {
@@ -228,6 +218,14 @@ class PlayPublisherPlugin : Plugin<Project> {
                 dependsOnCompat(publishProductsTask)
             }
             publishAllTask.configure { dependsOnCompat(publishTask) }
+        }
+
+        project.afterEvaluate {
+            check(baseExtension.areCredsValid() || extensionContainer.any { it.areCredsValid() }) {
+                "Check your service account configuration. " +
+                        "Json credentials cannot specify a Service Account email while " +
+                        "PKCS12 credentials must do so."
+            }
         }
     }
 }

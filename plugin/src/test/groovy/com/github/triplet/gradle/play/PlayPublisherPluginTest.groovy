@@ -1,5 +1,6 @@
 package com.github.triplet.gradle.play
 
+import org.gradle.api.ProjectConfigurationException
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Test
 
@@ -268,7 +269,6 @@ class PlayPublisherPluginTest {
                     dimension = "variant"
                 }
             }
-
         }
         project.evaluate()
 
@@ -291,6 +291,41 @@ class PlayPublisherPluginTest {
         assertThat(project.tasks.publish, dependsOn('publishProductionPaidRelease'))
         assertThat(project.tasks.publishApk, dependsOn('publishProductionPaidReleaseApk'))
         assertThat(project.tasks.publishListing, dependsOn('publishProductionPaidReleaseListing'))
+    }
+
+    @Test(expected = ProjectConfigurationException.class)
+    void projectEvaluationFailsWithNoCreds() {
+        def project = TestHelper.evaluatableProject()
+
+        project.play {
+            serviceAccountCredentials = null
+        }
+
+        project.evaluate()
+    }
+
+    @Test
+    void projectEvaluationSucceedsWithVariantSpecificCreds() {
+        def project = TestHelper.evaluatableProject()
+
+        project.play {
+            serviceAccountCredentials = null
+        }
+        project.android {
+            flavorDimensions('d')
+            productFlavors {
+                f1 {}
+                f2 {}
+            }
+
+            playConfigs {
+                f1 {
+                    serviceAccountCredentials = project.file('fake.json')
+                }
+            }
+        }
+
+        project.evaluate()
     }
 
     @Test
