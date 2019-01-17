@@ -95,7 +95,7 @@ through the `plugins {}` DSL:
 ```kt
 plugins {
     id("com.android.application")
-    id("com.github.triplet.play") version "2.0.0"
+    id("com.github.triplet.play") version "2.1.0"
 }
 ```
 
@@ -106,7 +106,7 @@ plugins {
 ```groovy
 plugins {
     id 'com.android.application'
-    id 'com.github.triplet.play' version '2.0.0'
+    id 'com.github.triplet.play' version '2.1.0'
 }
 ```
 
@@ -129,7 +129,7 @@ buildscript {
 
     dependencies {
         // ...
-        classpath("com.github.triplet.gradle:play-publisher:2.1.0-SNAPSHOT")
+        classpath("com.github.triplet.gradle:play-publisher:2.2.0-SNAPSHOT")
     }
 }
 ```
@@ -147,7 +147,7 @@ buildscript {
 
     dependencies {
         // ...
-        classpath 'com.github.triplet.gradle:play-publisher:2.1.0-SNAPSHOT'
+        classpath 'com.github.triplet.gradle:play-publisher:2.2.0-SNAPSHOT'
     }
 }
 ```
@@ -195,7 +195,8 @@ artifacts.
 
 Several options are available to customize how your artifacts are published:
 
-* `track` is the target stage for an artifact, i.e. `internal`/`alpha`/`beta`/`production`
+* `track` is the target stage for an artifact, i.e. `internal`/`alpha`/`beta`/`production` or any
+  custom track
 * `releaseStatus` is the type of release, i.e. `completed`/`draft`/`inProgress`/`halted`
 * `userFraction` is the percentage of users who will received a staged release
 
@@ -212,8 +213,8 @@ play {
 
 #### Uploading release notes
 
-While GPP can automatically build and find your artifact, you'll need to tell the plugin about your
-release notes.
+While GPP can automatically build and find your artifact, you'll need to tell the plugin where to
+find your release notes.
 
 Add a file under `src/[sourceSet]/play/release-notes/[language]/[track].txt` where `sourceSet`
 is a [full variant name](https://developer.android.com/studio/build/build-variants#sourceset-build),
