@@ -16,11 +16,14 @@ import com.github.triplet.gradle.play.tasks.internal.BootstrapOptionsHolder
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishTaskBase
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.AndroidPublisher
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
+import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.workers.WorkerExecutor
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.Serializable
@@ -34,6 +37,8 @@ open class Bootstrap : PlayPublishTaskBase(), BootstrapOptions by BootstrapOptio
     protected val srcDir: File by lazy {
         project.file("src/${variant.flavorNameOrDefault}/$PLAY_PATH")
     }
+
+    @get:Internal protected val workerExecutor = project.serviceOf<WorkerExecutor>()
 
     init {
         // Always out-of-date since we don't know what's changed on the network

@@ -10,14 +10,11 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
 import org.gradle.internal.logging.progress.ProgressLogger
 import org.gradle.internal.logging.progress.ProgressLoggerFactory
-import org.gradle.kotlin.dsl.support.serviceOf
-import org.gradle.workers.WorkerExecutor
 
 abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
     @get:Nested override lateinit var extension: PlayPublisherExtension
     @get:Internal internal lateinit var variant: ApplicationVariant
 
-    @get:Internal protected val workerExecutor = project.serviceOf<WorkerExecutor>()
     @get:Internal
     protected val progressLogger: ProgressLogger = services[ProgressLoggerFactory::class.java]
             .newOperation(javaClass)
