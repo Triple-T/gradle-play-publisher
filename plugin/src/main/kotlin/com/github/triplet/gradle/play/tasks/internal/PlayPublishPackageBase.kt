@@ -38,7 +38,21 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
     protected fun AndroidPublisher.Edits.updateTracks(editId: String, versions: List<Long>) {
         progressLogger.progress("Updating tracks")
 
-        val track = if (extension.releaseStatusOrDefault == ReleaseStatus.IN_PROGRESS) {
+        val track = if (hasSavedEdit) {
+            tracks().get(variant.applicationId, editId, extension.track).execute().apply {
+                releases = if (releases.isNullOrEmpty()) {
+                    listOf(TrackRelease().applyChanges(versions))
+                } else {
+                    releases.map {
+                        if (it.status == extension.releaseStatusOrDefault.publishedName) {
+                            it.applyChanges(it.versionCodes.orEmpty() + versions)
+                        } else {
+                            it
+                        }
+                    }
+                }
+            }
+        } else if (extension.releaseStatusOrDefault == ReleaseStatus.IN_PROGRESS) {
             tracks().get(variant.applicationId, editId, extension.track).execute().apply {
                 val keep = releases.orEmpty().filter {
                     it.status == ReleaseStatus.COMPLETED.publishedName ||

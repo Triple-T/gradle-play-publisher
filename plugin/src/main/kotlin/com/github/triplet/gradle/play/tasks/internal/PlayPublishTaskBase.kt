@@ -2,8 +2,12 @@ package com.github.triplet.gradle.play.tasks.internal
 
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.PlayPublisherExtension
+import com.github.triplet.gradle.play.internal.EDIT_ID_FILE
 import com.github.triplet.gradle.play.internal.areCredsValid
 import com.github.triplet.gradle.play.internal.has
+import com.github.triplet.gradle.play.internal.nullOrFull
+import com.github.triplet.gradle.play.internal.orNull
+import com.github.triplet.gradle.play.internal.safeCreateNewFile
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.services.androidpublisher.AndroidPublisher
 import org.gradle.api.DefaultTask
@@ -11,10 +15,14 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
 import org.gradle.internal.logging.progress.ProgressLogger
 import org.gradle.internal.logging.progress.ProgressLoggerFactory
+import java.io.File
 
 abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
     @get:Nested override lateinit var extension: PlayPublisherExtension
     @get:Internal internal lateinit var variant: ApplicationVariant
+
+    private val savedEditId = File(project.rootProject.buildDir, EDIT_ID_FILE)
+    @get:Internal protected val hasSavedEdit get() = savedEditId.exists()
 
     @get:Internal
     protected val progressLogger: ProgressLogger = services[ProgressLoggerFactory::class.java]
@@ -32,10 +40,9 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
             block: AndroidPublisher.Edits.(editId: String) -> Unit
     ) {
         val edits = publisher.edits()
-        val request = edits.insert(variant.applicationId, null)
-
         val id = try {
-            request.execute().id
+            savedEditId.orNull()?.readText().nullOrFull()
+                    ?: edits.insert(variant.applicationId, null).execute().id
         } catch (e: GoogleJsonResponseException) {
             if (e has "applicationNotFound") {
                 if (skipIfNotFound) {
@@ -47,6 +54,11 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
                                     "The first version of your app must be uploaded via the " +
                                     "Play Store console.", e)
                 }
+            } else if (e has "editAlreadyCommitted") {
+                logger.info("Failed to retrieve saved edit.")
+                project.delete(savedEditId)
+
+                return read(skipIfNotFound, block)
             } else if (e.statusCode == 401) {
                 throw IllegalArgumentException(
                         "Service account not authenticated. See the README for instructions: " +
@@ -62,6 +74,15 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
 
     protected fun write(block: AndroidPublisher.Edits.(editId: String) -> Unit) = read {
         block(it)
-        commit(variant.applicationId, it).execute()
+
+        if (extension.commit) {
+            try {
+                commit(variant.applicationId, it).execute()
+            } finally {
+                project.delete(savedEditId)
+            }
+        } else {
+            savedEditId.safeCreateNewFile().writeText(it)
+        }
     }
 }

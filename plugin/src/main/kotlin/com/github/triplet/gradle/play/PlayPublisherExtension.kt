@@ -60,6 +60,18 @@ open class PlayPublisherExtension @JvmOverloads constructor(
         }
 
     @get:Internal("Backing property for public input")
+    internal var _commit: Boolean? = null
+    /**
+     * Choose whether or not to apply the changes from this build. Defaults to true.
+     */
+    @get:Input
+    var commit
+        get() = _commit ?: true
+        set(value) {
+            _commit = value
+        }
+
+    @get:Internal("Backing property for public input")
     internal var _fromTrack: String? = null
     /**
      * Specify the track from which to promote a release. That is, the specified track will be

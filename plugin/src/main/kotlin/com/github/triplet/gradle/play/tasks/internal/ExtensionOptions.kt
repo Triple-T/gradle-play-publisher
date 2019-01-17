@@ -24,6 +24,17 @@ internal interface ExtensionOptions {
 
     @get:Internal
     @set:Option(
+            option = "skip-commit",
+            description = "Don't commit changes from this build."
+    )
+    var skipCommitOption: Boolean
+        get() = throw UnsupportedOperationException()
+        set(value) {
+            extension.commit = !value
+        }
+
+    @get:Internal
+    @set:Option(
             option = "from-track",
             description = "Set the track from which to promote a release."
     )

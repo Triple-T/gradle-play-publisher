@@ -44,6 +44,7 @@ app details to the Google Play Store.
    1. [Using CLI options](#using-cli-options)
    1. [Encrypting Service Account keys](#encrypting-service-account-keys)
    1. [Using multiple Service Accounts](#using-multiple-service-accounts)
+   1. [Combining releases](#combining-releases)
    1. [Using HTTPS proxies](#using-https-proxies)
 
 ## Quickstart guide
@@ -500,6 +501,80 @@ play {
 ```
 
 </details>
+
+### Combining releases
+
+If you want to publish multiple product flavors together or upload a wear APK with your app, you'll
+need to combine multiple changes together before committing the release. This is achieved through
+the commit property:
+
+<details open><summary>Kotlin</summary>
+
+```kt
+android {
+    // ...
+
+    flavorDimensions("api")
+    productFlavors {
+        register("oreo") {
+            // ...
+        }
+
+        register("pie") {
+            // ...
+        }
+    }
+
+    playConfigs {
+        register("pie") {
+            commit = true
+        }
+    }
+}
+
+play {
+    commit = false
+}
+```
+
+</details>
+
+<details><summary>Groovy</summary>
+
+```groovy
+android {
+    // ...
+
+    flavorDimensions 'api'
+    productFlavors {
+        oreo {
+            // ...
+        }
+
+        pie {
+            // ...
+        }
+    }
+
+    playConfigs {
+        pie {
+            commit = true
+        }
+    }
+}
+
+play {
+    commit = false
+}
+```
+
+</details>
+
+The `commit` option can be used for any legal combined updates across any number of build
+invocations. The only hard requirement is for a task with `commit = true` to be run _last_. Should
+that not already be the case, Gradle's
+[`mustRunAfter`](https://docs.gradle.org/current/dsl/org.gradle.api.Task.html#org.gradle.api.Task:mustRunAfter(java.lang.Object[]))
+DSL will come in handy.
 
 ### Using HTTPS proxies
 
