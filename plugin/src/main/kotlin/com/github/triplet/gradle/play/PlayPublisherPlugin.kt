@@ -77,8 +77,16 @@ class PlayPublisherPlugin : Plugin<Project> {
         (android as ExtensionAware).extensions.add(PLAY_CONFIGS_PATH, extensionContainer)
         BootstrapOptionsHolder.reset()
         android.applicationVariants.whenObjectAdded {
+            val variantName = name.capitalize()
+
             if (buildType.isDebuggable) {
-                project.logger.info("Skipping debuggable build type ${buildType.name}.")
+                val typeName = buildType.name
+                if (typeName.equals("release", true)) {
+                    project.logger.error(
+                            "GPP cannot configure $variantName because it is debuggable")
+                } else {
+                    project.logger.info("Skipping debuggable build with type '$typeName'")
+                }
                 return@whenObjectAdded
             }
 
@@ -87,7 +95,6 @@ class PlayPublisherPlugin : Plugin<Project> {
             }.singleOrNull().let {
                 it ?: extensionContainer.findByName(buildType.name)
             }.mergeWith(baseExtension)
-            val variantName = name.capitalize()
 
             if (!isSigningReady && !outputsAreSigned) {
                 project.logger.error(
