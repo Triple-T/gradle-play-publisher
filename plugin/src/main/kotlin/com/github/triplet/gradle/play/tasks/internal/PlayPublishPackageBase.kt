@@ -75,7 +75,6 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
     protected fun TrackRelease.applyChanges(
             versionCodes: List<Long>? = null,
             updateStatus: Boolean = true,
-            useDefaultReleaseNotes: Boolean = true,
             updateFraction: Boolean = true
     ): TrackRelease {
         versionCodes?.let { this.versionCodes = it }
@@ -83,11 +82,7 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
 
         val releaseNotes = releaseNotesDir?.listFiles().orEmpty().mapNotNull { locale ->
             val file = File(locale, "${extension.track}.txt").orNull() ?: run {
-                if (useDefaultReleaseNotes) {
-                    File(locale, RELEASE_NOTES_DEFAULT_NAME).orNull()
-                } else {
-                    null
-                } ?: return@mapNotNull null
+                File(locale, RELEASE_NOTES_DEFAULT_NAME).orNull() ?: return@mapNotNull null
             }
 
             LocalizedText().apply {
