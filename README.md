@@ -198,7 +198,7 @@ Several options are available to customize how your artifacts are published:
 * `track` is the target stage for an artifact, i.e. `internal`/`alpha`/`beta`/`production` or any
   custom track
 * `releaseStatus` is the type of release, i.e. `completed`/`draft`/`inProgress`/`halted`
-* `userFraction` is the percentage of users who will received a staged release
+* `userFraction` is the percentage of users who will receive a staged release
 
 Example configuration:
 
