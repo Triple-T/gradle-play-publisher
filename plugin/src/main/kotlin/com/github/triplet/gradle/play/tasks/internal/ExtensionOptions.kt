@@ -66,6 +66,17 @@ internal interface ExtensionOptions {
             extension.userFraction = value.toDouble()
         }
 
+    @get:Internal
+    @set:Option(
+            option = "bundlePath",
+            description = "Set the expected bundle path to be uploaded."
+    )
+    var bundlePath: String
+        get() = throw UnsupportedOperationException()
+        set(value) {
+            extension.bundlePath = value
+        }
+
     @get:OptionValues("resolution-strategy")
     val resolutionStrategyOptions
         get() = ResolutionStrategy.values().map { it.publishedName }

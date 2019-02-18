@@ -45,6 +45,17 @@ open class PlayPublisherExtension @JvmOverloads constructor(
         }
 
     @get:Internal("Backing property for public input")
+    internal var _bundlePath: String? = null
+    /** bundle path.  Only needed iff the gradle version adds extra suffix to end of app bundle or apk. */
+    @get:Optional
+    @get:Input
+    var bundlePath
+        get() = _bundlePath
+        set(value) {
+            _bundlePath = value
+        }
+
+    @get:Internal("Backing property for public input")
     internal var _defaultToAppBundles: Boolean? = null
     /**
      * Choose the default packaging method. Either App Bundles or APKs. Affects tasks like

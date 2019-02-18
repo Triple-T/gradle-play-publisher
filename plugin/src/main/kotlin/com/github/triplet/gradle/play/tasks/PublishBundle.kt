@@ -1,6 +1,7 @@
 package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.play.internal.MIME_TYPE_STREAM
+import com.github.triplet.gradle.play.internal.nullOrFull
 import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.internal.trackUploadProgress
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishPackageBase
@@ -26,8 +27,10 @@ open class PublishBundle : PlayPublishPackageBase() {
         val file = File(project.buildDir, "outputs/bundle/${variant.name}/${archivesBaseName}.aab")
         if(file.exists()) {
                 file
-        } else {
+        } else if(extension._bundlePath.isNullOrEmpty()){
                 File(project.buildDir, "outputs/bundle/${variant.name}/${archivesBaseName}-${variant.name}.aab")
+        } else {
+            File(extension._bundlePath)
         }
     }
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
