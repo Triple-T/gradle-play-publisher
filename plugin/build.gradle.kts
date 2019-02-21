@@ -72,8 +72,8 @@ publishing {
             url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
 
             credentials {
-                username = project.findProperty("SONATYPE_NEXUS_USERNAME")?.toString()
-                password = project.findProperty("SONATYPE_NEXUS_PASSWORD")?.toString()
+                username = System.getenv("SONATYPE_NEXUS_USERNAME")
+                password = System.getenv("SONATYPE_NEXUS_PASSWORD")
             }
         }
     }
