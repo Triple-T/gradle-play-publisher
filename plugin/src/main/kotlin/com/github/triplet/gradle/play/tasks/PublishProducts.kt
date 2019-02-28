@@ -3,6 +3,7 @@ package com.github.triplet.gradle.play.tasks
 import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.isDirectChildOf
 import com.github.triplet.gradle.play.internal.playPath
+import com.github.triplet.gradle.play.internal.retryableExecute
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishTaskBase
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.model.InAppProduct
@@ -51,7 +52,7 @@ open class PublishProducts : PlayPublishTaskBase() {
                         .parse(InAppProduct::class.java)
             }.forEach {
                 progressLogger.progress("Uploading ${it.sku}")
-                update(variant.applicationId, it.sku, it).execute()
+                update(variant.applicationId, it.sku, it).retryableExecute()
             }
 
             outputFile.writeText(hashCode().toString())

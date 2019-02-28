@@ -1,5 +1,6 @@
 package com.github.triplet.gradle.play.tasks
 
+import com.github.triplet.gradle.play.internal.retryableExecute
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishPackageBase
 import org.gradle.api.tasks.TaskAction
 
@@ -13,7 +14,7 @@ open class PromoteRelease : PlayPublishPackageBase() {
     fun promote() = write { editId: String ->
         progressLogger.start("Promotes artifacts for variant ${variant.name}", null)
 
-        val tracks = tracks().list(variant.applicationId, editId).execute()
+        val tracks = tracks().list(variant.applicationId, editId).retryableExecute()
                 .tracks.orEmpty()
                 .filter {
                     it.releases.orEmpty().flatMap { it.versionCodes.orEmpty() }.isNotEmpty()
@@ -52,7 +53,7 @@ open class PromoteRelease : PlayPublishPackageBase() {
             it.status
         }
 
-        tracks().update(variant.applicationId, editId, extension.track, track).execute()
+        tracks().update(variant.applicationId, editId, extension.track, track).retryableExecute()
 
         progressLogger.completed()
     }

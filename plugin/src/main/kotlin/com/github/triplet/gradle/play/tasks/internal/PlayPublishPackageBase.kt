@@ -11,6 +11,7 @@ import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.internal.readProcessed
 import com.github.triplet.gradle.play.internal.releaseStatusOrDefault
 import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
+import com.github.triplet.gradle.play.internal.retryableExecute
 import com.github.triplet.gradle.play.internal.trackUploadProgress
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
@@ -39,7 +40,7 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
         progressLogger.progress("Updating tracks")
 
         val track = if (hasSavedEdit) {
-            tracks().get(variant.applicationId, editId, extension.track).execute().apply {
+            tracks().get(variant.applicationId, editId, extension.track).retryableExecute().apply {
                 releases = if (releases.isNullOrEmpty()) {
                     listOf(TrackRelease().applyChanges(versions))
                 } else {
@@ -53,7 +54,7 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
                 }
             }
         } else if (extension.releaseStatusOrDefault == ReleaseStatus.IN_PROGRESS) {
-            tracks().get(variant.applicationId, editId, extension.track).execute().apply {
+            tracks().get(variant.applicationId, editId, extension.track).retryableExecute().apply {
                 val keep = releases.orEmpty().filter {
                     it.status == ReleaseStatus.COMPLETED.publishedName ||
                             it.status == ReleaseStatus.DRAFT.publishedName
@@ -69,7 +70,7 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
 
         tracks()
                 .update(variant.applicationId, editId, extension.track, track)
-                .execute()
+                .retryableExecute()
     }
 
     protected fun TrackRelease.applyChanges(
@@ -150,7 +151,7 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
             deobfuscationfiles()
                     .upload(variant.applicationId, editId, versionCode, "proguard", mapping)
                     .trackUploadProgress(progressLogger, "mapping file")
-                    .execute()
+                    .retryableExecute()
         }
     }
 }

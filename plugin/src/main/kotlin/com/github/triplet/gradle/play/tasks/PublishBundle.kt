@@ -2,6 +2,7 @@ package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.play.internal.MIME_TYPE_STREAM
 import com.github.triplet.gradle.play.internal.playPath
+import com.github.triplet.gradle.play.internal.retryableExecute
 import com.github.triplet.gradle.play.internal.trackUploadProgress
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishPackageBase
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
@@ -57,7 +58,7 @@ open class PublishBundle : PlayPublishPackageBase() {
         val bundle = try {
             bundles().upload(variant.applicationId, editId, content)
                     .trackUploadProgress(progressLogger, "App Bundle")
-                    .execute()
+                    .retryableExecute()
         } catch (e: GoogleJsonResponseException) {
             return handleUploadFailures(e, content.file)
         }

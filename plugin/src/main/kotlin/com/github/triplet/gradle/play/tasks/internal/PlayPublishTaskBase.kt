@@ -7,6 +7,7 @@ import com.github.triplet.gradle.play.internal.areCredsValid
 import com.github.triplet.gradle.play.internal.has
 import com.github.triplet.gradle.play.internal.nullOrFull
 import com.github.triplet.gradle.play.internal.orNull
+import com.github.triplet.gradle.play.internal.retryableExecute
 import com.github.triplet.gradle.play.internal.safeCreateNewFile
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.services.androidpublisher.AndroidPublisher
@@ -42,7 +43,7 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
         val edits = publisher.edits()
         val id = try {
             savedEditId.orNull()?.readText().nullOrFull()
-                    ?: edits.insert(variant.applicationId, null).execute().id
+                    ?: edits.insert(variant.applicationId, null).retryableExecute().id
         } catch (e: GoogleJsonResponseException) {
             if (e has "applicationNotFound") {
                 if (skipIfNotFound) {
@@ -77,7 +78,7 @@ abstract class PlayPublishTaskBase : DefaultTask(), ExtensionOptions {
 
         if (extension.commit) {
             try {
-                commit(variant.applicationId, it).execute()
+                commit(variant.applicationId, it).retryableExecute()
             } finally {
                 project.delete(savedEditId)
             }

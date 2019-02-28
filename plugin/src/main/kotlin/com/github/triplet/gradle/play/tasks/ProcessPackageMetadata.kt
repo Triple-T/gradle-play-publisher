@@ -3,6 +3,7 @@ package com.github.triplet.gradle.play.tasks
 import com.android.build.gradle.api.ApkVariantOutput
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
+import com.github.triplet.gradle.play.internal.retryableExecute
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishTaskBase
 import org.gradle.api.tasks.TaskAction
 
@@ -23,7 +24,7 @@ open class ProcessPackageMetadata : PlayPublishTaskBase() {
 
     private fun processVersionCodes() = read(true) { editId ->
         progressLogger.progress("Downloading active version codes")
-        val maxVersionCode = tracks().list(variant.applicationId, editId).execute().tracks
+        val maxVersionCode = tracks().list(variant.applicationId, editId).retryableExecute().tracks
                 ?.flatMap { it.releases.orEmpty() }
                 ?.flatMap { it.versionCodes.orEmpty() }
                 ?.max() ?: 1

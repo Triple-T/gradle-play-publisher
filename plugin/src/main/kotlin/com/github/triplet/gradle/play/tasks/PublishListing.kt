@@ -11,6 +11,7 @@ import com.github.triplet.gradle.play.internal.isDirectChildOf
 import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.internal.readProcessed
+import com.github.triplet.gradle.play.internal.retryableExecute
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishTaskBase
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
@@ -103,7 +104,7 @@ open class PublishListing : PlayPublishTaskBase() {
             contactWebsite = AppDetail.CONTACT_WEBSITE.read()
         }
 
-        details().update(variant.applicationId, editId, details).execute()
+        details().update(variant.applicationId, editId, details).retryableExecute()
     }
 
     private fun AndroidPublisher.Edits.updateListing(
@@ -122,7 +123,7 @@ open class PublishListing : PlayPublishTaskBase() {
         }
 
         try {
-            listings().update(variant.applicationId, editId, locale, listing).execute()
+            listings().update(variant.applicationId, editId, locale, listing).retryableExecute()
         } catch (e: GoogleJsonResponseException) {
             if (e has "unsupportedListingLanguage") {
                 // Rethrow for clarity
@@ -153,7 +154,8 @@ open class PublishListing : PlayPublishTaskBase() {
             "You can only upload ${type.maxNum} graphic(s) for the $typeName"
         }
 
-        val remoteHashes = images().list(variant.applicationId, editId, locale, typeName).execute()
+        val remoteHashes = images().list(variant.applicationId, editId, locale, typeName)
+                .retryableExecute()
                 .images.orEmpty()
                 .map { it.sha1 }
         val localHashes = files.map {
@@ -163,11 +165,11 @@ open class PublishListing : PlayPublishTaskBase() {
         if (remoteHashes == localHashes) return
 
         progressLogger.progress("Uploading $locale listing graphics for type '$typeName'")
-        images().deleteall(variant.applicationId, editId, locale, typeName).execute()
+        images().deleteall(variant.applicationId, editId, locale, typeName).retryableExecute()
         for (file in files) {
             images()
                     .upload(variant.applicationId, editId, locale, typeName, file)
-                    .execute()
+                    .retryableExecute()
         }
     }
 
