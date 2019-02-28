@@ -96,6 +96,11 @@ class PlayPublisherPlugin : Plugin<Project> {
                 it ?: extensionContainer.findByName(buildType.name)
             }.mergeWith(baseExtension)
 
+            if (!extension.isEnabled) {
+                project.logger.info("Gradle Play Publisher is disabled for $variantName")
+                return@whenObjectAdded
+            }
+
             if (!isSigningReady && !outputsAreSigned) {
                 project.logger.error(
                         "Signing not ready. Be sure to specify a signingConfig for $variantName")

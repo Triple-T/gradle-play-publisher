@@ -20,6 +20,20 @@ open class PlayPublisherExtension @JvmOverloads constructor(
         @get:Internal internal val name: String = "default" // Needed for Gradle
 ) {
     @get:Internal("Backing property for public input")
+    internal var _isEnabled: Boolean? = null
+    /**
+     * Enables or disables GPP.
+     *
+     * Defaults to `true`.
+     */
+    @get:Input
+    var isEnabled
+        get() = _isEnabled ?: true
+        set(value) {
+            _isEnabled = value
+        }
+
+    @get:Internal("Backing property for public input")
     internal var _serviceAccountCredentials: File? = null
     /**
      * Service Account authentication file. Json is preferred, but PKCS12 is also supported. For
