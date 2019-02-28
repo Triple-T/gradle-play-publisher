@@ -90,7 +90,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 return@whenObjectAdded
             }
 
-            val extension = productFlavors.mapNotNull {
+            val extension = extensionContainer.findByName(name) ?: productFlavors.mapNotNull {
                 extensionContainer.findByName(it.name)
             }.singleOrNull().let {
                 it ?: extensionContainer.findByName(buildType.name)
