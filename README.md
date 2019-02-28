@@ -45,6 +45,7 @@ app details to the Google Play Store.
    1. [Encrypting Service Account keys](#encrypting-service-account-keys)
    1. [Using multiple Service Accounts](#using-multiple-service-accounts)
    1. [Combining releases](#combining-releases)
+   1. [Disabling publishing](#disabling-publishing)
    1. [Using HTTPS proxies](#using-https-proxies)
 
 ## Quickstart guide
@@ -576,6 +577,64 @@ invocations. The only hard requirement is for a task with `commit = true` to be 
 that not already be the case, Gradle's
 [`mustRunAfter`](https://docs.gradle.org/current/dsl/org.gradle.api.Task.html#org.gradle.api.Task:mustRunAfter(java.lang.Object[]))
 DSL will come in handy.
+
+### Disabling publishing
+
+Sometimes, you may not want to publish all variants of your app. Or maybe you don't want publishing
+enabled on CI or local dev machines. Whatever the case may be, GPP can be disabled down to the
+individual variant level through the `playConfigs` block:
+
+<details open><summary>Kotlin</summary>
+
+```kt
+android {
+    // ...
+
+    flavorDimensions(...)
+    productFlavors { ... }
+
+    playConfigs {
+        register("myCustomVariantOrProductFlavor") {
+            isEnabled = true
+        }
+
+        // ...
+    }
+}
+
+play {
+    isEnabled = false // This disables GPP by default. It could be the other way around.
+    // ...
+}
+```
+
+</details>
+
+<details><summary>Groovy</summary>
+
+```groovy
+android {
+    // ...
+
+    flavorDimensions ...
+    productFlavors { ... }
+
+    playConfigs {
+        myCustomVariantOrProductFlavor {
+            isEnabled = true
+        }
+
+        // ...
+    }
+}
+
+play {
+    isEnabled = false // This disables GPP by default. It could be the other way around.
+    // ...
+}
+```
+
+</details>
 
 ### Using HTTPS proxies
 
