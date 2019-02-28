@@ -1,5 +1,7 @@
 package com.github.triplet.gradle.play.tasks
 
+import com.android.build.gradle.internal.api.InstallableVariantImpl
+import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.github.triplet.gradle.play.internal.MIME_TYPE_STREAM
 import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.internal.trackUploadProgress
@@ -21,9 +23,8 @@ open class PublishBundle : PlayPublishPackageBase() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFile
     val bundle by lazy {
-        // TODO: If we take a customizable folder, we can fix #233, #227
-        val archivesBaseName = project.properties["archivesBaseName"] as String
-        File(project.buildDir, "outputs/bundle/${variant.name}/${archivesBaseName}.aab")
+        (variant as InstallableVariantImpl).getFinalArtifact(InternalArtifactType.BUNDLE)
+                .files.single()
     }
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
