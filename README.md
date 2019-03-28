@@ -271,6 +271,15 @@ play {
 } 
 ```
 
+If you need to execute a one-time promotion, you can use the CLI args. For example, this is how you
+would promote an artifact from the alpha ➡️ beta track with only 25% of users getting the release:
+
+```sh
+./gradlew promoteArtifact \
+  --from-track alpha --track beta \
+  --release-status inProgress --user-fraction .25
+```
+
 ### Handling version conflicts
 
 If an artifact already exists with a version code greater than or equal to the one you're trying to
