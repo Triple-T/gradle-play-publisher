@@ -39,7 +39,6 @@ open class PromoteRelease : PlayPublishPackageBase() {
         track.releases.forEach {
             it.applyChanges(
                     updateStatus = extension._releaseStatus != null,
-                    useDefaultReleaseNotes = false,
                     updateFraction = extension._userFraction != null
             )
         }
