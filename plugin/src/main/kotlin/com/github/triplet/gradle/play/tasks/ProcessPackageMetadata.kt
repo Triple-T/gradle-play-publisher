@@ -32,10 +32,8 @@ open class ProcessPackageMetadata : PlayPublishTaskBase() {
         val smallestVersionCode = outputs.map { it.versionCode }.min() ?: 1
 
         val patch = maxVersionCode - smallestVersionCode + 1
-        if (patch <= 0) return@read // Nothing to do, outputs are already greater than remote
-
         for ((i, output) in outputs.withIndex()) {
-            output.versionCodeOverride = output.versionCode + patch.toInt() + i
+            if (patch > 0) output.versionCodeOverride = output.versionCode + patch.toInt() + i
             extension._outputProcessor?.execute(output)
         }
     }
