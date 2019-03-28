@@ -26,6 +26,8 @@ internal fun validateRuntime() {
 }
 
 internal fun PlayPublisherExtension.areCredsValid(): Boolean {
+    if (!isEnabled) return true
+
     val creds = _serviceAccountCredentials ?: return false
     return if (creds.extension.equals("json", true)) {
         serviceAccountEmail == null

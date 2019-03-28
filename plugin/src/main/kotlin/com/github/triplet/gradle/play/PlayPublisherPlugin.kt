@@ -90,11 +90,16 @@ class PlayPublisherPlugin : Plugin<Project> {
                 return@whenObjectAdded
             }
 
-            val extension = productFlavors.mapNotNull {
+            val extension = extensionContainer.findByName(name) ?: productFlavors.mapNotNull {
                 extensionContainer.findByName(it.name)
             }.singleOrNull().let {
                 it ?: extensionContainer.findByName(buildType.name)
             }.mergeWith(baseExtension)
+
+            if (!extension.isEnabled) {
+                project.logger.info("Gradle Play Publisher is disabled for $variantName")
+                return@whenObjectAdded
+            }
 
             if (!isSigningReady && !outputsAreSigned) {
                 project.logger.error(
