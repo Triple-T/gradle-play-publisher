@@ -1,6 +1,9 @@
 package com.github.triplet.gradle.play.tasks.internal
 
 import com.github.triplet.gradle.play.internal.MIME_TYPE_STREAM
+import com.github.triplet.gradle.play.internal.RELEASE_NAMES_DEFAULT_NAME
+import com.github.triplet.gradle.play.internal.RELEASE_NAMES_MAX_LENGTH
+import com.github.triplet.gradle.play.internal.RELEASE_NAMES_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_DEFAULT_NAME
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_MAX_LENGTH
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
@@ -34,6 +37,13 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
     @get:InputDirectory
     protected val releaseNotesDir
         get() = File(resDir, RELEASE_NOTES_PATH).orNull()
+
+    @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:Optional
+    @get:InputDirectory
+    protected val consoleNamesDir
+        get() = File(resDir, RELEASE_NAMES_PATH).orNull()
 
     protected fun AndroidPublisher.Edits.updateTracks(editId: String, versions: List<Long>) {
         progressLogger.progress("Updating tracks")
@@ -75,10 +85,16 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
     protected fun TrackRelease.applyChanges(
             versionCodes: List<Long>? = null,
             updateStatus: Boolean = true,
-            updateFraction: Boolean = true
+            updateFraction: Boolean = true,
+            updateConsoleName: Boolean = true
     ): TrackRelease {
         versionCodes?.let { this.versionCodes = it }
         if (updateStatus) status = extension.releaseStatus
+        if (updateConsoleName) {
+            val file = File(consoleNamesDir, "${extension.track}.txt").orNull()
+                    ?: File(consoleNamesDir, RELEASE_NAMES_DEFAULT_NAME).orNull()
+            name = file?.readProcessed(RELEASE_NAMES_MAX_LENGTH)?.lines()?.first()
+        }
 
         val releaseNotes = releaseNotesDir?.listFiles().orEmpty().mapNotNull { locale ->
             val file = File(locale, "${extension.track}.txt").orNull() ?: run {

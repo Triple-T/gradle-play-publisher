@@ -5,6 +5,8 @@ import java.io.FileFilter
 
 internal const val RELEASE_NOTES_DEFAULT_NAME = "default.txt"
 internal const val RELEASE_NOTES_MAX_LENGTH = 500
+internal const val RELEASE_NAMES_DEFAULT_NAME = "default.txt"
+internal const val RELEASE_NAMES_MAX_LENGTH = 50
 
 internal object LocaleFileFilter : FileFilter {
     // region '419' is a special case in the Play Store that represents latin america
