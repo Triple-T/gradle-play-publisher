@@ -24,7 +24,6 @@ open class PublishApk : PlayPublishPackageBase() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
     protected val inputApks by lazy {
-        // TODO: If we take a customizable folder, we can fix #233, #227
         variant.outputs.filterIsInstance<ApkVariantOutput>().filter {
             OutputType.valueOf(it.outputType) == OutputType.MAIN || it.filters.isNotEmpty()
         }.map { it.outputFile }
