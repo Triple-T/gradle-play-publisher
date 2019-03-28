@@ -8,6 +8,7 @@ import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
 import com.github.triplet.gradle.play.internal.trackOrDefault
 import org.gradle.api.Action
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
@@ -186,5 +187,23 @@ open class PlayPublisherExtension @JvmOverloads constructor(
                 "Release Status must be one of " +
                         ReleaseStatus.values().joinToString { "'${it.publishedName}'" }
             }
+        }
+
+    @get:Internal("Backing property for public input")
+    internal var _artifactDir: File? = null
+    /**
+     * Specify a directory where prebuilt artifacts such as APKs and App Bundles may be found. The
+     * directory must exist and should contain only artifacts intended to be uploaded. If no
+     * directory is specified, your app will be built on-the-fly when you try to publish it.
+     *
+     * Defaults to null (i.e. your app will be built on publish).
+     */
+    @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    @get:Optional
+    @get:InputDirectory
+    var artifactDir: File?
+        get() = _artifactDir
+        set(value) {
+            _artifactDir = value
         }
 }

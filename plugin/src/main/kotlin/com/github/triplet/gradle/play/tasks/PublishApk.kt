@@ -24,9 +24,17 @@ open class PublishApk : PlayPublishPackageBase() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
     protected val inputApks by lazy {
-        variant.outputs.filterIsInstance<ApkVariantOutput>().filter {
-            OutputType.valueOf(it.outputType) == OutputType.MAIN || it.filters.isNotEmpty()
-        }.map { it.outputFile }
+        val customDir = extension._artifactDir
+
+        if (customDir == null) {
+            variant.outputs.filterIsInstance<ApkVariantOutput>().filter {
+                OutputType.valueOf(it.outputType) == OutputType.MAIN || it.filters.isNotEmpty()
+            }.map { it.outputFile }
+        } else {
+            customDir.listFiles().orEmpty().filter { it.extension == "apk" }.ifEmpty {
+                error("No APKs found in '$customDir'.")
+            }
+        }
     }
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)

@@ -23,8 +23,15 @@ open class PublishBundle : PlayPublishPackageBase() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFile
     val bundle by lazy {
-        (variant as InstallableVariantImpl).getFinalArtifact(InternalArtifactType.BUNDLE)
-                .files.single()
+        val customDir = extension._artifactDir
+
+        if (customDir == null) {
+            (variant as InstallableVariantImpl).getFinalArtifact(InternalArtifactType.BUNDLE)
+                    .files.single()
+        } else {
+            customDir.listFiles().orEmpty().singleOrNull { it.extension == "aab" }
+                    ?: error("No App Bundle found in '$customDir'.")
+        }
     }
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
