@@ -31,7 +31,7 @@ internal fun PlayPublisherExtension.buildPublisher(): AndroidPublisher {
     }
 
     return AndroidPublisher.Builder(transport, JacksonFactory.getDefaultInstance()) {
-        credential.initialize(it.apply { readTimeout = 0 })
+        credential.initialize(it.setReadTimeout(0))
     }.setApplicationName(PLUGIN_NAME).build()
 }
 
