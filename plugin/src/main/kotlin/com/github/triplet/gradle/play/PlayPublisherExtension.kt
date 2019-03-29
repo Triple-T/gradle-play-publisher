@@ -192,11 +192,11 @@ open class PlayPublisherExtension @JvmOverloads constructor(
     @get:Internal("Backing property for public input")
     internal var _artifactDir: File? = null
     /**
-     * Specify a directory where prebuilt artifacts such as APKs and App Bundles may be found. The
+     * Specify a directory where prebuilt artifacts such as APKs or App Bundles may be found. The
      * directory must exist and should contain only artifacts intended to be uploaded. If no
      * directory is specified, your app will be built on-the-fly when you try to publish it.
      *
-     * Defaults to null (i.e. your app will be built on publish).
+     * Defaults to null (i.e. your app will be built pre-publish).
      */
     @get:PathSensitive(PathSensitivity.ABSOLUTE)
     @get:Optional
