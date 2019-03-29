@@ -2,6 +2,7 @@ package com.github.triplet.gradle.play.tasks
 
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.internal.AppDetail
+import com.github.triplet.gradle.play.internal.ImageType
 import com.github.triplet.gradle.play.internal.JsonFileFilter
 import com.github.triplet.gradle.play.internal.LISTINGS_PATH
 import com.github.triplet.gradle.play.internal.LocaleFileFilter
@@ -78,7 +79,8 @@ open class GenerateResources : DefaultTask() {
             listings.listFiles()
                     .filter { it.name != defaultLocale }
                     .map { File(it, relativePath) }
-                    .filter { !it.exists() }
+                    .filterNot(File::exists)
+                    .filterNot(::hasGraphicCategory)
                     .forEach {
                         project.copy {
                             from(default).into(File(resDir, it.parentFile.toRelativeString(resDir)))
@@ -148,6 +150,11 @@ open class GenerateResources : DefaultTask() {
     }
 
     private fun isHidden(file: File) = file.name.startsWith(".")
+
+    private fun hasGraphicCategory(file: File): Boolean {
+        val graphic = ImageType.values().find { file.isDirectChildOf(it.dirName) }
+        return graphic != null && file.climbUpTo(graphic.dirName)?.orNull() != null
+    }
 
     private fun File.findDest() = File(resDir, toRelativeString(findOwner()))
 
