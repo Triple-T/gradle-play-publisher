@@ -6,6 +6,7 @@ import org.junit.Test
 import static com.github.triplet.gradle.play.TestHelper.FIXTURE_WORKING_DIR
 import static com.github.triplet.gradle.play.TestHelper.execute
 import static junit.framework.TestCase.assertEquals
+import static org.junit.Assert.assertFalse
 import static org.junit.Assert.assertTrue
 
 class GenerateResourcesTest {
@@ -353,5 +354,38 @@ class GenerateResourcesTest {
         assertEquals(originalTitle, processedTitle)
         assertEquals(originalFullDescription, processedFullDescription)
         assertEquals(originalShortDescription, processedShortDescription)
+    }
+
+    @Test
+    void graphicsLanguageMergeOnlyAcrossCategories() {
+        // language=gradle
+        def config = """
+            flavorDimensions 'pricing', 'server'
+
+            productFlavors {
+                free { dimension 'server' }
+                paid { dimension 'pricing' }
+                staging { dimension 'server' }
+                prod { dimension 'pricing' }
+            }
+        """
+        execute(config, "clean", "generateProdStagingReleasePlayResources")
+
+        def processedFrPhone = new File(FIXTURE_WORKING_DIR,
+                'build/generated/gpp/prodStagingRelease/res/listings/fr-FR/graphics/phone-screenshots/foo.jpg')
+        def existingFrPhone = new File(FIXTURE_WORKING_DIR,
+                'build/generated/gpp/prodStagingRelease/res/listings/fr-FR/graphics/phone-screenshots/bar.jpg')
+        def processedFrTablet = new File(FIXTURE_WORKING_DIR,
+                'build/generated/gpp/prodStagingRelease/res/listings/fr-FR/graphics/tablet-screenshots/baz.jpg')
+        def processedDePhone = new File(FIXTURE_WORKING_DIR,
+                'build/generated/gpp/prodStagingRelease/res/listings/de-DE/graphics/phone-screenshots/foo.jpg')
+        def processedDeTablet = new File(FIXTURE_WORKING_DIR,
+                'build/generated/gpp/prodStagingRelease/res/listings/de-DE/graphics/tablet-screenshots/baz.jpg')
+
+        assertFalse(processedFrPhone.exists())
+        assertTrue(existingFrPhone.exists())
+        assertTrue(processedFrTablet.exists())
+        assertTrue(processedDePhone.exists())
+        assertTrue(processedDeTablet.exists())
     }
 }
