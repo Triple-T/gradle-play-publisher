@@ -3,10 +3,12 @@ package com.github.triplet.gradle.play.tasks.internal
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.ReleaseStatus
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
+import com.github.triplet.gradle.play.internal.orNull
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.options.Option
 import org.gradle.api.tasks.options.OptionValues
+import java.io.File
 
 internal interface ExtensionOptions {
     @get:Nested val extension: PlayPublisherExtension
@@ -92,5 +94,19 @@ internal interface ExtensionOptions {
         get() = throw UnsupportedOperationException()
         set(value) {
             extension.releaseStatus = value
+        }
+
+    @get:Internal
+    @set:Option(
+            option = "artifact-dir",
+            description = "Set the prebuilt artifacts (APKs/App Bundles) directory"
+    )
+    var artifactDirOption: String
+        get() = throw UnsupportedOperationException()
+        set(value) {
+            val dir = File(value)
+            extension.artifactDir = requireNotNull(dir.orNull()) {
+                "Folder '${dir.absolutePath}' does not exist."
+            }.absoluteFile
         }
 }

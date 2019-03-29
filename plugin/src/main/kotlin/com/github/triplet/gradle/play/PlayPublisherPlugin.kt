@@ -171,15 +171,17 @@ class PlayPublisherPlugin : Plugin<Project> {
                 init()
                 resDir = playResourcesTask.get().resDir
 
-                dependsOnCompat(processPackageMetadata)
                 dependsOnCompat(playResourcesTask)
-                try {
-                    variant.assembleProvider
-                } catch (e: NoSuchMethodError) {
-                    @Suppress("DEPRECATION")
-                    variant.assemble
-                }?.let { dependsOn(it) }
-                        ?: logger.warn("Assemble task not found. Publishing APKs may not work.")
+                if (extension._artifactDir == null) {
+                    dependsOnCompat(processPackageMetadata)
+                    try {
+                        variant.assembleProvider
+                    } catch (e: NoSuchMethodError) {
+                        @Suppress("DEPRECATION")
+                        variant.assemble
+                    }?.let { dependsOn(it) }
+                            ?: logger.warn("Assemble task not found. Publishing APKs may not work.")
+                }
             }
             publishApkAllTask.configure { dependsOnCompat(publishApkTask) }
             // TODO Remove in v3.0
@@ -195,15 +197,17 @@ class PlayPublisherPlugin : Plugin<Project> {
                 init()
                 resDir = playResourcesTask.get().resDir
 
-                dependsOnCompat(processPackageMetadata)
                 dependsOnCompat(playResourcesTask)
-                // Remove hack when AGP 3.2 reaches stable channel
-                project.tasks.findByName(
-                        (variant as InstallableVariantImpl).variantData.getTaskName("bundle", ""))
-                        ?.let { dependsOn(it) }
-                        ?: logger.warn("Bundle task not found, make sure to use " +
-                                               "'com.android.tools.build:gradle' v3.2+. " +
-                                               "Publishing App Bundles may not work.")
+                if (extension._artifactDir == null) {
+                    dependsOnCompat(processPackageMetadata)
+                    // TODO remove hack when AGP 3.2 reaches stable channel
+                    project.tasks.findByName((variant as InstallableVariantImpl).variantData
+                                                     .getTaskName("bundle", ""))
+                            ?.let { dependsOn(it) }
+                            ?: logger.warn("Bundle task not found, make sure to use " +
+                                                   "'com.android.tools.build:gradle' v3.2+. " +
+                                                   "Publishing App Bundles may not work.")
+                }
             }
             publishBundleAllTask.configure { dependsOnCompat(publishBundleTask) }
 
