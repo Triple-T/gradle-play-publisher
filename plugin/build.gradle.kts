@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile
-
 plugins {
     `java-gradle-plugin`
     `kotlin-dsl`
@@ -9,15 +7,15 @@ plugins {
 }
 
 dependencies {
-    compileOnly("com.android.tools.build:gradle:3.4.0-alpha10")
+    compileOnly("com.android.tools.build:gradle:3.5.0-alpha09")
 
-    implementation("com.google.apis:google-api-services-androidpublisher:v3-rev46-1.25.0")
+    implementation("com.google.apis:google-api-services-androidpublisher:v3-rev71-1.24.1")
 
-    testImplementation("com.android.tools.build:gradle:3.4.0-alpha10")
+    testImplementation("com.android.tools.build:gradle:3.5.0-alpha09")
     testImplementation(kotlin("test"))
     testImplementation("junit:junit:4.12")
-    testImplementation("org.mockito:mockito-core:2.23.4")
-    testImplementation("org.assertj:assertj-core:3.11.1")
+    testImplementation("org.mockito:mockito-core:2.25.1")
+    testImplementation("org.assertj:assertj-core:3.12.2")
 }
 
 java {
