@@ -93,7 +93,7 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
         if (updateConsoleName) {
             val file = File(consoleNamesDir, "${extension.track}.txt").orNull()
                     ?: File(consoleNamesDir, RELEASE_NAMES_DEFAULT_NAME).orNull()
-            name = file?.readProcessed(RELEASE_NAMES_MAX_LENGTH)?.lines()?.first()
+            name = file?.readProcessed(RELEASE_NAMES_MAX_LENGTH)?.lines()?.firstOrNull()
         }
 
         val releaseNotes = releaseNotesDir?.listFiles().orEmpty().mapNotNull { locale ->
