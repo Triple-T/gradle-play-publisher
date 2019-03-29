@@ -117,7 +117,7 @@ plugins {
 
 If you're prepared to cut yourself on the bleeding edge of GPP development, snapshot builds are
 available from
-[Sonatype's `snapshots` repository](https://oss.sonatype.org/content/repositories/snapshots/):
+[Sonatype's `snapshots` repository](https://oss.sonatype.org/content/repositories/snapshots/com/github/triplet/gradle/play-publisher/):
 
 <details open><summary>Kotlin</summary>
 
