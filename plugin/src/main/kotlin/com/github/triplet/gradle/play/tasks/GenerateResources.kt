@@ -7,6 +7,7 @@ import com.github.triplet.gradle.play.internal.LISTINGS_PATH
 import com.github.triplet.gradle.play.internal.LocaleFileFilter
 import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
+import com.github.triplet.gradle.play.internal.RELEASE_NAMES_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
 import com.github.triplet.gradle.play.internal.climbUpTo
 import com.github.triplet.gradle.play.internal.findClosestDir
@@ -113,6 +114,13 @@ open class GenerateResources : DefaultTask() {
             releaseNotes.validateLocales()
         }
 
+        fun validateReleaseNames() {
+            val releaseNames = climbUpTo(RELEASE_NAMES_PATH) ?: return
+            check(releaseNames.isDirectChildOf(PLAY_PATH)) {
+                "Release names ($releaseNames) must be under the '$PLAY_PATH' folder"
+            }
+        }
+
         fun validateProducts() {
             val products = climbUpTo(PRODUCTS_PATH) ?: return
             check(products.isDirectChildOf(PLAY_PATH)) {
@@ -129,11 +137,13 @@ open class GenerateResources : DefaultTask() {
                 || isDirectChildOf(PLAY_PATH)
                 || isChildOf(LISTINGS_PATH)
                 || isChildOf(RELEASE_NOTES_PATH)
+                || isChildOf(RELEASE_NAMES_PATH)
                 || isChildOf(PRODUCTS_PATH)
         check(areRootsValid) { "Unknown file: $this" }
 
         validateListings()
         validateReleaseNotes()
+        validateReleaseNames()
         validateProducts()
     }
 
