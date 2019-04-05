@@ -42,7 +42,7 @@ tasks.named<Delete>("clean") {
 }
 
 group = "com.github.triplet.gradle"
-version = "2.2.0"
+version = "2.3.0-SNAPSHOT"
 
 gradlePlugin {
     plugins.create("play") {
