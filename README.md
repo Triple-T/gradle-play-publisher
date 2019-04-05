@@ -96,7 +96,7 @@ through the `plugins {}` DSL:
 ```kt
 plugins {
     id("com.android.application")
-    id("com.github.triplet.play") version "2.1.0"
+    id("com.github.triplet.play") version "2.2.0"
 }
 ```
 
@@ -107,7 +107,7 @@ plugins {
 ```groovy
 plugins {
     id 'com.android.application'
-    id 'com.github.triplet.play' version '2.1.0'
+    id 'com.github.triplet.play' version '2.2.0'
 }
 ```
 
@@ -234,6 +234,42 @@ When you publish to the beta channel, the `beta.txt` release notes will be uploa
 channel, `default.txt` will be uploaded.
 
 > Note: the Play Store limits your release notes to a maximum of 500 characters.
+
+#### Uploading developer facing release names
+
+The Play Console supports customizing release names. These aren't visible to users, but may be
+useful for internal processes. Similar to release notes, release names may be specified by placing
+a `[track].txt` file in the `release-names` directory under your `play` folder. For example, here's
+a custom release name for the alpha track in the `play/release-names/alpha.txt` file:
+
+```
+My custom release name
+```
+
+> Note: the Play Store limits your release names to a maximum of 50 characters.
+
+#### Uploading a pre-existing artifact
+
+By default GPP will rebuild your project before every release. In advanced use cases, this might not
+be the desired behavior. For example, if you need to inject translations into your APK or App Bundle
+_after_ building it but _before_ publishing it. Or maybe it's a simple as you already having an
+artifact you want to publish. GPP supports this class of use cases by letting you specify a
+directory in which publishable artifacts may be found:
+
+```kt
+play {
+    // ...
+    artifactDir = file("path/to/apk-or-app-bundle/dir")
+}
+```
+
+For quick access, you can also use the `--artifact-dir` CLI option:
+
+```sh
+./gradlew publishBundle --artifact-dir path/to/app-bundle/dir
+```
+
+> Note: all artifacts in the specified directory will be published.
 
 ### Publishing an App Bundle
 
@@ -630,7 +666,7 @@ android {
 
     playConfigs {
         myCustomVariantOrProductFlavor {
-            isEnabled = true
+            enabled = true
         }
 
         // ...
@@ -638,7 +674,7 @@ android {
 }
 
 play {
-    isEnabled = false // This disables GPP by default. It could be the other way around.
+    enabled = false // This disables GPP by default. It could be the other way around.
     // ...
 }
 ```
