@@ -159,9 +159,12 @@ class PlayPublisherPlugin : Plugin<Project> {
             ) { init() }
             try {
                 checkManifestProvider.configure { dependsOn(processPackageMetadata) }
+                generateBuildConfigProvider.configure { dependsOn(processPackageMetadata) }
             } catch (e: NoSuchMethodError) {
                 @Suppress("DEPRECATION")
                 checkManifest.dependsOnCompat(processPackageMetadata)
+                @Suppress("DEPRECATION")
+                generateBuildConfig.dependsOnCompat(processPackageMetadata)
             }
 
             val publishApkTask = project.newTask<PublishApk>(
