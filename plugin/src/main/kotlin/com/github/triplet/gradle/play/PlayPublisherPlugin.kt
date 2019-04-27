@@ -5,7 +5,6 @@ import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.internal.api.InstallableVariantImpl
 import com.github.triplet.gradle.play.internal.PLAY_CONFIGS_PATH
 import com.github.triplet.gradle.play.internal.PLAY_PATH
-import com.github.triplet.gradle.play.internal.areCredsValid
 import com.github.triplet.gradle.play.internal.configure
 import com.github.triplet.gradle.play.internal.dependsOnCompat
 import com.github.triplet.gradle.play.internal.mergeWith
@@ -90,15 +89,32 @@ class PlayPublisherPlugin : Plugin<Project> {
                 return@whenObjectAdded
             }
 
-            val extension = extensionContainer.findByName(name) ?: productFlavors.mapNotNull {
+            val extension = (extensionContainer.findByName(name) ?: productFlavors.mapNotNull {
                 extensionContainer.findByName(it.name)
             }.singleOrNull().let {
                 it ?: extensionContainer.findByName(buildType.name)
-            }.mergeWith(baseExtension)
+            }).mergeWith(baseExtension)
 
             if (!extension.isEnabled) {
                 project.logger.info("Gradle Play Publisher is disabled for $variantName")
                 return@whenObjectAdded
+            }
+
+            extension.apply {
+                val creds = checkNotNull(_serviceAccountCredentials) {
+                    "No credentials specified. Please read our docs for more details: " +
+                            "https://github.com/Triple-T/gradle-play-publisher" +
+                            "#authenticating-gradle-play-publisher"
+                }
+                if (creds.extension.equals("json", true)) {
+                    check(serviceAccountEmail == null) {
+                        "JSON credentials cannot specify a service account email."
+                    }
+                } else {
+                    check(serviceAccountEmail != null) {
+                        "PKCS12 credentials must specify a service account email."
+                    }
+                }
             }
 
             if (!isSigningReady && !outputsAreSigned) {
@@ -234,14 +250,6 @@ class PlayPublisherPlugin : Plugin<Project> {
                 dependsOnCompat(publishProductsTask)
             }
             publishAllTask.configure { dependsOnCompat(publishTask) }
-        }
-
-        project.afterEvaluate {
-            check(baseExtension.areCredsValid() || extensionContainer.any { it.areCredsValid() }) {
-                "Check your service account configuration. " +
-                        "Json credentials cannot specify a Service Account email while " +
-                        "PKCS12 credentials must do so."
-            }
         }
     }
 }
