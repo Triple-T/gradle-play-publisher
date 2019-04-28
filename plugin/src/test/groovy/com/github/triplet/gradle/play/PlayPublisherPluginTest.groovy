@@ -309,6 +309,7 @@ class PlayPublisherPluginTest {
         def project = TestHelper.evaluatableProject()
 
         project.play {
+            enabled = false
             serviceAccountCredentials = null
         }
         project.android {
@@ -320,6 +321,7 @@ class PlayPublisherPluginTest {
 
             playConfigs {
                 f1 {
+                    enabled = true
                     serviceAccountCredentials = project.file('fake.json')
                 }
             }

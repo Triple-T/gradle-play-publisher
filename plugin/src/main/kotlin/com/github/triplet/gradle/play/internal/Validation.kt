@@ -1,7 +1,6 @@
 package com.github.triplet.gradle.play.internal
 
 import com.android.builder.model.Version
-import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import org.gradle.util.GradleVersion
 
@@ -22,17 +21,6 @@ internal fun validateRuntime() {
         "Gradle Play Publisher's minimum Android Gradle Plugin version is at least " +
                 "$MIN_AGP_VERSION and yours is $agpVersion. Find the latest version and upgrade " +
                 "instructions at https://developer.android.com/studio/releases/gradle-plugin."
-    }
-}
-
-internal fun PlayPublisherExtension.areCredsValid(): Boolean {
-    if (!isEnabled) return true
-
-    val creds = _serviceAccountCredentials ?: return false
-    return if (creds.extension.equals("json", true)) {
-        serviceAccountEmail == null
-    } else {
-        serviceAccountEmail != null
     }
 }
 
