@@ -22,6 +22,7 @@ import com.google.api.services.androidpublisher.model.LocalizedText
 import com.google.api.services.androidpublisher.model.Track
 import com.google.api.services.androidpublisher.model.TrackRelease
 import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
@@ -30,6 +31,21 @@ import java.io.File
 
 abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
     @get:Internal internal lateinit var resDir: File
+
+    @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:Optional
+    @get:InputFile
+    protected val mappingFile: File?
+        get() {
+            val customDir = extension._artifactDir
+
+            return if (customDir == null) {
+                variant.mappingFile.orNull()
+            } else {
+                customDir.listFiles().orEmpty().singleOrNull { it.name == "mapping.txt" }
+            }
+        }
 
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -155,7 +171,7 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
     }
 
     protected fun AndroidPublisher.Edits.handlePackageDetails(editId: String, versionCode: Int) {
-        val file = variant.mappingFile
+        val file = mappingFile
         if (file != null && file.length() > 0) {
             val mapping = FileContent(MIME_TYPE_STREAM, file)
             deobfuscationfiles()
