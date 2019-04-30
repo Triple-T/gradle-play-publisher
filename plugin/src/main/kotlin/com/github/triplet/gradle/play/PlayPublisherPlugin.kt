@@ -183,6 +183,23 @@ class PlayPublisherPlugin : Plugin<Project> {
                 generateBuildConfig.dependsOnCompat(processPackageMetadata)
             }
 
+            val publishApkTaskDependenciesHack = project.newTask(
+                    "publish${variantName}ApkWrapper",
+                    "",
+                    null
+            ) {
+                if (extension._artifactDir == null) {
+                    dependsOnCompat(processPackageMetadata)
+                    try {
+                        assembleProvider
+                    } catch (e: NoSuchMethodError) {
+                        @Suppress("DEPRECATION")
+                        assemble
+                    }?.let {
+                        dependsOn(it)
+                    } ?: logger.warn("Assemble task not found. Publishing APKs may not work.")
+                }
+            }
             val publishApkTask = project.newTask<PublishApk>(
                     "publish${variantName}Apk",
                     "Uploads APK for $variantName."
@@ -191,16 +208,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 resDir = playResourcesTask.get().resDir
 
                 dependsOnCompat(playResourcesTask)
-                if (extension._artifactDir == null) {
-                    dependsOnCompat(processPackageMetadata)
-                    try {
-                        variant.assembleProvider
-                    } catch (e: NoSuchMethodError) {
-                        @Suppress("DEPRECATION")
-                        variant.assemble
-                    }?.let { dependsOn(it) }
-                            ?: logger.warn("Assemble task not found. Publishing APKs may not work.")
-                }
+                dependsOnCompat(publishApkTaskDependenciesHack)
             }
             publishApkAllTask.configure { dependsOnCompat(publishApkTask) }
             // TODO Remove in v3.0
@@ -209,6 +217,24 @@ class PlayPublisherPlugin : Plugin<Project> {
                 doFirst { logger.warn("$name is deprecated, use ${publishApkTask.get().name} instead") }
             }
 
+            val publishBundleTaskDependenciesHack = project.newTask(
+                    "publish${variantName}BundleWrapper",
+                    "",
+                    null
+            ) {
+                if (extension._artifactDir == null) {
+                    dependsOnCompat(processPackageMetadata)
+                    // TODO remove hack when AGP 3.2 reaches stable channel
+                    project.tasks.findByName(
+                            (this@whenObjectAdded as InstallableVariantImpl).variantData
+                                    .getTaskName("bundle", "")
+                    )?.let {
+                        dependsOn(it)
+                    } ?: logger.warn("Bundle task not found, make sure to use " +
+                                             "'com.android.tools.build:gradle' v3.2+. " +
+                                             "Publishing App Bundles may not work.")
+                }
+            }
             val publishBundleTask = project.newTask<PublishBundle>(
                     "publish${variantName}Bundle",
                     "Uploads App Bundle for $variantName."
@@ -217,16 +243,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 resDir = playResourcesTask.get().resDir
 
                 dependsOnCompat(playResourcesTask)
-                if (extension._artifactDir == null) {
-                    dependsOnCompat(processPackageMetadata)
-                    // TODO remove hack when AGP 3.2 reaches stable channel
-                    project.tasks.findByName((variant as InstallableVariantImpl).variantData
-                                                     .getTaskName("bundle", ""))
-                            ?.let { dependsOn(it) }
-                            ?: logger.warn("Bundle task not found, make sure to use " +
-                                                   "'com.android.tools.build:gradle' v3.2+. " +
-                                                   "Publishing App Bundles may not work.")
-                }
+                dependsOnCompat(publishBundleTaskDependenciesHack)
             }
             publishBundleAllTask.configure { dependsOnCompat(publishBundleTask) }
 
