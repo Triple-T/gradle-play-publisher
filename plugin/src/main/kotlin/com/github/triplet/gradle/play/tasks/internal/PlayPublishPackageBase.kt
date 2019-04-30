@@ -41,7 +41,7 @@ abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
             val customDir = extension._artifactDir
 
             return if (customDir == null) {
-                variant.mappingFile.orNull()
+                variant.mappingFile?.orNull()
             } else {
                 customDir.listFiles().orEmpty().singleOrNull { it.name == "mapping.txt" }
             }
