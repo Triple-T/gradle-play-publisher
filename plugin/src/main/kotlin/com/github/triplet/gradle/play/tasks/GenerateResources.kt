@@ -19,7 +19,9 @@ import com.github.triplet.gradle.play.internal.nullOrFull
 import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.internal.parents
 import com.github.triplet.gradle.play.internal.playPath
+import org.gradle.api.Action
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.CopySpec
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
@@ -72,7 +74,8 @@ open class GenerateResources : DefaultTask() {
         }
         inputs.removed { project.delete(file.findDest()) }
 
-        for (default in changedDefaults.reversed().distinctBy { it.name }) {
+        val writeQueue = mutableListOf<Action<CopySpec>>()
+        for (default in changedDefaults) {
             val listings = default.findDest().climbUpTo(LISTINGS_PATH)!!
             val relativePath = default.invariantSeparatorsPath.split("$defaultLocale/").last()
 
@@ -82,11 +85,12 @@ open class GenerateResources : DefaultTask() {
                     .filterNot(File::exists)
                     .filterNot(::hasGraphicCategory)
                     .forEach {
-                        project.copy {
+                        writeQueue += Action {
                             from(default).into(File(resDir, it.parentFile.toRelativeString(resDir)))
                         }
                     }
         }
+        writeQueue.forEach { project.copy(it) }
     }
 
     private fun File.validate() {
