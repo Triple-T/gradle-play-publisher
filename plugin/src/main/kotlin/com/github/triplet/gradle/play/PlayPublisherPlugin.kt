@@ -5,8 +5,6 @@ import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.internal.api.InstallableVariantImpl
 import com.github.triplet.gradle.play.internal.PLAY_CONFIGS_PATH
 import com.github.triplet.gradle.play.internal.PLAY_PATH
-import com.github.triplet.gradle.play.internal.configure
-import com.github.triplet.gradle.play.internal.dependsOnCompat
 import com.github.triplet.gradle.play.internal.mergeWith
 import com.github.triplet.gradle.play.internal.newTask
 import com.github.triplet.gradle.play.internal.validateRuntime
@@ -131,7 +129,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "bootstrap${variantName}PlayResources",
                     "Downloads the Play Store listing metadata for $variantName."
             ) { init() }
-            bootstrapAllTask.configure { dependsOnCompat(bootstrapTask) }
+            bootstrapAllTask.configure { dependsOn(bootstrapTask) }
 
             val playResourcesTask = project.newTask<GenerateResources>(
                     "generate${variantName}PlayResources",
@@ -148,12 +146,12 @@ class PlayPublisherPlugin : Plugin<Project> {
                 init()
                 resDir = playResourcesTask.get().resDir
 
-                dependsOnCompat(playResourcesTask)
+                dependsOn(playResourcesTask)
             }
-            publishListingAllTask.configure { dependsOnCompat(publishListingTask) }
+            publishListingAllTask.configure { dependsOn(publishListingTask) }
             // TODO Remove in v3.0
             project.newTask("publishListing$variantName", "", null) {
-                dependsOnCompat(publishListingTask)
+                dependsOn(publishListingTask)
                 doFirst { logger.warn("$name is deprecated, use ${publishListingTask.get().name} instead") }
             }
 
@@ -164,24 +162,17 @@ class PlayPublisherPlugin : Plugin<Project> {
                 init()
                 resDir = playResourcesTask.get().resDir
 
-                dependsOnCompat(playResourcesTask)
+                dependsOn(playResourcesTask)
             }
-            publishProductsAllTask.configure { dependsOnCompat(publishProductsTask) }
+            publishProductsAllTask.configure { dependsOn(publishProductsTask) }
 
             val processPackageMetadata = project.newTask<ProcessPackageMetadata>(
                     "process${variantName}Metadata",
                     "Processes packaging metadata for $variantName.",
                     null
             ) { init() }
-            try {
-                checkManifestProvider.configure { dependsOn(processPackageMetadata) }
-                generateBuildConfigProvider.configure { dependsOn(processPackageMetadata) }
-            } catch (e: NoSuchMethodError) {
-                @Suppress("DEPRECATION")
-                checkManifest.dependsOnCompat(processPackageMetadata)
-                @Suppress("DEPRECATION")
-                generateBuildConfig.dependsOnCompat(processPackageMetadata)
-            }
+            checkManifestProvider.configure { dependsOn(processPackageMetadata) }
+            generateBuildConfigProvider.configure { dependsOn(processPackageMetadata) }
 
             val publishApkTaskDependenciesHack = project.newTask(
                     "publish${variantName}ApkWrapper",
@@ -189,13 +180,8 @@ class PlayPublisherPlugin : Plugin<Project> {
                     null
             ) {
                 if (extension._artifactDir == null) {
-                    dependsOnCompat(processPackageMetadata)
-                    try {
-                        assembleProvider
-                    } catch (e: NoSuchMethodError) {
-                        @Suppress("DEPRECATION")
-                        assemble
-                    }?.let {
+                    dependsOn(processPackageMetadata)
+                    assembleProvider?.let {
                         dependsOn(it)
                     } ?: logger.warn("Assemble task not found. Publishing APKs may not work.")
                 }
@@ -207,13 +193,13 @@ class PlayPublisherPlugin : Plugin<Project> {
                 init()
                 resDir = playResourcesTask.get().resDir
 
-                dependsOnCompat(playResourcesTask)
-                dependsOnCompat(publishApkTaskDependenciesHack)
+                dependsOn(playResourcesTask)
+                dependsOn(publishApkTaskDependenciesHack)
             }
-            publishApkAllTask.configure { dependsOnCompat(publishApkTask) }
+            publishApkAllTask.configure { dependsOn(publishApkTask) }
             // TODO Remove in v3.0
             project.newTask("publishApk$variantName", "", null) {
-                dependsOnCompat(publishApkTask)
+                dependsOn(publishApkTask)
                 doFirst { logger.warn("$name is deprecated, use ${publishApkTask.get().name} instead") }
             }
 
@@ -223,8 +209,8 @@ class PlayPublisherPlugin : Plugin<Project> {
                     null
             ) {
                 if (extension._artifactDir == null) {
-                    dependsOnCompat(processPackageMetadata)
-                    // TODO remove hack when AGP 3.2 reaches stable channel
+                    dependsOn(processPackageMetadata)
+                    // TODO https://issuetracker.google.com/issues/109918868
                     project.tasks.findByName(
                             (this@whenObjectAdded as InstallableVariantImpl).variantData
                                     .getTaskName("bundle", "")
@@ -242,10 +228,10 @@ class PlayPublisherPlugin : Plugin<Project> {
                 init()
                 resDir = playResourcesTask.get().resDir
 
-                dependsOnCompat(playResourcesTask)
-                dependsOnCompat(publishBundleTaskDependenciesHack)
+                dependsOn(playResourcesTask)
+                dependsOn(publishBundleTaskDependenciesHack)
             }
-            publishBundleAllTask.configure { dependsOnCompat(publishBundleTask) }
+            publishBundleAllTask.configure { dependsOn(publishBundleTask) }
 
             val promoteReleaseTask = project.newTask<PromoteRelease>(
                     "promote${variantName}Artifact",
@@ -254,9 +240,9 @@ class PlayPublisherPlugin : Plugin<Project> {
                 init()
                 resDir = playResourcesTask.get().resDir
 
-                dependsOnCompat(playResourcesTask)
+                dependsOn(playResourcesTask)
             }
-            promoteReleaseAllTask.configure { dependsOnCompat(promoteReleaseTask) }
+            promoteReleaseAllTask.configure { dependsOn(promoteReleaseTask) }
 
             val publishTask = project.newTask<LifecycleHelperTask>(
                     "publish$variantName",
@@ -264,12 +250,11 @@ class PlayPublisherPlugin : Plugin<Project> {
             ) {
                 this.extension = extension
 
-                dependsOnCompat(
-                        if (extension.defaultToAppBundles) publishBundleTask else publishApkTask)
-                dependsOnCompat(publishListingTask)
-                dependsOnCompat(publishProductsTask)
+                dependsOn(if (extension.defaultToAppBundles) publishBundleTask else publishApkTask)
+                dependsOn(publishListingTask)
+                dependsOn(publishProductsTask)
             }
-            publishAllTask.configure { dependsOnCompat(publishTask) }
+            publishAllTask.configure { dependsOn(publishTask) }
         }
     }
 }
