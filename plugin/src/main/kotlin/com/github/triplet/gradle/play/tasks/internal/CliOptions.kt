@@ -78,6 +78,18 @@ internal interface UpdatableArtifactExtensionOptions : ArtifactExtensionOptions 
         set(value) {
             extension.fromTrack = value
         }
+    @get:Internal
+    @set:Option(
+            option = "update",
+            description = "Set the track to update when promoting releases. This is the same as " +
+                    "using 'from-track' and 'track' with the same value."
+    )
+    var updateTrackOption: String
+        get() = throw UnsupportedOperationException()
+        set(value) {
+            extension.fromTrack = value
+            extension.track = value
+        }
 }
 
 internal interface PublishableArtifactExtensionOptions : ArtifactExtensionOptions {
