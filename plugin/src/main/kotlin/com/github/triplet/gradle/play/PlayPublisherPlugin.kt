@@ -129,11 +129,16 @@ class PlayPublisherPlugin : Plugin<Project> {
             }
 
             val bootstrapTask = project.newTask<Bootstrap>(
-                    "bootstrap${variantName}PlayResources",
+                    "bootstrap$variantName",
                     "Downloads the Play Store listing metadata for variant '$name'.",
                     arrayOf(extension, this)
             )
             bootstrapAllTask.configure { dependsOn(bootstrapTask) }
+            // TODO Remove in v3.0
+            project.newTask("bootstrap${variantName}PlayResources") {
+                dependsOn(bootstrapTask)
+                doFirst { logger.warn("$name is deprecated, use ${bootstrapTask.get().name} instead") }
+            }
 
             val playResourcesTask = project.newTask<GenerateResources>(
                     "generate${variantName}PlayResources",
