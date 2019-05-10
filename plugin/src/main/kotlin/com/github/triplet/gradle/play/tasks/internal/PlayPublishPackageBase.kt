@@ -1,5 +1,7 @@
 package com.github.triplet.gradle.play.tasks.internal
 
+import com.android.build.gradle.api.ApplicationVariant
+import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.MIME_TYPE_STREAM
 import com.github.triplet.gradle.play.internal.RELEASE_NAMES_DEFAULT_NAME
 import com.github.triplet.gradle.play.internal.RELEASE_NAMES_MAX_LENGTH
@@ -29,7 +31,10 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import java.io.File
 
-abstract class PlayPublishPackageBase : PlayPublishTaskBase() {
+abstract class PlayPublishPackageBase(
+        extension: PlayPublisherExtension,
+        variant: ApplicationVariant
+) : PlayPublishTaskBase(extension, variant) {
     @get:Internal internal lateinit var resDir: File
 
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle

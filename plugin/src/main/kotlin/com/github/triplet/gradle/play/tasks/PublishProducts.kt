@@ -1,5 +1,7 @@
 package com.github.triplet.gradle.play.tasks
 
+import com.android.build.gradle.api.ApplicationVariant
+import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.isDirectChildOf
 import com.github.triplet.gradle.play.internal.playPath
@@ -15,8 +17,12 @@ import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import java.io.File
+import javax.inject.Inject
 
-open class PublishProducts : PlayPublishTaskBase() {
+open class PublishProducts @Inject constructor(
+        extension: PlayPublisherExtension,
+        variant: ApplicationVariant
+) : PlayPublishTaskBase(extension, variant) {
     @get:Internal
     internal lateinit var resDir: File
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
