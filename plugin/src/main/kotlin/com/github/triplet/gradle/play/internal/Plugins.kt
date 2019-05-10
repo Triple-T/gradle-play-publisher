@@ -19,18 +19,18 @@ private val ProductFlavor.extras
 
 internal inline fun <reified T : Task> Project.newTask(
         name: String,
-        description: String,
-        group: String? = PLUGIN_GROUP,
-        crossinline block: T.() -> Unit = {}
+        description: String? = null,
+        constructorArgs: Array<Any> = emptyArray(),
+        noinline block: T.() -> Unit = {}
 ): TaskProvider<T> {
     val config: T.() -> Unit = {
         this.description = description
-        this.group = group
+        this.group = if (description.isNullOrBlank()) null else PLUGIN_GROUP
         block()
     }
 
     val safeName = if (tasks.findByName(name) == null) name else "gpp" + name.capitalize()
-    return tasks.register(safeName, config)
+    return tasks.register<T>(safeName, *constructorArgs).apply { configure(config) }
 }
 
 internal operator fun ProductFlavor.get(name: String) = extras[name]

@@ -19,7 +19,6 @@ import com.github.triplet.gradle.play.tasks.PublishProducts
 import com.github.triplet.gradle.play.tasks.internal.BootstrapLifecycleHelperTask
 import com.github.triplet.gradle.play.tasks.internal.BootstrapOptionsHolder
 import com.github.triplet.gradle.play.tasks.internal.LifecycleHelperTask
-import com.github.triplet.gradle.play.tasks.internal.PlayPublishTaskBase
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
@@ -43,32 +42,39 @@ class PlayPublisherPlugin : Plugin<Project> {
 
         val bootstrapAllTask = project.newTask<BootstrapLifecycleHelperTask>(
                 "bootstrap",
-                "Downloads the Play Store listing metadata for all variants."
-        ) { extension = baseExtension }
+                "Downloads the Play Store listing metadata for all variants.",
+                arrayOf(baseExtension)
+        )
         val publishAllTask = project.newTask<LifecycleHelperTask>(
                 "publish",
-                "Uploads APK or App Bundle and all Play Store metadata for every variant."
-        ) { extension = baseExtension }
+                "Uploads APK or App Bundle and all Play Store metadata for every variant.",
+                arrayOf(baseExtension)
+        )
         val publishApkAllTask = project.newTask<LifecycleHelperTask>(
                 "publishApk",
-                "Uploads APK for every variant."
-        ) { extension = baseExtension }
+                "Uploads APK for every variant.",
+                arrayOf(baseExtension)
+        )
         val publishBundleAllTask = project.newTask<LifecycleHelperTask>(
                 "publishBundle",
-                "Uploads App Bundle for every variant."
-        ) { extension = baseExtension }
+                "Uploads App Bundle for every variant.",
+                arrayOf(baseExtension)
+        )
         val promoteReleaseAllTask = project.newTask<LifecycleHelperTask>(
                 "promoteArtifact",
-                "Promotes a release for every variant."
-        ) { extension = baseExtension }
+                "Promotes a release for every variant.",
+                arrayOf(baseExtension)
+        )
         val publishListingAllTask = project.newTask<LifecycleHelperTask>(
                 "publishListing",
-                "Uploads all Play Store metadata for every variant."
-        ) { extension = baseExtension }
+                "Uploads all Play Store metadata for every variant.",
+                arrayOf(baseExtension)
+        )
         val publishProductsAllTask = project.newTask<LifecycleHelperTask>(
                 "publishProducts",
-                "Uploads all Play Store in-app products for every variant."
-        ) { extension = baseExtension }
+                "Uploads all Play Store in-app products for every variant.",
+                arrayOf(baseExtension)
+        )
 
         val android = project.the<AppExtension>()
         (android as ExtensionAware).extensions.add(PLAY_CONFIGS_PATH, extensionContainer)
@@ -80,7 +86,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 val typeName = buildType.name
                 if (typeName.equals("release", true)) {
                     project.logger.error(
-                            "GPP cannot configure $variantName because it is debuggable")
+                            "GPP cannot configure variant '$name' because it is debuggable")
                 } else {
                     project.logger.info("Skipping debuggable build with type '$typeName'")
                 }
@@ -94,7 +100,7 @@ class PlayPublisherPlugin : Plugin<Project> {
             }).mergeWith(baseExtension)
 
             if (!extension.isEnabled) {
-                project.logger.info("Gradle Play Publisher is disabled for $variantName")
+                project.logger.info("Gradle Play Publisher is disabled for variant '$name'.")
                 return@whenObjectAdded
             }
 
@@ -117,49 +123,43 @@ class PlayPublisherPlugin : Plugin<Project> {
 
             if (!isSigningReady && !outputsAreSigned) {
                 project.logger.error(
-                        "Signing not ready. Be sure to specify a signingConfig for $variantName")
-            }
-
-            fun PlayPublishTaskBase.init() {
-                this.extension = extension
-                this.variant = this@whenObjectAdded
+                        "Signing not ready. " +
+                                "Be sure to specify a signingConfig for variant '$name'.")
             }
 
             val bootstrapTask = project.newTask<Bootstrap>(
                     "bootstrap${variantName}PlayResources",
-                    "Downloads the Play Store listing metadata for $variantName."
-            ) { init() }
+                    "Downloads the Play Store listing metadata for variant '$name'.",
+                    arrayOf(extension, this)
+            )
             bootstrapAllTask.configure { dependsOn(bootstrapTask) }
 
             val playResourcesTask = project.newTask<GenerateResources>(
                     "generate${variantName}PlayResources",
-                    "Collects Play Store resources for $variantName.",
-                    null
-            ) {
-                variant = this@whenObjectAdded
-            }
+                    constructorArgs = arrayOf(this)
+            )
 
             val publishListingTask = project.newTask<PublishListing>(
                     "publish${variantName}Listing",
-                    "Uploads all Play Store metadata for $variantName."
+                    "Uploads all Play Store metadata for variant '$name'.",
+                    arrayOf(extension, this)
             ) {
-                init()
                 resDir = playResourcesTask.get().resDir
 
                 dependsOn(playResourcesTask)
             }
             publishListingAllTask.configure { dependsOn(publishListingTask) }
             // TODO Remove in v3.0
-            project.newTask("publishListing$variantName", "", null) {
+            project.newTask("publishListing$variantName") {
                 dependsOn(publishListingTask)
                 doFirst { logger.warn("$name is deprecated, use ${publishListingTask.get().name} instead") }
             }
 
             val publishProductsTask = project.newTask<PublishProducts>(
                     "publish${variantName}Products",
-                    "Uploads all Play Store in-app products for $variantName."
+                    "Uploads all Play Store in-app products for variant '$name'.",
+                    arrayOf(extension, this)
             ) {
-                init()
                 resDir = playResourcesTask.get().resDir
 
                 dependsOn(playResourcesTask)
@@ -168,16 +168,13 @@ class PlayPublisherPlugin : Plugin<Project> {
 
             val processPackageMetadata = project.newTask<ProcessPackageMetadata>(
                     "process${variantName}Metadata",
-                    "Processes packaging metadata for $variantName.",
-                    null
-            ) { init() }
+                    constructorArgs = arrayOf(extension, this)
+            )
             checkManifestProvider.configure { dependsOn(processPackageMetadata) }
             generateBuildConfigProvider.configure { dependsOn(processPackageMetadata) }
 
             val publishApkTaskDependenciesHack = project.newTask(
-                    "publish${variantName}ApkWrapper",
-                    "",
-                    null
+                    "publish${variantName}ApkWrapper"
             ) {
                 if (extension._artifactDir == null) {
                     dependsOn(processPackageMetadata)
@@ -188,9 +185,9 @@ class PlayPublisherPlugin : Plugin<Project> {
             }
             val publishApkTask = project.newTask<PublishApk>(
                     "publish${variantName}Apk",
-                    "Uploads APK for $variantName."
+                    "Uploads APK for variant '$name'.",
+                    arrayOf(extension, this)
             ) {
-                init()
                 resDir = playResourcesTask.get().resDir
 
                 dependsOn(playResourcesTask)
@@ -198,15 +195,13 @@ class PlayPublisherPlugin : Plugin<Project> {
             }
             publishApkAllTask.configure { dependsOn(publishApkTask) }
             // TODO Remove in v3.0
-            project.newTask("publishApk$variantName", "", null) {
+            project.newTask("publishApk$variantName") {
                 dependsOn(publishApkTask)
                 doFirst { logger.warn("$name is deprecated, use ${publishApkTask.get().name} instead") }
             }
 
             val publishBundleTaskDependenciesHack = project.newTask(
-                    "publish${variantName}BundleWrapper",
-                    "",
-                    null
+                    "publish${variantName}BundleWrapper"
             ) {
                 if (extension._artifactDir == null) {
                     dependsOn(processPackageMetadata)
@@ -223,9 +218,9 @@ class PlayPublisherPlugin : Plugin<Project> {
             }
             val publishBundleTask = project.newTask<PublishBundle>(
                     "publish${variantName}Bundle",
-                    "Uploads App Bundle for $variantName."
+                    "Uploads App Bundle for variant '$name'.",
+                    arrayOf(extension, this)
             ) {
-                init()
                 resDir = playResourcesTask.get().resDir
 
                 dependsOn(playResourcesTask)
@@ -235,9 +230,9 @@ class PlayPublisherPlugin : Plugin<Project> {
 
             val promoteReleaseTask = project.newTask<PromoteRelease>(
                     "promote${variantName}Artifact",
-                    "Promotes a release for $variantName."
+                    "Promotes a release for variant '$name'.",
+                    arrayOf(extension, this)
             ) {
-                init()
                 resDir = playResourcesTask.get().resDir
 
                 dependsOn(playResourcesTask)
@@ -246,10 +241,9 @@ class PlayPublisherPlugin : Plugin<Project> {
 
             val publishTask = project.newTask<LifecycleHelperTask>(
                     "publish$variantName",
-                    "Uploads APK or App Bundle and all Play Store metadata for $variantName."
+                    "Uploads APK or App Bundle and all Play Store metadata for variant '$name'.",
+                    arrayOf(extension)
             ) {
-                this.extension = extension
-
                 dependsOn(if (extension.defaultToAppBundles) publishBundleTask else publishApkTask)
                 dependsOn(publishListingTask)
                 dependsOn(publishProductsTask)

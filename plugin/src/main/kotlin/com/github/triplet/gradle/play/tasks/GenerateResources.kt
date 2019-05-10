@@ -24,7 +24,6 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.file.CopySpec
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -32,12 +31,12 @@ import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import java.io.File
+import javax.inject.Inject
 
 @CacheableTask
-open class GenerateResources : DefaultTask() {
-    @get:Internal
-    internal lateinit var variant: ApplicationVariant
-
+open class GenerateResources @Inject constructor(
+        private val variant: ApplicationVariant
+) : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputDirectory
     internal val resDir by lazy { File(project.buildDir, "${variant.playPath}/res") }

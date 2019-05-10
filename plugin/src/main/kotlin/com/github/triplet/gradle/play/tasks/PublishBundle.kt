@@ -1,7 +1,9 @@
 package com.github.triplet.gradle.play.tasks
 
+import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.internal.api.InstallableVariantImpl
 import com.android.build.gradle.internal.scope.InternalArtifactType
+import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.MIME_TYPE_STREAM
 import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.internal.trackUploadProgress
@@ -17,8 +19,12 @@ import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import java.io.File
+import javax.inject.Inject
 
-open class PublishBundle : PlayPublishPackageBase() {
+open class PublishBundle @Inject constructor(
+        extension: PlayPublisherExtension,
+        variant: ApplicationVariant
+) : PlayPublishPackageBase(extension, variant) {
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFile

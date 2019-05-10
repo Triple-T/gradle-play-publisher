@@ -1,5 +1,7 @@
 package com.github.triplet.gradle.play.tasks
 
+import com.android.build.gradle.api.ApplicationVariant
+import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.AppDetail
 import com.github.triplet.gradle.play.internal.GRAPHICS_PATH
 import com.github.triplet.gradle.play.internal.ImageType
@@ -30,7 +32,10 @@ import java.io.Serializable
 import java.net.URL
 import javax.inject.Inject
 
-open class Bootstrap : PlayPublishTaskBase(), BootstrapOptions by BootstrapOptionsHolder {
+open class Bootstrap @Inject constructor(
+        extension: PlayPublisherExtension,
+        variant: ApplicationVariant
+) : PlayPublishTaskBase(extension, variant), BootstrapOptions by BootstrapOptionsHolder {
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputDirectory

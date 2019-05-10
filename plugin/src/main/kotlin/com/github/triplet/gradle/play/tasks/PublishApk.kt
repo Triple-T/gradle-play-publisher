@@ -2,6 +2,8 @@ package com.github.triplet.gradle.play.tasks
 
 import com.android.build.VariantOutput.OutputType
 import com.android.build.gradle.api.ApkVariantOutput
+import com.android.build.gradle.api.ApplicationVariant
+import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.internal.trackUploadProgress
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishPackageBase
@@ -17,8 +19,12 @@ import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 import java.io.File
+import javax.inject.Inject
 
-open class PublishApk : PlayPublishPackageBase() {
+open class PublishApk @Inject constructor(
+        extension: PlayPublisherExtension,
+        variant: ApplicationVariant
+) : PlayPublishPackageBase(extension, variant) {
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:SkipWhenEmpty
     @get:PathSensitive(PathSensitivity.RELATIVE)

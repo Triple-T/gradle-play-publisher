@@ -1,9 +1,15 @@
 package com.github.triplet.gradle.play.tasks
 
+import com.android.build.gradle.api.ApplicationVariant
+import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishPackageBase
 import org.gradle.api.tasks.TaskAction
+import javax.inject.Inject
 
-open class PromoteRelease : PlayPublishPackageBase() {
+open class PromoteRelease @Inject constructor(
+        extension: PlayPublisherExtension,
+        variant: ApplicationVariant
+) : PlayPublishPackageBase(extension, variant) {
     init {
         // Always out-of-date since we don't know what's changed on the network
         outputs.upToDateWhen { false }
