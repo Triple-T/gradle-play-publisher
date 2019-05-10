@@ -14,7 +14,6 @@ import com.github.triplet.gradle.play.internal.flavorNameOrDefault
 import com.github.triplet.gradle.play.internal.nullOrFull
 import com.github.triplet.gradle.play.internal.safeCreateNewFile
 import com.github.triplet.gradle.play.tasks.internal.BootstrapOptions
-import com.github.triplet.gradle.play.tasks.internal.BootstrapOptionsHolder
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishTaskBase
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.AndroidPublisher
@@ -35,7 +34,7 @@ import javax.inject.Inject
 open class Bootstrap @Inject constructor(
         extension: PlayPublisherExtension,
         variant: ApplicationVariant
-) : PlayPublishTaskBase(extension, variant), BootstrapOptions by BootstrapOptionsHolder {
+) : PlayPublishTaskBase(extension, variant), BootstrapOptions by BootstrapOptions.Holder {
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputDirectory
