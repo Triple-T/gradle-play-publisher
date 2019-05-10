@@ -17,9 +17,9 @@ import org.gradle.internal.logging.progress.ProgressLoggerFactory
 import java.io.File
 
 abstract class PlayPublishTaskBase(
-        @get:Nested override val extension: PlayPublisherExtension,
+        @get:Nested protected open val extension: PlayPublisherExtension,
         @get:Internal protected val variant: ApplicationVariant
-) : DefaultTask(), ExtensionOptions {
+) : DefaultTask() {
     private val savedEditId = File(project.rootProject.buildDir, EDIT_ID_FILE)
     @get:Internal protected val hasSavedEdit get() = savedEditId.exists()
 

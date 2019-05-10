@@ -14,6 +14,7 @@ import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.internal.readProcessed
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishTaskBase
+import com.github.triplet.gradle.play.tasks.internal.WriteExtensionOptions
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
@@ -24,6 +25,7 @@ import com.google.common.io.Files
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -34,9 +36,9 @@ import java.io.File
 import javax.inject.Inject
 
 open class PublishListing @Inject constructor(
-        extension: PlayPublisherExtension,
+        @get:Nested override val extension: PlayPublisherExtension,
         variant: ApplicationVariant
-) : PlayPublishTaskBase(extension, variant) {
+) : PlayPublishTaskBase(extension, variant), WriteExtensionOptions {
     @get:Internal
     internal lateinit var resDir: File
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle

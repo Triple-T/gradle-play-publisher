@@ -16,9 +16,12 @@ import com.github.triplet.gradle.play.tasks.PublishApk
 import com.github.triplet.gradle.play.tasks.PublishBundle
 import com.github.triplet.gradle.play.tasks.PublishListing
 import com.github.triplet.gradle.play.tasks.PublishProducts
-import com.github.triplet.gradle.play.tasks.internal.BootstrapLifecycleHelperTask
-import com.github.triplet.gradle.play.tasks.internal.BootstrapOptionsHolder
-import com.github.triplet.gradle.play.tasks.internal.LifecycleHelperTask
+import com.github.triplet.gradle.play.tasks.internal.BootstrapLifecycleTask
+import com.github.triplet.gradle.play.tasks.internal.BootstrapOptions
+import com.github.triplet.gradle.play.tasks.internal.GlobalPublishableArtifactLifecycleTask
+import com.github.triplet.gradle.play.tasks.internal.PublishableArtifactLifecycleTask
+import com.github.triplet.gradle.play.tasks.internal.UpdatableArtifactLifecycleTask
+import com.github.triplet.gradle.play.tasks.internal.WriteLifecycleTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
@@ -40,45 +43,43 @@ class PlayPublisherPlugin : Plugin<Project> {
                 project.extensions.create(PLAY_PATH, PlayPublisherExtension::class.java)
         val extensionContainer = project.container(PlayPublisherExtension::class.java)
 
-        val bootstrapAllTask = project.newTask<BootstrapLifecycleHelperTask>(
+        val bootstrapAllTask = project.newTask<BootstrapLifecycleTask>(
                 "bootstrap",
-                "Downloads the Play Store listing metadata for all variants.",
-                arrayOf(baseExtension)
+                "Downloads the Play Store listing metadata for all variants."
         )
-        val publishAllTask = project.newTask<LifecycleHelperTask>(
+        val publishAllTask = project.newTask<GlobalPublishableArtifactLifecycleTask>(
                 "publish",
                 "Uploads APK or App Bundle and all Play Store metadata for every variant.",
                 arrayOf(baseExtension)
         )
-        val publishApkAllTask = project.newTask<LifecycleHelperTask>(
+        val publishApkAllTask = project.newTask<PublishableArtifactLifecycleTask>(
                 "publishApk",
                 "Uploads APK for every variant.",
                 arrayOf(baseExtension)
         )
-        val publishBundleAllTask = project.newTask<LifecycleHelperTask>(
+        val publishBundleAllTask = project.newTask<PublishableArtifactLifecycleTask>(
                 "publishBundle",
                 "Uploads App Bundle for every variant.",
                 arrayOf(baseExtension)
         )
-        val promoteReleaseAllTask = project.newTask<LifecycleHelperTask>(
+        val promoteReleaseAllTask = project.newTask<UpdatableArtifactLifecycleTask>(
                 "promoteArtifact",
                 "Promotes a release for every variant.",
                 arrayOf(baseExtension)
         )
-        val publishListingAllTask = project.newTask<LifecycleHelperTask>(
+        val publishListingAllTask = project.newTask<WriteLifecycleTask>(
                 "publishListing",
                 "Uploads all Play Store metadata for every variant.",
                 arrayOf(baseExtension)
         )
-        val publishProductsAllTask = project.newTask<LifecycleHelperTask>(
+        val publishProductsAllTask = project.newTask(
                 "publishProducts",
-                "Uploads all Play Store in-app products for every variant.",
-                arrayOf(baseExtension)
+                "Uploads all Play Store in-app products for every variant."
         )
 
         val android = project.the<AppExtension>()
         (android as ExtensionAware).extensions.add(PLAY_CONFIGS_PATH, extensionContainer)
-        BootstrapOptionsHolder.reset()
+        BootstrapOptions.Holder.reset()
         android.applicationVariants.whenObjectAdded {
             val variantName = name.capitalize()
 
@@ -239,7 +240,7 @@ class PlayPublisherPlugin : Plugin<Project> {
             }
             promoteReleaseAllTask.configure { dependsOn(promoteReleaseTask) }
 
-            val publishTask = project.newTask<LifecycleHelperTask>(
+            val publishTask = project.newTask<GlobalPublishableArtifactLifecycleTask>(
                     "publish$variantName",
                     "Uploads APK or App Bundle and all Play Store metadata for variant '$name'.",
                     arrayOf(extension)
