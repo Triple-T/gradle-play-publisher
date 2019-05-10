@@ -61,7 +61,7 @@ class TestHelper {
                 jcenter()
             }
             dependencies {
-                classpath 'com.android.tools.build:gradle:3.2.1'
+                classpath 'com.android.tools.build:gradle:3.5.0-beta01'
                 classpath files('../../../../build/libs/plugin-${System.getProperty("VERSION_NAME")}.jar')
 
                 // Manually define transitive dependencies for our plugin since we don't have the

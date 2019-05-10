@@ -9,20 +9,20 @@ plugins {
 }
 
 dependencies {
-    compileOnly("com.android.tools.build:gradle:3.5.0-alpha09")
+    compileOnly("com.android.tools.build:gradle:3.5.0-beta01")
 
-    implementation("com.google.apis:google-api-services-androidpublisher:v3-rev71-1.24.1")
+    implementation("com.google.apis:google-api-services-androidpublisher:v3-rev82-1.25.0")
 
-    testImplementation("com.android.tools.build:gradle:3.5.0-alpha09")
+    testImplementation("com.android.tools.build:gradle:3.5.0-beta01")
     testImplementation(kotlin("test"))
     testImplementation("junit:junit:4.12")
-    testImplementation("org.mockito:mockito-core:2.25.1")
+    testImplementation("org.mockito:mockito-core:2.27.0")
     testImplementation("org.assertj:assertj-core:3.12.2")
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_7
-    targetCompatibility = JavaVersion.VERSION_1_7
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 tasks.withType<KotlinJvmCompile>().configureEach {
