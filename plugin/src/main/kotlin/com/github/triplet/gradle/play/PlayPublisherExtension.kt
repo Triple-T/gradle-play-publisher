@@ -8,18 +8,18 @@ import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
 import com.github.triplet.gradle.play.internal.trackOrDefault
 import org.gradle.api.Action
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import java.io.File
+import java.io.Serializable
 
 @Suppress("PropertyName")
 open class PlayPublisherExtension @JvmOverloads constructor(
         @get:Internal internal val name: String = "default" // Needed for Gradle
-) {
+) : Serializable {
     @get:Internal("Backing property for public input")
     internal var _isEnabled: Boolean? = null
     /**
@@ -198,12 +198,26 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      *
      * Defaults to null (i.e. your app will be built pre-publish).
      */
-    @get:PathSensitive(PathSensitivity.ABSOLUTE)
-    @get:Optional
-    @get:InputDirectory
+    @get:Internal("Directory mapped to a useful set of files later")
     var artifactDir: File?
         get() = _artifactDir
         set(value) {
             _artifactDir = value
         }
+
+    internal fun toSerializable() = Serializable().also {
+        it._isEnabled = _isEnabled
+        it._serviceAccountCredentials = _serviceAccountCredentials
+        it._serviceAccountEmail = _serviceAccountEmail
+        it._defaultToAppBundles = _defaultToAppBundles
+        it._commit = _commit
+        it._fromTrack = _fromTrack
+        it._track = _track
+        it._userFraction = _userFraction
+        it._resolutionStrategy = _resolutionStrategy
+        it._releaseStatus = _releaseStatus
+        it._artifactDir = _artifactDir
+    }
+
+    internal class Serializable : PlayPublisherExtension()
 }

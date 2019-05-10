@@ -3,20 +3,25 @@ package com.github.triplet.gradle.play.tasks
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
-import com.github.triplet.gradle.play.internal.isDirectChildOf
-import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishTaskBase
+import com.github.triplet.gradle.play.tasks.internal.PlayWorkerBase
+import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.model.InAppProduct
+import org.gradle.api.file.FileType
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.incremental.IncrementalTaskInputs
+import org.gradle.kotlin.dsl.submit
+import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.work.ChangeType
+import org.gradle.work.InputChanges
+import org.gradle.workers.WorkerExecutor
 import java.io.File
+import java.io.Serializable
 import javax.inject.Inject
 
 open class PublishProducts @Inject constructor(
@@ -29,41 +34,38 @@ open class PublishProducts @Inject constructor(
     @get:SkipWhenEmpty
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputDirectory
-    protected val productsDir by lazy { File(resDir, PRODUCTS_PATH) }
-
-    @Suppress("MemberVisibilityCanBePrivate") // Needed for Gradle caching to work correctly
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    @get:OutputFile
-    val outputFile by lazy { File(project.buildDir, "${variant.playPath}/products-cache-key") }
-
-    @TaskAction
-    fun publishListing(inputs: IncrementalTaskInputs) {
-        if (!inputs.isIncremental) project.delete(outputs.files)
-
-        val changedProducts = mutableSetOf<File>()
-
-        fun File.process() {
-            if (invalidatesProduct()) changedProducts += this
+    protected val productsDir by lazy {
+        project.fileTree(File(resDir, PRODUCTS_PATH)).apply {
+            include("*.json")
         }
-
-        inputs.outOfDate { file.process() }
-        inputs.removed { file.process() }
-
-        progressLogger.start("Uploads in-app products for variant ${variant.name}", null)
-        publisher.inappproducts().apply {
-            changedProducts.map {
-                JacksonFactory.getDefaultInstance()
-                        .createJsonParser(it.inputStream())
-                        .parse(InAppProduct::class.java)
-            }.forEach {
-                progressLogger.progress("Uploading ${it.sku}")
-                update(variant.applicationId, it.sku, it).execute()
-            }
-
-            outputFile.writeText(hashCode().toString())
-        }
-        progressLogger.completed()
     }
 
-    private fun File.invalidatesProduct() = isDirectChildOf(PRODUCTS_PATH)
+    @TaskAction
+    fun publishProducts(changes: InputChanges) {
+        val executor = project.serviceOf<WorkerExecutor>()
+        changes.getFileChanges(productsDir)
+                .filterNot { it.changeType == ChangeType.REMOVED }
+                .filter { it.fileType == FileType.FILE }
+                .forEach {
+                    executor.submit(Uploader::class) {
+                        paramsForBase(this, Uploader.Params(it.file))
+                    }
+                }
+    }
+
+    private class Uploader @Inject constructor(
+            private val p: Params,
+            data: PlayPublishingData
+    ) : PlayWorkerBase(data) {
+        override fun run() {
+            val product = JacksonFactory.getDefaultInstance()
+                    .createJsonParser(p.target.inputStream())
+                    .parse(InAppProduct::class.java)
+
+            println("Uploading ${product.sku}")
+            publisher.inappproducts().update(appId, product.sku, product).execute()
+        }
+
+        data class Params(val target: File) : Serializable
+    }
 }
