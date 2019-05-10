@@ -125,9 +125,7 @@ open class Bootstrap @Inject constructor(
             track.releases?.maxBy {
                 it.versionCodes?.max() ?: Long.MIN_VALUE
             }?.releaseNotes?.forEach {
-                File(srcDir, "$RELEASE_NOTES_PATH/${it.language}/${track.track}.txt")
-                        .safeCreateNewFile()
-                        .writeText(it.text)
+                it.text.write(srcDir, "$RELEASE_NOTES_PATH/${it.language}/${track.track}.txt")
             }
         }
     }
@@ -142,7 +140,7 @@ open class Bootstrap @Inject constructor(
     }
 
     private fun String.write(dir: File, fileName: String) =
-            File(dir, fileName).safeCreateNewFile().writeText(this)
+            File(dir, fileName).safeCreateNewFile().writeText(this + "\n")
 
     private companion object {
         const val HIGH_RES_IMAGE_REQUEST = "=h16383" // Max res: 2^14 - 1
