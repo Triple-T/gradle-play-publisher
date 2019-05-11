@@ -167,9 +167,9 @@ class PlayPublisherPluginTest {
         }
         project.evaluate()
 
-        assertEquals('default@exmaple.com', project.tasks.bootstrapDefaultFlavorReleasePlayResources.extension.serviceAccountEmail)
-        assertEquals('first-mail@exmaple.com', project.tasks.bootstrapFreeReleasePlayResources.extension.serviceAccountEmail)
-        assertEquals('another-mail@exmaple.com', project.tasks.bootstrapPaidReleasePlayResources.extension.serviceAccountEmail)
+        assertEquals('default@exmaple.com', project.tasks.bootstrapDefaultFlavorRelease.extension.serviceAccountEmail)
+        assertEquals('first-mail@exmaple.com', project.tasks.bootstrapFreeRelease.extension.serviceAccountEmail)
+        assertEquals('another-mail@exmaple.com', project.tasks.bootstrapPaidRelease.extension.serviceAccountEmail)
 
         assertEquals('default@exmaple.com', project.tasks.publishDefaultFlavorReleaseApk.extension.serviceAccountEmail)
         assertEquals('first-mail@exmaple.com', project.tasks.publishFreeReleaseApk.extension.serviceAccountEmail)
@@ -216,10 +216,10 @@ class PlayPublisherPluginTest {
         }
         project.evaluate()
 
-        assertEquals('free@exmaple.com', project.tasks.bootstrapDemoFreeReleasePlayResources.extension.serviceAccountEmail)
-        assertEquals('paid@exmaple.com', project.tasks.bootstrapDemoPaidReleasePlayResources.extension.serviceAccountEmail)
-        assertEquals('free@exmaple.com', project.tasks.bootstrapProductionFreeReleasePlayResources.extension.serviceAccountEmail)
-        assertEquals('paid@exmaple.com', project.tasks.bootstrapProductionPaidReleasePlayResources.extension.serviceAccountEmail)
+        assertEquals('free@exmaple.com', project.tasks.bootstrapDemoFreeRelease.extension.serviceAccountEmail)
+        assertEquals('paid@exmaple.com', project.tasks.bootstrapDemoPaidRelease.extension.serviceAccountEmail)
+        assertEquals('free@exmaple.com', project.tasks.bootstrapProductionFreeRelease.extension.serviceAccountEmail)
+        assertEquals('paid@exmaple.com', project.tasks.bootstrapProductionPaidRelease.extension.serviceAccountEmail)
     }
 
     @Test
@@ -232,7 +232,7 @@ class PlayPublisherPluginTest {
         }
         project.evaluate()
 
-        assertEquals('default@exmaple.com', project.tasks.bootstrapReleasePlayResources.extension.serviceAccountEmail)
+        assertEquals('default@exmaple.com', project.tasks.bootstrapRelease.extension.serviceAccountEmail)
         assertEquals('default@exmaple.com', project.tasks.publishReleaseApk.extension.serviceAccountEmail)
         assertEquals('default@exmaple.com', project.tasks.publishReleaseListing.extension.serviceAccountEmail)
     }
@@ -242,7 +242,7 @@ class PlayPublisherPluginTest {
         def project = TestHelper.evaluatableProject()
         project.evaluate()
 
-        assertThat(project.tasks.bootstrap, dependsOn('bootstrapReleasePlayResources'))
+        assertThat(project.tasks.bootstrap, dependsOn('bootstrapRelease'))
         assertThat(project.tasks.publish, dependsOn('publishRelease'))
         assertThat(project.tasks.publishApk, dependsOn('publishReleaseApk'))
         assertThat(project.tasks.publishListing, dependsOn('publishReleaseListing'))
@@ -272,22 +272,22 @@ class PlayPublisherPluginTest {
         }
         project.evaluate()
 
-        assertThat(project.tasks.bootstrap, dependsOn('bootstrapDemoFreeReleasePlayResources'))
+        assertThat(project.tasks.bootstrap, dependsOn('bootstrapDemoFreeRelease'))
         assertThat(project.tasks.publish, dependsOn('publishDemoFreeRelease'))
         assertThat(project.tasks.publishApk, dependsOn('publishDemoFreeReleaseApk'))
         assertThat(project.tasks.publishListing, dependsOn('publishDemoFreeReleaseListing'))
 
-        assertThat(project.tasks.bootstrap, dependsOn('bootstrapDemoPaidReleasePlayResources'))
+        assertThat(project.tasks.bootstrap, dependsOn('bootstrapDemoPaidRelease'))
         assertThat(project.tasks.publish, dependsOn('publishDemoPaidRelease'))
         assertThat(project.tasks.publishApk, dependsOn('publishDemoPaidReleaseApk'))
         assertThat(project.tasks.publishListing, dependsOn('publishDemoPaidReleaseListing'))
 
-        assertThat(project.tasks.bootstrap, dependsOn('bootstrapProductionFreeReleasePlayResources'))
+        assertThat(project.tasks.bootstrap, dependsOn('bootstrapProductionFreeRelease'))
         assertThat(project.tasks.publish, dependsOn('publishProductionFreeRelease'))
         assertThat(project.tasks.publishApk, dependsOn('publishProductionFreeReleaseApk'))
         assertThat(project.tasks.publishListing, dependsOn('publishProductionFreeReleaseListing'))
 
-        assertThat(project.tasks.bootstrap, dependsOn('bootstrapProductionPaidReleasePlayResources'))
+        assertThat(project.tasks.bootstrap, dependsOn('bootstrapProductionPaidRelease'))
         assertThat(project.tasks.publish, dependsOn('publishProductionPaidRelease'))
         assertThat(project.tasks.publishApk, dependsOn('publishProductionPaidReleaseApk'))
         assertThat(project.tasks.publishListing, dependsOn('publishProductionPaidReleaseListing'))
