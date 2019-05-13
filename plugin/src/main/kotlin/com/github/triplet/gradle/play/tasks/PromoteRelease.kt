@@ -35,7 +35,9 @@ open class PromoteRelease @Inject constructor(
         val track = run {
             val from = extension._fromTrack
             if (from == null) {
-                tracks.last() // Tracks are always ordered from most to least stable
+                tracks.sortedByDescending {
+                    it.releases.flatMap { it.versionCodes.orEmpty() }.max()
+                }.first()
             } else {
                 checkNotNull(tracks.find { it.track.equals(from, true) }) {
                     "${from.capitalize()} track has no active artifacts"
