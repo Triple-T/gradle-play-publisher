@@ -52,6 +52,8 @@ open class Bootstrap @Inject constructor(
 
     @TaskAction
     fun bootstrap() {
+        project.delete(srcDir)
+
         val editId = getOrCreateEditId()
 
         val executor = project.serviceOf<WorkerExecutor>()
@@ -158,9 +160,9 @@ open class Bootstrap @Inject constructor(
                 val imageDir = File(p.dir, p.type.dirName).safeMkdirs()
 
                 println("Downloading ${p.language} listing graphics for type '$typeName'")
-                for (image in images) {
+                for ((i, image) in images.withIndex()) {
                     executor.submit(ImageDownloader::class) {
-                        params(ImageDownloader.Params(File(imageDir, "${image.id}.png"), image.url))
+                        params(ImageDownloader.Params(File(imageDir, "${i + 1}.png"), image.url))
                     }
                 }
             }

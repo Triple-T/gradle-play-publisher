@@ -143,7 +143,7 @@ class PlayPublisherPlugin : Plugin<Project> {
             val playResourcesTask = project.newTask<GenerateResources>(
                     "generate${variantName}PlayResources",
                     constructorArgs = arrayOf(this)
-            )
+            ) { mustRunAfter(bootstrapTask) }
 
             val publishListingTask = project.newTask<PublishListing>(
                     "publish${variantName}Listing",
