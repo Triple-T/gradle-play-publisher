@@ -182,6 +182,21 @@ class GenerateResourcesTest {
     }
 
     @Test
+    void ignoresHiddenFile() {
+        // language=gradle
+        def config = """
+            flavorDimensions 'pricing'
+
+            productFlavors {
+                hiddenFile { dimension 'pricing' }
+            }
+        """
+        def result = execute(config, "clean", "generateHiddenFileReleasePlayResources")
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":generateHiddenFileReleasePlayResources").outcome)
+    }
+
+    @Test
     void invalidLocaleThrows() {
         // language=gradle
         def config = """

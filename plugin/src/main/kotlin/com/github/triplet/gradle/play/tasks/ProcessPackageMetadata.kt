@@ -22,14 +22,9 @@ open class ProcessPackageMetadata @Inject constructor(
 
     @TaskAction
     fun process() {
-        progressLogger.start("Updates APK/Bundle metadata for variant ${variant.name}", null)
-        processVersionCodes()
-        progressLogger.completed()
-    }
-
-    private fun processVersionCodes() = read(true) { editId ->
-        progressLogger.progress("Downloading active version codes")
-        val maxVersionCode = tracks().list(variant.applicationId, editId).execute().tracks
+        val editId = getOrCreateEditId()
+        val maxVersionCode = publisher.edits().tracks()
+                .list(variant.applicationId, editId).execute().tracks
                 ?.flatMap { it.releases.orEmpty() }
                 ?.flatMap { it.versionCodes.orEmpty() }
                 ?.max() ?: 1

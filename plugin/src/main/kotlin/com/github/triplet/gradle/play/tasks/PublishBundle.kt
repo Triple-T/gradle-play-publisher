@@ -5,22 +5,26 @@ import com.android.build.gradle.internal.api.InstallableVariantImpl
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.MIME_TYPE_STREAM
+import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.internal.trackUploadProgress
+import com.github.triplet.gradle.play.tasks.internal.ArtifactWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishPackageBase
 import com.github.triplet.gradle.play.tasks.internal.PublishableArtifactExtensionOptions
+import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
-import com.google.api.services.androidpublisher.AndroidPublisher
-import com.google.api.services.androidpublisher.model.Bundle
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.incremental.IncrementalTaskInputs
+import org.gradle.kotlin.dsl.submit
+import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.workers.WorkerExecutor
 import java.io.File
+import java.io.Serializable
 import javax.inject.Inject
 
 open class PublishBundle @Inject constructor(
@@ -30,56 +34,51 @@ open class PublishBundle @Inject constructor(
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFile
-    val bundle by lazy {
-        val customDir = extension._artifactDir
+    protected val bundle: File?
+        get() {
+            val customDir = extension._artifactDir
 
-        if (customDir == null) {
-            (variant as InstallableVariantImpl).getFinalArtifact(InternalArtifactType.BUNDLE)
-                    .files.single()
-        } else {
-            customDir.listFiles().orEmpty().singleOrNull { it.extension == "aab" }
-                    ?: error("No App Bundle found in '$customDir'.")
-        }
-    }
-    @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    @get:OutputDirectory
-    val outputDir by lazy { File(project.buildDir, "${variant.playPath}/bundles") }
-
-    @TaskAction
-    fun publishBundle(inputs: IncrementalTaskInputs) = write { editId: String ->
-        progressLogger.start("Uploads App Bundle for variant ${variant.name}", null)
-
-        if (!inputs.isIncremental) project.delete(outputs.files)
-
-        inputs.outOfDate {
-            if (file == bundle) {
-                project.copy { from(file).into(outputDir) }
-
-                publishBundle(editId, FileContent(MIME_TYPE_STREAM, file))?.let {
-                    updateTracks(editId, listOf(it.versionCode.toLong()))
+            return if (customDir == null) {
+                (variant as InstallableVariantImpl).getFinalArtifact(InternalArtifactType.BUNDLE)
+                        .files.singleOrNull()
+            } else {
+                customDir.listFiles().orEmpty().singleOrNull { it.extension == "aab" }.also {
+                    if (it == null) println("Warning: no App Bundle found in '$customDir' yet.")
                 }
             }
         }
-        inputs.removed { project.delete(File(outputDir, file.name)) }
+    @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:OutputDirectory // This directory isn't used, but it's needed for up-to-date checks to work
+    protected val outputDir by lazy { File(project.buildDir, "${variant.playPath}/bundles") }
 
-        progressLogger.completed()
+    @TaskAction
+    fun publishBundle() {
+        val bundleFile = bundle?.orNull() ?: return
+        project.serviceOf<WorkerExecutor>().submit(BundleUploader::class) {
+            paramsForBase(this, BundleUploader.Params(bundleFile))
+        }
     }
 
-    private fun AndroidPublisher.Edits.publishBundle(
-            editId: String,
-            content: FileContent
-    ): Bundle? {
-        val bundle = try {
-            bundles().upload(variant.applicationId, editId, content)
-                    .trackUploadProgress(progressLogger, "App Bundle")
-                    .execute()
-        } catch (e: GoogleJsonResponseException) {
-            return handleUploadFailures(e, content.file)
+    private class BundleUploader @Inject constructor(
+            private val p: Params,
+            artifact: ArtifactPublishingData,
+            play: PlayPublishingData
+    ) : ArtifactWorkerBase(artifact, play) {
+        override fun upload() {
+            val content = FileContent(MIME_TYPE_STREAM, p.bundleFile)
+            val bundle = try {
+                edits.bundles().upload(appId, editId, content)
+                        .trackUploadProgress("App Bundle")
+                        .execute()
+            } catch (e: GoogleJsonResponseException) {
+                handleUploadFailures(e, content.file)
+            } ?: return
+
+            handlePackageDetails(editId, bundle.versionCode)
+            updateTracks(editId, listOf(bundle.versionCode.toLong()))
         }
 
-        handlePackageDetails(editId, bundle.versionCode)
-
-        return bundle
+        data class Params(val bundleFile: File) : Serializable
     }
 }
