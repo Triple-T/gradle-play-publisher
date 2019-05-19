@@ -15,7 +15,23 @@ internal interface ExtensionOptionsBase {
     @get:Nested val extension: PlayPublisherExtension
 }
 
-internal interface WriteExtensionOptions : ExtensionOptionsBase {
+internal interface ArtifactExtensionOptions : ExtensionOptionsBase {
+    @get:Internal
+    @set:Option(
+            option = "artifact-dir",
+            description = "Set the prebuilt artifact (APKs/App Bundles) directory"
+    )
+    var artifactDirOption: String
+        get() = throw UnsupportedOperationException()
+        set(value) {
+            val dir = File(value)
+            extension.artifactDir = requireNotNull(dir.orNull()) {
+                "Folder '${dir.absolutePath}' does not exist."
+            }.absoluteFile
+        }
+}
+
+internal interface WriteTrackExtensionOptions : ExtensionOptionsBase {
     @get:Internal
     @set:Option(
             option = "skip-commit",
@@ -28,7 +44,7 @@ internal interface WriteExtensionOptions : ExtensionOptionsBase {
         }
 }
 
-internal interface ArtifactExtensionOptions : WriteExtensionOptions {
+internal interface TrackExtensionOptions : WriteTrackExtensionOptions {
     @get:Internal
     @set:Option(
             option = "track",
@@ -67,7 +83,7 @@ internal interface ArtifactExtensionOptions : WriteExtensionOptions {
         }
 }
 
-internal interface UpdatableArtifactExtensionOptions : ArtifactExtensionOptions {
+internal interface UpdatableTrackExtensionOptions : TrackExtensionOptions {
     @get:Internal
     @set:Option(
             option = "from-track",
@@ -92,7 +108,8 @@ internal interface UpdatableArtifactExtensionOptions : ArtifactExtensionOptions 
         }
 }
 
-internal interface PublishableArtifactExtensionOptions : ArtifactExtensionOptions {
+internal interface PublishableTrackExtensionOptions : TrackExtensionOptions,
+        ArtifactExtensionOptions {
     @get:OptionValues("resolution-strategy")
     val resolutionStrategyOptions
         get() = ResolutionStrategy.values().map { it.publishedName }
@@ -106,23 +123,9 @@ internal interface PublishableArtifactExtensionOptions : ArtifactExtensionOption
         set(value) {
             extension.resolutionStrategy = value
         }
-
-    @get:Internal
-    @set:Option(
-            option = "artifact-dir",
-            description = "Set the prebuilt artifacts (APKs/App Bundles) directory"
-    )
-    var artifactDirOption: String
-        get() = throw UnsupportedOperationException()
-        set(value) {
-            val dir = File(value)
-            extension.artifactDir = requireNotNull(dir.orNull()) {
-                "Folder '${dir.absolutePath}' does not exist."
-            }.absoluteFile
-        }
 }
 
-internal interface GlobalPublishableArtifactExtensionOptions : PublishableArtifactExtensionOptions {
+internal interface GlobalPublishableArtifactExtensionOptions : PublishableTrackExtensionOptions {
     @get:Internal
     @set:Option(
             option = "default-to-app-bundles",

@@ -13,7 +13,7 @@ import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.internal.readProcessed
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PlayWorkerBase
-import com.github.triplet.gradle.play.tasks.internal.WriteExtensionOptions
+import com.github.triplet.gradle.play.tasks.internal.WriteTrackExtensionOptions
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
@@ -42,7 +42,7 @@ import javax.inject.Inject
 open class PublishListing @Inject constructor(
         @get:Nested override val extension: PlayPublisherExtension,
         variant: ApplicationVariant
-) : PlayPublishTaskBase(extension, variant), WriteExtensionOptions {
+) : PlayPublishTaskBase(extension, variant), WriteTrackExtensionOptions {
     @get:Internal
     internal lateinit var resDir: File
 

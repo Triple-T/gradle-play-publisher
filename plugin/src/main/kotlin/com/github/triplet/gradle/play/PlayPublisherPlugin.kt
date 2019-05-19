@@ -14,14 +14,17 @@ import com.github.triplet.gradle.play.tasks.ProcessPackageMetadata
 import com.github.triplet.gradle.play.tasks.PromoteRelease
 import com.github.triplet.gradle.play.tasks.PublishApk
 import com.github.triplet.gradle.play.tasks.PublishBundle
+import com.github.triplet.gradle.play.tasks.PublishInternalSharingApk
+import com.github.triplet.gradle.play.tasks.PublishInternalSharingBundle
 import com.github.triplet.gradle.play.tasks.PublishListing
 import com.github.triplet.gradle.play.tasks.PublishProducts
+import com.github.triplet.gradle.play.tasks.internal.ArtifactLifecycleTask
 import com.github.triplet.gradle.play.tasks.internal.BootstrapLifecycleTask
 import com.github.triplet.gradle.play.tasks.internal.BootstrapOptions
 import com.github.triplet.gradle.play.tasks.internal.GlobalPublishableArtifactLifecycleTask
-import com.github.triplet.gradle.play.tasks.internal.PublishableArtifactLifecycleTask
-import com.github.triplet.gradle.play.tasks.internal.UpdatableArtifactLifecycleTask
-import com.github.triplet.gradle.play.tasks.internal.WriteLifecycleTask
+import com.github.triplet.gradle.play.tasks.internal.PublishableTrackLifecycleTask
+import com.github.triplet.gradle.play.tasks.internal.UpdatableTrackLifecycleTask
+import com.github.triplet.gradle.play.tasks.internal.WriteTrackLifecycleTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
@@ -52,22 +55,32 @@ class PlayPublisherPlugin : Plugin<Project> {
                 "Uploads APK or App Bundle and all Play Store metadata for every variant.",
                 arrayOf(baseExtension)
         )
-        val publishApkAllTask = project.newTask<PublishableArtifactLifecycleTask>(
+        val publishApkAllTask = project.newTask<PublishableTrackLifecycleTask>(
                 "publishApk",
                 "Uploads APK for every variant.",
                 arrayOf(baseExtension)
         )
-        val publishBundleAllTask = project.newTask<PublishableArtifactLifecycleTask>(
+        val publishBundleAllTask = project.newTask<PublishableTrackLifecycleTask>(
                 "publishBundle",
                 "Uploads App Bundle for every variant.",
                 arrayOf(baseExtension)
         )
-        val promoteReleaseAllTask = project.newTask<UpdatableArtifactLifecycleTask>(
+        val publishInternalSharingApkAllTask = project.newTask<ArtifactLifecycleTask>(
+                "uploadPrivateApk",
+                "Uploads Internal Sharing APK for every variant.",
+                arrayOf(baseExtension)
+        )
+        val publishInternalSharingBundleAllTask = project.newTask<ArtifactLifecycleTask>(
+                "uploadPrivateBundle",
+                "Uploads Internal Sharing App Bundle for every variant.",
+                arrayOf(baseExtension)
+        )
+        val promoteReleaseAllTask = project.newTask<UpdatableTrackLifecycleTask>(
                 "promoteArtifact",
                 "Promotes a release for every variant.",
                 arrayOf(baseExtension)
         )
-        val publishListingAllTask = project.newTask<WriteLifecycleTask>(
+        val publishListingAllTask = project.newTask<WriteTrackLifecycleTask>(
                 "publishListing",
                 "Uploads all Play Store metadata for every variant.",
                 arrayOf(baseExtension)
@@ -206,6 +219,13 @@ class PlayPublisherPlugin : Plugin<Project> {
                 doFirst { logger.warn("$name is deprecated, use ${publishApkTask.get().name} instead") }
             }
 
+            val publishInternalSharingApkTask = project.newTask<PublishInternalSharingApk>(
+                    "upload${variantName}PrivateApk",
+                    "Uploads Internal Sharing APK for variant '$name'.",
+                    arrayOf(extension, this)
+            ) { dependsOn(publishApkTaskDependenciesHack) }
+            publishInternalSharingApkAllTask.configure { dependsOn(publishInternalSharingApkTask) }
+
             val publishBundleTaskDependenciesHack = project.newTask(
                     "publish${variantName}BundleWrapper"
             ) {
@@ -233,6 +253,15 @@ class PlayPublisherPlugin : Plugin<Project> {
                 dependsOn(publishBundleTaskDependenciesHack)
             }
             publishBundleAllTask.configure { dependsOn(publishBundleTask) }
+
+            val publishInternalSharingBundleTask = project.newTask<PublishInternalSharingBundle>(
+                    "upload${variantName}PrivateBundle",
+                    "Uploads Internal Sharing App Bundle for variant '$name'.",
+                    arrayOf(extension, this)
+            ) { dependsOn(publishBundleTaskDependenciesHack) }
+            publishInternalSharingBundleAllTask.configure {
+                dependsOn(publishInternalSharingBundleTask)
+            }
 
             val promoteReleaseTask = project.newTask<PromoteRelease>(
                     "promote${variantName}Artifact",
