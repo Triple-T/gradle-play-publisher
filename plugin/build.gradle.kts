@@ -11,7 +11,7 @@ plugins {
 dependencies {
     compileOnly("com.android.tools.build:gradle:3.5.0-beta01")
 
-    implementation("com.google.apis:google-api-services-androidpublisher:v3-rev82-1.25.0")
+    implementation("com.google.apis:google-api-services-androidpublisher:v3-rev86-1.25.0")
 
     testImplementation("com.android.tools.build:gradle:3.5.0-beta01")
     testImplementation(kotlin("test"))

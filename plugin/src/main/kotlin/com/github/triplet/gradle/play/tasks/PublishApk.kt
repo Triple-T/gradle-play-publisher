@@ -9,7 +9,7 @@ import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.internal.trackUploadProgress
 import com.github.triplet.gradle.play.tasks.internal.ArtifactWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishPackageBase
-import com.github.triplet.gradle.play.tasks.internal.PublishableArtifactExtensionOptions
+import com.github.triplet.gradle.play.tasks.internal.PublishableTrackExtensionOptions
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
@@ -30,7 +30,7 @@ import javax.inject.Inject
 open class PublishApk @Inject constructor(
         @get:Nested override val extension: PlayPublisherExtension,
         variant: ApplicationVariant
-) : PlayPublishPackageBase(extension, variant), PublishableArtifactExtensionOptions {
+) : PlayPublishPackageBase(extension, variant), PublishableTrackExtensionOptions {
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
