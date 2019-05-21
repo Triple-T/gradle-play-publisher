@@ -16,8 +16,6 @@ dependencies {
     testImplementation("com.android.tools.build:gradle:3.5.0-beta01")
     testImplementation(kotlin("test"))
     testImplementation("junit:junit:4.12")
-    testImplementation("org.mockito:mockito-core:2.27.0")
-    testImplementation("org.assertj:assertj-core:3.12.2")
 }
 
 java {
@@ -39,6 +37,10 @@ tasks.withType<ValidateTaskProperties>().configureEach {
 tasks.named<Delete>("clean") {
     val base = "src/test/fixtures/android_app/"
     delete(base + ".gradle", base + "build", base + "userHome")
+}
+
+tasks.named("test") {
+    inputs.files("src/test/fixtures/android_app/src")
 }
 
 group = "com.github.triplet.gradle"
