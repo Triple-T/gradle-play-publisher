@@ -2,13 +2,13 @@ package com.github.triplet.gradle.play
 
 import com.github.triplet.gradle.play.internal.normalized
 import com.github.triplet.gradle.play.internal.readProcessed
-import org.assertj.core.api.Assertions.assertThat
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Before
 import org.junit.Test
 import java.io.File
 import java.nio.charset.StandardCharsets
+import kotlin.test.assertEquals
 
 class ExtensionsTest {
     private lateinit var project: Project
@@ -27,18 +27,18 @@ class ExtensionsTest {
 
     @Test
     fun `Files on the edge don't throw`() {
-        assertThat(project.file(TEST_FILE).readProcessed(4)).hasSize(4)
+        assertEquals(4, project.file(TEST_FILE).readProcessed(4).length)
     }
 
     @Test
     fun `Short files don't throw`() {
-        assertThat(project.file(TEST_FILE).readProcessed(100)).hasSize(4)
+        assertEquals(4, project.file(TEST_FILE).readProcessed(100).length)
     }
 
     @Test
     fun `Character counts are valid`() {
-        assertThat(newLine).hasSize(10)
-        assertThat(newLine.normalized()).hasSize(7)
+        assertEquals(10, newLine.length)
+        assertEquals(7, newLine.normalized().length)
     }
 
     private companion object {
