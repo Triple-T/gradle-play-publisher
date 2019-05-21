@@ -28,6 +28,7 @@ import com.github.triplet.gradle.play.tasks.internal.WriteTrackLifecycleTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
+import org.gradle.kotlin.dsl.invoke
 import org.gradle.kotlin.dsl.the
 import org.gradle.kotlin.dsl.withType
 
@@ -146,7 +147,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "Downloads the Play Store listing metadata for variant '$name'.",
                     arrayOf(extension, this)
             )
-            bootstrapAllTask.configure { dependsOn(bootstrapTask) }
+            bootstrapAllTask { dependsOn(bootstrapTask) }
             // TODO Remove in v3.0
             project.newTask("bootstrap${variantName}PlayResources") {
                 dependsOn(bootstrapTask)
@@ -167,7 +168,7 @@ class PlayPublisherPlugin : Plugin<Project> {
 
                 dependsOn(playResourcesTask)
             }
-            publishListingAllTask.configure { dependsOn(publishListingTask) }
+            publishListingAllTask { dependsOn(publishListingTask) }
             // TODO Remove in v3.0
             project.newTask("publishListing$variantName") {
                 dependsOn(publishListingTask)
@@ -183,14 +184,14 @@ class PlayPublisherPlugin : Plugin<Project> {
 
                 dependsOn(playResourcesTask)
             }
-            publishProductsAllTask.configure { dependsOn(publishProductsTask) }
+            publishProductsAllTask { dependsOn(publishProductsTask) }
 
             val processPackageMetadata = project.newTask<ProcessPackageMetadata>(
                     "process${variantName}Metadata",
                     constructorArgs = arrayOf(extension, this)
             )
-            checkManifestProvider.configure { dependsOn(processPackageMetadata) }
-            generateBuildConfigProvider.configure { dependsOn(processPackageMetadata) }
+            checkManifestProvider { dependsOn(processPackageMetadata) }
+            generateBuildConfigProvider { dependsOn(processPackageMetadata) }
 
             val publishApkTaskDependenciesHack = project.newTask(
                     "publish${variantName}ApkWrapper"
@@ -212,7 +213,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 dependsOn(playResourcesTask)
                 dependsOn(publishApkTaskDependenciesHack)
             }
-            publishApkAllTask.configure { dependsOn(publishApkTask) }
+            publishApkAllTask { dependsOn(publishApkTask) }
             // TODO Remove in v3.0
             project.newTask("publishApk$variantName") {
                 dependsOn(publishApkTask)
@@ -252,7 +253,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 dependsOn(playResourcesTask)
                 dependsOn(publishBundleTaskDependenciesHack)
             }
-            publishBundleAllTask.configure { dependsOn(publishBundleTask) }
+            publishBundleAllTask { dependsOn(publishBundleTask) }
 
             val publishInternalSharingBundleTask = project.newTask<PublishInternalSharingBundle>(
                     "upload${variantName}PrivateBundle",
@@ -272,7 +273,7 @@ class PlayPublisherPlugin : Plugin<Project> {
 
                 dependsOn(playResourcesTask)
             }
-            promoteReleaseAllTask.configure { dependsOn(promoteReleaseTask) }
+            promoteReleaseAllTask { dependsOn(promoteReleaseTask) }
 
             val publishTask = project.newTask<GlobalPublishableArtifactLifecycleTask>(
                     "publish$variantName",
@@ -283,7 +284,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 dependsOn(publishListingTask)
                 dependsOn(publishProductsTask)
             }
-            publishAllTask.configure { dependsOn(publishTask) }
+            publishAllTask { dependsOn(publishTask) }
         }
     }
 }
