@@ -17,6 +17,12 @@ internal val BaseVariant.playPath get() = "$RESOURCES_OUTPUT_PATH/$name"
 private val ProductFlavor.extras
     get() = requireNotNull((this as ExtensionAware).the<ExtraPropertiesExtension>())
 
+internal fun Project.newTask(
+        name: String,
+        description: String? = null,
+        block: Task.() -> Unit = {}
+) = newTask(name, description, emptyArray(), block)
+
 internal inline fun <reified T : Task> Project.newTask(
         name: String,
         description: String? = null,

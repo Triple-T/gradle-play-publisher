@@ -44,16 +44,15 @@ open class GenerateResources @Inject constructor(
     @get:OutputDirectory
     internal val resDir by lazy { File(project.buildDir, "${variant.playPath}/res") }
 
-    private val resSrcDirNames by lazy { variant.sourceSets.map { "${it.name}/$PLAY_PATH" } }
-    private val resSrcDirs by lazy { resSrcDirNames.map { project.file("src/$it") } }
+    private val resSrcDirNames by lazy { variant.sourceSets.map { "src/${it.name}/$PLAY_PATH" } }
+    private val resSrcDirs by lazy { resSrcDirNames.map { project.file(it) } }
     @get:SkipWhenEmpty
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
     protected val resSrcTree by lazy {
-        project.fileTree("src").apply {
-            for (dirName in resSrcDirNames) include("/$dirName/**")
-            exclude("**/.*")
-        }
+        project.files(resSrcDirNames.map {
+            project.fileTree(it).apply { exclude("**/.*") }
+        })
     }
 
     @TaskAction
