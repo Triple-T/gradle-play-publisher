@@ -3,7 +3,7 @@ package com.github.triplet.gradle.play.tasks
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.tasks.internal.ArtifactWorkerBase
-import com.github.triplet.gradle.play.tasks.internal.PlayPublishPackageBase
+import com.github.triplet.gradle.play.tasks.internal.PlayPublishArtifactBase
 import com.github.triplet.gradle.play.tasks.internal.UpdatableTrackExtensionOptions
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import org.gradle.api.tasks.Nested
@@ -17,7 +17,7 @@ import javax.inject.Inject
 open class PromoteRelease @Inject constructor(
         @get:Nested override val extension: PlayPublisherExtension,
         variant: ApplicationVariant
-) : PlayPublishPackageBase(extension, variant), UpdatableTrackExtensionOptions {
+) : PlayPublishArtifactBase(extension, variant), UpdatableTrackExtensionOptions {
     init {
         // Always out-of-date since we don't know what's changed on the network
         outputs.upToDateWhen { false }

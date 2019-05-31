@@ -13,7 +13,7 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import java.io.File
 
-abstract class PlayPublishPackageBase(
+abstract class PlayPublishArtifactBase(
         extension: PlayPublisherExtension,
         variant: ApplicationVariant
 ) : PlayPublishTaskBase(extension, variant) {

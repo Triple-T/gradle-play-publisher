@@ -103,7 +103,7 @@ class CompatibilityTest(
         fun parameters() = listOf(
                 arrayOf("3.5.0-beta01", "5.4"), // Oldest supported
                 arrayOf("3.5.0-beta01", "5.4"), // Latest stable
-                arrayOf("3.5.0-beta01", "5.4") // Latest
+                arrayOf("3.6.0-alpha02", "5.4.1") // Latest
         )
     }
 }
