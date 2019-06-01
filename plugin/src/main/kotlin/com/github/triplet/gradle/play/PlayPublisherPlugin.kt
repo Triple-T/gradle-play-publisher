@@ -10,7 +10,7 @@ import com.github.triplet.gradle.play.internal.newTask
 import com.github.triplet.gradle.play.internal.validateRuntime
 import com.github.triplet.gradle.play.tasks.Bootstrap
 import com.github.triplet.gradle.play.tasks.GenerateResources
-import com.github.triplet.gradle.play.tasks.ProcessPackageMetadata
+import com.github.triplet.gradle.play.tasks.ProcessArtifactMetadata
 import com.github.triplet.gradle.play.tasks.PromoteRelease
 import com.github.triplet.gradle.play.tasks.PublishApk
 import com.github.triplet.gradle.play.tasks.PublishBundle
@@ -186,18 +186,18 @@ class PlayPublisherPlugin : Plugin<Project> {
             }
             publishProductsAllTask { dependsOn(publishProductsTask) }
 
-            val processPackageMetadata = project.newTask<ProcessPackageMetadata>(
+            val processArtifactMetadata = project.newTask<ProcessArtifactMetadata>(
                     "process${variantName}Metadata",
                     constructorArgs = arrayOf(extension, this)
             )
-            checkManifestProvider { dependsOn(processPackageMetadata) }
-            generateBuildConfigProvider { dependsOn(processPackageMetadata) }
+            checkManifestProvider { dependsOn(processArtifactMetadata) }
+            generateBuildConfigProvider { dependsOn(processArtifactMetadata) }
 
             val publishApkTaskDependenciesHack = project.newTask(
                     "publish${variantName}ApkWrapper"
             ) {
                 if (extension._artifactDir == null) {
-                    dependsOn(processPackageMetadata)
+                    dependsOn(processArtifactMetadata)
                     assembleProvider?.let {
                         dependsOn(it)
                     } ?: logger.warn("Assemble task not found. Publishing APKs may not work.")
@@ -231,7 +231,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "publish${variantName}BundleWrapper"
             ) {
                 if (extension._artifactDir == null) {
-                    dependsOn(processPackageMetadata)
+                    dependsOn(processArtifactMetadata)
                     // TODO https://issuetracker.google.com/issues/109918868
                     project.tasks.findByName(
                             (this@whenObjectAdded as InstallableVariantImpl).variantData

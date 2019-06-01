@@ -36,7 +36,7 @@ internal fun PlayPublishTaskBase.paramsForBase(
             editId
     )
 
-    if (this is PlayPublishPackageBase) {
+    if (this is PlayPublishArtifactBase) {
         val artifact = ArtifactWorkerBase.ArtifactPublishingData(
                 variant.name,
                 variant.outputs.map { it.versionCode }.first(),
@@ -194,7 +194,7 @@ internal abstract class ArtifactWorkerBase(
         throw e
     }
 
-    protected fun handlePackageDetails(editId: String, versionCode: Int) {
+    protected fun handleArtifactDetails(editId: String, versionCode: Int) {
         val file = artifact.mappingFile
         if (file != null && file.length() > 0) {
             val mapping = FileContent(MIME_TYPE_STREAM, file)

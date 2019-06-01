@@ -152,7 +152,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
             }
         }
 
-    @get:Internal("ProcessPackageMetadata is always out-of-date. Also, Closures with " +
+    @get:Internal("ProcessArtifactMetadata is always out-of-date. Also, Closures with " +
                           "parameters cannot be used as inputs.")
     internal var _outputProcessor: Action<ApkVariantOutput>? = null
 
