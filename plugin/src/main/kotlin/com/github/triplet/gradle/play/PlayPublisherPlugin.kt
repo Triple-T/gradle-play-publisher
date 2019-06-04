@@ -28,6 +28,8 @@ import com.github.triplet.gradle.play.tasks.internal.WriteTrackLifecycleTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
+import org.gradle.kotlin.dsl.container
+import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.invoke
 import org.gradle.kotlin.dsl.the
 import org.gradle.kotlin.dsl.withType
@@ -43,9 +45,8 @@ class PlayPublisherPlugin : Plugin<Project> {
     }
 
     private fun applyInternal(project: Project) {
-        val baseExtension: PlayPublisherExtension =
-                project.extensions.create(PLAY_PATH, PlayPublisherExtension::class.java)
-        val extensionContainer = project.container(PlayPublisherExtension::class.java)
+        val baseExtension = project.extensions.create<PlayPublisherExtension>(PLAY_PATH)
+        val extensionContainer = project.container<PlayPublisherExtension>()
 
         val bootstrapAllTask = project.newTask<BootstrapLifecycleTask>(
                 "bootstrap",
