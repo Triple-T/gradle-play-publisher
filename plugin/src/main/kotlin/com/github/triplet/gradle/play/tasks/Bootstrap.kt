@@ -36,8 +36,9 @@ import javax.inject.Inject
 
 open class Bootstrap @Inject constructor(
         extension: PlayPublisherExtension,
-        variant: ApplicationVariant
-) : PlayPublishTaskBase(extension, variant), BootstrapOptions by BootstrapOptions.Holder {
+        variant: ApplicationVariant,
+        optionsHolder: BootstrapOptions.Holder
+) : PlayPublishTaskBase(extension, variant), BootstrapOptions by optionsHolder {
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputDirectory
