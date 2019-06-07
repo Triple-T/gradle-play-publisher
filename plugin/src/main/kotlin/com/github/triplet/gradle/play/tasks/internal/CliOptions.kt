@@ -138,7 +138,7 @@ internal interface GlobalPublishableArtifactExtensionOptions : PublishableTrackE
         }
 }
 
-internal interface BootstrapOptions {
+interface BootstrapOptions {
     @get:Internal
     @set:Option(
             option = "app-details",
@@ -161,7 +161,7 @@ internal interface BootstrapOptions {
     @set:Option(option = "products", description = "Download in-app purchases and subscriptions.")
     var downloadProducts: Boolean
 
-    object Holder : BootstrapOptions {
+    class Holder : BootstrapOptions {
         private val isRequestingSpecificFeature = AtomicBoolean()
 
         override var downloadAppDetails = true
@@ -184,20 +184,6 @@ internal interface BootstrapOptions {
                 onSet()
                 field = value
             }
-
-        /**
-         * Since this is an object, it won't be destroyed across Gradle invocations. Therefore, we need
-         * to manually reset it every time our plugin is applied.
-         */
-        fun reset() {
-            downloadAppDetails = true
-            downloadListings = true
-            downloadReleaseNotes = true
-            downloadProducts = true
-
-            // Must come after to override onSet
-            isRequestingSpecificFeature.set(false)
-        }
 
         /**
          * By default, we download all features. However, if they are specified with CLI options, we

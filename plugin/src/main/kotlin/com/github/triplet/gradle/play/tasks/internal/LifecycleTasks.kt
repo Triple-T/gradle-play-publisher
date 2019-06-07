@@ -25,5 +25,6 @@ internal open class GlobalPublishableArtifactLifecycleTask @Inject constructor(
         @get:Nested override val extension: PlayPublisherExtension
 ) : DefaultTask(), GlobalPublishableArtifactExtensionOptions
 
-internal open class BootstrapLifecycleTask : DefaultTask(),
-        BootstrapOptions by BootstrapOptions.Holder
+internal open class BootstrapLifecycleTask @Inject constructor(
+        optionsHolder: BootstrapOptions.Holder
+) : DefaultTask(), BootstrapOptions by optionsHolder

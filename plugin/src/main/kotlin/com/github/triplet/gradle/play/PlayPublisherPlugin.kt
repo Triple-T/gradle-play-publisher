@@ -47,10 +47,12 @@ class PlayPublisherPlugin : Plugin<Project> {
     private fun applyInternal(project: Project) {
         val baseExtension = project.extensions.create<PlayPublisherExtension>(PLAY_PATH)
         val extensionContainer = project.container<PlayPublisherExtension>()
+        val bootstrapOptionsHolder = BootstrapOptions.Holder()
 
         val bootstrapAllTask = project.newTask<BootstrapLifecycleTask>(
                 "bootstrap",
-                "Downloads the Play Store listing metadata for all variants."
+                "Downloads the Play Store listing metadata for all variants.",
+                arrayOf(bootstrapOptionsHolder)
         )
         val publishAllTask = project.newTask<GlobalPublishableArtifactLifecycleTask>(
                 "publish",
@@ -94,7 +96,6 @@ class PlayPublisherPlugin : Plugin<Project> {
 
         val android = project.the<AppExtension>()
         (android as ExtensionAware).extensions.add(PLAY_CONFIGS_PATH, extensionContainer)
-        BootstrapOptions.Holder.reset()
         android.applicationVariants.whenObjectAdded {
             val variantName = name.capitalize()
 
@@ -146,7 +147,7 @@ class PlayPublisherPlugin : Plugin<Project> {
             val bootstrapTask = project.newTask<Bootstrap>(
                     "bootstrap$variantName",
                     "Downloads the Play Store listing metadata for variant '$name'.",
-                    arrayOf(extension, this)
+                    arrayOf(extension, this, bootstrapOptionsHolder)
             )
             bootstrapAllTask { dependsOn(bootstrapTask) }
             // TODO Remove in v3.0
