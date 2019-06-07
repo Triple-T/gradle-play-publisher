@@ -34,10 +34,10 @@ internal interface ArtifactExtensionOptions : ExtensionOptionsBase {
 internal interface WriteTrackExtensionOptions : ExtensionOptionsBase {
     @get:Internal
     @set:Option(
-            option = "skip-commit",
+            option = "no-commit",
             description = "Don't commit changes from this build."
     )
-    var skipCommitOption: Boolean
+    var noCommitOption: Boolean
         get() = throw UnsupportedOperationException()
         set(value) {
             extension.commit = !value
