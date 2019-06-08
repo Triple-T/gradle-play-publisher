@@ -15,8 +15,9 @@
     </a>
 </p>
 
-Gradle Play Publisher is a Gradle plugin that allows you to upload your App Bundle or APK and other
-app details to the Google Play Store.
+Gradle Play Publisher is Android's unofficial release automation Gradle Plugin. It can do anything
+from building, uploading, and then promoting your App Bundle or APK to publishing app listings and
+other metadata.
 
 ## Table of contents
 
@@ -33,6 +34,7 @@ app details to the Google Play Store.
    1. [Common configuration](#common-configuration)
    1. [Publishing an App Bundle](#publishing-an-app-bundle)
    1. [Publishing APKs](#publishing-apks)
+   1. [Uploading an Internal Sharing artifact](#uploading-an-internal-sharing-artifact)
    1. [Promoting artifacts](#promoting-artifacts)
    1. [Handling version conflicts](#handling-version-conflicts)
 1. [Managing Play Store metadata](#managing-play-store-metadata)
@@ -68,9 +70,9 @@ changes, GPP may be used.
 
 ### Signing configuration
 
-If no publishing tasks were created, you most likely haven't added a valid signing configuration to
-your release builds. Be sure to
-[add one](https://developer.android.com/studio/publish/app-signing#gradle-sign).
+To successfully upload apps to the Play Store, they must be signed with your developer key. Make
+sure you have
+[a valid signing configuration](https://developer.android.com/studio/publish/app-signing#gradle-sign).
 
 ### Service Account
 
@@ -185,12 +187,18 @@ GPP follows the Android Gradle Plugin's naming convention: `[action][Variant][Th
 Lifecycle tasks to publish multiple product flavors at once are also available. For example,
 `publishBundle` publishes all variants.
 
-To find available tasks, run `./gradlew tasks` and look under the publishing section.
+To find available tasks, run `./gradlew tasks --group publishing` and use
+`./gradlew help --task [task]` where `task` is something like `publishBundle` to get more detailed
+documentation for a specific task.
+
+> Note: if a task conflict occurs, say with the `maven-publish` plugin for example, be sure to apply
+> the GPP plugin _last_. Conflicting tasks will then be prefixed with `gpp` (ex: `publish` ->
+> `gppPublish`).
 
 ## Managing artifacts
 
 GPP supports uploading both the App Bundle and APK. Once uploaded, GPP also supports promoting those
-artifacts.
+artifacts to different tracks.
 
 ### Common configuration
 
@@ -209,10 +217,12 @@ Example configuration:
 
 ```kt
 play {
-    // ...
+    // Overrides defaults
     track = "production"
     userFraction = 0.5
     releaseStatus = "inProgress"
+
+    // ...
 }
 ```
 
@@ -250,15 +260,18 @@ a custom release name for the alpha track in the `play/release-names/alpha.txt` 
 My custom release name
 ```
 
+There is also a `--release-name` CLI option for quick access. For example,
+`./gradlew publishBundle --release-name "Hello World!"`.
+
 > Note: the Play Store limits your release names to a maximum of 50 characters.
 
 #### Uploading a pre-existing artifact
 
 By default GPP will rebuild your project before every release. In advanced use cases, this might not
 be the desired behavior. For example, if you need to inject translations into your APK or App Bundle
-_after_ building it but _before_ publishing it. Or maybe it's a simple as you already having an
-artifact you want to publish. GPP supports this class of use cases by letting you specify a
-directory in which publishable artifacts may be found:
+after building it but before publishing it. Or perhaps you simply already have an artifact you wish
+to publish. GPP supports this class of use cases by letting you specify a directory in which
+publishable artifacts may be found:
 
 ```kt
 play {
@@ -294,6 +307,12 @@ play {
 ### Publishing APKs
 
 Run `./gradlew publishApk`. Splits will be uploaded if available.
+
+### Uploading an Internal Sharing artifact
+
+Run `./gradlew uploadReleasePrivateBundle` for App Bundles and `./gradlew uploadReleasePrivateApk`
+for APKs. To upload an existing artifact, read about
+[how to do so](#uploading-a-pre-existing-artifact).
 
 ### Promoting artifacts
 
@@ -362,6 +381,8 @@ descriptions to in-app purchases and subscriptions.
 GPP includes a bootstrap task that pulls down your existing listing and initializes everything for
 you. To use it, run `./gradlew bootstrap`.
 
+> Note: if you have a pre-existing `play` folder, it will be reset.
+
 ### Directory structure
 
 GPP follows the Android Gradle Plugin's source set
@@ -411,17 +432,17 @@ for the same media type. While file names are arbitrary, they will be uploaded i
 and presented on the Play Store as such. Therefore, we recommend using a number as the file name
 (`1.png` for example). Both PNG and JPEG images are supported.
 
-Directory | Max # of images
---- | ---
-`icon` | 1
-`feature-graphic` | 1
-`promo-graphic` | 1
-`phone-screenshots` | 8
-`tablet-screenshots` | 8
-`large-tablet-screenshots` | 8
-`tv-banner` | 1
-`tv-screenshots` | 8
-`wear-screenshots` | 8
+Directory | Max # of images | Image dimension constraints (px)
+--- | --- | ---
+`icon` | 1 | 512x512
+`feature-graphic` | 1 | 1024x500
+`promo-graphic` | 1 | 180x120
+`phone-screenshots` | 8 | [320..3840]x[320..3840]
+`tablet-screenshots` | 8 | [320..3840]x[320..3840]
+`large-tablet-screenshots` | 8 | [320..3840]x[320..3840]
+`tv-banner` | 1 | 1280x720
+`tv-screenshots` | 8 | [320..3840]x[320..3840]
+`wear-screenshots` | 8 | [320..3840]x[320..3840]
 
 ### Publishing in-app products
 
