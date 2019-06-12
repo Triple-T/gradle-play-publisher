@@ -68,7 +68,7 @@ internal abstract class PlayWorkerBase(private val data: PlayPublishingData) : R
 
             val applicationId: String,
 
-            val savedEditId: File,
+            val savedEditId: File?,
             val editId: String?
     ) : Serializable
 }
@@ -87,7 +87,7 @@ internal abstract class ArtifactWorkerBase(
     protected fun updateTracks(editId: String, versions: List<Long>) {
         println("Updating tracks ($appId:$versions)")
 
-        val track = if (play.savedEditId.exists()) {
+        val track = if (play.savedEditId?.orNull() != null) {
             edits.tracks().get(appId, editId, extension.track).execute().apply {
                 releases = if (releases.isNullOrEmpty()) {
                     listOf(TrackRelease().applyChanges(versions))

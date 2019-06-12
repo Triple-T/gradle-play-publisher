@@ -5,6 +5,7 @@ import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.EDIT_ID_FILE
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.LocalState
 import org.gradle.api.tasks.Nested
 import java.io.File
 
@@ -12,7 +13,11 @@ abstract class PlayPublishTaskBase(
         @get:Nested internal open val extension: PlayPublisherExtension,
         @get:Internal internal val variant: ApplicationVariant
 ) : DefaultTask() {
-    @get:Internal internal val savedEditId = File(project.rootProject.buildDir, EDIT_ID_FILE)
+    @get:LocalState
+    internal val savedEditId
+        get() = File(project.rootProject.buildDir, EDIT_ID_FILE).takeUnless {
+            extension.commit && !it.exists()
+        }
 
     @get:Internal protected val publisher by lazy { extension.buildPublisher() }
 

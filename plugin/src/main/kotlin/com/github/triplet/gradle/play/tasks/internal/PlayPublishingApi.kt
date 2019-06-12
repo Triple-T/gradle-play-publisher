@@ -17,8 +17,8 @@ import java.io.File
 import java.io.FileInputStream
 import java.security.KeyStore
 
-internal fun AndroidPublisher.getOrCreateEditId(appId: String, savedEditId: File): String = try {
-    val editId = savedEditId.orNull()?.readText().nullOrFull()
+internal fun AndroidPublisher.getOrCreateEditId(appId: String, savedEditId: File?): String = try {
+    val editId = savedEditId?.orNull()?.readText().nullOrFull()
     if (editId == null) {
         edits().insert(appId, null).execute().id
     } else {
@@ -33,7 +33,7 @@ internal fun AndroidPublisher.getOrCreateEditId(appId: String, savedEditId: File
                         "Play Store console.", e)
         e has "editAlreadyCommitted" || e has "editNotFound" || e has "editExpired" -> {
             println("Failed to retrieve saved edit.")
-            savedEditId.delete()
+            savedEditId?.delete()
 
             getOrCreateEditId(appId, savedEditId)
         }
@@ -49,18 +49,18 @@ internal fun AndroidPublisher.commit(
         extension: PlayPublisherExtension,
         appId: String,
         editId: String,
-        savedEditId: File
+        savedEditId: File?
 ) {
     if (extension.commit) {
         println("Committing changes")
         try {
             edits().commit(appId, editId).execute()
         } finally {
-            savedEditId.delete()
+            savedEditId?.delete()
         }
     } else {
         println("Changes pending commit")
-        savedEditId.safeCreateNewFile().writeText(editId)
+        requireNotNull(savedEditId).safeCreateNewFile().writeText(editId)
     }
 }
 
