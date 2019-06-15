@@ -6,7 +6,6 @@ import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.internal.playPath
-import com.github.triplet.gradle.play.internal.trackUploadProgress
 import com.github.triplet.gradle.play.tasks.internal.ArtifactWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishArtifactBase
 import com.github.triplet.gradle.play.tasks.internal.PublishableTrackExtensionOptions
@@ -44,7 +43,7 @@ open class PublishApk @Inject constructor(
                 }.map { it.outputFile }
             } else {
                 customDir.listFiles().orEmpty().filter { it.extension == "apk" }.also {
-                    if (it.isEmpty()) println("Warning: no APKs found in '$customDir' yet.")
+                    if (it.isEmpty()) logger.warn("Warning: no APKs found in '$customDir' yet.")
                 }
             }.ifEmpty { null }
         }

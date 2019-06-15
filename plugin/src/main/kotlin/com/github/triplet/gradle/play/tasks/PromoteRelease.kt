@@ -43,7 +43,7 @@ open class PromoteRelease @Inject constructor(
                     }
 
             if (tracks.isEmpty()) {
-                println("Nothing to promote. Did you mean to run publish?")
+                logger.warn("Nothing to promote. Did you mean to run publish?")
                 return
             }
 
@@ -59,7 +59,6 @@ open class PromoteRelease @Inject constructor(
                     }
                 }
             }
-            println("Promoting '${track.track}' release to '${extension.track}'")
 
             track.releases.forEach {
                 it.applyChanges(
@@ -77,6 +76,9 @@ open class PromoteRelease @Inject constructor(
                 it.status
             }
 
+            println("Promoting ${track.releases.map { it.status }.distinct()} release " +
+                            "($appId:${track.releases.flatMap { it.versionCodes.orEmpty() }}) " +
+                            "from track '${track.track}' to track '${extension.track}'")
             edits.tracks().update(appId, editId, extension.track, track).execute()
         }
 

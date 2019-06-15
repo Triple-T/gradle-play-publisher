@@ -32,7 +32,7 @@ open class PublishBundleBase @Inject constructor(
                         .getFinalArtifact(InternalArtifactType.BUNDLE).files.singleOrNull()
             } else {
                 customDir.listFiles().orEmpty().singleOrNull { it.extension == "aab" }.also {
-                    if (it == null) println("Warning: no App Bundle found in '$customDir' yet.")
+                    if (it == null) logger.warn("Warning: no App Bundle found in '$customDir' yet.")
                 }
             }
         }

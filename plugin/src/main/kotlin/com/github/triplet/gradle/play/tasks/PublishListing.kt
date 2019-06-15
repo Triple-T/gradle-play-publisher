@@ -204,7 +204,7 @@ open class PublishListing @Inject constructor(
 
             check(files.all {
                 val isValidType = ImageFileFilter.accept(it)
-                if (!isValidType) System.err.println("Invalid file type: ${it.name}")
+                if (!isValidType) logger.error("Invalid file type: ${it.name}")
                 isValidType
             }) { "Invalid files type(s), check logs for details." }
             check(files.size <= p.type.maxNum) {
