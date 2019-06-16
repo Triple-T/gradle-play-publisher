@@ -13,6 +13,8 @@ import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.AndroidPublisherScopes
+import org.gradle.api.Task
+import org.gradle.api.logging.Logging
 import java.io.File
 import java.io.FileInputStream
 import java.security.KeyStore
@@ -32,7 +34,7 @@ internal fun AndroidPublisher.getOrCreateEditId(appId: String, savedEditId: File
                         "The first version of your app must be uploaded via the " +
                         "Play Store console.", e)
         e has "editAlreadyCommitted" || e has "editNotFound" || e has "editExpired" -> {
-            println("Failed to retrieve saved edit.")
+            Logging.getLogger(Task::class.java).error("Failed to retrieve saved edit.")
             savedEditId?.delete()
 
             getOrCreateEditId(appId, savedEditId)
