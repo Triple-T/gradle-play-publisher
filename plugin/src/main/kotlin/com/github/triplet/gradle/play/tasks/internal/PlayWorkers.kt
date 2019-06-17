@@ -100,9 +100,11 @@ internal abstract class ArtifactWorkerBase(
         private val artifact: ArtifactPublishingData,
         private val play: PlayPublishingData
 ) : PlayWorkerBase(play) {
+    protected var commit = true
+
     final override fun run() {
         upload()
-        commit()
+        if (commit) commit()
     }
 
     abstract fun upload()
