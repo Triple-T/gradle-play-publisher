@@ -48,6 +48,7 @@ internal fun PlayPublishTaskBase.paramsForBase(
 
                 releaseNotesDir,
                 consoleNamesDir,
+                releaseName,
                 mappingFile
         )
 
@@ -154,9 +155,13 @@ internal abstract class ArtifactWorkerBase(
         versionCodes?.let { this.versionCodes = it }
         if (updateStatus) status = extension.releaseStatus
         if (updateConsoleName) {
-            val file = File(artifact.consoleNamesDir, "${extension.track}.txt").orNull()
-                    ?: File(artifact.consoleNamesDir, RELEASE_NAMES_DEFAULT_NAME).orNull()
-            name = file?.readProcessed(RELEASE_NAMES_MAX_LENGTH)?.lines()?.firstOrNull()
+            name = if (artifact.transientConsoleName == null) {
+                val file = File(artifact.consoleNamesDir, "${extension.track}.txt").orNull()
+                        ?: File(artifact.consoleNamesDir, RELEASE_NAMES_DEFAULT_NAME).orNull()
+                file?.readProcessed(RELEASE_NAMES_MAX_LENGTH)?.lines()?.firstOrNull()
+            } else {
+                artifact.transientConsoleName
+            }
         }
 
         val releaseNotes = artifact.releaseNotesDir?.listFiles().orEmpty().mapNotNull { locale ->
@@ -237,6 +242,7 @@ internal abstract class ArtifactWorkerBase(
 
             val releaseNotesDir: File?,
             val consoleNamesDir: File?,
+            val transientConsoleName: String?,
             val mappingFile: File?
     ) : Serializable
 }
