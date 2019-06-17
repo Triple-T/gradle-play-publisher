@@ -23,6 +23,7 @@ import com.github.triplet.gradle.play.tasks.internal.BootstrapLifecycleTask
 import com.github.triplet.gradle.play.tasks.internal.BootstrapOptions
 import com.github.triplet.gradle.play.tasks.internal.GlobalPublishableArtifactLifecycleTask
 import com.github.triplet.gradle.play.tasks.internal.PublishableTrackLifecycleTask
+import com.github.triplet.gradle.play.tasks.internal.TransientTrackOptions
 import com.github.triplet.gradle.play.tasks.internal.UpdatableTrackLifecycleTask
 import com.github.triplet.gradle.play.tasks.internal.WriteTrackLifecycleTask
 import org.gradle.api.Plugin
@@ -48,6 +49,7 @@ class PlayPublisherPlugin : Plugin<Project> {
         val baseExtension = project.extensions.create<PlayPublisherExtension>(PLAY_PATH)
         val extensionContainer = project.container<PlayPublisherExtension>()
         val bootstrapOptionsHolder = BootstrapOptions.Holder()
+        val transientTrackOptionsHolder = TransientTrackOptions.Holder()
 
         val bootstrapAllTask = project.newTask<BootstrapLifecycleTask>(
                 "bootstrap",
@@ -62,12 +64,12 @@ class PlayPublisherPlugin : Plugin<Project> {
         val publishApkAllTask = project.newTask<PublishableTrackLifecycleTask>(
                 "publishApk",
                 "Uploads APK for every variant.",
-                arrayOf(baseExtension)
+                arrayOf(baseExtension, transientTrackOptionsHolder)
         )
         val publishBundleAllTask = project.newTask<PublishableTrackLifecycleTask>(
                 "publishBundle",
                 "Uploads App Bundle for every variant.",
-                arrayOf(baseExtension)
+                arrayOf(baseExtension, transientTrackOptionsHolder)
         )
         val publishInternalSharingApkAllTask = project.newTask<ArtifactLifecycleTask>(
                 "uploadPrivateApk",
@@ -82,7 +84,7 @@ class PlayPublisherPlugin : Plugin<Project> {
         val promoteReleaseAllTask = project.newTask<UpdatableTrackLifecycleTask>(
                 "promoteArtifact",
                 "Promotes a release for every variant.",
-                arrayOf(baseExtension)
+                arrayOf(baseExtension, transientTrackOptionsHolder)
         )
         val publishListingAllTask = project.newTask<WriteTrackLifecycleTask>(
                 "publishListing",
@@ -208,7 +210,7 @@ class PlayPublisherPlugin : Plugin<Project> {
             val publishApkTask = project.newTask<PublishApk>(
                     "publish${variantName}Apk",
                     "Uploads APK for variant '$name'.",
-                    arrayOf(extension, this)
+                    arrayOf(extension, this, transientTrackOptionsHolder)
             ) {
                 resDir = playResourcesTask.get().resDir
 
@@ -248,7 +250,7 @@ class PlayPublisherPlugin : Plugin<Project> {
             val publishBundleTask = project.newTask<PublishBundle>(
                     "publish${variantName}Bundle",
                     "Uploads App Bundle for variant '$name'.",
-                    arrayOf(extension, this)
+                    arrayOf(extension, this, transientTrackOptionsHolder)
             ) {
                 resDir = playResourcesTask.get().resDir
 
@@ -269,7 +271,7 @@ class PlayPublisherPlugin : Plugin<Project> {
             val promoteReleaseTask = project.newTask<PromoteRelease>(
                     "promote${variantName}Artifact",
                     "Promotes a release for variant '$name'.",
-                    arrayOf(extension, this)
+                    arrayOf(extension, this, transientTrackOptionsHolder)
             ) {
                 resDir = playResourcesTask.get().resDir
 

@@ -14,12 +14,14 @@ internal open class WriteTrackLifecycleTask @Inject constructor(
 ) : DefaultTask(), WriteTrackExtensionOptions
 
 internal open class UpdatableTrackLifecycleTask @Inject constructor(
-        @get:Nested override val extension: PlayPublisherExtension
-) : DefaultTask(), UpdatableTrackExtensionOptions
+        @get:Nested override val extension: PlayPublisherExtension,
+        optionsHolder: TransientTrackOptions.Holder
+) : DefaultTask(), UpdatableTrackExtensionOptions, TransientTrackOptions by optionsHolder
 
 internal open class PublishableTrackLifecycleTask @Inject constructor(
-        @get:Nested override val extension: PlayPublisherExtension
-) : DefaultTask(), PublishableTrackExtensionOptions
+        @get:Nested override val extension: PlayPublisherExtension,
+        optionsHolder: TransientTrackOptions.Holder
+) : DefaultTask(), PublishableTrackExtensionOptions, TransientTrackOptions by optionsHolder
 
 internal open class GlobalPublishableArtifactLifecycleTask @Inject constructor(
         @get:Nested override val extension: PlayPublisherExtension
