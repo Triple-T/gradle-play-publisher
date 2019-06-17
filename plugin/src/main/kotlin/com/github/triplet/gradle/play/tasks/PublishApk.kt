@@ -11,7 +11,6 @@ import com.github.triplet.gradle.play.tasks.internal.PublishableTrackExtensionOp
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
-import com.google.api.services.androidpublisher.model.Apk
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.OutputDirectory
@@ -20,6 +19,7 @@ import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
 import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.workers.IsolationMode
 import org.gradle.workers.WorkerExecutor
 import java.io.File
 import java.io.Serializable
@@ -52,38 +52,62 @@ open class PublishApk @Inject constructor(
     @TaskAction
     fun publishApks() {
         val apks = inputApks.orEmpty().mapNotNull(File::orNull).ifEmpty { return }
-        project.serviceOf<WorkerExecutor>().submit(ApkUploader::class) {
-            paramsForBase(this, ApkUploader.Params(apks))
+        project.serviceOf<WorkerExecutor>().submit(ApksUploader::class) {
+            isolationMode = IsolationMode.NONE
+            paramsForBase(this, ApksUploader.Params(apks, temporaryDir), getOrCreateEditId())
         }
     }
 
-    private class ApkUploader @Inject constructor(
+    private class ApksUploader @Inject constructor(
+            private val executor: WorkerExecutor,
+
             private val p: Params,
-            artifact: ArtifactPublishingData,
-            play: PlayPublishingData
+            private val artifact: ArtifactPublishingData,
+            private val play: PlayPublishingData
     ) : ArtifactWorkerBase(artifact, play) {
         override fun upload() {
-            updateTracks(editId, p.apkFiles.mapNotNull {
-                uploadApk(editId, FileContent(MIME_TYPE_APK, it))?.versionCode?.toLong()
-            }.ifEmpty { return })
+            for (apk in p.apkFiles) {
+                executor.submit(Uploader::class) {
+                    params(Uploader.Params(apk, p.uploadResults), artifact, play)
+                }
+            }
+            executor.await()
+
+            val versions = p.uploadResults.listFiles().orEmpty().map { it.name.toLong() }
+            updateTracks(editId, versions)
         }
 
-        private fun uploadApk(editId: String, content: FileContent): Apk? {
-            val apk = try {
-                edits.apks().upload(appId, editId, content).trackUploadProgress("APK").execute()
-            } catch (e: GoogleJsonResponseException) {
-                return handleUploadFailures(e, content.file)
+        data class Params(val apkFiles: List<File>, val uploadResults: File) : Serializable
+
+        private class Uploader @Inject constructor(
+                private val p: Params,
+                artifact: ArtifactPublishingData,
+                play: PlayPublishingData
+        ) : ArtifactWorkerBase(artifact, play) {
+            init {
+                commit = false
             }
 
-            handleArtifactDetails(editId, apk.versionCode)
+            override fun upload() {
+                val apk = try {
+                    edits.apks()
+                            .upload(appId, editId, FileContent(MIME_TYPE_APK, p.apk))
+                            .trackUploadProgress("APK")
+                            .execute()
+                } catch (e: GoogleJsonResponseException) {
+                    handleUploadFailures(e, p.apk)
+                    return
+                }
 
-            return apk
-        }
+                handleArtifactDetails(editId, apk.versionCode)
+                File(p.uploadResults, apk.versionCode.toString()).createNewFile()
+            }
 
-        data class Params(val apkFiles: List<File>) : Serializable
+            data class Params(val apk: File, val uploadResults: File) : Serializable
 
-        private companion object {
-            const val MIME_TYPE_APK = "application/vnd.android.package-archive"
+            private companion object {
+                const val MIME_TYPE_APK = "application/vnd.android.package-archive"
+            }
         }
     }
 }
