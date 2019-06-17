@@ -1,6 +1,5 @@
 package com.github.triplet.gradle.play.tasks
 
-import com.android.build.VariantOutput.OutputType
 import com.android.build.gradle.api.ApkVariantOutput
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.PlayPublisherExtension
@@ -38,9 +37,7 @@ open class PublishApk @Inject constructor(
             val customDir = extension._artifactDir
 
             return if (customDir == null) {
-                variant.outputs.filterIsInstance<ApkVariantOutput>().filter {
-                    OutputType.valueOf(it.outputType) == OutputType.MAIN || it.filters.isNotEmpty()
-                }.map { it.outputFile }
+                variant.outputs.filterIsInstance<ApkVariantOutput>().map { it.outputFile }
             } else {
                 customDir.listFiles().orEmpty().filter { it.extension == "apk" }.also {
                     if (it.isEmpty()) logger.warn("Warning: no APKs found in '$customDir' yet.")

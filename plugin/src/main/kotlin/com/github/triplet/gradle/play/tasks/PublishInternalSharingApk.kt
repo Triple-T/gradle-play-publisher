@@ -36,7 +36,7 @@ open class PublishInternalSharingApk @Inject constructor(
 
             return if (customDir == null) {
                 variant.outputs.filterIsInstance<ApkVariantOutput>().singleOrNull {
-                    OutputType.valueOf(it.outputType) == OutputType.MAIN
+                    OutputType.valueOf(it.outputType) == OutputType.MAIN || it.filters.isEmpty()
                 }?.outputFile
             } else {
                 customDir.listFiles().orEmpty().singleOrNull { it.extension == "apk" }.also {
