@@ -1,5 +1,6 @@
 package com.github.triplet.gradle.play.tasks.internal
 
+import com.android.build.gradle.AppExtension
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.MIME_TYPE_STREAM
 import com.github.triplet.gradle.play.internal.RELEASE_NAMES_DEFAULT_NAME
@@ -24,7 +25,9 @@ import com.google.api.services.androidpublisher.model.TrackRelease
 import org.gradle.api.Task
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
+import org.gradle.kotlin.dsl.the
 import org.gradle.workers.WorkerConfiguration
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.Serializable
 import kotlin.math.roundToInt
@@ -44,7 +47,7 @@ internal fun PlayPublishTaskBase.paramsForBase(
     if (this is PlayPublishArtifactBase) {
         val artifact = ArtifactWorkerBase.ArtifactPublishingData(
                 variant.name,
-                variant.outputs.map { it.versionCode }.first(),
+                variant.outputs.associate { it.outputFile to versionCode(it.outputFile) },
 
                 releaseNotesDir,
                 consoleNamesDir,
@@ -55,6 +58,27 @@ internal fun PlayPublishTaskBase.paramsForBase(
     } else {
         config.params(p, base)
     }
+}
+
+private fun Task.versionCode(apk: File): Long {
+    val tools = File(project.the<AppExtension>().sdkDirectory, "build-tools")
+    val latest = File(
+            tools,
+            requireNotNull(tools.listFiles().orEmpty().max()) { "No build tools available." }.name
+    )
+    val aapt = File(latest, "aapt")
+
+    val output = ByteArrayOutputStream()
+    project.exec {
+        standardOutput = output
+        commandLine(aapt, "dump", "badging", apk.absolutePath)
+    }
+    return output.toString()
+            .replaceBefore("versionCode='", "")
+            .removePrefix("versionCode='")
+            .replaceAfter("'", "")
+            .removeSuffix("'")
+            .toLong()
 }
 
 internal abstract class PlayWorkerBase(private val data: PlayPublishingData) : Runnable {
@@ -201,19 +225,20 @@ internal abstract class ArtifactWorkerBase(
     ): Nothing? = if (e has "apkUpgradeVersionConflict" || e has "apkNoUpgradePath") {
         when (extension.resolutionStrategyOrDefault) {
             ResolutionStrategy.AUTO -> throw IllegalStateException(
-                    "Concurrent uploads for variant ${artifact.variantName} (version code " +
-                            "${artifact.versionCode} already used). Make sure to synchronously " +
-                            "upload your APKs such that they don't conflict. If this problem " +
-                            "persists, delete your drafts in the Play Console's artifact library.",
+                    "Concurrent uploads for variant ${artifact.variantName} (version code(s) " +
+                            "${artifact.versionCodes.values} have already been used). Make sure " +
+                            "to synchronously upload your APKs such that they don't conflict. If " +
+                            "this problem persists, delete your drafts in the Play Console's " +
+                            "artifact library.",
                     e
             )
             ResolutionStrategy.FAIL -> throw IllegalStateException(
-                    "Version code ${artifact.versionCode} is too low or has already been used " +
-                            "for variant ${artifact.variantName}.",
+                    "Version code(s) ${artifact.versionCodes.values} are too low or have already " +
+                            "been used for variant ${artifact.variantName}.",
                     e
             )
             ResolutionStrategy.IGNORE -> println(
-                    "Ignoring artifact ($file) for version code ${artifact.versionCode}")
+                    "Ignoring artifact ($file) for version code(s) ${artifact.versionCodes.values}")
         }
         null
     } else {
@@ -233,7 +258,7 @@ internal abstract class ArtifactWorkerBase(
 
     internal data class ArtifactPublishingData(
             val variantName: String,
-            val versionCode: Int,
+            val versionCodes: Map<File, Long>,
 
             val releaseNotesDir: File?,
             val consoleNamesDir: File?,

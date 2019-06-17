@@ -81,7 +81,7 @@ open class PublishApk @Inject constructor(
 
         private class Uploader @Inject constructor(
                 private val p: Params,
-                artifact: ArtifactPublishingData,
+                private val artifact: ArtifactPublishingData,
                 play: PlayPublishingData
         ) : ArtifactWorkerBase(artifact, play) {
             init {
@@ -92,7 +92,7 @@ open class PublishApk @Inject constructor(
                 val apk = try {
                     edits.apks()
                             .upload(appId, editId, FileContent(MIME_TYPE_APK, p.apk))
-                            .trackUploadProgress("APK")
+                            .trackUploadProgress("APK ($appId:${artifact.versionCodes[p.apk]})")
                             .execute()
                 } catch (e: GoogleJsonResponseException) {
                     handleUploadFailures(e, p.apk)
