@@ -14,12 +14,8 @@ import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.model.Apk
-import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.Nested
-import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
-import org.gradle.api.tasks.TaskAction
+import com.google.api.services.androidpublisher.model.ExpansionFile
+import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.submit
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.workers.WorkerExecutor
@@ -64,11 +60,18 @@ open class PublishApk @Inject constructor(
     private class ApkUploader @Inject constructor(
             private val p: Params,
             artifact: ArtifactPublishingData,
-            play: PlayPublishingData
+            val play: PlayPublishingData
     ) : ArtifactWorkerBase(artifact, play) {
         override fun upload() {
             updateTracks(editId, p.apkFiles.mapNotNull {
-                uploadApk(editId, FileContent(MIME_TYPE_APK, it))?.versionCode?.toLong()
+                var code = uploadApk(editId, FileContent(MIME_TYPE_APK, it))?.versionCode?.toLong()
+
+                // Attach Obb file from other APK (using its code)
+                var expansionFile = ExpansionFile()
+                expansionFile.referencesVersion = play.extension.attachObb
+                edits.expansionfiles().update(appId, editId, code!!.toInt(), "main", expansionFile).execute()
+
+                code
             }.ifEmpty { return })
         }
 

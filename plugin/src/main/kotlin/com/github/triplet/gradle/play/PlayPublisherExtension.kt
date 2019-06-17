@@ -1,18 +1,9 @@
 package com.github.triplet.gradle.play
 
 import com.android.build.gradle.api.ApkVariantOutput
-import com.github.triplet.gradle.play.internal.ReleaseStatus
-import com.github.triplet.gradle.play.internal.ResolutionStrategy
-import com.github.triplet.gradle.play.internal.releaseStatusOrDefault
-import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
-import com.github.triplet.gradle.play.internal.trackOrDefault
+import com.github.triplet.gradle.play.internal.*
 import org.gradle.api.Action
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.*
 import java.io.File
 import java.io.Serializable
 
@@ -134,6 +125,18 @@ open class PlayPublisherExtension @JvmOverloads constructor(
         }
 
     @get:Internal("Backing property for public input")
+    internal var _attachObb: Int? = null
+    /**
+     * Specify the obb APK version code to attach to it.
+     */
+    @get:Input
+    var attachObb
+        get() = _attachObb ?: -1
+        set(value) {
+            _attachObb = value
+        }
+
+    @get:Internal("Backing property for public input")
     internal var _resolutionStrategy: ResolutionStrategy? = null
     /**
      * Specify the resolution strategy to employ when a version conflict occurs.
@@ -153,7 +156,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
         }
 
     @get:Internal("ProcessArtifactMetadata is always out-of-date. Also, Closures with " +
-                          "parameters cannot be used as inputs.")
+            "parameters cannot be used as inputs.")
     internal var _outputProcessor: Action<ApkVariantOutput>? = null
 
     /**
@@ -217,6 +220,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
         it._resolutionStrategy = _resolutionStrategy
         it._releaseStatus = _releaseStatus
         it._artifactDir = _artifactDir
+        it._attachObb = attachObb
     }
 
     internal class Serializable : PlayPublisherExtension()
