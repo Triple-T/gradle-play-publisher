@@ -134,12 +134,6 @@ afterEvaluate {
                     roles.set(listOf("Developer"))
                     timezone.set("-8")
                 }
-                developer {
-                    id.set("santojon")
-                    name.set("Jonathan Santos")
-                    roles.set(listOf("Developer"))
-                    timezone.set("-3")
-                }
             }
 
             scm {
