@@ -1,19 +1,7 @@
 package com.github.triplet.gradle.play.tasks.internal
 
 import com.github.triplet.gradle.play.PlayPublisherExtension
-import com.github.triplet.gradle.play.internal.MIME_TYPE_STREAM
-import com.github.triplet.gradle.play.internal.RELEASE_NAMES_DEFAULT_NAME
-import com.github.triplet.gradle.play.internal.RELEASE_NAMES_MAX_LENGTH
-import com.github.triplet.gradle.play.internal.RELEASE_NOTES_DEFAULT_NAME
-import com.github.triplet.gradle.play.internal.RELEASE_NOTES_MAX_LENGTH
-import com.github.triplet.gradle.play.internal.ReleaseStatus
-import com.github.triplet.gradle.play.internal.ResolutionStrategy
-import com.github.triplet.gradle.play.internal.has
-import com.github.triplet.gradle.play.internal.orNull
-import com.github.triplet.gradle.play.internal.readProcessed
-import com.github.triplet.gradle.play.internal.releaseStatusOrDefault
-import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
-import com.github.triplet.gradle.play.internal.trackUploadProgress
+import com.github.triplet.gradle.play.internal.*
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
@@ -42,6 +30,7 @@ internal fun PlayPublishTaskBase.paramsForBase(
                 variant.outputs.map { it.versionCode }.first(),
 
                 releaseNotesDir,
+                obbDir,
                 consoleNamesDir,
                 mappingFile
         )
@@ -210,6 +199,7 @@ internal abstract class ArtifactWorkerBase(
             val versionCode: Int,
 
             val releaseNotesDir: File?,
+            val obbDir: File?,
             val consoleNamesDir: File?,
             val mappingFile: File?
     ) : Serializable

@@ -125,6 +125,18 @@ open class PlayPublisherExtension @JvmOverloads constructor(
         }
 
     @get:Internal("Backing property for public input")
+    internal var _trackObb: String? = null
+    /**
+     * Specify the obb APK version code to attach to it.
+     */
+    @get:Input
+    var trackObb
+        get() = _trackObb
+        set(value) {
+            _trackObb = value
+        }
+
+    @get:Internal("Backing property for public input")
     internal var _attachObb: Int? = null
     /**
      * Specify the obb APK version code to attach to it.
@@ -221,6 +233,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
         it._releaseStatus = _releaseStatus
         it._artifactDir = _artifactDir
         it._attachObb = attachObb
+        it._trackObb = trackObb
     }
 
     internal class Serializable : PlayPublisherExtension()

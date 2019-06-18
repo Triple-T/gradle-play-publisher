@@ -2,15 +2,11 @@ package com.github.triplet.gradle.play.tasks.internal
 
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.PlayPublisherExtension
+import com.github.triplet.gradle.play.internal.OBB_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NAMES_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
 import com.github.triplet.gradle.play.internal.orNull
-import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.*
 import java.io.File
 
 abstract class PlayPublishArtifactBase(
@@ -25,6 +21,13 @@ abstract class PlayPublishArtifactBase(
     @get:InputDirectory
     internal val releaseNotesDir
         get() = File(resDir, RELEASE_NOTES_PATH).orNull()
+
+    @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:Optional
+    @get:InputDirectory
+    internal val obbDir
+        get() = File(resDir, OBB_PATH).orNull()
 
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)

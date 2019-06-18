@@ -15,6 +15,7 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.model.Apk
 import com.google.api.services.androidpublisher.model.ExpansionFile
+import org.gradle.api.GradleException
 import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.submit
 import org.gradle.kotlin.dsl.support.serviceOf
@@ -59,17 +60,43 @@ open class PublishApk @Inject constructor(
 
     private class ApkUploader @Inject constructor(
             private val p: Params,
-            artifact: ArtifactPublishingData,
+            val artifact: ArtifactPublishingData,
             val play: PlayPublishingData
     ) : ArtifactWorkerBase(artifact, play) {
         override fun upload() {
             updateTracks(editId, p.apkFiles.mapNotNull {
-                var code = uploadApk(editId, FileContent(MIME_TYPE_APK, it))?.versionCode?.toLong()
+                val code = uploadApk(editId, FileContent(MIME_TYPE_APK, it))?.versionCode?.toLong()
+                val trackObb = play.extension.trackObb
 
                 // Attach Obb file from other APK (using its code)
-                var expansionFile = ExpansionFile()
-                expansionFile.referencesVersion = play.extension.attachObb
-                edits.expansionfiles().update(appId, editId, code!!.toInt(), "main", expansionFile).execute()
+                if (play.extension.attachObb > 0) {
+                    var expansionFile = ExpansionFile()
+                    expansionFile.referencesVersion = play.extension.attachObb
+                    if (trackObb == null) {
+                        edits.expansionfiles().update(appId, editId, code!!.toInt(), "main", expansionFile).execute()
+                    } else {
+                        edits.expansionfiles().update(appId, editId, code!!.toInt(), trackObb, expansionFile).execute()
+                    }
+                } else {
+                    // No attach, but track, so upload from play/obb/[main|patch]
+                    if (trackObb != null) {
+                        val obbFiles = artifact.obbDir?.listFiles().orEmpty().mapNotNull { locale ->
+                            File(locale, "${extension.track}/$trackObb.txt").orNull()
+                                    ?: return@mapNotNull null
+                        }
+
+                        for (obbFile in obbFiles) {
+                            if (obbFile.exists()) {
+                                val newObbFile = FileContent("application/octet-stream", obbFile)
+                                edits.expansionfiles()
+                                        .upload(appId, editId, code!!.toInt(), trackObb, newObbFile)
+                                        .execute()
+                            } else {
+                                throw GradleException("Please place a file named `$trackObb` in the `play/obb/[main|patch]` directory")
+                            }
+                        }
+                    }
+                }
 
                 code
             }.ifEmpty { return })
