@@ -54,6 +54,8 @@ open class PublishApk @Inject constructor(
     @TaskAction
     fun publishApks() {
         val apks = inputApks.orEmpty().mapNotNull(File::orNull).ifEmpty { return }
+
+        project.delete(temporaryDir) // Make sure previous executions get cleared out
         project.serviceOf<WorkerExecutor>().submit(ApksUploader::class) {
             isolationMode = IsolationMode.NONE
             paramsForBase(this, ApksUploader.Params(apks, temporaryDir), getOrCreateEditId())
