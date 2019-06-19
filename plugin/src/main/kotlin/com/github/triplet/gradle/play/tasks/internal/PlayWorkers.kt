@@ -3,9 +3,7 @@ package com.github.triplet.gradle.play.tasks.internal
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.MIME_TYPE_STREAM
 import com.github.triplet.gradle.play.internal.RELEASE_NAMES_DEFAULT_NAME
-import com.github.triplet.gradle.play.internal.RELEASE_NAMES_MAX_LENGTH
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_DEFAULT_NAME
-import com.github.triplet.gradle.play.internal.RELEASE_NOTES_MAX_LENGTH
 import com.github.triplet.gradle.play.internal.ReleaseStatus
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.has
@@ -158,7 +156,7 @@ internal abstract class ArtifactWorkerBase(
             name = if (artifact.transientConsoleName == null) {
                 val file = File(artifact.consoleNamesDir, "${extension.track}.txt").orNull()
                         ?: File(artifact.consoleNamesDir, RELEASE_NAMES_DEFAULT_NAME).orNull()
-                file?.readProcessed(RELEASE_NAMES_MAX_LENGTH)?.lines()?.firstOrNull()
+                file?.readProcessed()?.lines()?.firstOrNull()
             } else {
                 artifact.transientConsoleName
             }
@@ -171,7 +169,7 @@ internal abstract class ArtifactWorkerBase(
 
             LocalizedText().apply {
                 language = locale.name
-                text = file.readProcessed(RELEASE_NOTES_MAX_LENGTH)
+                text = file.readProcessed()
             }
         }
         if (releaseNotes.isNotEmpty()) {
@@ -191,10 +189,10 @@ internal abstract class ArtifactWorkerBase(
 
         if (updateFraction) {
             val status = extension.releaseStatus
-            userFraction = if (
-                    status == ReleaseStatus.IN_PROGRESS.publishedName ||
-                    status == ReleaseStatus.HALTED.publishedName
-            ) extension.userFraction else null
+            userFraction = extension.userFraction.takeIf {
+                status == ReleaseStatus.IN_PROGRESS.publishedName ||
+                        status == ReleaseStatus.HALTED.publishedName
+            }
         }
 
         return this

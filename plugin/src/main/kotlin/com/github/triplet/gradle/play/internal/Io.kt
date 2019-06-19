@@ -2,10 +2,7 @@ package com.github.triplet.gradle.play.internal
 
 import java.io.File
 
-internal val File.parents
-    get() = generateSequence(parentFile) { it.parentFile }
-
-internal fun File.orNull() = if (exists()) this else null
+internal fun File.orNull() = takeIf { exists() }
 
 internal tailrec fun File.findClosestDir(): File {
     check(exists()) { "$this does not exist" }
@@ -28,14 +25,8 @@ internal fun File.safeCreateNewFile() = apply {
     check(exists() || createNewFile()) { "Unable to create $this" }
 }
 
-internal fun File.readProcessed(maxLength: Int) =
-        readText().normalized().throwOnOverflow(maxLength, this)
+internal fun File.readProcessed() = readText().normalized()
 
 internal fun String.normalized() = replace(Regex("\\r\\n"), "\n").trim()
 
-internal fun String?.nullOrFull() = if (isNullOrBlank()) null else this
-
-private fun String.throwOnOverflow(max: Int, file: File): String {
-    check(length <= max) { "File '$file' has reached the limit of $max characters." }
-    return this
-}
+internal fun String?.nullOrFull() = takeUnless { isNullOrBlank() }
