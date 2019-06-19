@@ -198,8 +198,12 @@ Several options are available to customize how your artifacts are published:
 
 * `track` is the target stage for an artifact, i.e. `internal`/`alpha`/`beta`/`production` or any
   custom track
+  * Default: `internal`
 * `releaseStatus` is the type of release, i.e. `completed`/`draft`/`inProgress`/`halted`
+  * Default: `completed`
 * `userFraction` is the percentage of users who will receive a staged release
+  * Default: `0.1`
+  * ***Note: If you want to specify `userFraction` you must set `releaseStatus`'s value to `inProgress` or `halted`***
 
 Example configuration:
 
@@ -305,7 +309,7 @@ property:
 play {
     // ...
     fromTrack = "alpha"
-} 
+}
 ```
 
 If you need to execute a one-time promotion, you can use the CLI args. For example, this is how you
