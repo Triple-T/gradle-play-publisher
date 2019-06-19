@@ -31,7 +31,7 @@ internal inline fun <reified T : Task> Project.newTask(
 ): TaskProvider<T> {
     val config: T.() -> Unit = {
         this.description = description
-        this.group = if (description.isNullOrBlank()) null else PLUGIN_GROUP
+        this.group = PLUGIN_GROUP.takeUnless { description.isNullOrBlank() }
         block()
     }
 
