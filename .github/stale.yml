@@ -1,3 +1,4 @@
+only: issues
 daysUntilStale: 7
 daysUntilClose: 7
 exemptLabels:
