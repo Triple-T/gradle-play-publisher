@@ -198,8 +198,12 @@ Several options are available to customize how your artifacts are published:
 
 * `track` is the target stage for an artifact, i.e. `internal`/`alpha`/`beta`/`production` or any
   custom track
+  * Defaults to `internal`
 * `releaseStatus` is the type of release, i.e. `completed`/`draft`/`inProgress`/`halted`
+  * Defaults to `completed`
 * `userFraction` is the percentage of users who will receive a staged release
+  * Defaults to `0.1` aka 10%
+  * **Note:** the `userFraction` is only applicable where `releaseStatus=[inProgress/halted]`
 
 Example configuration:
 
@@ -271,6 +275,27 @@ For quick access, you can also use the `--artifact-dir` CLI option:
 
 > Note: all artifacts in the specified directory will be published.
 
+#### Link to existent expansion files
+
+If your app uses expansion **(\*.obb)** files, you cannot upload, but link your new APKs with a file
+already in Play Store, linked with some other version.
+You have to use the version code of already linked APK to _attachObb_ property:
+
+```kt
+play {
+    // APK version code to get Obb file to attach
+    trackObb = "main"
+    attachObb = 315
+}
+```
+
+The _trackObb_ property is optional in this case, and can be "patch" or "main". Where "main" is the
+default value if not passed.
+
+Every time you run a publish related task, the linked obb file with the APK version code you passed
+will be linked with the new ones. If obb file don't exist, an error will raise and your APKs will
+not be published.
+
 ### Publishing an App Bundle
 
 Run `./gradlew publishBundle`.
@@ -305,7 +330,7 @@ property:
 play {
     // ...
     fromTrack = "alpha"
-} 
+}
 ```
 
 If you need to execute a one-time promotion, you can use the CLI args. For example, this is how you

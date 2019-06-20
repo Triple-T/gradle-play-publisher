@@ -3,9 +3,7 @@ package com.github.triplet.gradle.play.tasks
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.internal.AppDetail
 import com.github.triplet.gradle.play.internal.ImageType
-import com.github.triplet.gradle.play.internal.JsonFileFilter
 import com.github.triplet.gradle.play.internal.LISTINGS_PATH
-import com.github.triplet.gradle.play.internal.LocaleFileFilter
 import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NAMES_PATH
@@ -126,8 +124,8 @@ open class GenerateResources @Inject constructor(
                 checkNotNull(listFiles()) {
                     "$this must be a folder"
                 }.forEach {
-                    check(it.isDirectory && LocaleFileFilter.accept(it)) {
-                        "Invalid locale: ${it.name}"
+                    check(it.isDirectory) {
+                        "Files are not allowed under the listings directory: ${it.name}"
                     }
                 }
             }
@@ -162,8 +160,6 @@ open class GenerateResources @Inject constructor(
                 }
                 checkNotNull(products.listFiles()) {
                     "$products must be a folder"
-                }.forEach {
-                    check(JsonFileFilter.accept(it)) { "In-app product files must be JSON." }
                 }
             }
 

@@ -4,18 +4,15 @@ import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.AppDetail
 import com.github.triplet.gradle.play.internal.GRAPHICS_PATH
-import com.github.triplet.gradle.play.internal.ImageFileFilter
 import com.github.triplet.gradle.play.internal.ImageType
 import com.github.triplet.gradle.play.internal.LISTINGS_PATH
 import com.github.triplet.gradle.play.internal.ListingDetail
-import com.github.triplet.gradle.play.internal.has
 import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.internal.readProcessed
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PlayWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.WriteTrackExtensionOptions
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
-import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.model.AppDetails
 import com.google.api.services.androidpublisher.model.Listing
@@ -148,7 +145,7 @@ open class PublishListing @Inject constructor(
         override fun run() {
             println("Uploading app details")
             val details = AppDetails().apply {
-                fun AppDetail.read() = File(p.dir, fileName).orNull()?.readProcessed(maxLength)
+                fun AppDetail.read() = File(p.dir, fileName).orNull()?.readProcessed()
 
                 defaultLanguage = AppDetail.DEFAULT_LANGUAGE.read()
                 contactEmail = AppDetail.CONTACT_EMAIL.read()
@@ -177,19 +174,10 @@ open class PublishListing @Inject constructor(
             if (listing.toPrettyString() == "{}") return
 
             println("Uploading $locale listing")
-            try {
-                edits.listings().update(appId, editId, locale, listing).execute()
-            } catch (e: GoogleJsonResponseException) {
-                if (e has "unsupportedListingLanguage") {
-                    // Rethrow for clarity
-                    throw IllegalArgumentException("Unsupported locale: $locale", e)
-                } else {
-                    throw e
-                }
-            }
+            edits.listings().update(appId, editId, locale, listing).execute()
         }
 
-        fun ListingDetail.read() = File(p.listingDir, fileName).orNull()?.readProcessed(maxLength)
+        fun ListingDetail.read() = File(p.listingDir, fileName).orNull()?.readProcessed()
 
         data class Params(val listingDir: File) : Serializable
     }
@@ -201,14 +189,8 @@ open class PublishListing @Inject constructor(
         override fun run() {
             val typeName = p.type.publishedName
             val files = p.imageDir.listFiles()?.sorted() ?: return
-
-            check(files.all {
-                val isValidType = ImageFileFilter.accept(it)
-                if (!isValidType) System.err.println("Invalid file type: ${it.name}")
-                isValidType
-            }) { "Invalid files type(s), check logs for details." }
             check(files.size <= p.type.maxNum) {
-                "You can only upload ${p.type.maxNum} graphic(s) for the $typeName"
+                "You can only upload ${p.type.maxNum} $typeName."
             }
 
             val locale = p.imageDir/*icon*/.parentFile/*graphics*/.parentFile/*en-US*/.name

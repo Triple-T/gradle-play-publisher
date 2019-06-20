@@ -4,6 +4,7 @@ import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.tasks.internal.ArtifactWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishArtifactBase
+import com.github.triplet.gradle.play.tasks.internal.TransientTrackOptions
 import com.github.triplet.gradle.play.tasks.internal.UpdatableTrackExtensionOptions
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import org.gradle.api.tasks.Nested
@@ -16,8 +17,9 @@ import javax.inject.Inject
 
 open class PromoteRelease @Inject constructor(
         @get:Nested override val extension: PlayPublisherExtension,
-        variant: ApplicationVariant
-) : PlayPublishArtifactBase(extension, variant), UpdatableTrackExtensionOptions {
+        variant: ApplicationVariant,
+        optionsHolder: TransientTrackOptions.Holder
+) : PlayPublishArtifactBase(extension, variant, optionsHolder), UpdatableTrackExtensionOptions {
     init {
         // Always out-of-date since we don't know what's changed on the network
         outputs.upToDateWhen { false }
@@ -32,7 +34,7 @@ open class PromoteRelease @Inject constructor(
 
     private class Promoter @Inject constructor(
             @Suppress("UNUSED_PARAMETER") p: Params,
-            artifact: ArtifactPublishingData,
+            private val artifact: ArtifactPublishingData,
             play: PlayPublishingData
     ) : ArtifactWorkerBase(artifact, play) {
         override fun upload() {
@@ -43,7 +45,7 @@ open class PromoteRelease @Inject constructor(
                     }
 
             if (tracks.isEmpty()) {
-                println("Nothing to promote. Did you mean to run publish?")
+                logger.warn("Nothing to promote. Did you mean to run publish?")
                 return
             }
 
@@ -59,13 +61,12 @@ open class PromoteRelease @Inject constructor(
                     }
                 }
             }
-            println("Promoting '${track.track}' release to '${extension.track}'")
 
             track.releases.forEach {
                 it.applyChanges(
                         updateStatus = extension._releaseStatus != null,
                         updateFraction = extension._userFraction != null,
-                        updateConsoleName = false
+                        updateConsoleName = artifact.transientConsoleName != null
                 )
             }
 
@@ -77,6 +78,9 @@ open class PromoteRelease @Inject constructor(
                 it.status
             }
 
+            println("Promoting ${track.releases.map { it.status }.distinct()} release " +
+                            "($appId:${track.releases.flatMap { it.versionCodes.orEmpty() }}) " +
+                            "from track '${track.track}' to track '${extension.track}'")
             edits.tracks().update(appId, editId, extension.track, track).execute()
         }
 

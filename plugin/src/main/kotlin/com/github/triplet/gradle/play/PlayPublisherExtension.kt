@@ -127,11 +127,11 @@ open class PlayPublisherExtension @JvmOverloads constructor(
     @get:Internal("Backing property for public input")
     internal var _trackObb: String? = null
     /**
-     * Specify the obb APK version code to attach to it.
+     * Specify the obb track.
      */
     @get:Input
     var trackObb
-        get() = _trackObb
+        get() = trackObbOrDefault
         set(value) {
             _trackObb = value
         }

@@ -11,8 +11,9 @@ import java.io.File
 
 abstract class PlayPublishArtifactBase(
         extension: PlayPublisherExtension,
-        variant: ApplicationVariant
-) : PlayPublishTaskBase(extension, variant) {
+        variant: ApplicationVariant,
+        optionsHolder: TransientTrackOptions.Holder
+) : PlayPublishTaskBase(extension, variant), TransientTrackOptions by optionsHolder {
     @get:Internal internal lateinit var resDir: File
 
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle

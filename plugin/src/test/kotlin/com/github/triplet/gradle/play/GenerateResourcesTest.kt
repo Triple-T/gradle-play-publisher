@@ -26,24 +26,6 @@ class GenerateResourcesTest {
     // TODO add test making sure source files doesn't change
 
     @Test
-    fun `Invalid product file throws`() {
-        // language=gradle
-        val config = """
-            flavorDimensions 'pricing'
-
-            productFlavors {
-                invalidProduct { dimension 'pricing' }
-            }
-        """
-        val result = execute(config, true, "clean", "generateInvalidProductReleasePlayResources")
-
-        assertEquals(
-                TaskOutcome.FAILED,
-                result.task(":generateInvalidProductReleasePlayResources")!!.outcome
-        )
-    }
-
-    @Test
     fun `Various build types override main variant fallbacks`() {
         // language=gradle
         val config = """
@@ -293,24 +275,6 @@ class GenerateResourcesTest {
         assertEquals(
                 TaskOutcome.SUCCESS,
                 result.task(":generateHiddenFileReleasePlayResources")!!.outcome
-        )
-    }
-
-    @Test
-    fun `Invalid locales throw`() {
-        // language=gradle
-        val config = """
-            flavorDimensions 'pricing'
-
-            productFlavors {
-                invalidLocale { dimension 'pricing' }
-            }
-        """
-        val result = execute(config, true, "clean", "generateInvalidLocaleReleasePlayResources")
-
-        assertEquals(
-                TaskOutcome.FAILED,
-                result.task(":generateInvalidLocaleReleasePlayResources")!!.outcome
         )
     }
 

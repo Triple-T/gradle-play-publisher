@@ -5,7 +5,6 @@ import com.android.build.gradle.api.ApkVariantOutput
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.orNull
-import com.github.triplet.gradle.play.internal.trackUploadProgress
 import com.github.triplet.gradle.play.tasks.internal.ArtifactExtensionOptions
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PlayWorkerBase
@@ -37,11 +36,11 @@ open class PublishInternalSharingApk @Inject constructor(
 
             return if (customDir == null) {
                 variant.outputs.filterIsInstance<ApkVariantOutput>().singleOrNull {
-                    OutputType.valueOf(it.outputType) == OutputType.MAIN
+                    OutputType.valueOf(it.outputType) == OutputType.MAIN || it.filters.isEmpty()
                 }?.outputFile
             } else {
                 customDir.listFiles().orEmpty().singleOrNull { it.extension == "apk" }.also {
-                    if (it == null) println("Warning: no APKs found in '$customDir' yet.")
+                    if (it == null) logger.warn("Warning: no APKs found in '$customDir' yet.")
                 }
             }
         }
