@@ -21,8 +21,6 @@ import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.model.Listing
 import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
 import org.gradle.kotlin.dsl.support.serviceOf
@@ -40,7 +38,6 @@ open class Bootstrap @Inject constructor(
         optionsHolder: BootstrapOptions.Holder
 ) : PlayPublishTaskBase(extension, variant), BootstrapOptions by optionsHolder {
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
-    @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputDirectory
     protected val srcDir: File by lazy {
         project.file("src/${variant.flavorNameOrDefault}/$PLAY_PATH")

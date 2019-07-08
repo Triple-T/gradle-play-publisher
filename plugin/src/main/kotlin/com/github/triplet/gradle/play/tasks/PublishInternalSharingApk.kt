@@ -45,7 +45,6 @@ open class PublishInternalSharingApk @Inject constructor(
             }
         }
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
-    @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputDirectory
     protected val outputDir by lazy {
         File(project.buildDir, "outputs/internal-sharing/apk/${variant.name}")
