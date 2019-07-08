@@ -38,7 +38,6 @@ import javax.inject.Inject
 open class GenerateResources @Inject constructor(
         private val variant: ApplicationVariant
 ) : DefaultTask() {
-    @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputDirectory
     internal val resDir by lazy { File(project.buildDir, "${variant.playPath}/res") }
 

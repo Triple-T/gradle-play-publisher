@@ -53,7 +53,6 @@ open class PublishBundle @Inject constructor(
             }
         }
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
-    @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:OutputDirectory // This directory isn't used, but it's needed for up-to-date checks to work
     protected val outputDir by lazy { File(project.buildDir, "${variant.playPath}/bundles") }
 

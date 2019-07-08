@@ -1,6 +1,6 @@
 package com.github.triplet.gradle.play.internal
 
-import com.android.builder.model.Version
+import com.android.Version
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import org.gradle.util.GradleVersion
 
@@ -16,7 +16,12 @@ internal fun validateRuntime() {
                 "'./gradlew wrapper --gradle-version=\$LATEST --distribution-type=ALL'."
     }
 
-    val agpVersion = Version.ANDROID_GRADLE_PLUGIN_VERSION
+    val agpVersion = try {
+        Version.ANDROID_GRADLE_PLUGIN_VERSION
+    } catch (e: NoClassDefFoundError) {
+        @Suppress("DEPRECATION") // TODO remove when 3.6 is the minimum
+        com.android.builder.model.Version.ANDROID_GRADLE_PLUGIN_VERSION
+    }
     check(agpVersion >= MIN_AGP_VERSION) {
         "Gradle Play Publisher's minimum Android Gradle Plugin version is at least " +
                 "$MIN_AGP_VERSION and yours is $agpVersion. Find the latest version and upgrade " +

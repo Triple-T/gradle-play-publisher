@@ -9,11 +9,11 @@ plugins {
 }
 
 dependencies {
-    compileOnly("com.android.tools.build:gradle:3.6.0-alpha02")
+    compileOnly("com.android.tools.build:gradle:3.6.0-alpha04")
 
     implementation("com.google.apis:google-api-services-androidpublisher:v3-rev86-1.25.0")
 
-    testImplementation("com.android.tools.build:gradle:3.6.0-alpha02")
+    testImplementation("com.android.tools.build:gradle:3.6.0-alpha04")
     testImplementation(kotlin("test"))
     testImplementation("junit:junit:4.12")
 }

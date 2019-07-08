@@ -101,9 +101,9 @@ class CompatibilityTest(
         @JvmStatic
         @Parameterized.Parameters(name = "agpVersion: {0}, gradleVersion {1}")
         fun parameters() = listOf(
-                arrayOf("3.5.0-beta01", "5.4"), // Oldest supported
-                arrayOf("3.5.0-beta01", "5.4"), // Latest stable
-                arrayOf("3.6.0-alpha02", "5.4.1") // Latest
+                arrayOf("3.5.0-beta05", "5.4.1"), // Oldest supported
+                arrayOf("3.5.0-beta05", "5.4.1"), // Latest stable
+                arrayOf("3.6.0-alpha04", "5.5") // Latest
         )
     }
 }
