@@ -1,17 +1,15 @@
 package com.github.triplet.gradle.play.tasks
 
 import com.android.build.gradle.api.ApplicationVariant
-import com.android.build.gradle.internal.api.InstallableVariantImpl
-import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.MIME_TYPE_STREAM
 import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.tasks.internal.ArtifactExtensionOptions
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PlayWorkerBase
+import com.github.triplet.gradle.play.tasks.internal.findBundleFile
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.http.FileContent
-import org.gradle.api.file.RegularFile
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.OutputDirectory
@@ -33,21 +31,7 @@ open class PublishInternalSharingBundle @Inject constructor(
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFile
     val bundle: File?
-        get() {
-            val customDir = extension._artifactDir
-
-            return if (customDir == null) {
-                val installable = variant as InstallableVariantImpl
-                installable.variantData.scope.artifacts
-                        .getFinalProduct<RegularFile>(InternalArtifactType.BUNDLE)
-                        .get().asFile.orNull() ?: installable
-                        .getFinalArtifact(InternalArtifactType.BUNDLE).files.singleOrNull()
-            } else {
-                customDir.listFiles().orEmpty().singleOrNull { it.extension == "aab" }.also {
-                    if (it == null) logger.warn("Warning: no App Bundle found in '$customDir' yet.")
-                }
-            }
-        }
+        get() = findBundleFile()
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:OutputDirectory
     protected val outputDir by lazy {
