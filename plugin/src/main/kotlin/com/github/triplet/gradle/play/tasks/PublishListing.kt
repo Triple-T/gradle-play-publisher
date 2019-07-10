@@ -18,6 +18,7 @@ import com.google.api.services.androidpublisher.model.AppDetails
 import com.google.api.services.androidpublisher.model.Listing
 import com.google.common.hash.Hashing
 import com.google.common.io.Files
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileType
 import org.gradle.api.tasks.InputFiles
@@ -36,19 +37,19 @@ import java.io.File
 import java.io.Serializable
 import javax.inject.Inject
 
-open class PublishListing @Inject constructor(
+abstract class PublishListing @Inject constructor(
         @get:Nested override val extension: PlayPublisherExtension,
         variant: ApplicationVariant
 ) : PlayPublishTaskBase(extension, variant), WriteTrackExtensionOptions {
     @get:Internal
-    internal lateinit var resDir: File
+    internal abstract val resDir: DirectoryProperty
 
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:Incremental
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
     protected val detailFiles: FileCollection by lazy {
-        project.fileTree(resDir).apply {
+        project.fileTree(resDir).builtBy(resDir).apply {
             // We can't simply use `project.files` because Gradle would expect those to exist for
             // stuff like `@SkipWhenEmpty` to work.
             for (detail in AppDetail.values()) include("/${detail.fileName}")
@@ -59,7 +60,7 @@ open class PublishListing @Inject constructor(
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
     protected val listingFiles: FileCollection by lazy {
-        project.fileTree(resDir).apply {
+        project.fileTree(resDir).builtBy(resDir).apply {
             for (detail in ListingDetail.values()) include("/$LISTINGS_PATH/*/${detail.fileName}")
         }
     }
@@ -68,7 +69,7 @@ open class PublishListing @Inject constructor(
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
     protected val mediaFiles: FileCollection by lazy {
-        project.fileTree(resDir).apply {
+        project.fileTree(resDir).builtBy(resDir).apply {
             for (image in ImageType.values()) {
                 include("/$LISTINGS_PATH/*/$GRAPHICS_PATH/${image.dirName}/*")
             }
@@ -98,10 +99,12 @@ open class PublishListing @Inject constructor(
         val changedDetails =
                 changes.getFileChanges(detailFiles).filter { it.fileType == FileType.FILE }
         if (changedDetails.isEmpty()) return
-        if (AppDetail.values().map { File(resDir, it.fileName) }.none { it.exists() }) return
+        if (AppDetail.values().map { resDir.file(it.fileName) }.none { it.get().asFile.exists() }) {
+            return
+        }
 
         executor.submit(DetailsUploader::class) {
-            paramsForBase(this, DetailsUploader.Params(resDir), editId)
+            paramsForBase(this, DetailsUploader.Params(resDir.asFile.get()), editId)
         }
     }
 

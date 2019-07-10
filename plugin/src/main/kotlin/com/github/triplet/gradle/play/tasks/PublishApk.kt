@@ -26,7 +26,7 @@ import java.io.File
 import java.io.Serializable
 import javax.inject.Inject
 
-open class PublishApk @Inject constructor(
+abstract class PublishApk @Inject constructor(
         @get:Nested override val extension: PlayPublisherExtension,
         variant: ApplicationVariant,
         optionsHolder: TransientTrackOptions.Holder

@@ -7,6 +7,7 @@ import com.github.triplet.gradle.play.internal.PLAY_CONFIGS_PATH
 import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.mergeWith
 import com.github.triplet.gradle.play.internal.newTask
+import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.internal.validateRuntime
 import com.github.triplet.gradle.play.tasks.Bootstrap
 import com.github.triplet.gradle.play.tasks.GenerateResources
@@ -34,6 +35,7 @@ import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.invoke
 import org.gradle.kotlin.dsl.the
 import org.gradle.kotlin.dsl.withType
+import java.io.File
 
 @Suppress("unused") // Used by Gradle
 class PlayPublisherPlugin : Plugin<Project> {
@@ -158,20 +160,21 @@ class PlayPublisherPlugin : Plugin<Project> {
                 doFirst { logger.warn("$name is deprecated, use ${bootstrapTask.get().name} instead") }
             }
 
-            val playResourcesTask = project.newTask<GenerateResources>(
+            val resourceDir = project.newTask<GenerateResources>(
                     "generate${variantName}PlayResources",
                     constructorArgs = arrayOf(this)
-            ) { mustRunAfter(bootstrapTask) }
+            ) {
+                resDir.set(File(project.buildDir, "$playPath/res"))
+                mustRunAfter(bootstrapTask)
+            }.flatMap {
+                it.resDir
+            }
 
             val publishListingTask = project.newTask<PublishListing>(
                     "publish${variantName}Listing",
                     "Uploads all Play Store metadata for variant '$name'.",
                     arrayOf(extension, this)
-            ) {
-                resDir = playResourcesTask.get().resDir
-
-                dependsOn(playResourcesTask)
-            }
+            ) { resDir.set(resourceDir) }
             publishListingAllTask { dependsOn(publishListingTask) }
             // TODO Remove in v3.0
             project.newTask("publishListing$variantName") {
@@ -183,11 +186,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "publish${variantName}Products",
                     "Uploads all Play Store in-app products for variant '$name'.",
                     arrayOf(extension, this)
-            ) {
-                resDir = playResourcesTask.get().resDir
-
-                dependsOn(playResourcesTask)
-            }
+            ) { resDir.set(resourceDir) }
             publishProductsAllTask { dependsOn(publishProductsTask) }
 
             val processArtifactMetadata = project.newTask<ProcessArtifactMetadata>(
@@ -212,9 +211,9 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "Uploads APK for variant '$name'.",
                     arrayOf(extension, this, transientTrackOptionsHolder)
             ) {
-                resDir = playResourcesTask.get().resDir
+                resDir.set(resourceDir)
 
-                dependsOn(playResourcesTask)
+                dependsOn(resourceDir)
                 dependsOn(publishApkTaskDependenciesHack)
             }
             publishApkAllTask { dependsOn(publishApkTask) }
@@ -252,9 +251,9 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "Uploads App Bundle for variant '$name'.",
                     arrayOf(extension, this, transientTrackOptionsHolder)
             ) {
-                resDir = playResourcesTask.get().resDir
+                resDir.set(resourceDir)
 
-                dependsOn(playResourcesTask)
+                dependsOn(resourceDir)
                 dependsOn(publishBundleTaskDependenciesHack)
             }
             publishBundleAllTask { dependsOn(publishBundleTask) }
@@ -273,9 +272,9 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "Promotes a release for variant '$name'.",
                     arrayOf(extension, this, transientTrackOptionsHolder)
             ) {
-                resDir = playResourcesTask.get().resDir
+                resDir.set(resourceDir)
 
-                dependsOn(playResourcesTask)
+                dependsOn(resourceDir)
             }
             promoteReleaseAllTask { dependsOn(promoteReleaseTask) }
 
