@@ -58,7 +58,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 arrayOf(bootstrapOptionsHolder)
         )
         val publishAllTask = project.newTask<GlobalPublishableArtifactLifecycleTask>(
-                "publish",
+                "publishAll",
                 "Uploads APK or App Bundle and all Play Store metadata for every variant.",
                 arrayOf(baseExtension)
         )
