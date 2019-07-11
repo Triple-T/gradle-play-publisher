@@ -19,7 +19,6 @@ import com.github.triplet.gradle.play.tasks.PublishInternalSharingApk
 import com.github.triplet.gradle.play.tasks.PublishInternalSharingBundle
 import com.github.triplet.gradle.play.tasks.PublishListing
 import com.github.triplet.gradle.play.tasks.PublishProducts
-import com.github.triplet.gradle.play.tasks.internal.ArtifactLifecycleTask
 import com.github.triplet.gradle.play.tasks.internal.BootstrapLifecycleTask
 import com.github.triplet.gradle.play.tasks.internal.BootstrapOptions
 import com.github.triplet.gradle.play.tasks.internal.GlobalPublishableArtifactLifecycleTask
@@ -72,16 +71,6 @@ class PlayPublisherPlugin : Plugin<Project> {
                 "publishBundle",
                 "Uploads App Bundle for every variant.",
                 arrayOf(baseExtension, transientTrackOptionsHolder)
-        )
-        val publishInternalSharingApkAllTask = project.newTask<ArtifactLifecycleTask>(
-                "uploadPrivateApk",
-                "Uploads Internal Sharing APK for every variant.",
-                arrayOf(baseExtension)
-        )
-        val publishInternalSharingBundleAllTask = project.newTask<ArtifactLifecycleTask>(
-                "uploadPrivateBundle",
-                "Uploads Internal Sharing App Bundle for every variant.",
-                arrayOf(baseExtension)
         )
         val promoteReleaseAllTask = project.newTask<UpdatableTrackLifecycleTask>(
                 "promoteArtifact",
@@ -223,12 +212,11 @@ class PlayPublisherPlugin : Plugin<Project> {
                 doFirst { logger.warn("$name is deprecated, use ${publishApkTask.get().name} instead") }
             }
 
-            val publishInternalSharingApkTask = project.newTask<PublishInternalSharingApk>(
+            project.newTask<PublishInternalSharingApk>(
                     "upload${variantName}PrivateApk",
                     "Uploads Internal Sharing APK for variant '$name'.",
                     arrayOf(extension, this)
             ) { dependsOn(publishApkTaskDependenciesHack) }
-            publishInternalSharingApkAllTask.configure { dependsOn(publishInternalSharingApkTask) }
 
             val publishBundleTaskDependenciesHack = project.newTask(
                     "publish${variantName}BundleWrapper"
@@ -258,14 +246,11 @@ class PlayPublisherPlugin : Plugin<Project> {
             }
             publishBundleAllTask { dependsOn(publishBundleTask) }
 
-            val publishInternalSharingBundleTask = project.newTask<PublishInternalSharingBundle>(
+            project.newTask<PublishInternalSharingBundle>(
                     "upload${variantName}PrivateBundle",
                     "Uploads Internal Sharing App Bundle for variant '$name'.",
                     arrayOf(extension, this)
             ) { dependsOn(publishBundleTaskDependenciesHack) }
-            publishInternalSharingBundleAllTask.configure {
-                dependsOn(publishInternalSharingBundleTask)
-            }
 
             val promoteReleaseTask = project.newTask<PromoteRelease>(
                     "promote${variantName}Artifact",
