@@ -5,10 +5,6 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Nested
 import javax.inject.Inject
 
-internal open class ArtifactLifecycleTask @Inject constructor(
-        @get:Nested override val extension: PlayPublisherExtension
-) : DefaultTask(), ArtifactExtensionOptions
-
 internal open class WriteTrackLifecycleTask @Inject constructor(
         @get:Nested override val extension: PlayPublisherExtension
 ) : DefaultTask(), WriteTrackExtensionOptions
