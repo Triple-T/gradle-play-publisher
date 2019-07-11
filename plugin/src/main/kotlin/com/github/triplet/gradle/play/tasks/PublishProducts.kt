@@ -8,6 +8,7 @@ import com.github.triplet.gradle.play.tasks.internal.PlayWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.model.InAppProduct
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileType
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Internal
@@ -24,18 +25,18 @@ import java.io.File
 import java.io.Serializable
 import javax.inject.Inject
 
-open class PublishProducts @Inject constructor(
+abstract class PublishProducts @Inject constructor(
         extension: PlayPublisherExtension,
         variant: ApplicationVariant
 ) : PlayPublishTaskBase(extension, variant) {
     @get:Internal
-    internal lateinit var resDir: File
+    internal abstract val resDir: DirectoryProperty
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:SkipWhenEmpty
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputDirectory
     protected val productsDir by lazy {
-        project.fileTree(File(resDir, PRODUCTS_PATH)).apply {
+        project.fileTree(resDir.file(PRODUCTS_PATH)).builtBy(resDir).apply {
             include("*.json")
         }
     }

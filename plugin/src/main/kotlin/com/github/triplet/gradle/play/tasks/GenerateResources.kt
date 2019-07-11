@@ -15,9 +15,9 @@ import com.github.triplet.gradle.play.internal.isDirectChildOf
 import com.github.triplet.gradle.play.internal.normalized
 import com.github.triplet.gradle.play.internal.nullOrFull
 import com.github.triplet.gradle.play.internal.orNull
-import com.github.triplet.gradle.play.internal.playPath
 import org.gradle.api.Action
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
@@ -35,11 +35,11 @@ import java.io.Serializable
 import javax.inject.Inject
 
 @CacheableTask
-open class GenerateResources @Inject constructor(
+abstract class GenerateResources @Inject constructor(
         private val variant: ApplicationVariant
 ) : DefaultTask() {
     @get:OutputDirectory
-    internal val resDir by lazy { File(project.buildDir, "${variant.playPath}/res") }
+    internal abstract val resDir: DirectoryProperty
 
     private val resSrcDirNames by lazy { variant.sourceSets.map { "src/${it.name}/$PLAY_PATH" } }
     private val resSrcDirs by lazy { resSrcDirNames.map { project.file(it) } }
@@ -59,7 +59,7 @@ open class GenerateResources @Inject constructor(
                 val file = change.file
                 val target = resSrcDirs.singleOrNull { file.startsWith(it) }
                         ?.let { file.toRelativeString(it).nullOrFull() }
-                if (target != null) project.delete(File(resDir, target))
+                if (target != null) project.delete(resDir.file(target))
 
                 false
             } else {
@@ -68,7 +68,7 @@ open class GenerateResources @Inject constructor(
         }.map { it.file }
 
         project.serviceOf<WorkerExecutor>().submit(Processor::class) {
-            params(Processor.Params(resDir, resSrcDirs, files))
+            params(Processor.Params(resDir.asFile.get(), resSrcDirs, files))
         }
     }
 

@@ -5,6 +5,7 @@ import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.RELEASE_NAMES_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
 import com.github.triplet.gradle.play.internal.orNull
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
@@ -18,21 +19,21 @@ abstract class PlayPublishArtifactBase(
         variant: ApplicationVariant,
         optionsHolder: TransientTrackOptions.Holder
 ) : PlayPublishTaskBase(extension, variant), TransientTrackOptions by optionsHolder {
-    @get:Internal internal lateinit var resDir: File
+    @get:Internal internal abstract val resDir: DirectoryProperty
 
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:Optional
     @get:InputDirectory
     internal val releaseNotesDir
-        get() = File(resDir, RELEASE_NOTES_PATH).orNull()
+        get() = resDir.file(RELEASE_NOTES_PATH).get().asFile.orNull()
 
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:Optional
     @get:InputDirectory
     internal val consoleNamesDir
-        get() = File(resDir, RELEASE_NAMES_PATH).orNull()
+        get() = resDir.file(RELEASE_NAMES_PATH).get().asFile.orNull()
 
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)

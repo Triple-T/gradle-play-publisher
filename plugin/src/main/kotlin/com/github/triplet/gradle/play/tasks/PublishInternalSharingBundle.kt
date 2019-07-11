@@ -23,7 +23,7 @@ import java.io.File
 import java.io.Serializable
 import javax.inject.Inject
 
-open class PublishInternalSharingBundle @Inject constructor(
+abstract class PublishInternalSharingBundle @Inject constructor(
         @get:Nested override val extension: PlayPublisherExtension,
         variant: ApplicationVariant
 ) : PlayPublishTaskBase(extension, variant), ArtifactExtensionOptions {

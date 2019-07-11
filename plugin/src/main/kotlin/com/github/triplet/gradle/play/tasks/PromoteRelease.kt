@@ -15,7 +15,7 @@ import org.gradle.workers.WorkerExecutor
 import java.io.Serializable
 import javax.inject.Inject
 
-open class PromoteRelease @Inject constructor(
+abstract class PromoteRelease @Inject constructor(
         @get:Nested override val extension: PlayPublisherExtension,
         variant: ApplicationVariant,
         optionsHolder: TransientTrackOptions.Holder

@@ -32,7 +32,7 @@ import java.io.Serializable
 import java.net.URL
 import javax.inject.Inject
 
-open class Bootstrap @Inject constructor(
+abstract class Bootstrap @Inject constructor(
         extension: PlayPublisherExtension,
         variant: ApplicationVariant,
         optionsHolder: BootstrapOptions.Holder
