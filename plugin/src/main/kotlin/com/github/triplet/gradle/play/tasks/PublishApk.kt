@@ -95,7 +95,7 @@ abstract class PublishApk @Inject constructor(
                 val apk = try {
                     edits.apks()
                             .upload(appId, editId, FileContent(MIME_TYPE_APK, p.apk))
-                            .trackUploadProgress("APK")
+                            .trackUploadProgress("APK", p.apk)
                             .execute()
                 } catch (e: GoogleJsonResponseException) {
                     handleUploadFailures(e, p.apk)

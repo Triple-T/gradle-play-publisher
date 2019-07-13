@@ -65,7 +65,7 @@ abstract class PublishInternalSharingApk @Inject constructor(
         override fun run() {
             val apk = publisher.internalappsharingartifacts()
                     .uploadapk(appId, FileContent(MIME_TYPE_APK, p.apkFile))
-                    .trackUploadProgress("APK")
+                    .trackUploadProgress("APK", p.apkFile)
                     .execute()
 
             File(p.outputDir, "${System.currentTimeMillis()}.json").writeText(apk.toPrettyString())

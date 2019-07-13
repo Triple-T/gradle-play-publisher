@@ -53,7 +53,7 @@ abstract class PublishInternalSharingBundle @Inject constructor(
         override fun run() {
             val bundle = publisher.internalappsharingartifacts()
                     .uploadbundle(appId, FileContent(MIME_TYPE_STREAM, p.bundleFile))
-                    .trackUploadProgress("App Bundle")
+                    .trackUploadProgress("App Bundle", p.bundleFile)
                     .execute()
 
             File(p.outputDir, "${System.currentTimeMillis()}.json")
