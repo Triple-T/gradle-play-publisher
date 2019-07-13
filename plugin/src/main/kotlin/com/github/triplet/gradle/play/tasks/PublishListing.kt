@@ -32,6 +32,7 @@ import org.gradle.kotlin.dsl.submit
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
+import org.gradle.workers.IsolationMode
 import org.gradle.workers.WorkerExecutor
 import java.io.File
 import java.io.Serializable
@@ -84,31 +85,31 @@ abstract class PublishListing @Inject constructor(
 
     @TaskAction
     fun publishListing(changes: InputChanges) {
+        val details = processDetails(changes)
+        val listings = processListings(changes)
+        val media = processMedia(changes)
+
+        if (details == null && listings.isEmpty() && media.isEmpty()) return
+
         val editId = getOrCreateEditId()
-
-        val executor = project.serviceOf<WorkerExecutor>()
-        processDetails(executor, changes, editId)
-        processListings(executor, changes, editId)
-        processMedia(executor, changes, editId)
-        executor.await()
-
-        commit(editId)
+        project.serviceOf<WorkerExecutor>().submit(Publisher::class) {
+            isolationMode = IsolationMode.NONE
+            paramsForBase(this, Publisher.Params(details, listings, media), editId)
+        }
     }
 
-    private fun processDetails(executor: WorkerExecutor, changes: InputChanges, editId: String) {
+    private fun processDetails(changes: InputChanges): DetailsUploader.Params? {
         val changedDetails =
                 changes.getFileChanges(detailFiles).filter { it.fileType == FileType.FILE }
-        if (changedDetails.isEmpty()) return
+        if (changedDetails.isEmpty()) return null
         if (AppDetail.values().map { resDir.file(it.fileName) }.none { it.get().asFile.exists() }) {
-            return
+            return null
         }
 
-        executor.submit(DetailsUploader::class) {
-            paramsForBase(this, DetailsUploader.Params(resDir.asFile.get()), editId)
-        }
+        return DetailsUploader.Params(resDir.asFile.get())
     }
 
-    private fun processListings(executor: WorkerExecutor, changes: InputChanges, editId: String) {
+    private fun processListings(changes: InputChanges): List<ListingUploader.Params> {
         val changedLocales = changes.getFileChanges(listingFiles).asSequence()
                 .filter { it.fileType == FileType.FILE }
                 .map { it.file.parentFile }
@@ -117,14 +118,10 @@ abstract class PublishListing @Inject constructor(
                 .filter { it.exists() }
                 .toList()
 
-        for (listingDir in changedLocales) {
-            executor.submit(ListingUploader::class) {
-                paramsForBase(this, ListingUploader.Params(listingDir), editId)
-            }
-        }
+        return changedLocales.map { listingDir -> ListingUploader.Params(listingDir) }
     }
 
-    private fun processMedia(executor: WorkerExecutor, changes: InputChanges, editId: String) {
+    private fun processMedia(changes: InputChanges): List<MediaUploader.Params> {
         val changedMediaTypes = changes.getFileChanges(mediaFiles).asSequence()
                 .filter { it.fileType == FileType.FILE }
                 .map { it.file.parentFile }
@@ -134,11 +131,35 @@ abstract class PublishListing @Inject constructor(
                 .map { it.first to it.second!! }
                 .associate { it }
 
-        for ((imageDir, type) in changedMediaTypes) {
-            executor.submit(MediaUploader::class) {
-                paramsForBase(this, MediaUploader.Params(imageDir, type), editId)
+        return changedMediaTypes.map { (imageDir, type) -> MediaUploader.Params(imageDir, type) }
+    }
+
+    private class Publisher @Inject constructor(
+            private val executor: WorkerExecutor,
+
+            private val p: Params,
+            private val data: PlayPublishingData
+    ) : PlayWorkerBase(data) {
+        override fun run() {
+            if (p.details != null) {
+                executor.submit(DetailsUploader::class) { params(p.details, data) }
             }
+            for (listing in p.listings) {
+                executor.submit(ListingUploader::class) { params(listing, data) }
+            }
+            for (medium in p.media) {
+                executor.submit(MediaUploader::class) { params(medium, data) }
+            }
+
+            executor.await()
+            commit()
         }
+
+        data class Params(
+                val details: DetailsUploader.Params?,
+                val listings: List<ListingUploader.Params>,
+                val media: List<MediaUploader.Params>
+        ) : Serializable
     }
 
     private class DetailsUploader @Inject constructor(
