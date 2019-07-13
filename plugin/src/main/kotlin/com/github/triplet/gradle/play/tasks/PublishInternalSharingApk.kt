@@ -38,6 +38,8 @@ abstract class PublishInternalSharingApk @Inject constructor(
                 variant.outputs.filterIsInstance<ApkVariantOutput>().singleOrNull {
                     OutputType.valueOf(it.outputType) == OutputType.MAIN || it.filters.isEmpty()
                 }?.outputFile
+            } else if (customDir.isFile && customDir.extension == "apk") {
+                customDir
             } else {
                 customDir.listFiles().orEmpty().singleOrNull { it.extension == "apk" }.also {
                     if (it == null) logger.warn("Warning: no APKs found in '$customDir' yet.")
