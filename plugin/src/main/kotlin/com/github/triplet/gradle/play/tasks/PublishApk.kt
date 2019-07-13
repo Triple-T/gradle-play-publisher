@@ -40,6 +40,8 @@ abstract class PublishApk @Inject constructor(
 
             return if (customDir == null) {
                 variant.outputs.filterIsInstance<ApkVariantOutput>().map { it.outputFile }
+            } else if (customDir.isFile && customDir.extension == "apk") {
+                listOf(customDir)
             } else {
                 customDir.listFiles().orEmpty().filter { it.extension == "apk" }.also {
                     if (it.isEmpty()) logger.warn("Warning: no APKs found in '$customDir' yet.")

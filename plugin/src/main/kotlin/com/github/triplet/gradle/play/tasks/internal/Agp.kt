@@ -25,6 +25,8 @@ fun PlayPublishTaskBase.findBundleFile(): File? {
         installable.variantData.scope.artifacts
                 .getFinalProduct<RegularFile>(InternalArtifactType.BUNDLE)
                 .get().asFile.orNull() ?: getFinalArtifactCompat().singleOrNull()
+    } else if (customDir.isFile && customDir.extension == "aab") {
+        customDir
     } else {
         customDir.listFiles().orEmpty().singleOrNull { it.extension == "aab" }.also {
             if (it == null) logger.warn("Warning: no App Bundle found in '$customDir' yet.")
