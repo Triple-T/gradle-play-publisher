@@ -57,7 +57,7 @@ abstract class PublishBundle @Inject constructor(
             val content = FileContent(MIME_TYPE_STREAM, p.bundleFile)
             val bundle = try {
                 edits.bundles().upload(appId, editId, content)
-                        .trackUploadProgress("App Bundle")
+                        .trackUploadProgress("App Bundle", p.bundleFile)
                         .execute()
             } catch (e: GoogleJsonResponseException) {
                 handleUploadFailures(e, content.file)

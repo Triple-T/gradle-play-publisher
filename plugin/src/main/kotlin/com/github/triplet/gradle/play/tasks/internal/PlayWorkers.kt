@@ -69,13 +69,14 @@ internal abstract class PlayWorkerBase(private val data: PlayPublishingData) : R
     protected fun commit() = publisher.commit(extension, appId, editId, data.savedEditId)
 
     protected fun <T> AndroidPublisherRequest<T>.trackUploadProgress(
-            thing: String
+            thing: String,
+            file: File
     ): AndroidPublisherRequest<T> {
         mediaHttpUploader?.setProgressListener {
             @Suppress("NON_EXHAUSTIVE_WHEN")
             when (it.uploadState) {
                 MediaHttpUploader.UploadState.INITIATION_STARTED ->
-                    println("Starting $thing upload")
+                    println("Starting $thing upload: $file")
                 MediaHttpUploader.UploadState.MEDIA_IN_PROGRESS ->
                     println("Uploading $thing: ${(it.progress * 100).roundToInt()}% complete")
                 MediaHttpUploader.UploadState.MEDIA_COMPLETE ->
@@ -229,7 +230,7 @@ internal abstract class ArtifactWorkerBase(
             val mapping = FileContent(MIME_TYPE_STREAM, file)
             edits.deobfuscationfiles()
                     .upload(appId, editId, versionCode, "proguard", mapping)
-                    .trackUploadProgress("mapping file")
+                    .trackUploadProgress("mapping file", file)
                     .execute()
         }
     }
