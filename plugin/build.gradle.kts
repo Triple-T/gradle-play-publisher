@@ -44,7 +44,7 @@ tasks.named("test") {
 }
 
 group = "com.github.triplet.gradle"
-version = "2.3.0-SNAPSHOT"
+version = "2.3.0"
 
 gradlePlugin {
     plugins.create("play") {
