@@ -56,7 +56,7 @@ abstract class PublishProducts @Inject constructor(
 
     private class Uploader @Inject constructor(
             private val p: Params,
-            data: PlayPublishingData
+            data: PlayPublishingParams
     ) : PlayWorkerBase(data) {
         override fun run() {
             val product = JacksonFactory.getDefaultInstance()

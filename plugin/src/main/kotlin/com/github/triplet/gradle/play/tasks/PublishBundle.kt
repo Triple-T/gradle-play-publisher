@@ -50,9 +50,8 @@ abstract class PublishBundle @Inject constructor(
 
     private class BundleUploader @Inject constructor(
             private val p: Params,
-            artifact: ArtifactPublishingData,
-            play: PlayPublishingData
-    ) : ArtifactWorkerBase(artifact, play) {
+            data: ArtifactPublishingParams
+    ) : ArtifactWorkerBase(data) {
         override fun upload() {
             val content = FileContent(MIME_TYPE_STREAM, p.bundleFile)
             val bundle = try {

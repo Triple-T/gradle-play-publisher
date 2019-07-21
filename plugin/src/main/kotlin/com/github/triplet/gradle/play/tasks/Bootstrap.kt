@@ -15,8 +15,8 @@ import com.github.triplet.gradle.play.internal.nullOrFull
 import com.github.triplet.gradle.play.internal.safeCreateNewFile
 import com.github.triplet.gradle.play.internal.safeMkdirs
 import com.github.triplet.gradle.play.tasks.internal.BootstrapOptions
-import com.github.triplet.gradle.play.tasks.internal.PlayPublishTaskBase
-import com.github.triplet.gradle.play.tasks.internal.PlayWorkerBase
+import com.github.triplet.gradle.play.tasks.internal.EditWorkerBase
+import com.github.triplet.gradle.play.tasks.internal.PlayPublishEditTaskBase
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.model.Listing
@@ -36,7 +36,7 @@ abstract class Bootstrap @Inject constructor(
         extension: PlayPublisherExtension,
         variant: ApplicationVariant,
         optionsHolder: BootstrapOptions.Holder
-) : PlayPublishTaskBase(extension, variant), BootstrapOptions by optionsHolder {
+) : PlayPublishEditTaskBase(extension, variant), BootstrapOptions by optionsHolder {
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:OutputDirectory
     protected val srcDir: File by lazy {
@@ -52,32 +52,29 @@ abstract class Bootstrap @Inject constructor(
     fun bootstrap() {
         project.delete(srcDir)
 
-        val editId = getOrCreateEditId()
-
         val executor = project.serviceOf<WorkerExecutor>()
-        if (downloadAppDetails) bootstrapAppDetails(executor, editId)
-        if (downloadListings) bootstrapListings(executor, editId)
-        if (downloadReleaseNotes) bootstrapReleaseNotes(executor, editId)
+        if (downloadAppDetails) bootstrapAppDetails(executor)
+        if (downloadListings) bootstrapListings(executor)
+        if (downloadReleaseNotes) bootstrapReleaseNotes(executor)
         if (downloadProducts) bootstrapProducts(executor)
     }
 
-    private fun bootstrapAppDetails(executor: WorkerExecutor, editId: String) {
+    private fun bootstrapAppDetails(executor: WorkerExecutor) {
         executor.submit(DetailsDownloader::class) {
-            paramsForBase(this, DetailsDownloader.Params(srcDir), editId)
+            paramsForBase(this, DetailsDownloader.Params(srcDir))
         }
     }
 
-    private fun bootstrapListings(executor: WorkerExecutor, editId: String) {
+    private fun bootstrapListings(executor: WorkerExecutor) {
         executor.submit(ListingsDownloader::class) {
             isolationMode = IsolationMode.NONE
-            paramsForBase(this, ListingsDownloader.Params(File(srcDir, LISTINGS_PATH)), editId)
+            paramsForBase(this, ListingsDownloader.Params(File(srcDir, LISTINGS_PATH)))
         }
     }
 
-    private fun bootstrapReleaseNotes(executor: WorkerExecutor, editId: String) {
+    private fun bootstrapReleaseNotes(executor: WorkerExecutor) {
         executor.submit(ReleaseNotesDownloader::class) {
-            paramsForBase(
-                    this, ReleaseNotesDownloader.Params(File(srcDir, RELEASE_NOTES_PATH)), editId)
+            paramsForBase(this, ReleaseNotesDownloader.Params(File(srcDir, RELEASE_NOTES_PATH)))
         }
     }
 
@@ -89,8 +86,8 @@ abstract class Bootstrap @Inject constructor(
 
     private class DetailsDownloader @Inject constructor(
             private val p: Params,
-            data: PlayPublishingData
-    ) : PlayWorkerBase(data) {
+            data: EditPublishingParams
+    ) : EditWorkerBase(data) {
         override fun run() {
             println("Downloading app details")
             val details = edits.details().get(appId, editId).execute()
@@ -108,9 +105,10 @@ abstract class Bootstrap @Inject constructor(
 
     private class ListingsDownloader @Inject constructor(
             private val executor: WorkerExecutor,
+
             private val p: Params,
-            private val data: PlayPublishingData
-    ) : PlayWorkerBase(data) {
+            private val data: EditPublishingParams
+    ) : EditWorkerBase(data) {
         override fun run() {
             println("Downloading listings")
             val listings = edits.listings().list(appId, editId).execute().listings ?: return
@@ -146,9 +144,10 @@ abstract class Bootstrap @Inject constructor(
 
         private class ImageFetcher @Inject constructor(
                 private val executor: WorkerExecutor,
+
                 private val p: Params,
-                data: PlayPublishingData
-        ) : PlayWorkerBase(data) {
+                data: EditPublishingParams
+        ) : EditWorkerBase(data) {
             override fun run() {
                 val typeName = p.type.publishedName
                 val images = edits.images()
@@ -197,8 +196,8 @@ abstract class Bootstrap @Inject constructor(
 
     private class ReleaseNotesDownloader @Inject constructor(
             private val p: Params,
-            data: PlayPublishingData
-    ) : PlayWorkerBase(data) {
+            data: EditPublishingParams
+    ) : EditWorkerBase(data) {
         override fun run() {
             println("Downloading release notes")
 
@@ -217,8 +216,8 @@ abstract class Bootstrap @Inject constructor(
 
     private class ProductsDownloader @Inject constructor(
             private val p: Params,
-            data: PlayPublishingData
-    ) : PlayWorkerBase(data) {
+            data: EditPublishingParams
+    ) : EditWorkerBase(data) {
         override fun run() {
             println("Downloading in-app products")
             publisher.inappproducts().list(appId).execute().inappproduct?.forEach {

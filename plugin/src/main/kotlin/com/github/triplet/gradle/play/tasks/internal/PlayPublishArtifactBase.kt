@@ -18,7 +18,7 @@ abstract class PlayPublishArtifactBase(
         extension: PlayPublisherExtension,
         variant: ApplicationVariant,
         optionsHolder: TransientTrackOptions.Holder
-) : PlayPublishTaskBase(extension, variant), TransientTrackOptions by optionsHolder {
+) : PlayPublishEditTaskBase(extension, variant), TransientTrackOptions by optionsHolder {
     @get:Internal internal abstract val resDir: DirectoryProperty
 
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle

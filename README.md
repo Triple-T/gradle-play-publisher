@@ -42,12 +42,13 @@ other metadata.
    1. [Directory structure](#directory-structure)
    1. [Publishing listings](#publishing-listings)
    1. [Publishing in-app products](#publishing-in-app-products)
+1. [Working with product flavors](#working-with-product-flavors)
+   1. [Disabling publishing](#disabling-publishing)
+   1. [Using multiple Service Accounts](#using-multiple-service-accounts)
+   1. [Combining releases](#combining-releases)
 1. [Advanced topics](#advanced-topics)
    1. [Using CLI options](#using-cli-options)
    1. [Encrypting Service Account keys](#encrypting-service-account-keys)
-   1. [Using multiple Service Accounts](#using-multiple-service-accounts)
-   1. [Combining releases](#combining-releases)
-   1. [Disabling publishing](#disabling-publishing)
    1. [Using HTTPS proxies](#using-https-proxies)
 
 ## Quickstart guide
@@ -451,77 +452,43 @@ Run `./gradlew publishProducts`.
 Manually setting up in-app purchase files is not recommended. [Bootstrap them instead](#quickstart)
 with `./gradlew bootstrap --products`.
 
-## Advanced topics
+## Working with product flavors
 
-### Using CLI options
-
-All configuration options available in the `play` block are also available as CLI options so you
-don't have to update your build file when making one-time changes. For example, to configure
-`play.track` on demand, use the `--track` option. `camelCase` options are converted to
-`kebab-case` ones.
-
-To get a list of options and their quick documentation, use `./gradlew help --task [task]` where
-`task` is something like `publishBundle`.
-
-### Encrypting Service Account keys
-
-If you commit unencrypted Service Account keys to source, you run the risk of letting anyone access
-your Google Play account. To circumvent this issue, many CI servers support encrypting files while
-keeping fake versions in public source control. Here is a set of
-[common fake files](https://github.com/SUPERCILEX/Robot-Scouter/tree/38407b3d6db74edb6c9de33b862655dfbd010a70/ci-dummies)
-you might need and ways to encrypt your real keys for a few common CI servers:
-
-- [Travis CI](https://docs.travis-ci.com/user/encrypting-files/)
-- [CircleCI](https://github.com/circleci/encrypted-files)
-- [Jenkins](https://github.com/samrocketman/jervis/wiki/Secure-secrets-in-repositories)
-
-### Using multiple Service Accounts
-
-If you need to publish each build flavor to a separate Play Store account, GPP supports flavor
-specific `play` configurations through the `playConfigs` block:
+When working with product flavors, granular configuration is key. GPP provides varying levels of
+granularity to best support your needs, all through the `playConfigs` block:
 
 <details open><summary>Kotlin</summary>
 
 ```kt
+play {
+    // In a simple app, this play block is all you'll need. However, in an app with product flavors,
+    // the play block becomes a place to store default configurations. Anything configured in here
+    // will apply to all product flavors, that is, unless an override is supplied in the playConfigs
+    // block.
+}
+
 android {
-    // ...
-
-    flavorDimensions("customer", "version")
+    // Suppose we have the following flavors
+    flavorDimensions("customer", "type")
     productFlavors {
-        register("firstCustomer") {
-            setDimension("customer")
-            // ...
-        }
+        register("firstCustomer") { setDimension("customer") }
+        register("secondCustomer") { setDimension("customer") }
 
-        register("secondCustomer") {
-            setDimension("customer")
-            // ...
-        }
-
-        register("demo") {
-            setDimension("version")
-            // ...
-        }
-
-        register("full") {
-            setDimension("version")
-            // ...
-        }
+        register("demo") { setDimension("type") }
+        register("full") { setDimension("type") }
     }
 
     playConfigs {
-        register("firstCustomer") {
-            serviceAccountCredentials = file("customer-one-key.json")
-        }
+        // Now, we can configure GPP however precisely is required.
 
-        register("secondCustomer") {
-            serviceAccountCredentials = file("customer-two-key.json")
-        }
+        // Configuration overrides occur in a cascading manner from most to least specific. That is,
+        // a property configured in a build type + flavor combo overrides that same property
+        // configured in a flavor combo, which overrides a build type combo, which in turn overrides
+        // the play block. Properties not configured are inherited.
+        register("firstCustomerFullRelease") { ... } // Build type + flavor
+        register("firstCustomer") { ... } // Flavor
+        register("release") { ... } // Build type
     }
-}
-
-play {
-    // Defaults
 }
 ```
 
@@ -530,138 +497,51 @@ play {
 <details><summary>Groovy</summary>
 
 ```groovy
+play {
+    // In a simple app, this play block is all you'll need. However, in an app with product flavors,
+    // the play block becomes a place to store default configurations. Anything configured in here
+    // will apply to all product flavors, that is, unless an override is supplied in the playConfigs
+    // block.
+}
+
 android {
-    // ...
-
-    flavorDimensions 'customer', 'version'
+    // Suppose we have the following flavors
+    flavorDimensions 'customer', 'type'
     productFlavors {
-        firstCustomer {
-            dimension 'customer'
-            // ...
-        }
+        firstCustomer { dimension 'customer' }
+        secondCustomer { dimension 'customer' }
 
-        secondCustomer {
-            dimension 'customer'
-            // ...
-        }
-
-        demo {
-            dimension 'version'
-            // ...
-        }
-
-        full {
-            dimension 'version'
-            // ...
-        }
+        demo { dimension 'type' }
+        full { dimension 'type' }
     }
 
     playConfigs {
-        firstCustomer {
-            serviceAccountCredentials = file('customer-one-key.json')
-        }
+        // Now, we can configure GPP however precisely is required.
 
-        secondCustomer {
-            serviceAccountCredentials = file('customer-two-key.json')
-        }
+        // Configuration overrides occur in a cascading manner from most to least specific. That is,
+        // a property configured in a build type + flavor combo overrides that same property
+        // configured in a flavor combo, which overrides a build type combo, which in turn overrides
+        // the play block. Properties not configured are inherited.
+        firstCustomerFullRelease { ... } // Build type + flavor
+        firstCustomer { ... } // Flavor
+        release { ... } // Build type
     }
-}
-
-play {
-    // Defaults
 }
 ```
 
 </details>
-
-### Combining releases
-
-If you want to publish multiple product flavors together or upload a wear APK with your app, you'll
-need to combine multiple changes together before committing the release. This is achieved through
-the commit property:
-
-<details open><summary>Kotlin</summary>
-
-```kt
-android {
-    // ...
-
-    flavorDimensions("api")
-    productFlavors {
-        register("oreo") {
-            // ...
-        }
-
-        register("pie") {
-            // ...
-        }
-    }
-
-    playConfigs {
-        register("pie") {
-            commit = true
-        }
-    }
-}
-
-play {
-    commit = false
-}
-```
-
-</details>
-
-<details><summary>Groovy</summary>
-
-```groovy
-android {
-    // ...
-
-    flavorDimensions 'api'
-    productFlavors {
-        oreo {
-            // ...
-        }
-
-        pie {
-            // ...
-        }
-    }
-
-    playConfigs {
-        pie {
-            commit = true
-        }
-    }
-}
-
-play {
-    commit = false
-}
-```
-
-</details>
-
-The `commit` option can be used for any legal combined updates across any number of build
-invocations. The only hard requirement is for a task with `commit = true` to be run _last_. Should
-that not already be the case, Gradle's
-[`mustRunAfter`](https://docs.gradle.org/current/dsl/org.gradle.api.Task.html#org.gradle.api.Task:mustRunAfter(java.lang.Object[]))
-DSL will come in handy.
 
 ### Disabling publishing
 
 Sometimes, you may not want to publish all variants of your app. Or maybe you don't want publishing
-enabled on CI or local dev machines. Whatever the case may be, GPP can be disabled down to the
-individual variant level through the `playConfigs` block:
+enabled on CI or local dev machines. Whatever the case may be, GPP can be disabled with the
+`enabled` property:
 
 <details open><summary>Kotlin</summary>
 
 ```kt
 android {
     // ...
-
-    flavorDimensions(...)
-    productFlavors { ... }
 
     playConfigs {
         register("myCustomVariantOrProductFlavor") {
@@ -686,9 +566,6 @@ play {
 android {
     // ...
 
-    flavorDimensions ...
-    productFlavors { ... }
-
     playConfigs {
         myCustomVariantOrProductFlavor {
             enabled = true
@@ -705,6 +582,87 @@ play {
 ```
 
 </details>
+
+### Using multiple Service Accounts
+
+If you need to publish each build flavor to a separate Play Store account, simply provide separate
+credentials per product flavor.
+
+<details open><summary>Kotlin</summary>
+
+```kt
+android {
+    // ...
+
+    playConfigs {
+        register("firstCustomer") {
+            serviceAccountCredentials = file("customer-one-key.json")
+        }
+
+        register("secondCustomer") {
+            serviceAccountCredentials = file("customer-two-key.json")
+        }
+    }
+}
+```
+
+</details>
+
+<details><summary>Groovy</summary>
+
+```groovy
+android {
+    // ...
+
+    playConfigs {
+        firstCustomer {
+            serviceAccountCredentials = file('customer-one-key.json')
+        }
+
+        secondCustomer {
+            serviceAccountCredentials = file('customer-two-key.json')
+        }
+    }
+}
+```
+
+</details>
+
+### Combining releases
+
+If you want to create an atomic publishing action across multiple sequential builds, you can skip
+committing changes with the `commit` property. A code example is shown below, but it might be easier
+to use the `--no-commit` CLI option.
+
+```kt
+play {
+    commit = false
+}
+```
+
+## Advanced topics
+
+### Using CLI options
+
+All configuration options available in the `play` block are also available as CLI options so you
+don't have to update your build file when making one-time changes. For example, to configure
+`play.track` on demand, use the `--track` option. `camelCase` options are converted to
+`kebab-case` ones.
+
+To get a list of options and their quick documentation, use `./gradlew help --task [task]` where
+`task` is something like `publishBundle`.
+
+### Encrypting Service Account keys
+
+If you commit unencrypted Service Account keys to source, you run the risk of letting anyone access
+your Google Play account. To circumvent this issue, many CI servers support encrypting files while
+keeping fake versions in public source control. Here is a set of
+[common fake files](https://github.com/SUPERCILEX/Robot-Scouter/tree/38407b3d6db74edb6c9de33b862655dfbd010a70/ci-dummies)
+you might need and ways to encrypt your real keys for a few common CI servers:
+
+- [Travis CI](https://docs.travis-ci.com/user/encrypting-files/)
+- [CircleCI](https://github.com/circleci/encrypted-files)
+- [Jenkins](https://github.com/samrocketman/jervis/wiki/Secure-secrets-in-repositories)
 
 ### Using HTTPS proxies
 

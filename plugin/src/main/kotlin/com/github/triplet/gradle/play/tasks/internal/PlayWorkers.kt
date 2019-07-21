@@ -7,10 +7,12 @@ import com.github.triplet.gradle.play.internal.RELEASE_NOTES_DEFAULT_NAME
 import com.github.triplet.gradle.play.internal.ReleaseStatus
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.has
+import com.github.triplet.gradle.play.internal.marked
 import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.internal.readProcessed
 import com.github.triplet.gradle.play.internal.releaseStatusOrDefault
 import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
+import com.github.triplet.gradle.play.internal.safeCreateNewFile
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.googleapis.media.MediaHttpUploader
 import com.google.api.client.http.FileContent
@@ -27,46 +29,48 @@ import java.io.File
 import java.io.Serializable
 import kotlin.math.roundToInt
 
-internal fun PlayPublishTaskBase.paramsForBase(
-        config: WorkerConfiguration,
-        p: Any,
-        editId: String? = null
-) {
-    val base = PlayWorkerBase.PlayPublishingData(
+internal fun PlayPublishTaskBase.paramsForBase(config: WorkerConfiguration, p: Any) {
+    val base = PlayWorkerBase.PlayPublishingParams(
             extension.toSerializable(),
-            variant.applicationId,
-            savedEditId,
-            editId
+            variant.applicationId
     )
 
-    if (this is PlayPublishArtifactBase) {
-        val artifact = ArtifactWorkerBase.ArtifactPublishingData(
-                variant.name,
-                variant.outputs.map { it.versionCode }.first(),
+    if (this is PlayPublishEditTaskBase) {
+        val edit = EditWorkerBase.EditPublishingParams(
+                editId,
+                editIdFile.asFile.get().marked("commit"),
+                editIdFile.asFile.get().marked("skipped"),
 
-                releaseNotesDir,
-                consoleNamesDir,
-                releaseName,
-                mappingFile
+                base
         )
 
-        config.params(p, artifact, base)
+        if (this is PlayPublishArtifactBase) {
+            val artifact = ArtifactWorkerBase.ArtifactPublishingParams(
+                    variant.name,
+                    variant.outputs.map { it.versionCode }.first(),
+
+                    releaseNotesDir,
+                    consoleNamesDir,
+                    releaseName,
+                    mappingFile,
+
+                    edit
+            )
+            config.params(p, artifact)
+        } else {
+            config.params(p, edit)
+        }
     } else {
         config.params(p, base)
     }
 }
 
-internal abstract class PlayWorkerBase(private val data: PlayPublishingData) : Runnable {
-    protected val extension = data.extension
-    protected val publisher = extension.buildPublisher()
-    protected val appId = data.applicationId
-    protected val editId by lazy {
-        data.editId ?: publisher.getOrCreateEditId(appId, data.savedEditId)
-    }
-    protected val edits: AndroidPublisher.Edits = publisher.edits()
-    protected val logger: Logger = Logging.getLogger(Task::class.java)
+internal abstract class PlayWorkerBase(p: PlayPublishingParams) : Runnable {
+    protected val extension = p.extension
+    protected val appId = p.appId
 
-    protected fun commit() = publisher.commit(extension, appId, editId, data.savedEditId)
+    protected val publisher = extension.buildPublisher()
+    protected val logger: Logger = Logging.getLogger(Task::class.java)
 
     protected fun <T> AndroidPublisherRequest<T>.trackUploadProgress(
             thing: String,
@@ -86,20 +90,34 @@ internal abstract class PlayWorkerBase(private val data: PlayPublishingData) : R
         return this
     }
 
-    internal data class PlayPublishingData(
+    internal data class PlayPublishingParams(
             val extension: PlayPublisherExtension.Serializable,
+            val appId: String
+    ) : Serializable
+}
 
-            val applicationId: String,
+internal abstract class EditWorkerBase(
+        private val p: EditPublishingParams
+) : PlayWorkerBase(p.base) {
+    protected val editId = p.editId
+    protected val edits: AndroidPublisher.Edits = publisher.edits()
 
-            val savedEditId: File?,
-            val editId: String?
+    protected fun commit() {
+        (if (extension.commit) p.commitMarker else p.skippedMarker).safeCreateNewFile()
+    }
+
+    internal data class EditPublishingParams(
+            val editId: String,
+            val commitMarker: File,
+            val skippedMarker: File,
+
+            val base: PlayPublishingParams
     ) : Serializable
 }
 
 internal abstract class ArtifactWorkerBase(
-        private val artifact: ArtifactPublishingData,
-        private val play: PlayPublishingData
-) : PlayWorkerBase(play) {
+        private val p: ArtifactPublishingParams
+) : EditWorkerBase(p.base) {
     protected var commit = true
 
     final override fun run() {
@@ -110,7 +128,7 @@ internal abstract class ArtifactWorkerBase(
     abstract fun upload()
 
     protected fun updateTracks(editId: String, versions: List<Long>) {
-        val track = if (play.savedEditId?.orNull() != null) {
+        val track = if (p.base.skippedMarker.exists()) {
             edits.tracks().get(appId, editId, extension.track).execute().apply {
                 releases = if (releases.isNullOrEmpty()) {
                     listOf(TrackRelease().applyChanges(versions))
@@ -154,16 +172,16 @@ internal abstract class ArtifactWorkerBase(
         versionCodes?.let { this.versionCodes = it }
         if (updateStatus) status = extension.releaseStatus
         if (updateConsoleName) {
-            name = if (artifact.transientConsoleName == null) {
-                val file = File(artifact.consoleNamesDir, "${extension.track}.txt").orNull()
-                        ?: File(artifact.consoleNamesDir, RELEASE_NAMES_DEFAULT_NAME).orNull()
+            name = if (p.transientConsoleName == null) {
+                val file = File(p.consoleNamesDir, "${extension.track}.txt").orNull()
+                        ?: File(p.consoleNamesDir, RELEASE_NAMES_DEFAULT_NAME).orNull()
                 file?.readProcessed()?.lines()?.firstOrNull()
             } else {
-                artifact.transientConsoleName
+                p.transientConsoleName
             }
         }
 
-        val releaseNotes = artifact.releaseNotesDir?.listFiles().orEmpty().mapNotNull { locale ->
+        val releaseNotes = p.releaseNotesDir?.listFiles().orEmpty().mapNotNull { locale ->
             val file = File(locale, "${extension.track}.txt").orNull() ?: run {
                 File(locale, RELEASE_NOTES_DEFAULT_NAME).orNull() ?: return@mapNotNull null
             }
@@ -205,19 +223,19 @@ internal abstract class ArtifactWorkerBase(
     ): Nothing? = if (e has "apkUpgradeVersionConflict" || e has "apkNoUpgradePath") {
         when (extension.resolutionStrategyOrDefault) {
             ResolutionStrategy.AUTO -> throw IllegalStateException(
-                    "Concurrent uploads for variant ${artifact.variantName} (version code " +
-                            "${artifact.versionCode} already used). Make sure to synchronously " +
+                    "Concurrent uploads for variant ${p.variantName} (version code " +
+                            "${p.versionCode} already used). Make sure to synchronously " +
                             "upload your APKs such that they don't conflict. If this problem " +
                             "persists, delete your drafts in the Play Console's artifact library.",
                     e
             )
             ResolutionStrategy.FAIL -> throw IllegalStateException(
-                    "Version code ${artifact.versionCode} is too low or has already been used " +
-                            "for variant ${artifact.variantName}.",
+                    "Version code ${p.versionCode} is too low or has already been used " +
+                            "for variant ${p.variantName}.",
                     e
             )
             ResolutionStrategy.IGNORE -> println(
-                    "Ignoring artifact ($file) for version code ${artifact.versionCode}")
+                    "Ignoring artifact ($file) for version code ${p.versionCode}")
         }
         null
     } else {
@@ -225,7 +243,7 @@ internal abstract class ArtifactWorkerBase(
     }
 
     protected fun handleArtifactDetails(editId: String, versionCode: Int) {
-        val file = artifact.mappingFile
+        val file = p.mappingFile
         if (file != null && file.length() > 0) {
             val mapping = FileContent(MIME_TYPE_STREAM, file)
             edits.deobfuscationfiles()
@@ -235,13 +253,15 @@ internal abstract class ArtifactWorkerBase(
         }
     }
 
-    internal data class ArtifactPublishingData(
+    internal data class ArtifactPublishingParams(
             val variantName: String,
             val versionCode: Int,
 
             val releaseNotesDir: File?,
             val consoleNamesDir: File?,
             val transientConsoleName: String?,
-            val mappingFile: File?
+            val mappingFile: File?,
+
+            val base: EditPublishingParams
     ) : Serializable
 }

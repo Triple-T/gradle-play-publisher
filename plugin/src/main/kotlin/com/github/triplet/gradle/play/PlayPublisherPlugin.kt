@@ -5,9 +5,13 @@ import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.internal.api.InstallableVariantImpl
 import com.github.triplet.gradle.play.internal.PLAY_CONFIGS_PATH
 import com.github.triplet.gradle.play.internal.PLAY_PATH
+import com.github.triplet.gradle.play.internal.ResolutionStrategy
+import com.github.triplet.gradle.play.internal.getCommitEditTask
+import com.github.triplet.gradle.play.internal.getGenEditTask
 import com.github.triplet.gradle.play.internal.mergeWith
 import com.github.triplet.gradle.play.internal.newTask
 import com.github.triplet.gradle.play.internal.playPath
+import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
 import com.github.triplet.gradle.play.internal.validateRuntime
 import com.github.triplet.gradle.play.tasks.Bootstrap
 import com.github.triplet.gradle.play.tasks.GenerateResources
@@ -144,12 +148,21 @@ class PlayPublisherPlugin : Plugin<Project> {
                                 "Be sure to specify a signingConfig for variant '$name'.")
             }
 
+            val genEditTask = project.getGenEditTask(applicationId, extension)
+            val commitEditTask = project.getCommitEditTask(applicationId, extension)
+            val editFile = genEditTask.flatMap { it.editIdFile }
+            genEditTask { finalizedBy(commitEditTask) }
+
             val bootstrapTask = project.newTask<Bootstrap>(
                     "bootstrap$variantName",
                     "Downloads the Play Store listing metadata for variant '$name'. See " +
                             "https://github.com/Triple-T/gradle-play-publisher#quickstart",
                     arrayOf(extension, this, bootstrapOptionsHolder)
-            )
+            ) {
+                editIdFile.set(editFile)
+
+                dependsOn(genEditTask)
+            }
             bootstrapAllTask { dependsOn(bootstrapTask) }
             // TODO Remove in v3.0
             project.newTask("bootstrap${variantName}PlayResources") {
@@ -172,7 +185,13 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "Uploads all Play Store metadata for variant '$name'. See " +
                             "https://github.com/Triple-T/gradle-play-publisher#publishing-listings",
                     arrayOf(extension, this)
-            ) { resDir.set(resourceDir) }
+            ) {
+                resDir.set(resourceDir)
+                editIdFile.set(editFile)
+
+                dependsOn(genEditTask)
+            }
+            commitEditTask { mustRunAfter(publishListingTask) }
             publishListingAllTask { dependsOn(publishListingTask) }
             // TODO Remove in v3.0
             project.newTask("publishListing$variantName") {
@@ -191,9 +210,14 @@ class PlayPublisherPlugin : Plugin<Project> {
             val processArtifactMetadata = project.newTask<ProcessArtifactMetadata>(
                     "process${variantName}Metadata",
                     constructorArgs = arrayOf(extension, this)
-            )
-            checkManifestProvider { dependsOn(processArtifactMetadata) }
-            generateBuildConfigProvider { dependsOn(processArtifactMetadata) }
+            ) {
+                editIdFile.set(editFile)
+
+                val shouldRun = extension.resolutionStrategyOrDefault == ResolutionStrategy.AUTO
+                onlyIf { shouldRun }
+                if (shouldRun) dependsOn(genEditTask)
+            }
+            preBuildProvider { dependsOn(processArtifactMetadata) }
 
             val publishApkTaskDependenciesHack = project.newTask(
                     "publish${variantName}ApkWrapper"
@@ -212,10 +236,13 @@ class PlayPublisherPlugin : Plugin<Project> {
                     arrayOf(extension, this, transientTrackOptionsHolder)
             ) {
                 resDir.set(resourceDir)
+                editIdFile.set(editFile)
 
                 dependsOn(resourceDir)
+                dependsOn(genEditTask)
                 dependsOn(publishApkTaskDependenciesHack)
             }
+            commitEditTask { mustRunAfter(publishApkTask) }
             publishApkAllTask { dependsOn(publishApkTask) }
             // TODO Remove in v3.0
             project.newTask("publishApk$variantName") {
@@ -253,10 +280,13 @@ class PlayPublisherPlugin : Plugin<Project> {
                     arrayOf(extension, this, transientTrackOptionsHolder)
             ) {
                 resDir.set(resourceDir)
+                editIdFile.set(editFile)
 
                 dependsOn(resourceDir)
+                dependsOn(genEditTask)
                 dependsOn(publishBundleTaskDependenciesHack)
             }
+            commitEditTask { mustRunAfter(publishBundleTask) }
             publishBundleAllTask { dependsOn(publishBundleTask) }
 
             project.newTask<PublishInternalSharingBundle>(
@@ -273,9 +303,12 @@ class PlayPublisherPlugin : Plugin<Project> {
                     arrayOf(extension, this, transientTrackOptionsHolder)
             ) {
                 resDir.set(resourceDir)
+                editIdFile.set(editFile)
 
                 dependsOn(resourceDir)
+                dependsOn(genEditTask)
             }
+            commitEditTask { mustRunAfter(promoteReleaseTask) }
             promoteReleaseAllTask { dependsOn(promoteReleaseTask) }
 
             val publishTask = project.newTask<GlobalPublishableArtifactLifecycleTask>(
