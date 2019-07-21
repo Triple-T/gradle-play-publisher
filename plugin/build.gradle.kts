@@ -5,15 +5,15 @@ plugins {
     `kotlin-dsl`
     `maven-publish`
     groovy
-    id("com.gradle.plugin-publish") version "0.10.0"
+    id("com.gradle.plugin-publish") version "0.10.1"
 }
 
 dependencies {
-    compileOnly("com.android.tools.build:gradle:3.6.0-alpha04")
+    compileOnly("com.android.tools.build:gradle:3.6.0-alpha05")
 
-    implementation("com.google.apis:google-api-services-androidpublisher:v3-rev86-1.25.0")
+    implementation("com.google.apis:google-api-services-androidpublisher:v3-rev20190702-1.30.1")
 
-    testImplementation("com.android.tools.build:gradle:3.6.0-alpha04")
+    testImplementation("com.android.tools.build:gradle:3.6.0-alpha05")
     testImplementation(kotlin("test"))
     testImplementation("junit:junit:4.12")
 }
