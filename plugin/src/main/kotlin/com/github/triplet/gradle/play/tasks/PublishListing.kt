@@ -9,8 +9,8 @@ import com.github.triplet.gradle.play.internal.LISTINGS_PATH
 import com.github.triplet.gradle.play.internal.ListingDetail
 import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.internal.readProcessed
-import com.github.triplet.gradle.play.tasks.internal.PlayPublishTaskBase
-import com.github.triplet.gradle.play.tasks.internal.PlayWorkerBase
+import com.github.triplet.gradle.play.tasks.internal.EditWorkerBase
+import com.github.triplet.gradle.play.tasks.internal.PlayPublishEditTaskBase
 import com.github.triplet.gradle.play.tasks.internal.WriteTrackExtensionOptions
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.http.FileContent
@@ -41,7 +41,7 @@ import javax.inject.Inject
 abstract class PublishListing @Inject constructor(
         @get:Nested override val extension: PlayPublisherExtension,
         variant: ApplicationVariant
-) : PlayPublishTaskBase(extension, variant), WriteTrackExtensionOptions {
+) : PlayPublishEditTaskBase(extension, variant), WriteTrackExtensionOptions {
     @get:Internal
     internal abstract val resDir: DirectoryProperty
 
@@ -91,10 +91,9 @@ abstract class PublishListing @Inject constructor(
 
         if (details == null && listings.isEmpty() && media.isEmpty()) return
 
-        val editId = getOrCreateEditId()
         project.serviceOf<WorkerExecutor>().submit(Publisher::class) {
             isolationMode = IsolationMode.NONE
-            paramsForBase(this, Publisher.Params(details, listings, media), editId)
+            paramsForBase(this, Publisher.Params(details, listings, media))
         }
     }
 
@@ -138,8 +137,8 @@ abstract class PublishListing @Inject constructor(
             private val executor: WorkerExecutor,
 
             private val p: Params,
-            private val data: PlayPublishingData
-    ) : PlayWorkerBase(data) {
+            private val data: EditPublishingParams
+    ) : EditWorkerBase(data) {
         override fun run() {
             if (p.details != null) {
                 executor.submit(DetailsUploader::class) { params(p.details, data) }
@@ -164,8 +163,8 @@ abstract class PublishListing @Inject constructor(
 
     private class DetailsUploader @Inject constructor(
             private val p: Params,
-            data: PlayPublishingData
-    ) : PlayWorkerBase(data) {
+            data: EditPublishingParams
+    ) : EditWorkerBase(data) {
         override fun run() {
             println("Uploading app details")
             val details = AppDetails().apply {
@@ -185,8 +184,8 @@ abstract class PublishListing @Inject constructor(
 
     private class ListingUploader @Inject constructor(
             private val p: Params,
-            data: PlayPublishingData
-    ) : PlayWorkerBase(data) {
+            data: EditPublishingParams
+    ) : EditWorkerBase(data) {
         override fun run() {
             val locale = p.listingDir.name
             val listing = Listing().apply {
@@ -208,8 +207,8 @@ abstract class PublishListing @Inject constructor(
 
     private class MediaUploader @Inject constructor(
             private val p: Params,
-            data: PlayPublishingData
-    ) : PlayWorkerBase(data) {
+            data: EditPublishingParams
+    ) : EditWorkerBase(data) {
         override fun run() {
             val typeName = p.type.publishedName
             val files = p.imageDir.listFiles()?.sorted() ?: return

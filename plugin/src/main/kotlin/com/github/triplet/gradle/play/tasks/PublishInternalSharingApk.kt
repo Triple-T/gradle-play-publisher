@@ -62,8 +62,8 @@ abstract class PublishInternalSharingApk @Inject constructor(
 
     private class ApkUploader @Inject constructor(
             private val p: Params,
-            play: PlayPublishingData
-    ) : PlayWorkerBase(play) {
+            data: PlayPublishingParams
+    ) : PlayWorkerBase(data) {
         override fun run() {
             val apk = publisher.internalappsharingartifacts()
                     .uploadapk(appId, FileContent(MIME_TYPE_APK, p.apkFile))

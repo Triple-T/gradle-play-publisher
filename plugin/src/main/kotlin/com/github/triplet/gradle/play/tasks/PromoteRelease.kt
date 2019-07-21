@@ -34,9 +34,8 @@ abstract class PromoteRelease @Inject constructor(
 
     private class Promoter @Inject constructor(
             @Suppress("UNUSED_PARAMETER") p: Params,
-            private val artifact: ArtifactPublishingData,
-            play: PlayPublishingData
-    ) : ArtifactWorkerBase(artifact, play) {
+            private val data: ArtifactPublishingParams
+    ) : ArtifactWorkerBase(data) {
         override fun upload() {
             val tracks = edits.tracks().list(appId, editId).execute()
                     .tracks.orEmpty()
@@ -66,7 +65,7 @@ abstract class PromoteRelease @Inject constructor(
                 it.applyChanges(
                         updateStatus = extension._releaseStatus != null,
                         updateFraction = extension._userFraction != null,
-                        updateConsoleName = artifact.transientConsoleName != null
+                        updateConsoleName = data.transientConsoleName != null
                 )
             }
 

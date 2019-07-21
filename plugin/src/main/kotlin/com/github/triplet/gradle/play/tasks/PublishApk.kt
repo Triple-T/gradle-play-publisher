@@ -59,7 +59,7 @@ abstract class PublishApk @Inject constructor(
         project.delete(temporaryDir) // Make sure previous executions get cleared out
         project.serviceOf<WorkerExecutor>().submit(ApksUploader::class) {
             isolationMode = IsolationMode.NONE
-            paramsForBase(this, ApksUploader.Params(apks, temporaryDir), getOrCreateEditId())
+            paramsForBase(this, ApksUploader.Params(apks, temporaryDir))
         }
     }
 
@@ -67,13 +67,12 @@ abstract class PublishApk @Inject constructor(
             private val executor: WorkerExecutor,
 
             private val p: Params,
-            private val artifact: ArtifactPublishingData,
-            private val play: PlayPublishingData
-    ) : ArtifactWorkerBase(artifact, play) {
+            private val data: ArtifactPublishingParams
+    ) : ArtifactWorkerBase(data) {
         override fun upload() {
             for (apk in p.apkFiles) {
                 executor.submit(Uploader::class) {
-                    params(Uploader.Params(apk, p.uploadResults), artifact, play)
+                    params(Uploader.Params(apk, p.uploadResults), data)
                 }
             }
             executor.await()
@@ -86,9 +85,8 @@ abstract class PublishApk @Inject constructor(
 
         private class Uploader @Inject constructor(
                 private val p: Params,
-                artifact: ArtifactPublishingData,
-                play: PlayPublishingData
-        ) : ArtifactWorkerBase(artifact, play) {
+                data: ArtifactPublishingParams
+        ) : ArtifactWorkerBase(data) {
             init {
                 commit = false
             }

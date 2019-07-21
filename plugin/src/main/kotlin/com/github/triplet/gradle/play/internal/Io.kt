@@ -4,6 +4,8 @@ import java.io.File
 
 internal fun File.orNull() = takeIf { exists() }
 
+internal fun File.marked(marker: String) = File(parentFile, "$nameWithoutExtension.$marker")
+
 internal tailrec fun File.findClosestDir(): File {
     check(exists()) { "$this does not exist" }
     return if (isDirectory) this else parentFile.findClosestDir()

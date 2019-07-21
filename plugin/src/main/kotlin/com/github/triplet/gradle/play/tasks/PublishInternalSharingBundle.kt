@@ -48,8 +48,8 @@ abstract class PublishInternalSharingBundle @Inject constructor(
 
     private class BundleUploader @Inject constructor(
             private val p: Params,
-            play: PlayPublishingData
-    ) : PlayWorkerBase(play) {
+            data: PlayPublishingParams
+    ) : PlayWorkerBase(data) {
         override fun run() {
             val bundle = publisher.internalappsharingartifacts()
                     .uploadbundle(appId, FileContent(MIME_TYPE_STREAM, p.bundleFile))
