@@ -585,7 +585,6 @@ play {
 
 ### Combining artifacts into a single release
 
-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 By default, GPP assumes every product flavor consists of a separate, independent app. To tell GPP
 this isn't the desired behavior, you can use the `commit` property:
 
