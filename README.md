@@ -44,8 +44,8 @@ other metadata.
    1. [Publishing in-app products](#publishing-in-app-products)
 1. [Working with product flavors](#working-with-product-flavors)
    1. [Disabling publishing](#disabling-publishing)
+   1. [Combining artifacts into a single release](#combining-artifacts-into-a-single-release)
    1. [Using multiple Service Accounts](#using-multiple-service-accounts)
-   1. [Combining releases](#combining-releases)
 1. [Advanced topics](#advanced-topics)
    1. [Using CLI options](#using-cli-options)
    1. [Encrypting Service Account keys](#encrypting-service-account-keys)
@@ -583,6 +583,72 @@ play {
 
 </details>
 
+### Combining artifacts into a single release
+
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+By default, GPP assumes every product flavor consists of a separate, independent app. To tell GPP
+this isn't the desired behavior, you can use the `commit` property:
+
+<details open><summary>Kotlin</summary>
+
+```kt
+android {
+    // ...
+
+    playConfigs {
+        register("someFlavor1") {
+            commit = false
+        }
+
+        register("someFlavor[2..N)") {
+            commit = false
+        }
+
+        register("someFlavorN") {
+            // This isn't actually needed since the default is true. Here's what you _do_ need:
+            // 1. A starter no-commit variant (someFlavor1 in this case)
+            // 2. (Optional) Intermediate no-commit variants (someFlavor2, someFlavor3, ...)
+            // 3. One finisher variant to commit (aka do NOT mark someFlavorN as no-commit)
+            commit = true
+        }
+
+        // ...
+    }
+}
+```
+
+</details>
+
+<details><summary>Groovy</summary>
+
+```groovy
+android {
+    // ...
+
+    playConfigs {
+        someFlavor1 {
+            commit = false
+        }
+
+        someFlavor[2..N) {
+            commit = false
+        }
+
+        someFlavorN {
+            // This isn't actually needed since the default is true. Here's what you _do_ need:
+            // 1. A starter no-commit variant (someFlavor1 in this case)
+            // 2. (Optional) Intermediate no-commit variants (someFlavor2, someFlavor3, ...)
+            // 3. One finisher variant to commit (aka do NOT mark someFlavorN as no-commit)
+            commit = true
+        }
+
+        // ...
+    }
+}
+```
+
+</details>
+
 ### Using multiple Service Accounts
 
 If you need to publish each build flavor to a separate Play Store account, simply provide separate
@@ -627,18 +693,6 @@ android {
 ```
 
 </details>
-
-### Combining releases
-
-If you want to create an atomic publishing action across multiple sequential builds, you can skip
-committing changes with the `commit` property. A code example is shown below, but it might be easier
-to use the `--no-commit` CLI option.
-
-```kt
-play {
-    commit = false
-}
-```
 
 ## Advanced topics
 
