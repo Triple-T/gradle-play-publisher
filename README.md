@@ -615,6 +615,15 @@ android {
         // ...
     }
 }
+
+// Now make sure the tasks execute in the right order
+val intermediateTasks = listOf(
+        "publishSomeFlavor2Release[Apk/Bundle]",
+        "publishSomeFlavor3Release[Apk/Bundle]",
+        ...
+)
+tasks.matching { it.name in intermediateTasks }.configureEach { mustRunAfter("someFlavor1") }
+tasks.named("someFlavorN").configure { mustRunAfter(intermediateTasks) }
 ```
 
 </details>
@@ -645,6 +654,15 @@ android {
         // ...
     }
 }
+
+// Now make sure the tasks execute in the right order
+def intermediateTasks = [
+        "publishSomeFlavor2Release[Apk/Bundle]",
+        "publishSomeFlavor3Release[Apk/Bundle]",
+        ...
+]
+tasks.matching { intermediateTasks.contains(it.name) }.configureEach { mustRunAfter("someFlavor1") }
+tasks.named("someFlavorN").configure { mustRunAfter(intermediateTasks) }
 ```
 
 </details>
