@@ -621,8 +621,12 @@ val intermediateTasks = listOf(
         "publishSomeFlavor3Release[Apk/Bundle]",
         ...
 )
-tasks.matching { it.name in intermediateTasks }.configureEach { mustRunAfter("someFlavor1") }
-tasks.named("someFlavorN").configure { mustRunAfter(intermediateTasks) }
+tasks.matching { it.name in intermediateTasks }.configureEach {
+    mustRunAfter("publishSomeFlavor1Release[Apk/Bundle]")
+}
+tasks.named("publishSomeFlavorNRelease[Apk/Bundle]").configure {
+    mustRunAfter(intermediateTasks)
+}
 ```
 
 </details>
@@ -660,8 +664,12 @@ def intermediateTasks = [
         "publishSomeFlavor3Release[Apk/Bundle]",
         ...
 ]
-tasks.matching { intermediateTasks.contains(it.name) }.configureEach { mustRunAfter("someFlavor1") }
-tasks.named("someFlavorN").configure { mustRunAfter(intermediateTasks) }
+tasks.matching { intermediateTasks.contains(it.name) }.configureEach {
+    mustRunAfter("publishSomeFlavor1Release[Apk/Bundle]")
+}
+tasks.named("publishSomeFlavorNRelease[Apk/Bundle]").configure {
+    mustRunAfter(intermediateTasks)
+}
 ```
 
 </details>
