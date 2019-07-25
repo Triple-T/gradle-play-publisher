@@ -586,7 +586,7 @@ play {
 ### Combining artifacts into a single release
 
 By default, GPP assumes every product flavor consists of a separate, independent app. To tell GPP
-this isn't the desired behavior, you can use the `commit` property:
+this isn't the case, you must use the `commit` property:
 
 <details open><summary>Kotlin</summary>
 
