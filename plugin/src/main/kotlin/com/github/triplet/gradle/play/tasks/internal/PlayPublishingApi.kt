@@ -13,7 +13,7 @@ import java.security.KeyStore
 
 internal fun PlayPublisherExtension.Config.buildPublisher(): AndroidPublisher {
     val transport = buildTransport()
-    val creds = serviceAccountCredentials!!
+    val creds = checkNotNull(serviceAccountCredentials) { "No creds specified" }
     val serviceAccountEmail = serviceAccountEmail
     val factory = JacksonFactory.getDefaultInstance()
 
