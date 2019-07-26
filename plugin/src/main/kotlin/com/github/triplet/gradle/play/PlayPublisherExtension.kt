@@ -185,7 +185,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
             _config.artifactDir = value
         }
 
-    override fun toString() = "PlayPublisherExtension(name='$name', backing=$_config)"
+    override fun toString() = "PlayPublisherExtension(name='$name', config=$_config)"
 
     internal data class Config(
             var enabled: Boolean? = null,
