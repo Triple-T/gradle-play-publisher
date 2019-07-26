@@ -78,11 +78,11 @@ abstract class PromoteRelease @Inject constructor(
                 it.status
             }
 
-            val toTrackName = config.trackOrDefault
+            val promoteTrackName = config.trackOrDefault
             println("Promoting ${track.releases.map { it.status }.distinct()} release " +
                             "($appId:${track.releases.flatMap { it.versionCodes.orEmpty() }}) " +
-                            "from track '${track.track}' to track '$toTrackName'")
-            edits.tracks().update(appId, editId, toTrackName, track).execute()
+                            "from track '${track.track}' to track '$promoteTrackName'")
+            edits.tracks().update(appId, editId, promoteTrackName, track).execute()
         }
 
         class Params : Serializable
