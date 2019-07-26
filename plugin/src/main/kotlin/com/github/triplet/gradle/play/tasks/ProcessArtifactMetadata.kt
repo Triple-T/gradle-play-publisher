@@ -19,7 +19,7 @@ abstract class ProcessArtifactMetadata @Inject constructor(
 
     @TaskAction
     fun process() {
-        val maxVersionCode = extension.buildPublisher().edits().tracks()
+        val maxVersionCode = extension.config.buildPublisher().edits().tracks()
                 .list(variant.applicationId, editId).execute().tracks
                 ?.flatMap { it.releases.orEmpty() }
                 ?.flatMap { it.versionCodes.orEmpty() }
@@ -31,7 +31,7 @@ abstract class ProcessArtifactMetadata @Inject constructor(
         val patch = maxVersionCode - smallestVersionCode + 1
         for ((i, output) in outputs.withIndex()) {
             if (patch > 0) output.versionCodeOverride = output.versionCode + patch.toInt() + i
-            extension._outputProcessor?.execute(output)
+            extension.config.outputProcessor?.execute(output)
         }
     }
 }

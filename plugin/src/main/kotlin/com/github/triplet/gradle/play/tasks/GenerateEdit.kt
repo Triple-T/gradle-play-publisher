@@ -32,7 +32,7 @@ abstract class GenerateEdit @Inject constructor(
     fun generate() {
         val file = editIdFile.asFile.get()
         project.serviceOf<WorkerExecutor>().submit(Generator::class) {
-            params(Generator.Params(extension.toSerializable(), file))
+            params(Generator.Params(extension.serializableConfig, file))
         }
     }
 
@@ -41,7 +41,7 @@ abstract class GenerateEdit @Inject constructor(
         private val appId = file.nameWithoutExtension
 
         override fun run() {
-            val editId = p.extension.buildPublisher().getOrCreateEditId()
+            val editId = p.config.buildPublisher().getOrCreateEditId()
             file.safeCreateNewFile().writeText(editId)
         }
 
@@ -78,7 +78,7 @@ abstract class GenerateEdit @Inject constructor(
         }
 
         data class Params(
-                val extension: PlayPublisherExtension.Serializable,
+                val config: PlayPublisherExtension.Config,
                 val editIdFile: File
         ) : Serializable
     }

@@ -11,10 +11,10 @@ import com.google.api.services.androidpublisher.AndroidPublisherScopes
 import java.io.FileInputStream
 import java.security.KeyStore
 
-internal fun PlayPublisherExtension.buildPublisher(): AndroidPublisher {
+internal fun PlayPublisherExtension.Config.buildPublisher(): AndroidPublisher {
     val transport = buildTransport()
-    val creds = _serviceAccountCredentials!!
-    val serviceAccountEmail = _serviceAccountEmail
+    val creds = serviceAccountCredentials!!
+    val serviceAccountEmail = serviceAccountEmail
     val factory = JacksonFactory.getDefaultInstance()
 
     val credential = if (serviceAccountEmail == null) {

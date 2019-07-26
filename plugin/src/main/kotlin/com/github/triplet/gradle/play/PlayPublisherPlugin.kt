@@ -126,17 +126,17 @@ class PlayPublisherPlugin : Plugin<Project> {
             }
 
             extension.apply {
-                val creds = checkNotNull(_serviceAccountCredentials) {
+                val creds = checkNotNull(config.serviceAccountCredentials) {
                     "No credentials specified. Please read our docs for more details: " +
                             "https://github.com/Triple-T/gradle-play-publisher" +
                             "#authenticating-gradle-play-publisher"
                 }
                 if (creds.extension.equals("json", true)) {
-                    check(serviceAccountEmail == null) {
+                    check(config.serviceAccountEmail == null) {
                         "JSON credentials cannot specify a service account email."
                     }
                 } else {
-                    check(serviceAccountEmail != null) {
+                    check(config.serviceAccountEmail != null) {
                         "PKCS12 credentials must specify a service account email."
                     }
                 }
@@ -213,7 +213,8 @@ class PlayPublisherPlugin : Plugin<Project> {
             ) {
                 editIdFile.set(editFile)
 
-                val shouldRun = extension.resolutionStrategyOrDefault == ResolutionStrategy.AUTO
+                val shouldRun =
+                        extension.config.resolutionStrategyOrDefault == ResolutionStrategy.AUTO
                 onlyIf { shouldRun }
                 if (shouldRun) dependsOn(genEditTask)
             }
@@ -222,7 +223,7 @@ class PlayPublisherPlugin : Plugin<Project> {
             val publishApkTaskDependenciesHack = project.newTask(
                     "publish${variantName}ApkWrapper"
             ) {
-                if (extension._artifactDir == null) {
+                if (extension.config.artifactDir == null) {
                     dependsOn(processArtifactMetadata)
                     assembleProvider?.let {
                         dependsOn(it)
@@ -260,7 +261,7 @@ class PlayPublisherPlugin : Plugin<Project> {
             val publishBundleTaskDependenciesHack = project.newTask(
                     "publish${variantName}BundleWrapper"
             ) {
-                if (extension._artifactDir == null) {
+                if (extension.config.artifactDir == null) {
                     dependsOn(processArtifactMetadata)
                     // TODO https://issuetracker.google.com/issues/109918868
                     project.tasks.findByName(

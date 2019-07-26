@@ -2,6 +2,7 @@ package com.github.triplet.gradle.play.tasks
 
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.PlayPublisherExtension
+import com.github.triplet.gradle.play.internal.trackOrDefault
 import com.github.triplet.gradle.play.tasks.internal.ArtifactWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishArtifactBase
 import com.github.triplet.gradle.play.tasks.internal.TransientTrackOptions
@@ -49,7 +50,7 @@ abstract class PromoteRelease @Inject constructor(
             }
 
             val track = run {
-                val from = extension._fromTrack
+                val from = config.fromTrack
                 if (from == null) {
                     tracks.sortedByDescending {
                         it.releases.flatMap { it.versionCodes.orEmpty() }.max()
@@ -63,8 +64,8 @@ abstract class PromoteRelease @Inject constructor(
 
             track.releases.forEach {
                 it.applyChanges(
-                        updateStatus = extension._releaseStatus != null,
-                        updateFraction = extension._userFraction != null,
+                        updateStatus = config.releaseStatus != null,
+                        updateFraction = config.userFraction != null,
                         updateConsoleName = data.transientConsoleName != null
                 )
             }
@@ -77,10 +78,11 @@ abstract class PromoteRelease @Inject constructor(
                 it.status
             }
 
+            val toTrackName = config.trackOrDefault
             println("Promoting ${track.releases.map { it.status }.distinct()} release " +
                             "($appId:${track.releases.flatMap { it.versionCodes.orEmpty() }}) " +
-                            "from track '${track.track}' to track '${extension.track}'")
-            edits.tracks().update(appId, editId, extension.track, track).execute()
+                            "from track '${track.track}' to track '$toTrackName'")
+            edits.tracks().update(appId, editId, toTrackName, track).execute()
         }
 
         class Params : Serializable

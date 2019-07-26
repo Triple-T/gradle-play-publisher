@@ -8,7 +8,7 @@ import org.gradle.api.file.RegularFile
 import java.io.File
 
 fun PlayPublishTaskBase.findBundleFile(): File? {
-    val customDir = extension._artifactDir
+    val customDir = extension.config.artifactDir
 
     return if (customDir == null) {
         val installable = variant as InstallableVariantImpl

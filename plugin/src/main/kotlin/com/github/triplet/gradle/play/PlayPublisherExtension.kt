@@ -3,6 +3,7 @@ package com.github.triplet.gradle.play
 import com.android.build.gradle.api.ApkVariantOutput
 import com.github.triplet.gradle.play.internal.ReleaseStatus
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
+import com.github.triplet.gradle.play.internal.commitOrDefault
 import com.github.triplet.gradle.play.internal.releaseStatusOrDefault
 import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
 import com.github.triplet.gradle.play.internal.trackOrDefault
@@ -19,9 +20,11 @@ import java.io.Serializable
 @Suppress("PropertyName")
 open class PlayPublisherExtension @JvmOverloads constructor(
         @get:Internal internal val name: String = "default" // Needed for Gradle
-) : Serializable {
-    @get:Internal("Backing property for public input")
-    internal var _isEnabled: Boolean? = null
+) {
+    private val _config = Config()
+    @get:Internal internal val config get() = _config.copy()
+    @get:Internal internal val serializableConfig get() = _config.copy(outputProcessor = null)
+
     /**
      * Enables or disables GPP.
      *
@@ -29,13 +32,11 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      */
     @get:Input
     var isEnabled
-        get() = _isEnabled ?: true
+        get() = _config.enabled ?: true
         set(value) {
-            _isEnabled = value
+            _config.enabled = value
         }
 
-    @get:Internal("Backing property for public input")
-    internal var _serviceAccountCredentials: File? = null
     /**
      * Service Account authentication file. Json is preferred, but PKCS12 is also supported. For
      * PKCS12 to work, the [serviceAccountEmail] must be specified.
@@ -43,24 +44,20 @@ open class PlayPublisherExtension @JvmOverloads constructor(
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFile
     var serviceAccountCredentials
-        get() = _serviceAccountCredentials
+        get() = _config.serviceAccountCredentials
         set(value) {
-            _serviceAccountCredentials = value
+            _config.serviceAccountCredentials = value
         }
 
-    @get:Internal("Backing property for public input")
-    internal var _serviceAccountEmail: String? = null
     /** Service Account email. Only needed if PKCS12 credentials are used. */
     @get:Optional
     @get:Input
     var serviceAccountEmail
-        get() = _serviceAccountEmail
+        get() = _config.serviceAccountEmail
         set(value) {
-            _serviceAccountEmail = value
+            _config.serviceAccountEmail = value
         }
 
-    @get:Internal("Backing property for public input")
-    internal var _defaultToAppBundles: Boolean? = null
     /**
      * Choose the default packaging method. Either App Bundles or APKs. Affects tasks like
      * `publish`.
@@ -69,25 +66,21 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      */
     @get:Input
     var defaultToAppBundles
-        get() = _defaultToAppBundles ?: false
+        get() = _config.defaultToAppBundles ?: false
         set(value) {
-            _defaultToAppBundles = value
+            _config.defaultToAppBundles = value
         }
 
-    @get:Internal("Backing property for public input")
-    internal var _commit: Boolean? = null
     /**
      * Choose whether or not to apply the changes from this build. Defaults to true.
      */
     @get:Input
     var commit
-        get() = _commit ?: true
+        get() = _config.commitOrDefault
         set(value) {
-            _commit = value
+            _config.commit = value
         }
 
-    @get:Internal("Backing property for public input")
-    internal var _fromTrack: String? = null
     /**
      * Specify the track from which to promote a release. That is, the specified track will be
      * promoted to [track].
@@ -98,13 +91,11 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      */
     @get:Input
     var fromTrack
-        get() = _fromTrack ?: track
+        get() = _config.fromTrack ?: track
         set(value) {
-            _fromTrack = value
+            _config.fromTrack = value
         }
 
-    @get:Internal("Backing property for public input")
-    internal var _track: String? = null
     /**
      * Specify the track in which to upload your app.
      *
@@ -113,13 +104,11 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      */
     @get:Input
     var track
-        get() = trackOrDefault
+        get() = _config.trackOrDefault
         set(value) {
-            _track = value
+            _config.track = value
         }
 
-    @get:Internal("Backing property for public input")
-    internal var _userFraction: Double? = null
     /**
      * Specify the initial user fraction intended to receive an `inProgress` release. Defaults to
      * 0.1 (10%).
@@ -128,13 +117,11 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      */
     @get:Input
     var userFraction: Double
-        get() = _userFraction ?: 0.1
+        get() = _config.userFraction ?: 0.1
         set(value) {
-            _userFraction = value
+            _config.userFraction = value
         }
 
-    @get:Internal("Backing property for public input")
-    internal var _resolutionStrategy: ResolutionStrategy? = null
     /**
      * Specify the resolution strategy to employ when a version conflict occurs.
      *
@@ -142,19 +129,15 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      */
     @get:Input
     var resolutionStrategy
-        get() = resolutionStrategyOrDefault.publishedName
+        get() = _config.resolutionStrategyOrDefault.publishedName
         set(value) {
-            _resolutionStrategy = requireNotNull(
+            _config.resolutionStrategy = requireNotNull(
                     ResolutionStrategy.values().find { it.publishedName == value }
             ) {
                 "Resolution strategy must be one of " +
                         ResolutionStrategy.values().joinToString { "'${it.publishedName}'" }
             }
         }
-
-    @get:Internal("ProcessArtifactMetadata is always out-of-date. Also, Closures with " +
-                          "parameters cannot be used as inputs.")
-    internal var _outputProcessor: Action<ApkVariantOutput>? = null
 
     /**
      * If the [resolutionStrategy] is auto, provide extra processing on top of what this plugin
@@ -167,11 +150,9 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      */
     @Suppress("unused") // Public API
     fun outputProcessor(processor: Action<ApkVariantOutput>) {
-        _outputProcessor = processor
+        _config.outputProcessor = processor
     }
 
-    @get:Internal("Backing property for public input")
-    internal var _releaseStatus: ReleaseStatus? = null
     /**
      * Specify the status to apply to the uploaded app release.
      *
@@ -179,9 +160,9 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      */
     @get:Input
     var releaseStatus: String
-        get() = releaseStatusOrDefault.publishedName
+        get() = _config.releaseStatusOrDefault.publishedName
         set(value) {
-            _releaseStatus = requireNotNull(
+            _config.releaseStatus = requireNotNull(
                     ReleaseStatus.values().find { it.publishedName == value }
             ) {
                 "Release Status must be one of " +
@@ -189,8 +170,6 @@ open class PlayPublisherExtension @JvmOverloads constructor(
             }
         }
 
-    @get:Internal("Backing property for public input")
-    internal var _artifactDir: File? = null
     /**
      * Specify a directory where prebuilt artifacts such as APKs or App Bundles may be found. The
      * directory must exist and should contain only artifacts intended to be uploaded. If no
@@ -200,24 +179,25 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      */
     @get:Internal("Directory mapped to a useful set of files later")
     var artifactDir: File?
-        get() = _artifactDir
+        get() = _config.artifactDir
         set(value) {
-            _artifactDir = value
+            _config.artifactDir = value
         }
 
-    internal fun toSerializable() = Serializable().also {
-        it._isEnabled = _isEnabled
-        it._serviceAccountCredentials = _serviceAccountCredentials
-        it._serviceAccountEmail = _serviceAccountEmail
-        it._defaultToAppBundles = _defaultToAppBundles
-        it._commit = _commit
-        it._fromTrack = _fromTrack
-        it._track = _track
-        it._userFraction = _userFraction
-        it._resolutionStrategy = _resolutionStrategy
-        it._releaseStatus = _releaseStatus
-        it._artifactDir = _artifactDir
-    }
+    override fun toString() = "PlayPublisherExtension(name='$name', backing=$_config)"
 
-    internal class Serializable : PlayPublisherExtension()
+    internal data class Config(
+            var enabled: Boolean? = null,
+            var serviceAccountCredentials: File? = null,
+            var serviceAccountEmail: String? = null,
+            var defaultToAppBundles: Boolean? = null,
+            var commit: Boolean? = null,
+            var fromTrack: String? = null,
+            var track: String? = null,
+            var userFraction: Double? = null,
+            var resolutionStrategy: ResolutionStrategy? = null,
+            var outputProcessor: Action<ApkVariantOutput>? = null,
+            var releaseStatus: ReleaseStatus? = null,
+            var artifactDir: File? = null
+    ) : Serializable
 }

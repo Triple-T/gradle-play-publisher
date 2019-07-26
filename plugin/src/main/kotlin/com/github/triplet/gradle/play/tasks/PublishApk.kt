@@ -36,7 +36,7 @@ abstract class PublishApk @Inject constructor(
     @get:InputFiles
     protected val inputApks: List<File>?
         get() {
-            val customDir = extension._artifactDir
+            val customDir = extension.config.artifactDir
 
             return if (customDir == null) {
                 variant.outputs.filterIsInstance<ApkVariantOutput>().map { it.outputFile }

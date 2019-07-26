@@ -41,7 +41,7 @@ abstract class PlayPublishArtifactBase(
     @get:InputFile
     internal val mappingFile: File?
         get() {
-            val customDir = extension._artifactDir
+            val customDir = extension.config.artifactDir
 
             return if (customDir == null) {
                 variant.mappingFile?.orNull()
