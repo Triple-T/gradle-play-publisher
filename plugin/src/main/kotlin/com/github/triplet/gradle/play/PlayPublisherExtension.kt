@@ -22,6 +22,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
         @get:Internal internal val name: String = "default" // Needed for Gradle
 ) {
     private val _config = Config()
+
     @get:Internal internal val config get() = _config.copy()
     @get:Internal internal val serializableConfig get() = _config.copy(outputProcessor = null)
 
