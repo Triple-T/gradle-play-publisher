@@ -8,7 +8,7 @@ import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.getCommitEditTask
 import com.github.triplet.gradle.play.internal.getGenEditTask
-import com.github.triplet.gradle.play.internal.mergeWith
+import com.github.triplet.gradle.play.internal.mergeExtensions
 import com.github.triplet.gradle.play.internal.newTask
 import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
@@ -114,11 +114,20 @@ class PlayPublisherPlugin : Plugin<Project> {
                 return@whenObjectAdded
             }
 
-            val extension = (extensionContainer.findByName(name) ?: productFlavors.mapNotNull {
-                extensionContainer.findByName(it.name)
-            }.singleOrNull().let {
-                it ?: extensionContainer.findByName(buildType.name)
-            }).mergeWith(baseExtension)
+            val extension = run {
+                val variantExtension = extensionContainer.findByName(name)
+                val flavorExtension = productFlavors.mapNotNull {
+                    extensionContainer.findByName(it.name)
+                }.singleOrNull()
+                val buildTypeExtension = extensionContainer.findByName(buildType.name)
+
+                mergeExtensions(listOfNotNull(
+                        variantExtension,
+                        flavorExtension,
+                        buildTypeExtension,
+                        baseExtension
+                ))
+            }
 
             if (!extension.isEnabled) {
                 project.logger.info("Gradle Play Publisher is disabled for variant '$name'.")
