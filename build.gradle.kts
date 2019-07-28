@@ -18,8 +18,8 @@ tasks.register<Delete>("clean") {
 }
 
 tasks.register("ciBuild") {
-    val isMaster = System.getenv("TRAVIS_BRANCH") == "master"
-    val isPr = System.getenv("TRAVIS_PULL_REQUEST") ?: "false" != "false"
+    val isMaster = System.getenv("CIRCLE_BRANCH") == "master"
+    val isPr = System.getenv("CIRCLE_PULL_REQUEST") != null
 
     if (isMaster && !isPr) { // Release build
         dependsOn(":plugin:build", ":plugin:publish")
