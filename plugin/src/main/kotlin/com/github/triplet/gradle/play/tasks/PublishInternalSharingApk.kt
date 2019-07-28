@@ -32,7 +32,7 @@ abstract class PublishInternalSharingApk @Inject constructor(
     @get:InputFile
     protected val apk: File?
         get() {
-            val customDir = extension._artifactDir
+            val customDir = extension.config.artifactDir
 
             return if (customDir == null) {
                 variant.outputs.filterIsInstance<ApkVariantOutput>().singleOrNull {

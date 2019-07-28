@@ -26,7 +26,7 @@ abstract class CommitEdit @Inject constructor(
         }
 
         project.serviceOf<WorkerExecutor>().submit(Committer::class) {
-            params(Committer.Params(extension.toSerializable(), file))
+            params(Committer.Params(extension.serializableConfig, file))
         }
     }
 
@@ -37,7 +37,7 @@ abstract class CommitEdit @Inject constructor(
                 println("Committing changes")
                 val appId = file.nameWithoutExtension
                 try {
-                    p.extension.buildPublisher().edits().commit(appId, file.readText()).execute()
+                    p.config.buildPublisher().edits().commit(appId, file.readText()).execute()
                 } finally {
                     file.reset()
                 }
@@ -49,7 +49,7 @@ abstract class CommitEdit @Inject constructor(
         }
 
         data class Params(
-                val extension: PlayPublisherExtension.Serializable,
+                val config: PlayPublisherExtension.Config,
                 val editIdFile: File
         ) : Serializable
     }

@@ -6,6 +6,7 @@ import com.github.triplet.gradle.play.internal.RELEASE_NAMES_DEFAULT_NAME
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_DEFAULT_NAME
 import com.github.triplet.gradle.play.internal.ReleaseStatus
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
+import com.github.triplet.gradle.play.internal.commitOrDefault
 import com.github.triplet.gradle.play.internal.has
 import com.github.triplet.gradle.play.internal.marked
 import com.github.triplet.gradle.play.internal.orNull
@@ -13,6 +14,7 @@ import com.github.triplet.gradle.play.internal.readProcessed
 import com.github.triplet.gradle.play.internal.releaseStatusOrDefault
 import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
 import com.github.triplet.gradle.play.internal.safeCreateNewFile
+import com.github.triplet.gradle.play.internal.trackOrDefault
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.googleapis.media.MediaHttpUploader
 import com.google.api.client.http.FileContent
@@ -31,7 +33,7 @@ import kotlin.math.roundToInt
 
 internal fun PlayPublishTaskBase.paramsForBase(config: WorkerConfiguration, p: Any) {
     val base = PlayWorkerBase.PlayPublishingParams(
-            extension.toSerializable(),
+            extension.serializableConfig,
             variant.applicationId
     )
 
@@ -66,10 +68,10 @@ internal fun PlayPublishTaskBase.paramsForBase(config: WorkerConfiguration, p: A
 }
 
 internal abstract class PlayWorkerBase(p: PlayPublishingParams) : Runnable {
-    protected val extension = p.extension
+    protected val config = p.config
     protected val appId = p.appId
 
-    protected val publisher = extension.buildPublisher()
+    protected val publisher = config.buildPublisher()
     protected val logger: Logger = Logging.getLogger(Task::class.java)
 
     protected fun <T> AndroidPublisherRequest<T>.trackUploadProgress(
@@ -91,7 +93,7 @@ internal abstract class PlayWorkerBase(p: PlayPublishingParams) : Runnable {
     }
 
     internal data class PlayPublishingParams(
-            val extension: PlayPublisherExtension.Serializable,
+            val config: PlayPublisherExtension.Config,
             val appId: String
     ) : Serializable
 }
@@ -103,7 +105,7 @@ internal abstract class EditWorkerBase(
     protected val edits: AndroidPublisher.Edits = publisher.edits()
 
     protected fun commit() {
-        (if (extension.commit) p.commitMarker else p.skippedMarker).safeCreateNewFile()
+        (if (config.commitOrDefault) p.commitMarker else p.skippedMarker).safeCreateNewFile()
     }
 
     internal data class EditPublishingParams(
@@ -129,12 +131,12 @@ internal abstract class ArtifactWorkerBase(
 
     protected fun updateTracks(editId: String, versions: List<Long>) {
         val track = if (p.base.skippedMarker.exists()) {
-            edits.tracks().get(appId, editId, extension.track).execute().apply {
+            edits.tracks().get(appId, editId, config.trackOrDefault).execute().apply {
                 releases = if (releases.isNullOrEmpty()) {
                     listOf(TrackRelease().applyChanges(versions))
                 } else {
                     releases.map {
-                        if (it.status == extension.releaseStatusOrDefault.publishedName) {
+                        if (it.status == config.releaseStatusOrDefault.publishedName) {
                             it.applyChanges(it.versionCodes.orEmpty() + versions)
                         } else {
                             it
@@ -142,8 +144,8 @@ internal abstract class ArtifactWorkerBase(
                     }
                 }
             }
-        } else if (extension.releaseStatusOrDefault == ReleaseStatus.IN_PROGRESS) {
-            edits.tracks().get(appId, editId, extension.track).execute().apply {
+        } else if (config.releaseStatusOrDefault == ReleaseStatus.IN_PROGRESS) {
+            edits.tracks().get(appId, editId, config.trackOrDefault).execute().apply {
                 val keep = releases.orEmpty().filter {
                     it.status == ReleaseStatus.COMPLETED.publishedName ||
                             it.status == ReleaseStatus.DRAFT.publishedName
@@ -152,7 +154,7 @@ internal abstract class ArtifactWorkerBase(
             }
         } else {
             Track().apply {
-                track = extension.track
+                track = config.trackOrDefault
                 releases = listOf(TrackRelease().applyChanges(versions))
             }
         }
@@ -160,7 +162,7 @@ internal abstract class ArtifactWorkerBase(
         println("Updating ${track.releases.map { it.status }.distinct()} release " +
                         "($appId:${track.releases.flatMap { it.versionCodes.orEmpty() }}) " +
                         "in track '${track.track}'")
-        edits.tracks().update(appId, editId, extension.track, track).execute()
+        edits.tracks().update(appId, editId, config.trackOrDefault, track).execute()
     }
 
     protected fun TrackRelease.applyChanges(
@@ -170,10 +172,10 @@ internal abstract class ArtifactWorkerBase(
             updateConsoleName: Boolean = true
     ): TrackRelease {
         versionCodes?.let { this.versionCodes = it }
-        if (updateStatus) status = extension.releaseStatus
+        if (updateStatus) status = config.releaseStatusOrDefault.publishedName
         if (updateConsoleName) {
             name = if (p.transientConsoleName == null) {
-                val file = File(p.consoleNamesDir, "${extension.track}.txt").orNull()
+                val file = File(p.consoleNamesDir, "${config.trackOrDefault}.txt").orNull()
                         ?: File(p.consoleNamesDir, RELEASE_NAMES_DEFAULT_NAME).orNull()
                 file?.readProcessed()?.lines()?.firstOrNull()
             } else {
@@ -182,7 +184,7 @@ internal abstract class ArtifactWorkerBase(
         }
 
         val releaseNotes = p.releaseNotesDir?.listFiles().orEmpty().mapNotNull { locale ->
-            val file = File(locale, "${extension.track}.txt").orNull() ?: run {
+            val file = File(locale, "${config.trackOrDefault}.txt").orNull() ?: run {
                 File(locale, RELEASE_NOTES_DEFAULT_NAME).orNull() ?: return@mapNotNull null
             }
 
@@ -207,10 +209,9 @@ internal abstract class ArtifactWorkerBase(
         }
 
         if (updateFraction) {
-            val status = extension.releaseStatus
-            userFraction = extension.userFraction.takeIf {
-                status == ReleaseStatus.IN_PROGRESS.publishedName ||
-                        status == ReleaseStatus.HALTED.publishedName
+            userFraction = config.userFraction.takeIf {
+                val status = config.releaseStatusOrDefault
+                status == ReleaseStatus.IN_PROGRESS || status == ReleaseStatus.HALTED
             }
         }
 
@@ -221,7 +222,7 @@ internal abstract class ArtifactWorkerBase(
             e: GoogleJsonResponseException,
             file: File
     ): Nothing? = if (e has "apkUpgradeVersionConflict" || e has "apkNoUpgradePath") {
-        when (extension.resolutionStrategyOrDefault) {
+        when (config.resolutionStrategyOrDefault) {
             ResolutionStrategy.AUTO -> throw IllegalStateException(
                     "Concurrent uploads for variant ${p.variantName} (version code " +
                             "${p.versionCode} already used). Make sure to synchronously " +
