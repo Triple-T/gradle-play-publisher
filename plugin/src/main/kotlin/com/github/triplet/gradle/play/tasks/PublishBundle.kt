@@ -62,8 +62,8 @@ abstract class PublishBundle @Inject constructor(
                 handleUploadFailures(e, content.file)
             } ?: return
 
-            handleArtifactDetails(editId, bundle.versionCode)
-            updateTracks(editId, listOf(bundle.versionCode.toLong()))
+            uploadMappingFile(bundle.versionCode)
+            updateTracks(listOf(bundle.versionCode.toLong()))
         }
 
         data class Params(val bundleFile: File) : Serializable

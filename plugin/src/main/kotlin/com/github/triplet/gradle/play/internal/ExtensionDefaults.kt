@@ -22,9 +22,7 @@ fun mergeExtensions(extensions: List<PlayPublisherExtension>): PlayPublisherExte
     return result
 }
 
-fun PlayPublisherExtension.mergeWith(
-        default: PlayPublisherExtension?
-): PlayPublisherExtension {
+fun PlayPublisherExtension.mergeWith(default: PlayPublisherExtension?): PlayPublisherExtension {
     if (default == null) return this
 
     fun PlayPublisherExtension.getMutableConfig(): Any {
@@ -34,11 +32,22 @@ fun PlayPublisherExtension.mergeWith(
     }
 
     val baseConfig = default.getMutableConfig()
-    val mergableConfig = getMutableConfig()
+    val mergeableConfig = getMutableConfig()
     for (field in PlayPublisherExtension.Config::class.java.declaredFields) {
         field.isAccessible = true
-        if (field[mergableConfig] == null) field[mergableConfig] = field[baseConfig]
+        if (field.name == "retain") {
+            mergeRetain(field[mergeableConfig], field[baseConfig])
+        } else if (field[mergeableConfig] == null) {
+            field[mergeableConfig] = field[baseConfig]
+        }
     }
 
     return this
+}
+
+private fun mergeRetain(mergeableRetain: Any, baseRetain: Any) {
+    for (field in PlayPublisherExtension.Retain::class.java.declaredFields) {
+        field.isAccessible = true
+        if (field[mergeableRetain] == null) field[mergeableRetain] = field[baseRetain]
+    }
 }

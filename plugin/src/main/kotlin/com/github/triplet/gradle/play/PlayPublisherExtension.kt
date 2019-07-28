@@ -12,6 +12,7 @@ import org.gradle.api.Action
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -24,8 +25,9 @@ open class PlayPublisherExtension @JvmOverloads constructor(
 ) {
     private val _config = Config()
 
-    @get:Internal internal val config get() = _config.copy()
-    @get:Internal internal val serializableConfig get() = _config.copy(outputProcessor = null)
+    @get:Internal internal val config get() = _config.copy(retain = _config.retain.copy())
+    @get:Internal internal val serializableConfig
+        get() = _config.copy(outputProcessor = null, retain = _config.retain.copy())
 
     /**
      * Enables or disables GPP.
@@ -33,7 +35,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      * Defaults to `true`.
      */
     @get:Input
-    var isEnabled
+    var isEnabled: Boolean
         get() = _config.enabled ?: true
         set(value) {
             _config.enabled = value
@@ -45,7 +47,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      */
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFile
-    var serviceAccountCredentials
+    var serviceAccountCredentials: File?
         get() = _config.serviceAccountCredentials
         set(value) {
             _config.serviceAccountCredentials = value
@@ -54,7 +56,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
     /** Service Account email. Only needed if PKCS12 credentials are used. */
     @get:Optional
     @get:Input
-    var serviceAccountEmail
+    var serviceAccountEmail: String?
         get() = _config.serviceAccountEmail
         set(value) {
             _config.serviceAccountEmail = value
@@ -67,7 +69,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      * Defaults to `false` because App Bundles require Google Play App Signing to be configured.
      */
     @get:Input
-    var defaultToAppBundles
+    var defaultToAppBundles: Boolean
         get() = _config.defaultToAppBundles ?: false
         set(value) {
             _config.defaultToAppBundles = value
@@ -77,7 +79,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      * Choose whether or not to apply the changes from this build. Defaults to true.
      */
     @get:Input
-    var commit
+    var commit: Boolean
         get() = _config.commitOrDefault
         set(value) {
             _config.commit = value
@@ -92,7 +94,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      * the alpha will be chosen.
      */
     @get:Input
-    var fromTrack
+    var fromTrack: String
         get() = _config.fromTrack ?: track
         set(value) {
             _config.fromTrack = value
@@ -105,7 +107,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      * `internal`.
      */
     @get:Input
-    var track
+    var track: String
         get() = _config.trackOrDefault
         set(value) {
             _config.track = value
@@ -117,7 +119,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      * See [track] for valid values. If no promote track is specified, [track] is used instead.
      */
     @get:Input
-    var promoteTrack
+    var promoteTrack: String
         get() = _config.promoteTrackOrDefault
         set(value) {
             _config.promoteTrack = value
@@ -142,7 +144,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      * May be one of `auto`, `fail`, or `ignore`. Defaults to `fail`.
      */
     @get:Input
-    var resolutionStrategy
+    var resolutionStrategy: String
         get() = _config.resolutionStrategyOrDefault.publishedName
         set(value) {
             _config.resolutionStrategy = requireNotNull(
@@ -198,7 +200,46 @@ open class PlayPublisherExtension @JvmOverloads constructor(
             _config.artifactDir = value
         }
 
+    /**
+     * @return the configuration for your app's retainable objects such as previous artifacts and
+     * OBB files.
+     */
+    @get:Nested
+    val retain: Retain = _config.retain
+
+    /** Configure your app's retainable objects such as previous artifacts and OBB files. */
+    fun retain(action: Action<Retain>) {
+        action.execute(_config.retain)
+    }
+
     override fun toString() = "PlayPublisherExtension(name='$name', config=$_config)"
+
+    data class Retain(
+            /** Specify the version code(s) of an APK or App Bundle to retain. Defaults to none. */
+            @get:Optional
+            @get:Input
+            var artifacts: List<Long>? = null,
+
+            /**
+             * Specify the reference version of the main OBB file to attach to an APK.
+             *
+             * Defaults to none.
+             * @see patchObb
+             */
+            @get:Optional
+            @get:Input
+            var mainObb: Int? = null,
+
+            /**
+             * Specify the reference version of the patch OBB file to attach to an APK.
+             *
+             * Defaults to none.
+             * @see mainObb
+             */
+            @get:Optional
+            @get:Input
+            var patchObb: Int? = null
+    ) : Serializable
 
     internal data class Config(
             var enabled: Boolean? = null,
@@ -213,6 +254,8 @@ open class PlayPublisherExtension @JvmOverloads constructor(
             var resolutionStrategy: ResolutionStrategy? = null,
             var outputProcessor: Action<ApkVariantOutput>? = null,
             var releaseStatus: ReleaseStatus? = null,
-            var artifactDir: File? = null
+            var artifactDir: File? = null,
+
+            val retain: Retain = Retain()
     ) : Serializable
 }

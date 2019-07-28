@@ -4,6 +4,7 @@ import com.github.triplet.gradle.play.internal.ReleaseStatus
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.mergeExtensions
 import com.github.triplet.gradle.play.internal.mergeWith
+import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import kotlin.test.assertFails
 
@@ -15,7 +16,7 @@ class PlayPublisherExtensionTest {
 
         copy.track = "other"
 
-        assert(ext.track == "test")
+        assertThat(ext.track).isEqualTo("test")
     }
 
     @Test
@@ -34,7 +35,7 @@ class PlayPublisherExtensionTest {
 
         val merged = ext.mergeWith(other)
 
-        assert(ext.config == merged.config)
+        assertThat(ext.config).isEqualTo(merged.config)
     }
 
     @Test
@@ -44,8 +45,19 @@ class PlayPublisherExtensionTest {
 
         val merged = ext.mergeWith(other)
 
-        assert(merged.config.track == "test")
-        assert(merged.config.releaseStatus == ReleaseStatus.IN_PROGRESS)
+        assertThat(merged.config.track).isEqualTo("test")
+        assertThat(merged.config.releaseStatus).isEqualTo(ReleaseStatus.IN_PROGRESS)
+    }
+
+    @Test
+    fun `Merging extension with other nested returns superset`() {
+        val ext = PlayPublisherExtension().apply { track = "test" }
+        val other = PlayPublisherExtension().apply { retain.mainObb = 8 }
+
+        val merged = ext.mergeWith(other)
+
+        assertThat(merged.config.track).isEqualTo("test")
+        assertThat(merged.config.retain.mainObb).isEqualTo(8)
     }
 
     @Test
@@ -73,8 +85,20 @@ class PlayPublisherExtensionTest {
 
         val merged = mergeExtensions(exts)
 
-        assert(merged.config.track == "test")
-        assert(merged.config.releaseStatus == ReleaseStatus.IN_PROGRESS)
+        assertThat(merged.config.track).isEqualTo("test")
+        assertThat(merged.config.releaseStatus).isEqualTo(ReleaseStatus.IN_PROGRESS)
+    }
+
+    @Test
+    fun `Merging extensions with multiple nested returns superset`() {
+        val p0 = PlayPublisherExtension().apply { track = "test" }
+        val p1 = PlayPublisherExtension().apply { retain.mainObb = 8 }
+        val exts = listOf(p0, p1)
+
+        val merged = mergeExtensions(exts)
+
+        assertThat(merged.config.track).isEqualTo("test")
+        assertThat(merged.config.retain.mainObb).isEqualTo(8)
     }
 
     @Test
@@ -97,10 +121,27 @@ class PlayPublisherExtensionTest {
 
         val merged = mergeExtensions(exts)
 
-        assert(merged.config.track == "test")
-        assert(merged.config.releaseStatus == ReleaseStatus.IN_PROGRESS)
-        assert(merged.config.userFraction == 0.5)
-        assert(merged.config.defaultToAppBundles == true)
-        assert(merged.config.resolutionStrategy == ResolutionStrategy.IGNORE)
+        assertThat(merged.config.track).isEqualTo("test")
+        assertThat(merged.config.releaseStatus).isEqualTo(ReleaseStatus.IN_PROGRESS)
+        assertThat(merged.config.userFraction).isEqualTo(0.5)
+        assertThat(merged.config.defaultToAppBundles).isEqualTo(true)
+        assertThat(merged.config.resolutionStrategy).isEqualTo(ResolutionStrategy.IGNORE)
+    }
+
+    @Test
+    fun `Merging extensions with multiple nested overlapping returns prioritized superset`() {
+        val p0 = PlayPublisherExtension().apply { track = "test" }
+        val p1 = PlayPublisherExtension().apply { retain.mainObb = 8 }
+        val p3 = PlayPublisherExtension().apply {
+            retain.mainObb = 16
+            retain.patchObb = 16
+        }
+        val exts = listOf(p0, p1, p3)
+
+        val merged = mergeExtensions(exts)
+
+        assertThat(merged.config.track).isEqualTo("test")
+        assertThat(merged.config.retain.mainObb).isEqualTo(8)
+        assertThat(merged.config.retain.patchObb).isEqualTo(16)
     }
 }
