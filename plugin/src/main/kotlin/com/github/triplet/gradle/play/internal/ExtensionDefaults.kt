@@ -13,7 +13,7 @@ fun mergeExtensions(extensions: List<PlayPublisherExtension>): PlayPublisherExte
     requireNotNull(extensions.isNotEmpty()) { "At least one extension must be provided." }
     if (extensions.size == 1) return extensions.single()
 
-    var result: PlayPublisherExtension = extensions.first()
+    var result = extensions.first()
     for (i in 1 until extensions.size) {
         result = result.mergeWith(extensions[i])
     }
