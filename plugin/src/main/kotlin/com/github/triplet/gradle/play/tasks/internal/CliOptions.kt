@@ -112,6 +112,16 @@ internal interface UpdatableTrackExtensionOptions : TrackExtensionOptions {
         }
     @get:Internal
     @set:Option(
+            option = "promote-track",
+            description = "Set the track to promote a release to."
+    )
+    var promoteTrackOption: String
+        get() = throw UnsupportedOperationException()
+        set(value) {
+            extension.promoteTrack = value
+        }
+    @get:Internal
+    @set:Option(
             option = "update",
             description = "Set the track to update when promoting releases. This is the same as " +
                     "using 'from-track' and 'track' with the same value."
@@ -120,7 +130,7 @@ internal interface UpdatableTrackExtensionOptions : TrackExtensionOptions {
         get() = throw UnsupportedOperationException()
         set(value) {
             extension.fromTrack = value
-            extension.track = value
+            extension.promoteTrack = value
         }
 }
 

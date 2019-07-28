@@ -4,6 +4,8 @@ import com.github.triplet.gradle.play.PlayPublisherExtension
 
 internal val PlayPublisherExtension.Config.commitOrDefault get() = commit ?: true
 internal val PlayPublisherExtension.Config.trackOrDefault get() = track ?: "internal"
+internal val PlayPublisherExtension.Config.promoteTrackOrDefault
+    get() = promoteTrack ?: trackOrDefault
 internal val PlayPublisherExtension.Config.releaseStatusOrDefault
     get() = releaseStatus ?: ReleaseStatus.COMPLETED
 internal val PlayPublisherExtension.Config.resolutionStrategyOrDefault
