@@ -2,7 +2,7 @@ package com.github.triplet.gradle.play.tasks
 
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.PlayPublisherExtension
-import com.github.triplet.gradle.play.internal.trackOrDefault
+import com.github.triplet.gradle.play.internal.promoteTrackOrDefault
 import com.github.triplet.gradle.play.tasks.internal.ArtifactWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.PlayPublishArtifactBase
 import com.github.triplet.gradle.play.tasks.internal.TransientTrackOptions
@@ -78,7 +78,7 @@ abstract class PromoteRelease @Inject constructor(
                 it.status
             }
 
-            val promoteTrackName = config.trackOrDefault
+            val promoteTrackName = config.promoteTrackOrDefault
             println("Promoting ${track.releases.map { it.status }.distinct()} release " +
                             "($appId:${track.releases.flatMap { it.versionCodes.orEmpty() }}) " +
                             "from track '${track.track}' to track '$promoteTrackName'")

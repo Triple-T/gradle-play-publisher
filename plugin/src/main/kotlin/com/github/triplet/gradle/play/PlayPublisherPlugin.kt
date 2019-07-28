@@ -317,6 +317,9 @@ class PlayPublisherPlugin : Plugin<Project> {
 
                 dependsOn(resourceDir)
                 dependsOn(genEditTask)
+
+                mustRunAfter(publishApkTask)
+                mustRunAfter(publishBundleTask)
             }
             commitEditTask { mustRunAfter(promoteReleaseTask) }
             promoteReleaseAllTask { dependsOn(promoteReleaseTask) }

@@ -4,6 +4,7 @@ import com.android.build.gradle.api.ApkVariantOutput
 import com.github.triplet.gradle.play.internal.ReleaseStatus
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.commitOrDefault
+import com.github.triplet.gradle.play.internal.promoteTrackOrDefault
 import com.github.triplet.gradle.play.internal.releaseStatusOrDefault
 import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
 import com.github.triplet.gradle.play.internal.trackOrDefault
@@ -111,6 +112,18 @@ open class PlayPublisherExtension @JvmOverloads constructor(
         }
 
     /**
+     * Specify the track to promote a release to.
+     *
+     * See [track] for valid values. If no promote track is specified, [track] is used instead.
+     */
+    @get:Input
+    var promoteTrack
+        get() = _config.promoteTrackOrDefault
+        set(value) {
+            _config.promoteTrack = value
+        }
+
+    /**
      * Specify the initial user fraction intended to receive an `inProgress` release. Defaults to
      * 0.1 (10%).
      *
@@ -195,6 +208,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
             var commit: Boolean? = null,
             var fromTrack: String? = null,
             var track: String? = null,
+            var promoteTrack: String? = null,
             var userFraction: Double? = null,
             var resolutionStrategy: ResolutionStrategy? = null,
             var outputProcessor: Action<ApkVariantOutput>? = null,
