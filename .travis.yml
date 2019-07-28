@@ -1,7 +1,6 @@
-dist: bionic
 language: android
 
-jdk: openjdk11
+jdk: oraclejdk8
 
 env:
   global:
