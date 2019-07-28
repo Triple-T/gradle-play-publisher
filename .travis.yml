@@ -1,3 +1,4 @@
+dist: precise
 language: android
 
 jdk: openjdk8
