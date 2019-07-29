@@ -129,7 +129,7 @@ internal abstract class ArtifactWorkerBase(
 
     abstract fun upload()
 
-    protected fun updateTracks(editId: String, versions: List<Long>) {
+    protected fun updateTracks(versions: List<Long>) {
         val track = if (p.base.skippedMarker.exists()) {
             edits.tracks().get(appId, editId, config.trackOrDefault).execute().apply {
                 releases = if (releases.isNullOrEmpty()) {
@@ -171,8 +171,12 @@ internal abstract class ArtifactWorkerBase(
             updateFraction: Boolean = true,
             updateConsoleName: Boolean = true
     ): TrackRelease {
-        versionCodes?.let { this.versionCodes = it }
+        versionCodes?.let {
+            this.versionCodes = it + config.retain.artifacts.orEmpty()
+        }
+
         if (updateStatus) status = config.releaseStatusOrDefault.publishedName
+
         if (updateConsoleName) {
             name = if (p.transientConsoleName == null) {
                 val file = File(p.consoleNamesDir, "${config.trackOrDefault}.txt").orNull()
@@ -243,7 +247,7 @@ internal abstract class ArtifactWorkerBase(
         throw e
     }
 
-    protected fun handleArtifactDetails(editId: String, versionCode: Int) {
+    protected fun uploadMappingFile(versionCode: Int) {
         val file = p.mappingFile
         if (file != null && file.length() > 0) {
             val mapping = FileContent(MIME_TYPE_STREAM, file)

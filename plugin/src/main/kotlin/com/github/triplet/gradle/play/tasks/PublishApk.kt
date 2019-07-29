@@ -12,6 +12,7 @@ import com.github.triplet.gradle.play.tasks.internal.TransientTrackOptions
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
+import com.google.api.services.androidpublisher.model.ExpansionFile
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.OutputDirectory
@@ -78,7 +79,7 @@ abstract class PublishApk @Inject constructor(
             executor.await()
 
             val versions = p.uploadResults.listFiles().orEmpty().map { it.name.toLong() }
-            updateTracks(editId, versions)
+            updateTracks(versions)
         }
 
         data class Params(val apkFiles: List<File>, val uploadResults: File) : Serializable
@@ -102,8 +103,19 @@ abstract class PublishApk @Inject constructor(
                     return
                 }
 
-                handleArtifactDetails(editId, apk.versionCode)
+                config.retain.mainObb?.attachObb(apk.versionCode, "main")
+                config.retain.patchObb?.attachObb(apk.versionCode, "patch")
+
+                uploadMappingFile(apk.versionCode)
                 File(p.uploadResults, apk.versionCode.toString()).createNewFile()
+            }
+
+            private fun Int.attachObb(versionCode: Int, type: String) {
+                println("Attaching $type OBB ($this) to APK $versionCode")
+                val obb = ExpansionFile().also { it.referencesVersion = this }
+                edits.expansionfiles()
+                        .update(appId, editId, versionCode, type, obb)
+                        .execute()
             }
 
             data class Params(val apk: File, val uploadResults: File) : Serializable
