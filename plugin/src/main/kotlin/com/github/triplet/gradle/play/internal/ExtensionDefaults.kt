@@ -8,6 +8,8 @@ internal val PlayPublisherExtension.Config.promoteTrackOrDefault
     get() = promoteTrack ?: trackOrDefault
 internal val PlayPublisherExtension.Config.releaseStatusOrDefault
     get() = releaseStatus ?: ReleaseStatus.COMPLETED
+internal val PlayPublisherExtension.Config.userFractionOrDefault
+    get() = userFraction ?: 0.1
 internal val PlayPublisherExtension.Config.resolutionStrategyOrDefault
     get() = resolutionStrategy ?: ResolutionStrategy.FAIL
 

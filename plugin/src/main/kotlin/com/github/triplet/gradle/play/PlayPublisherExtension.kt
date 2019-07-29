@@ -8,6 +8,7 @@ import com.github.triplet.gradle.play.internal.promoteTrackOrDefault
 import com.github.triplet.gradle.play.internal.releaseStatusOrDefault
 import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
 import com.github.triplet.gradle.play.internal.trackOrDefault
+import com.github.triplet.gradle.play.internal.userFractionOrDefault
 import org.gradle.api.Action
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
@@ -133,7 +134,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      */
     @get:Input
     var userFraction: Double
-        get() = _config.userFraction ?: 0.1
+        get() = _config.userFractionOrDefault
         set(value) {
             _config.userFraction = value
         }
