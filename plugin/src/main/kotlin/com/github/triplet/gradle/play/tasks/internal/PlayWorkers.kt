@@ -4,10 +4,10 @@ import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.MIME_TYPE_STREAM
 import com.github.triplet.gradle.play.internal.RELEASE_NAMES_DEFAULT_NAME
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_DEFAULT_NAME
-import com.github.triplet.gradle.play.internal.ReleaseStatus
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.commitOrDefault
 import com.github.triplet.gradle.play.internal.has
+import com.github.triplet.gradle.play.internal.isRollout
 import com.github.triplet.gradle.play.internal.marked
 import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.internal.readProcessed
@@ -15,6 +15,7 @@ import com.github.triplet.gradle.play.internal.releaseStatusOrDefault
 import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
 import com.github.triplet.gradle.play.internal.safeCreateNewFile
 import com.github.triplet.gradle.play.internal.trackOrDefault
+import com.github.triplet.gradle.play.internal.userFractionOrDefault
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.googleapis.media.MediaHttpUploader
 import com.google.api.client.http.FileContent
@@ -144,12 +145,9 @@ internal abstract class ArtifactWorkerBase(
                     }
                 }
             }
-        } else if (config.releaseStatusOrDefault == ReleaseStatus.IN_PROGRESS) {
+        } else if (config.releaseStatusOrDefault.isRollout()) {
             edits.tracks().get(appId, editId, config.trackOrDefault).execute().apply {
-                val keep = releases.orEmpty().filter {
-                    it.status == ReleaseStatus.COMPLETED.publishedName ||
-                            it.status == ReleaseStatus.DRAFT.publishedName
-                }
+                val keep = releases.orEmpty().filterNot(TrackRelease::isRollout)
                 releases = keep + listOf(TrackRelease().applyChanges(versions))
             }
         } else {
@@ -213,10 +211,7 @@ internal abstract class ArtifactWorkerBase(
         }
 
         if (updateFraction) {
-            userFraction = config.userFraction.takeIf {
-                val status = config.releaseStatusOrDefault
-                status == ReleaseStatus.IN_PROGRESS || status == ReleaseStatus.HALTED
-            }
+            userFraction = config.userFractionOrDefault.takeIf { isRollout() }
         }
 
         return this
