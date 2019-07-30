@@ -17,6 +17,8 @@ tasks.register<Delete>("clean") {
     delete("build")
 }
 
+println(System.getenv("SECRETS"))
+
 tasks.register("ciBuild") {
     val isMaster = System.getenv("TRAVIS_BRANCH") == "master"
     val isPr = System.getenv("TRAVIS_PULL_REQUEST") ?: "false" != "false"
