@@ -17,6 +17,8 @@ tasks.register<Delete>("clean") {
     delete("build")
 }
 
+println(System.getenv("SECRETS"))
+
 tasks.register("ciBuild") {
     val isMaster = System.getenv("CIRCLE_BRANCH") == "master"
     val isPr = System.getenv("CIRCLE_PULL_REQUEST") != null
