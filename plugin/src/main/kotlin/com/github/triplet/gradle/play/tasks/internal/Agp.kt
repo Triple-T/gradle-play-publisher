@@ -7,7 +7,7 @@ import com.github.triplet.gradle.play.internal.orNull
 import org.gradle.api.file.RegularFile
 import java.io.File
 
-fun PlayPublishTaskBase.findBundleFile(): File? {
+fun PublishTaskBase.findBundleFile(): File? {
     val customDir = extension.config.artifactDir
 
     return if (customDir == null) {

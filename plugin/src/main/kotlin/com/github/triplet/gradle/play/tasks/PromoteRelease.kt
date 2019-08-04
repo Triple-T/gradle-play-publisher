@@ -4,11 +4,10 @@ import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.promoteTrackOrDefault
 import com.github.triplet.gradle.play.tasks.internal.ArtifactWorkerBase
-import com.github.triplet.gradle.play.tasks.internal.PlayPublishArtifactBase
+import com.github.triplet.gradle.play.tasks.internal.PublishArtifactTaskBase
 import com.github.triplet.gradle.play.tasks.internal.TransientTrackOptions
 import com.github.triplet.gradle.play.tasks.internal.UpdatableTrackExtensionOptions
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
-import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
 import org.gradle.kotlin.dsl.support.serviceOf
@@ -17,10 +16,10 @@ import java.io.Serializable
 import javax.inject.Inject
 
 abstract class PromoteRelease @Inject constructor(
-        @get:Nested override val extension: PlayPublisherExtension,
+        extension: PlayPublisherExtension,
         variant: ApplicationVariant,
         optionsHolder: TransientTrackOptions.Holder
-) : PlayPublishArtifactBase(extension, variant, optionsHolder), UpdatableTrackExtensionOptions {
+) : PublishArtifactTaskBase(extension, variant, optionsHolder), UpdatableTrackExtensionOptions {
     init {
         // Always out-of-date since we don't know what's changed on the network
         outputs.upToDateWhen { false }

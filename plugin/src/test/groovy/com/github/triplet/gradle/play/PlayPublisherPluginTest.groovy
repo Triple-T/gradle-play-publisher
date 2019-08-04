@@ -1,6 +1,6 @@
 package com.github.triplet.gradle.play
 
-import com.github.triplet.gradle.play.tasks.internal.PlayPublishTaskBase
+import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import org.gradle.api.ProjectConfigurationException
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Test
@@ -142,11 +142,11 @@ class PlayPublisherPluginTest {
             playConfigs {
                 free {
                     serviceAccountCredentials = project.file('secret.pk12')
-                    serviceAccountEmail = 'first-mail@exmaple.com'
+                    serviceAccountEmail = 'first-mail@example.com'
                 }
                 paid {
                     serviceAccountCredentials = project.file('another-secret.pk12')
-                    serviceAccountEmail = 'another-mail@exmaple.com'
+                    serviceAccountEmail = 'another-mail@example.com'
                 }
             }
 
@@ -166,21 +166,48 @@ class PlayPublisherPluginTest {
         }
         project.play {
             serviceAccountCredentials = project.file('first-secret.pk12')
-            serviceAccountEmail = 'default@exmaple.com'
+            serviceAccountEmail = 'default@example.com'
         }
         project.evaluate()
 
-        assertEquals('default@exmaple.com', ext(project.tasks.bootstrapDefaultFlavorRelease).serviceAccountEmail)
-        assertEquals('first-mail@exmaple.com', ext(project.tasks.bootstrapFreeRelease).serviceAccountEmail)
-        assertEquals('another-mail@exmaple.com', ext(project.tasks.bootstrapPaidRelease).serviceAccountEmail)
+        assertEquals(
+                'default@example.com',
+                project.tasks.bootstrapDefaultFlavorRelease.extension.serviceAccountEmail
+        )
+        assertEquals(
+                'first-mail@example.com',
+                project.tasks.bootstrapFreeRelease.extension.serviceAccountEmail
+        )
+        assertEquals(
+                'another-mail@example.com',
+                project.tasks.bootstrapPaidRelease.extension.serviceAccountEmail
+        )
 
-        assertEquals('default@exmaple.com', ext(project.tasks.publishDefaultFlavorReleaseApk).serviceAccountEmail)
-        assertEquals('first-mail@exmaple.com', ext(project.tasks.publishFreeReleaseApk).serviceAccountEmail)
-        assertEquals('another-mail@exmaple.com', ext(project.tasks.publishPaidReleaseApk).serviceAccountEmail)
+        assertEquals(
+                'default@example.com',
+                project.tasks.publishDefaultFlavorReleaseApk.extension.serviceAccountEmail
+        )
+        assertEquals(
+                'first-mail@example.com',
+                project.tasks.publishFreeReleaseApk.extension.serviceAccountEmail
+        )
+        assertEquals(
+                'another-mail@example.com',
+                project.tasks.publishPaidReleaseApk.extension.serviceAccountEmail
+        )
 
-        assertEquals('default@exmaple.com', ext(project.tasks.publishDefaultFlavorReleaseListing).serviceAccountEmail)
-        assertEquals('first-mail@exmaple.com', ext(project.tasks.publishFreeReleaseListing).serviceAccountEmail)
-        assertEquals('another-mail@exmaple.com', ext(project.tasks.publishPaidReleaseListing).serviceAccountEmail)
+        assertEquals(
+                'default@example.com',
+                project.tasks.publishDefaultFlavorReleaseListing.extension.serviceAccountEmail
+        )
+        assertEquals(
+                'first-mail@example.com',
+                project.tasks.publishFreeReleaseListing.extension.serviceAccountEmail
+        )
+        assertEquals(
+                'another-mail@example.com',
+                project.tasks.publishPaidReleaseListing.extension.serviceAccountEmail
+        )
     }
 
     @Test
@@ -194,11 +221,11 @@ class PlayPublisherPluginTest {
             playConfigs {
                 free {
                     serviceAccountCredentials = project.file('secret.pk12')
-                    serviceAccountEmail = 'free@exmaple.com'
+                    serviceAccountEmail = 'free@example.com'
                 }
                 paid {
                     serviceAccountCredentials = project.file('another-secret.pk12')
-                    serviceAccountEmail = 'paid@exmaple.com'
+                    serviceAccountEmail = 'paid@example.com'
                 }
             }
 
@@ -219,10 +246,22 @@ class PlayPublisherPluginTest {
         }
         project.evaluate()
 
-        assertEquals('free@exmaple.com', ext(project.tasks.bootstrapDemoFreeRelease).serviceAccountEmail)
-        assertEquals('paid@exmaple.com', ext(project.tasks.bootstrapDemoPaidRelease).serviceAccountEmail)
-        assertEquals('free@exmaple.com', ext(project.tasks.bootstrapProductionFreeRelease).serviceAccountEmail)
-        assertEquals('paid@exmaple.com', ext(project.tasks.bootstrapProductionPaidRelease).serviceAccountEmail)
+        assertEquals(
+                'free@example.com',
+                project.tasks.bootstrapDemoFreeRelease.extension.serviceAccountEmail
+        )
+        assertEquals(
+                'paid@example.com',
+                project.tasks.bootstrapDemoPaidRelease.extension.serviceAccountEmail
+        )
+        assertEquals(
+                'free@example.com',
+                project.tasks.bootstrapProductionFreeRelease.extension.serviceAccountEmail
+        )
+        assertEquals(
+                'paid@example.com',
+                project.tasks.bootstrapProductionPaidRelease.extension.serviceAccountEmail
+        )
     }
 
     @Test
@@ -231,13 +270,22 @@ class PlayPublisherPluginTest {
 
         project.play {
             serviceAccountCredentials = project.file('first-secret.pk12')
-            serviceAccountEmail = 'default@exmaple.com'
+            serviceAccountEmail = 'default@example.com'
         }
         project.evaluate()
 
-        assertEquals('default@exmaple.com', ext(project.tasks.bootstrapRelease).serviceAccountEmail)
-        assertEquals('default@exmaple.com', ext(project.tasks.publishReleaseApk).serviceAccountEmail)
-        assertEquals('default@exmaple.com', ext(project.tasks.publishReleaseListing).serviceAccountEmail)
+        assertEquals(
+                'default@example.com',
+                project.tasks.bootstrapRelease.extension.serviceAccountEmail
+        )
+        assertEquals(
+                'default@example.com',
+                project.tasks.publishReleaseApk.extension.serviceAccountEmail
+        )
+        assertEquals(
+                'default@example.com',
+                project.tasks.publishReleaseListing.extension.serviceAccountEmail
+        )
     }
 
     @Test
@@ -340,17 +388,9 @@ class PlayPublisherPluginTest {
         assertEquals(TaskOutcome.SKIPPED, result.task(":processReleaseMetadata").outcome)
     }
 
-    private PlayPublisherExtension ext(PlayPublishTaskBase task) {
+    private Object var(PublishTaskBase task) {
         Class c = task.class
-        while (c != PlayPublishTaskBase.class) c = c.superclass
-        Field f = c.getDeclaredField("extension")
-        f.setAccessible(true)
-        return f.get(task) as PlayPublisherExtension
-    }
-
-    private Object var(PlayPublishTaskBase task) {
-        Class c = task.class
-        while (c != PlayPublishTaskBase.class) c = c.superclass
+        while (c != PublishTaskBase.class) c = c.superclass
         Field f = c.getDeclaredField("variant")
         f.setAccessible(true)
         return f.get(task)
