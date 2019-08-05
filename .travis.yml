@@ -5,8 +5,8 @@ jdk: openjdk11
 
 env:
   global:
-    - secure: "HG2SDI/pIrNwLNk+KmWBExjQo/I+dTlPywJU9r7Xwm7yR+oK3B5MFjH7kZ3AHwbOibo7cvSnJfs7RhlYo/Ta3Z/AiIEskVzMRy9XLQHBRD9t4nkaa1GY98dWgjKnngaRvgcpvWgS3M2A69d8OnPNX858Ge2WchwXvd0bWTS5a9U="
-    - secure: "O1Smf6Jli0+465ym+C2zV3ZLseA7/LRdgMCojNUU6bKLvM7SY5sGv47m0tlCdFKNvOUijFXYWYmcSpNWFZ7avQROFMKjWXGcE7aKTZsbh42+tzzqW8IYKWMzlH7d3ZbzALTvYVNLn6pdcRJOlHiC0ApnAMvfci8MG7d50xB3yQM="
+    - secure: "tJm414XcsookOegItmtmHyPqRovTEEw0WkSKtxQhquZvF1CoP8gxCqNyAFymq8hsfEGSCzTEMZM47yIQyDIt0myyoiWPRMuXWEEqV4TPEJ0MtBGItyx0k2hIU/qSwMvYjNGTvvg5HStUqR63yYx3Ym+8vp+rQPjjZc+SAJrdwl4="
+    - secure: "cs0w0fingpt/EbFyqwoEGGOB2ab7tJQ/YetePwyKscvsYsOMIq6/z4JTBhs05QGPiMrg4/3kVTtfBrS6MvQJfChHT/4MnQ54uCmqejr/23LlcJi5WBrVYgoswxlRaEExe+CG0wT8fmzNFPZEs9fw6atI6ntStlSsdkUEKn0BHww="
 
 notifications:
   email: false
