@@ -545,7 +545,7 @@ android {
 
     playConfigs {
         register("myCustomVariantOrProductFlavor") {
-            isEnabled = true
+            enabled = true
         }
 
         // ...
@@ -553,7 +553,7 @@ android {
 }
 
 play {
-    isEnabled = false // This disables GPP by default. It could be the other way around.
+    enabled = false // This disables GPP by default. It could be the other way around.
     // ...
 }
 ```
