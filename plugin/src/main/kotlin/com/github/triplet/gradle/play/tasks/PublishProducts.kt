@@ -3,8 +3,8 @@ package com.github.triplet.gradle.play.tasks
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
-import com.github.triplet.gradle.play.tasks.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PlayWorkerBase
+import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.model.InAppProduct
@@ -28,7 +28,7 @@ import javax.inject.Inject
 abstract class PublishProducts @Inject constructor(
         extension: PlayPublisherExtension,
         variant: ApplicationVariant
-) : PlayPublishTaskBase(extension, variant) {
+) : PublishTaskBase(extension, variant) {
     @get:Internal
     internal abstract val resDir: DirectoryProperty
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle

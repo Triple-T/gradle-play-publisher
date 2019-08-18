@@ -14,11 +14,11 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import java.io.File
 
-abstract class PlayPublishArtifactBase(
+abstract class PublishArtifactTaskBase(
         extension: PlayPublisherExtension,
         variant: ApplicationVariant,
         optionsHolder: TransientTrackOptions.Holder
-) : PlayPublishEditTaskBase(extension, variant), TransientTrackOptions by optionsHolder {
+) : PublishEditTaskBase(extension, variant), TransientTrackOptions by optionsHolder {
     @get:Internal internal abstract val resDir: DirectoryProperty
 
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle

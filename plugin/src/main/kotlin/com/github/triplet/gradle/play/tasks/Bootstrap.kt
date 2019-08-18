@@ -16,7 +16,7 @@ import com.github.triplet.gradle.play.internal.safeCreateNewFile
 import com.github.triplet.gradle.play.internal.safeMkdirs
 import com.github.triplet.gradle.play.tasks.internal.BootstrapOptions
 import com.github.triplet.gradle.play.tasks.internal.EditWorkerBase
-import com.github.triplet.gradle.play.tasks.internal.PlayPublishEditTaskBase
+import com.github.triplet.gradle.play.tasks.internal.PublishEditTaskBase
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.model.Listing
@@ -36,7 +36,7 @@ abstract class Bootstrap @Inject constructor(
         extension: PlayPublisherExtension,
         variant: ApplicationVariant,
         optionsHolder: BootstrapOptions.Holder
-) : PlayPublishEditTaskBase(extension, variant), BootstrapOptions by optionsHolder {
+) : PublishEditTaskBase(extension, variant), BootstrapOptions by optionsHolder {
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:OutputDirectory
     protected val srcDir: File by lazy {

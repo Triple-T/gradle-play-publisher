@@ -6,7 +6,7 @@ import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.tasks.internal.ArtifactWorkerBase
-import com.github.triplet.gradle.play.tasks.internal.PlayPublishArtifactBase
+import com.github.triplet.gradle.play.tasks.internal.PublishArtifactTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PublishableTrackExtensionOptions
 import com.github.triplet.gradle.play.tasks.internal.TransientTrackOptions
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
@@ -14,7 +14,6 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.model.ExpansionFile
 import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -28,10 +27,10 @@ import java.io.Serializable
 import javax.inject.Inject
 
 abstract class PublishApk @Inject constructor(
-        @get:Nested override val extension: PlayPublisherExtension,
+        extension: PlayPublisherExtension,
         variant: ApplicationVariant,
         optionsHolder: TransientTrackOptions.Holder
-) : PlayPublishArtifactBase(extension, variant, optionsHolder), PublishableTrackExtensionOptions {
+) : PublishArtifactTaskBase(extension, variant, optionsHolder), PublishableTrackExtensionOptions {
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles

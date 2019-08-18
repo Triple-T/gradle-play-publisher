@@ -32,13 +32,13 @@ import java.io.File
 import java.io.Serializable
 import kotlin.math.roundToInt
 
-internal fun PlayPublishTaskBase.paramsForBase(config: WorkerConfiguration, p: Any) {
+internal fun PublishTaskBase.paramsForBase(config: WorkerConfiguration, p: Any) {
     val base = PlayWorkerBase.PlayPublishingParams(
             extension.serializableConfig,
             variant.applicationId
     )
 
-    if (this is PlayPublishEditTaskBase) {
+    if (this is PublishEditTaskBase) {
         val edit = EditWorkerBase.EditPublishingParams(
                 editId,
                 editIdFile.asFile.get().marked("commit"),
@@ -47,7 +47,7 @@ internal fun PlayPublishTaskBase.paramsForBase(config: WorkerConfiguration, p: A
                 base
         )
 
-        if (this is PlayPublishArtifactBase) {
+        if (this is PublishArtifactTaskBase) {
             val artifact = ArtifactWorkerBase.ArtifactPublishingParams(
                     variant.name,
                     variant.outputs.map { it.versionCode }.first(),

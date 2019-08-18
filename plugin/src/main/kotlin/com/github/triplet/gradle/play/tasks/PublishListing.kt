@@ -10,7 +10,7 @@ import com.github.triplet.gradle.play.internal.ListingDetail
 import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.internal.readProcessed
 import com.github.triplet.gradle.play.tasks.internal.EditWorkerBase
-import com.github.triplet.gradle.play.tasks.internal.PlayPublishEditTaskBase
+import com.github.triplet.gradle.play.tasks.internal.PublishEditTaskBase
 import com.github.triplet.gradle.play.tasks.internal.WriteTrackExtensionOptions
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.http.FileContent
@@ -23,7 +23,6 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileType
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SkipWhenEmpty
@@ -39,9 +38,9 @@ import java.io.Serializable
 import javax.inject.Inject
 
 abstract class PublishListing @Inject constructor(
-        @get:Nested override val extension: PlayPublisherExtension,
+        extension: PlayPublisherExtension,
         variant: ApplicationVariant
-) : PlayPublishEditTaskBase(extension, variant), WriteTrackExtensionOptions {
+) : PublishEditTaskBase(extension, variant), WriteTrackExtensionOptions {
     @get:Internal
     internal abstract val resDir: DirectoryProperty
 

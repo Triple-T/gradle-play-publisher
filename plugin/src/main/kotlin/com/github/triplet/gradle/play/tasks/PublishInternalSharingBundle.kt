@@ -5,13 +5,12 @@ import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.MIME_TYPE_STREAM
 import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.tasks.internal.ArtifactExtensionOptions
-import com.github.triplet.gradle.play.tasks.internal.PlayPublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PlayWorkerBase
+import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.findBundleFile
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.http.FileContent
 import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -24,9 +23,9 @@ import java.io.Serializable
 import javax.inject.Inject
 
 abstract class PublishInternalSharingBundle @Inject constructor(
-        @get:Nested override val extension: PlayPublisherExtension,
+        extension: PlayPublisherExtension,
         variant: ApplicationVariant
-) : PlayPublishTaskBase(extension, variant), ArtifactExtensionOptions {
+) : PublishTaskBase(extension, variant), ArtifactExtensionOptions {
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFile
