@@ -5,8 +5,8 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import org.gradle.util.GradleVersion
 import org.gradle.util.VersionNumber
 
-private val MIN_GRADLE_VERSION = GradleVersion.version("5.4")
-private val MIN_AGP_VERSION = VersionNumber.parse("3.5.0-beta05")
+private val MIN_GRADLE_VERSION = GradleVersion.version("5.6")
+private val MIN_AGP_VERSION = VersionNumber.parse("3.5.0-rc03")
 
 internal fun validateRuntime() {
     val gradleVersion = GradleVersion.current()
