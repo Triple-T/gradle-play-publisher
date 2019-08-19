@@ -218,10 +218,9 @@ abstract class PublishListing @Inject constructor(
             val locale = p.imageDir/*icon*/.parentFile/*graphics*/.parentFile/*en-US*/.name
             val remoteHashes = edits.images().list(appId, editId, locale, typeName).execute()
                     .images.orEmpty()
-                    .map { it.sha1 }
+                    .map { it.sha256 }
             val localHashes = files.map {
-                @Suppress("DEPRECATION") // The API only provides SHA1 hashes
-                Files.asByteSource(it).hash(Hashing.sha1()).toString()
+                Files.asByteSource(it).hash(Hashing.sha256()).toString()
             }
             if (remoteHashes == localHashes) return
 
