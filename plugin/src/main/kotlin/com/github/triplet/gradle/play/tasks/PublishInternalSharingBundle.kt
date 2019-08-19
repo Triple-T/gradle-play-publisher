@@ -10,6 +10,7 @@ import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.findBundleFile
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.http.FileContent
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
@@ -19,7 +20,6 @@ import org.gradle.kotlin.dsl.submit
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.workers.WorkerExecutor
 import java.io.File
-import java.io.Serializable
 import javax.inject.Inject
 
 abstract class PublishInternalSharingBundle @Inject constructor(
@@ -39,27 +39,30 @@ abstract class PublishInternalSharingBundle @Inject constructor(
 
     @TaskAction
     fun publishBundle() {
-        val bundleFile = bundle?.orNull() ?: return
-        project.serviceOf<WorkerExecutor>().submit(BundleUploader::class) {
-            paramsForBase(this, BundleUploader.Params(bundleFile, outputDir))
+        val bundle = bundle?.orNull() ?: return
+        project.serviceOf<WorkerExecutor>().noIsolation().submit(BundleUploader::class) {
+            paramsForBase(this)
+
+            bundleFile.set(bundle)
+            outputDir.set(this@PublishInternalSharingBundle.outputDir)
         }
     }
 
-    private class BundleUploader @Inject constructor(
-            private val p: Params,
-            data: PlayPublishingParams
-    ) : PlayWorkerBase(data) {
-        override fun run() {
+    internal abstract class BundleUploader : PlayWorkerBase<BundleUploader.Params>() {
+        override fun execute() {
             val bundle = publisher.internalappsharingartifacts()
-                    .uploadbundle(appId, FileContent(MIME_TYPE_STREAM, p.bundleFile))
-                    .trackUploadProgress("App Bundle", p.bundleFile)
+                    .uploadbundle(appId, FileContent(MIME_TYPE_STREAM, parameters.bundleFile.get()))
+                    .trackUploadProgress("App Bundle", parameters.bundleFile.get())
                     .execute()
 
-            File(p.outputDir, "${System.currentTimeMillis()}.json")
+            File(parameters.outputDir.get(), "${System.currentTimeMillis()}.json")
                     .writeText(bundle.toPrettyString())
             println("Upload successful: ${bundle.downloadUrl}")
         }
 
-        data class Params(val bundleFile: File, val outputDir: File) : Serializable
+        interface Params : PlayPublishingParams {
+            val bundleFile: Property<File>
+            val outputDir: Property<File>
+        }
     }
 }

@@ -11,12 +11,14 @@ import com.github.triplet.gradle.play.tasks.internal.buildPublisher
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.services.androidpublisher.AndroidPublisher
 import org.gradle.api.logging.Logging
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
 import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.workers.WorkAction
+import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkerExecutor
 import java.io.File
-import java.io.Serializable
 import javax.inject.Inject
 
 abstract class GenerateEdit @Inject constructor(
@@ -31,17 +33,18 @@ abstract class GenerateEdit @Inject constructor(
     @TaskAction
     fun generate() {
         val file = editIdFile.asFile.get()
-        project.serviceOf<WorkerExecutor>().submit(Generator::class) {
-            params(Generator.Params(extension.serializableConfig, file))
+        project.serviceOf<WorkerExecutor>().noIsolation().submit(Generator::class) {
+            config.set(extension.serializableConfig)
+            editIdFile.set(file)
         }
     }
 
-    private class Generator @Inject constructor(private val p: Params) : Runnable {
-        private val file = p.editIdFile
+    internal abstract class Generator : WorkAction<Generator.Params> {
+        private val file = parameters.editIdFile.get()
         private val appId = file.nameWithoutExtension
 
-        override fun run() {
-            val editId = p.config.buildPublisher().getOrCreateEditId()
+        override fun execute() {
+            val editId = parameters.config.get().buildPublisher().getOrCreateEditId()
             file.safeCreateNewFile().writeText(editId)
         }
 
@@ -77,9 +80,9 @@ abstract class GenerateEdit @Inject constructor(
             }
         }
 
-        data class Params(
-                val config: PlayPublisherExtension.Config,
-                val editIdFile: File
-        ) : Serializable
+        interface Params : WorkParameters {
+            val config: Property<PlayPublisherExtension.Config>
+            val editIdFile: Property<File>
+        }
     }
 }

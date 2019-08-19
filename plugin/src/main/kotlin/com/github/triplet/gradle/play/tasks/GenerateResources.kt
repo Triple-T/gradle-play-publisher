@@ -18,6 +18,7 @@ import com.github.triplet.gradle.play.internal.orNull
 import org.gradle.api.Action
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
@@ -29,9 +30,10 @@ import org.gradle.kotlin.dsl.submit
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.work.ChangeType
 import org.gradle.work.InputChanges
+import org.gradle.workers.WorkAction
+import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkerExecutor
 import java.io.File
-import java.io.Serializable
 import javax.inject.Inject
 
 @CacheableTask
@@ -67,22 +69,27 @@ abstract class GenerateResources @Inject constructor(
             }
         }.map { it.file }
 
-        project.serviceOf<WorkerExecutor>().submit(Processor::class) {
-            params(Processor.Params(resDir.asFile.get(), resSrcDirs, files))
+        project.serviceOf<WorkerExecutor>().noIsolation().submit(Processor::class) {
+            resDir.set(this@GenerateResources.resDir.asFile.get())
+            resSrcDirs.set(this@GenerateResources.resSrcDirs)
+            resFiles.set(files)
         }
     }
 
-    private class Processor @Inject constructor(private val p: Params) : Runnable {
-        override fun run() {
-            val defaultLocale = p.resSrcDirs.mapNotNull {
+    internal abstract class Processor : WorkAction<Processor.Params> {
+        override fun execute() {
+            val defaultLocale = parameters.resSrcDirs.get().mapNotNull {
                 File(it, AppDetail.DEFAULT_LANGUAGE.fileName).orNull()
                         ?.readText()?.normalized().nullOrFull()
             }.lastOrNull() // Pick the most specialized option available. E.g. `paidProdRelease`
 
-            val files = p.files
+            val files = parameters.resFiles.get()
                     .filterNot { it.isDirectory }
                     .sortedBy { file ->
-                        p.resSrcDirs.indexOf(p.resSrcDirs.singleOrNull { file.startsWith(it) })
+                        val dir = parameters.resSrcDirs.get().singleOrNull {
+                            file.startsWith(it)
+                        }
+                        parameters.resSrcDirs.get().indexOf(dir)
                     }
                     .ifEmpty { return }
 
@@ -104,14 +111,17 @@ abstract class GenerateResources @Inject constructor(
                 val relativePath = default.invariantSeparatorsPath.split("$defaultLocale/").last()
 
                 listings.listFiles()
+                        .orEmpty()
                         .filter { it.name != defaultLocale }
                         .map { File(it, relativePath) }
                         .filterNot(File::exists)
                         .filterNot(::hasGraphicCategory)
                         .forEach {
                             writeQueue += Action {
-                                default.copy(
-                                        File(p.resDir, it.parentFile.toRelativeString(p.resDir)))
+                                default.copy(File(
+                                        parameters.resDir.get(),
+                                        it.parentFile.toRelativeString(parameters.resDir.get())
+                                ))
                             }
                         }
             }
@@ -177,19 +187,19 @@ abstract class GenerateResources @Inject constructor(
 
         private fun File.copy(dest: File): File = copyTo(File(dest, name), true)
 
-        private fun File.findDest() = File(p.resDir, toRelativeString(findOwner()))
+        private fun File.findDest() = File(parameters.resDir.get(), toRelativeString(findOwner()))
 
-        private fun File.findOwner() = p.resSrcDirs.single { startsWith(it) }
+        private fun File.findOwner() = parameters.resSrcDirs.get().single { startsWith(it) }
 
         private fun hasGraphicCategory(file: File): Boolean {
             val graphic = ImageType.values().find { file.isDirectChildOf(it.dirName) }
             return graphic != null && file.climbUpTo(graphic.dirName)?.orNull() != null
         }
 
-        data class Params(
-                val resDir: File,
-                val resSrcDirs: List<File>,
-                val files: List<File>
-        ) : Serializable
+        interface Params : WorkParameters {
+            val resDir: Property<File>
+            val resSrcDirs: Property<List<File>>
+            val resFiles: Property<List<File>>
+        }
     }
 }

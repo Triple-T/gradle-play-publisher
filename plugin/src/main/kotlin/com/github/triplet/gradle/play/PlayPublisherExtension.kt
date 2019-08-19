@@ -209,6 +209,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
     val retain: Retain = _config.retain
 
     /** Configure your app's retainable objects such as previous artifacts and OBB files. */
+    @Suppress("unused") // Public API
     fun retain(action: Action<Retain>) {
         action.execute(_config.retain)
     }

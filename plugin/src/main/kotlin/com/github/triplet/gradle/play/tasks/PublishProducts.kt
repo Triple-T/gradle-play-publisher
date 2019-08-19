@@ -10,6 +10,7 @@ import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.model.InAppProduct
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileType
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.PathSensitive
@@ -22,7 +23,6 @@ import org.gradle.work.ChangeType
 import org.gradle.work.InputChanges
 import org.gradle.workers.WorkerExecutor
 import java.io.File
-import java.io.Serializable
 import javax.inject.Inject
 
 abstract class PublishProducts @Inject constructor(
@@ -48,25 +48,25 @@ abstract class PublishProducts @Inject constructor(
                 .filterNot { it.changeType == ChangeType.REMOVED }
                 .filter { it.fileType == FileType.FILE }
                 .forEach {
-                    executor.submit(Uploader::class) {
-                        paramsForBase(this, Uploader.Params(it.file))
+                    executor.noIsolation().submit(Uploader::class) {
+                        paramsForBase(this)
+                        target.set(it.file)
                     }
                 }
     }
 
-    private class Uploader @Inject constructor(
-            private val p: Params,
-            data: PlayPublishingParams
-    ) : PlayWorkerBase(data) {
-        override fun run() {
+    internal abstract class Uploader : PlayWorkerBase<Uploader.Params>() {
+        override fun execute() {
             val product = JacksonFactory.getDefaultInstance()
-                    .createJsonParser(p.target.inputStream())
+                    .createJsonParser(parameters.target.get().inputStream())
                     .parse(InAppProduct::class.java)
 
             println("Uploading ${product.sku}")
             publisher.inappproducts().update(appId, product.sku, product).execute()
         }
 
-        data class Params(val target: File) : Serializable
+        interface Params : PlayPublishingParams {
+            val target: Property<File>
+        }
     }
 }
