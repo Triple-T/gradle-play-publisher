@@ -13,6 +13,7 @@ import com.github.triplet.gradle.play.tasks.internal.findBundleFile
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
@@ -22,7 +23,6 @@ import org.gradle.kotlin.dsl.submit
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.workers.WorkerExecutor
 import java.io.File
-import java.io.Serializable
 import javax.inject.Inject
 
 abstract class PublishBundle @Inject constructor(
@@ -41,21 +41,19 @@ abstract class PublishBundle @Inject constructor(
 
     @TaskAction
     fun publishBundle() {
-        val bundleFile = bundle?.orNull() ?: return
-        project.serviceOf<WorkerExecutor>().submit(BundleUploader::class) {
-            paramsForBase(this, BundleUploader.Params(bundleFile))
+        val bundle = bundle?.orNull() ?: return
+        project.serviceOf<WorkerExecutor>().noIsolation().submit(BundleUploader::class) {
+            paramsForBase(this)
+            bundleFile.set(bundle)
         }
     }
 
-    private class BundleUploader @Inject constructor(
-            private val p: Params,
-            data: ArtifactPublishingParams
-    ) : ArtifactWorkerBase(data) {
+    internal abstract class BundleUploader : ArtifactWorkerBase<BundleUploader.Params>() {
         override fun upload() {
-            val content = FileContent(MIME_TYPE_STREAM, p.bundleFile)
+            val content = FileContent(MIME_TYPE_STREAM, parameters.bundleFile.get())
             val bundle = try {
                 edits.bundles().upload(appId, editId, content)
-                        .trackUploadProgress("App Bundle", p.bundleFile)
+                        .trackUploadProgress("App Bundle", parameters.bundleFile.get())
                         .execute()
             } catch (e: GoogleJsonResponseException) {
                 handleUploadFailures(e, content.file)
@@ -65,6 +63,8 @@ abstract class PublishBundle @Inject constructor(
             updateTracks(listOf(bundle.versionCode.toLong()))
         }
 
-        data class Params(val bundleFile: File) : Serializable
+        interface Params : ArtifactPublishingParams {
+            val bundleFile: Property<File>
+        }
     }
 }

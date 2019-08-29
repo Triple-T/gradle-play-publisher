@@ -12,6 +12,7 @@ import com.github.triplet.gradle.play.internal.readProcessed
 import com.github.triplet.gradle.play.tasks.internal.EditWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.PublishEditTaskBase
 import com.github.triplet.gradle.play.tasks.internal.WriteTrackExtensionOptions
+import com.github.triplet.gradle.play.tasks.internal.copy
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.model.AppDetails
@@ -21,6 +22,7 @@ import com.google.common.io.Files
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileType
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.PathSensitive
@@ -31,7 +33,6 @@ import org.gradle.kotlin.dsl.submit
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
-import org.gradle.workers.IsolationMode
 import org.gradle.workers.WorkerExecutor
 import java.io.File
 import java.io.Serializable
@@ -90,13 +91,16 @@ abstract class PublishListing @Inject constructor(
 
         if (details == null && listings.isEmpty() && media.isEmpty()) return
 
-        project.serviceOf<WorkerExecutor>().submit(Publisher::class) {
-            isolationMode = IsolationMode.NONE
-            paramsForBase(this, Publisher.Params(details, listings, media))
+        project.serviceOf<WorkerExecutor>().noIsolation().submit(Publisher::class) {
+            paramsForBase(this)
+
+            this.details.set(details)
+            this.listings.set(listings)
+            this.media.set(media)
         }
     }
 
-    private fun processDetails(changes: InputChanges): DetailsUploader.Params? {
+    private fun processDetails(changes: InputChanges): File? {
         val changedDetails =
                 changes.getFileChanges(detailFiles).filter { it.fileType == FileType.FILE }
         if (changedDetails.isEmpty()) return null
@@ -104,70 +108,75 @@ abstract class PublishListing @Inject constructor(
             return null
         }
 
-        return DetailsUploader.Params(resDir.asFile.get())
+        return resDir.asFile.get()
     }
 
-    private fun processListings(changes: InputChanges): List<ListingUploader.Params> {
-        val changedLocales = changes.getFileChanges(listingFiles).asSequence()
-                .filter { it.fileType == FileType.FILE }
-                .map { it.file.parentFile }
-                .distinct()
-                // We can't filter out FileType#REMOVED b/c otherwise we won't publish the changes
-                .filter { it.exists() }
-                .toList()
+    private fun processListings(
+            changes: InputChanges
+    ) = changes.getFileChanges(listingFiles).asSequence()
+            .filter { it.fileType == FileType.FILE }
+            .map { it.file.parentFile }
+            .distinct()
+            // We can't filter out FileType#REMOVED b/c otherwise we won't publish the changes
+            .filter { it.exists() }
+            .toList()
 
-        return changedLocales.map { listingDir -> ListingUploader.Params(listingDir) }
-    }
+    private fun processMedia(
+            changes: InputChanges
+    ) = changes.getFileChanges(mediaFiles).asSequence()
+            .filter { it.fileType == FileType.FILE }
+            .map { it.file.parentFile }
+            .map { f -> f to ImageType.values().find { f.name == it.dirName } }
+            .filter { it.second != null }
+            .filter { it.first.exists() }
+            .map { it.first to it.second!! }
+            .associate { it }
+            .map { Publisher.Media(it.key, it.value) }
 
-    private fun processMedia(changes: InputChanges): List<MediaUploader.Params> {
-        val changedMediaTypes = changes.getFileChanges(mediaFiles).asSequence()
-                .filter { it.fileType == FileType.FILE }
-                .map { it.file.parentFile }
-                .map { f -> f to ImageType.values().find { f.name == it.dirName } }
-                .filter { it.second != null }
-                .filter { it.first.exists() }
-                .map { it.first to it.second!! }
-                .associate { it }
-
-        return changedMediaTypes.map { (imageDir, type) -> MediaUploader.Params(imageDir, type) }
-    }
-
-    private class Publisher @Inject constructor(
-            private val executor: WorkerExecutor,
-
-            private val p: Params,
-            private val data: EditPublishingParams
-    ) : EditWorkerBase(data) {
-        override fun run() {
-            if (p.details != null) {
-                executor.submit(DetailsUploader::class) { params(p.details, data) }
+    internal abstract class Publisher @Inject constructor(
+            private val executor: WorkerExecutor
+    ) : EditWorkerBase<Publisher.Params>() {
+        override fun execute() {
+            if (parameters.details.isPresent) {
+                executor.noIsolation().submit(DetailsUploader::class) {
+                    parameters.copy(this)
+                    dir.set(parameters.details.get())
+                }
             }
-            for (listing in p.listings) {
-                executor.submit(ListingUploader::class) { params(listing, data) }
+            for (listing in parameters.listings.get()) {
+                executor.noIsolation().submit(ListingUploader::class) {
+                    parameters.copy(this)
+                    listingDir.set(listing)
+                }
             }
-            for (medium in p.media) {
-                executor.submit(MediaUploader::class) { params(medium, data) }
+            for (medium in parameters.media.get()) {
+                executor.noIsolation().submit(MediaUploader::class) {
+                    parameters.copy(this)
+
+                    imageDir.set(medium.imageDir)
+                    imageType.set(medium.type)
+                }
             }
 
             executor.await()
             commit()
         }
 
-        data class Params(
-                val details: DetailsUploader.Params?,
-                val listings: List<ListingUploader.Params>,
-                val media: List<MediaUploader.Params>
-        ) : Serializable
+        interface Params : EditPublishingParams {
+            val details: Property<File?>
+            val listings: Property<List<File>>
+            val media: Property<List<Media>>
+        }
+
+        data class Media(val imageDir: File, val type: ImageType) : Serializable
     }
 
-    private class DetailsUploader @Inject constructor(
-            private val p: Params,
-            data: EditPublishingParams
-    ) : EditWorkerBase(data) {
-        override fun run() {
+    internal abstract class DetailsUploader : EditWorkerBase<DetailsUploader.Params>() {
+        override fun execute() {
             println("Uploading app details")
             val details = AppDetails().apply {
-                fun AppDetail.read() = File(p.dir, fileName).orNull()?.readProcessed()
+                fun AppDetail.read() =
+                        File(parameters.dir.get(), fileName).orNull()?.readProcessed()
 
                 defaultLanguage = AppDetail.DEFAULT_LANGUAGE.read()
                 contactEmail = AppDetail.CONTACT_EMAIL.read()
@@ -178,15 +187,14 @@ abstract class PublishListing @Inject constructor(
             edits.details().update(appId, editId, details).execute()
         }
 
-        data class Params(val dir: File) : Serializable
+        interface Params : EditPublishingParams {
+            val dir: Property<File>
+        }
     }
 
-    private class ListingUploader @Inject constructor(
-            private val p: Params,
-            data: EditPublishingParams
-    ) : EditWorkerBase(data) {
-        override fun run() {
-            val locale = p.listingDir.name
+    internal abstract class ListingUploader : EditWorkerBase<ListingUploader.Params>() {
+        override fun execute() {
+            val locale = parameters.listingDir.get().name
             val listing = Listing().apply {
                 title = ListingDetail.TITLE.read()
                 shortDescription = ListingDetail.SHORT_DESCRIPTION.read()
@@ -199,23 +207,24 @@ abstract class PublishListing @Inject constructor(
             edits.listings().update(appId, editId, locale, listing).execute()
         }
 
-        fun ListingDetail.read() = File(p.listingDir, fileName).orNull()?.readProcessed()
+        private fun ListingDetail.read() =
+                File(parameters.listingDir.get(), fileName).orNull()?.readProcessed()
 
-        data class Params(val listingDir: File) : Serializable
+        interface Params : EditPublishingParams {
+            val listingDir: Property<File>
+        }
     }
 
-    private class MediaUploader @Inject constructor(
-            private val p: Params,
-            data: EditPublishingParams
-    ) : EditWorkerBase(data) {
-        override fun run() {
-            val typeName = p.type.publishedName
-            val files = p.imageDir.listFiles()?.sorted() ?: return
-            check(files.size <= p.type.maxNum) {
-                "You can only upload ${p.type.maxNum} $typeName."
+    internal abstract class MediaUploader : EditWorkerBase<MediaUploader.Params>() {
+        override fun execute() {
+            val typeName = parameters.imageType.get().publishedName
+            val files = parameters.imageDir.get().listFiles()?.sorted() ?: return
+            check(files.size <= parameters.imageType.get().maxNum) {
+                "You can only upload ${parameters.imageType.get().maxNum} $typeName."
             }
 
-            val locale = p.imageDir/*icon*/.parentFile/*graphics*/.parentFile/*en-US*/.name
+            val locale =
+                    parameters.imageDir.get()/*icon*/.parentFile/*graphics*/.parentFile/*en-US*/.name
             val remoteHashes = edits.images().list(appId, editId, locale, typeName).execute()
                     .images.orEmpty()
                     .map { it.sha256 }
@@ -238,7 +247,10 @@ abstract class PublishListing @Inject constructor(
             }
         }
 
-        data class Params(val imageDir: File, val type: ImageType) : Serializable
+        interface Params : EditPublishingParams {
+            val imageDir: Property<File>
+            val imageType: Property<ImageType>
+        }
 
         private companion object {
             const val MIME_TYPE_IMAGE = "image/*"

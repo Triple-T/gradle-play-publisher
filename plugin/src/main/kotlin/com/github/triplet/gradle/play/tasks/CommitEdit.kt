@@ -4,12 +4,14 @@ import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.marked
 import com.github.triplet.gradle.play.tasks.internal.EditTaskBase
 import com.github.triplet.gradle.play.tasks.internal.buildPublisher
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
 import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.workers.WorkAction
+import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkerExecutor
 import java.io.File
-import java.io.Serializable
 import javax.inject.Inject
 
 abstract class CommitEdit @Inject constructor(
@@ -25,19 +27,21 @@ abstract class CommitEdit @Inject constructor(
             return
         }
 
-        project.serviceOf<WorkerExecutor>().submit(Committer::class) {
-            params(Committer.Params(extension.serializableConfig, file))
+        project.serviceOf<WorkerExecutor>().noIsolation().submit(Committer::class) {
+            config.set(extension.serializableConfig)
+            editIdFile.set(file)
         }
     }
 
-    private class Committer @Inject constructor(private val p: Params) : Runnable {
-        override fun run() {
-            val file = p.editIdFile
+    internal abstract class Committer : WorkAction<Committer.Params> {
+        override fun execute() {
+            val file = parameters.editIdFile.get()
             if (file.marked("commit").exists()) {
                 println("Committing changes")
                 val appId = file.nameWithoutExtension
                 try {
-                    p.config.buildPublisher().edits().commit(appId, file.readText()).execute()
+                    parameters.config.get().buildPublisher()
+                            .edits().commit(appId, file.readText()).execute()
                 } finally {
                     file.reset()
                 }
@@ -48,9 +52,9 @@ abstract class CommitEdit @Inject constructor(
             }
         }
 
-        data class Params(
-                val config: PlayPublisherExtension.Config,
-                val editIdFile: File
-        ) : Serializable
+        interface Params : WorkParameters {
+            val config: Property<PlayPublisherExtension.Config>
+            val editIdFile: Property<File>
+        }
     }
 }

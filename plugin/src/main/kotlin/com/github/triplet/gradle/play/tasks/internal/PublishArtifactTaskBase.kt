@@ -44,7 +44,7 @@ abstract class PublishArtifactTaskBase(
             val customDir = extension.config.artifactDir
 
             return if (customDir == null) {
-                variant.mappingFile?.orNull()
+                variant.mappingFileProvider.get().singleOrNull()
             } else {
                 customDir.listFiles().orEmpty().singleOrNull { it.name == "mapping.txt" }
             }

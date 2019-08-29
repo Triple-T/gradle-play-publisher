@@ -10,6 +10,7 @@ import com.github.triplet.gradle.play.tasks.internal.PlayWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.http.FileContent
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
@@ -19,7 +20,6 @@ import org.gradle.kotlin.dsl.submit
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.workers.WorkerExecutor
 import java.io.File
-import java.io.Serializable
 import javax.inject.Inject
 
 abstract class PublishInternalSharingApk @Inject constructor(
@@ -53,27 +53,31 @@ abstract class PublishInternalSharingApk @Inject constructor(
 
     @TaskAction
     fun publishApk() {
-        val apkFile = apk?.orNull() ?: return
-        project.serviceOf<WorkerExecutor>().submit(ApkUploader::class) {
-            paramsForBase(this, ApkUploader.Params(apkFile, outputDir))
+        val apk = apk?.orNull() ?: return
+        project.serviceOf<WorkerExecutor>().noIsolation().submit(ApkUploader::class) {
+            paramsForBase(this)
+
+            apkFile.set(apk)
+            outputDir.set(this@PublishInternalSharingApk.outputDir)
         }
     }
 
-    private class ApkUploader @Inject constructor(
-            private val p: Params,
-            data: PlayPublishingParams
-    ) : PlayWorkerBase(data) {
-        override fun run() {
+    internal abstract class ApkUploader : PlayWorkerBase<ApkUploader.Params>() {
+        override fun execute() {
             val apk = publisher.internalappsharingartifacts()
-                    .uploadapk(appId, FileContent(MIME_TYPE_APK, p.apkFile))
-                    .trackUploadProgress("APK", p.apkFile)
+                    .uploadapk(appId, FileContent(MIME_TYPE_APK, parameters.apkFile.get()))
+                    .trackUploadProgress("APK", parameters.apkFile.get())
                     .execute()
 
-            File(p.outputDir, "${System.currentTimeMillis()}.json").writeText(apk.toPrettyString())
+            File(parameters.outputDir.get(), "${System.currentTimeMillis()}.json")
+                    .writeText(apk.toPrettyString())
             println("Upload successful: ${apk.downloadUrl}")
         }
 
-        data class Params(val apkFile: File, val outputDir: File) : Serializable
+        interface Params : PlayPublishingParams {
+            val apkFile: Property<File>
+            val outputDir: Property<File>
+        }
 
         private companion object {
             const val MIME_TYPE_APK = "application/vnd.android.package-archive"

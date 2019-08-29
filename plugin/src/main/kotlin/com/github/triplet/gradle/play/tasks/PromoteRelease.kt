@@ -12,7 +12,6 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.workers.WorkerExecutor
-import java.io.Serializable
 import javax.inject.Inject
 
 abstract class PromoteRelease @Inject constructor(
@@ -27,15 +26,13 @@ abstract class PromoteRelease @Inject constructor(
 
     @TaskAction
     fun promote() {
-        project.serviceOf<WorkerExecutor>().submit(Promoter::class) {
-            paramsForBase(this, Promoter.Params())
+        project.serviceOf<WorkerExecutor>().noIsolation().submit(Promoter::class) {
+            paramsForBase(this)
         }
     }
 
-    private class Promoter @Inject constructor(
-            @Suppress("UNUSED_PARAMETER") p: Params,
-            private val data: ArtifactPublishingParams
-    ) : ArtifactWorkerBase(data) {
+    internal abstract class Promoter :
+            ArtifactWorkerBase<ArtifactWorkerBase.ArtifactPublishingParams>() {
         override fun upload() {
             val tracks = edits.tracks().list(appId, editId).execute()
                     .tracks.orEmpty()
@@ -65,7 +62,7 @@ abstract class PromoteRelease @Inject constructor(
                 it.applyChanges(
                         updateStatus = config.releaseStatus != null,
                         updateFraction = config.userFraction != null,
-                        updateConsoleName = data.transientConsoleName != null
+                        updateConsoleName = parameters.transientConsoleName.isPresent
                 )
             }
 
@@ -83,7 +80,5 @@ abstract class PromoteRelease @Inject constructor(
                             "from track '${track.track}' to track '$promoteTrackName'")
             edits.tracks().update(appId, editId, promoteTrackName, track).execute()
         }
-
-        class Params : Serializable
     }
 }
