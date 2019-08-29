@@ -14,7 +14,8 @@ import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 
 internal interface ExtensionOptionsBase {
-    @get:Nested val extension: PlayPublisherExtension
+    @get:Nested
+    val extension: PlayPublisherExtension
 }
 
 internal interface ArtifactExtensionOptions : ExtensionOptionsBase {
