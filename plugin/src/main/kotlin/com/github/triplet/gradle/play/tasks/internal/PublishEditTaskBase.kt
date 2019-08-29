@@ -10,6 +10,8 @@ abstract class PublishEditTaskBase(
         extension: PlayPublisherExtension,
         variant: ApplicationVariant
 ) : PublishTaskBase(extension, variant) {
-    @get:LocalState internal abstract val editIdFile: RegularFileProperty
-    @get:Internal internal val editId by lazy { editIdFile.asFile.get().readText() }
+    @get:LocalState
+    internal abstract val editIdFile: RegularFileProperty
+    @get:Internal
+    internal val editId by lazy { editIdFile.asFile.get().readText() }
 }

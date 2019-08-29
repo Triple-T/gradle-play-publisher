@@ -19,7 +19,8 @@ abstract class PublishArtifactTaskBase(
         variant: ApplicationVariant,
         optionsHolder: TransientTrackOptions.Holder
 ) : PublishEditTaskBase(extension, variant), TransientTrackOptions by optionsHolder {
-    @get:Internal internal abstract val resDir: DirectoryProperty
+    @get:Internal
+    internal abstract val resDir: DirectoryProperty
 
     @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)

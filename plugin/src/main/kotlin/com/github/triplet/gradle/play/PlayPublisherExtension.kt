@@ -26,8 +26,11 @@ open class PlayPublisherExtension @JvmOverloads constructor(
 ) {
     private val _config = Config()
 
-    @get:Internal internal val config get() = _config.copy(retain = _config.retain.copy())
-    @get:Internal internal val serializableConfig
+    @get:Internal
+    internal val config
+        get() = _config.copy(retain = _config.retain.copy())
+    @get:Internal
+    internal val serializableConfig
         get() = _config.copy(outputProcessor = null, retain = _config.retain.copy())
 
     /**
