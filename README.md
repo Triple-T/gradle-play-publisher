@@ -279,11 +279,11 @@ There is also a `--release-name` CLI option for quick access. For example,
 
 #### Uploading a pre-existing artifact
 
-By default GPP will rebuild your project before every release. In advanced use cases, this might not
-be the desired behavior. For example, if you need to inject translations into your APK or App Bundle
-after building it but before publishing it. Or perhaps you simply already have an artifact you wish
-to publish. GPP supports this class of use cases by letting you specify a directory in which
-publishable artifacts may be found:
+By default, GPP will build your artifact on-the-fly as needed, per Gradle invocation. In advanced
+use cases, this might not be the desired behavior. For example, if you need to inject translations
+into your APK or App Bundle after building it but before publishing it. Or perhaps you simply
+already have an artifact you wish to publish. GPP supports this class of use cases by letting you
+specify a directory in which publishable artifacts may be found:
 
 ```kt
 play {
