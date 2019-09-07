@@ -5,7 +5,9 @@ import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.tasks.internal.PlayWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
+import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.json.jackson2.JacksonFactory
+import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.InAppProduct
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.FileCollection
@@ -69,7 +71,24 @@ abstract class PublishProducts @Inject constructor(
                     .parse(InAppProduct::class.java)
 
             println("Uploading ${product.sku}")
-            publisher.inappproducts().update(appId, product.sku, product).execute()
+            try {
+                publisher.inappproducts().update(appId, product.sku, product).withAutoPrices()
+                        .execute()
+            } catch (e: GoogleJsonResponseException) {
+                if (e.statusCode == 404) {
+                    publisher.inappproducts().insert(appId, product).withAutoPrices().execute()
+                } else {
+                    throw e
+                }
+            }
+        }
+
+        private fun AndroidPublisher.Inappproducts.Update.withAutoPrices() = apply {
+            autoConvertMissingPrices = true
+        }
+
+        private fun AndroidPublisher.Inappproducts.Insert.withAutoPrices() = apply {
+            autoConvertMissingPrices = true
         }
 
         interface Params : PlayPublishingParams {

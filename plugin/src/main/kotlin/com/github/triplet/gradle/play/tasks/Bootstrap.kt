@@ -18,6 +18,7 @@ import com.github.triplet.gradle.play.tasks.internal.PublishEditTaskBase
 import com.github.triplet.gradle.play.tasks.internal.copy
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.json.jackson2.JacksonFactory
+import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.Listing
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
@@ -228,10 +229,20 @@ abstract class Bootstrap @Inject constructor(
     internal abstract class ProductsDownloader : EditWorkerBase<ProductsDownloader.Params>() {
         override fun execute() {
             println("Downloading in-app products")
-            publisher.inappproducts().list(appId).execute().inappproduct?.forEach {
-                parameters.dir.get().file("${it.sku}.json")
-                        .write(JacksonFactory.getDefaultInstance().toPrettyString(it))
-            }
+
+            var token: String? = null
+            do {
+                val response = publisher.inappproducts().list(appId).withToken(token).execute()
+                response.inappproduct?.forEach {
+                    parameters.dir.get().file("${it.sku}.json")
+                            .write(JacksonFactory.getDefaultInstance().toPrettyString(it))
+                }
+                token = response.tokenPagination?.nextPageToken
+            } while (token != null)
+        }
+
+        private fun AndroidPublisher.Inappproducts.List.withToken(token: String?) = apply {
+            this.token = token
         }
 
         interface Params : EditPublishingParams {
