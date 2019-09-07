@@ -61,14 +61,14 @@ internal fun PublishTaskBase.paramsForBase(params: PlayWorkerBase.PlayPublishing
 }
 
 internal fun PlayWorkerBase.PlayPublishingParams.copy(into: PlayWorkerBase.PlayPublishingParams) {
-    into.config.set(config.get())
-    into.appId.set(appId.get())
+    into.config.set(config)
+    into.appId.set(appId)
 }
 
 internal fun EditWorkerBase.EditPublishingParams.copy(into: EditWorkerBase.EditPublishingParams) {
     (this as PlayWorkerBase.PlayPublishingParams).copy(into)
 
-    into.editId.set(editId.get())
+    into.editId.set(editId)
     into.commitMarker.set(commitMarker)
     into.skippedMarker.set(skippedMarker)
 }
@@ -78,12 +78,12 @@ internal fun ArtifactWorkerBase.ArtifactPublishingParams.copy(
 ) {
     (this as EditWorkerBase.EditPublishingParams).copy(into)
 
-    into.variantName.set(variantName.get())
-    into.versionCode.set(versionCode.get())
+    into.variantName.set(variantName)
+    into.versionCode.set(versionCode)
 
     into.releaseNotesDir.set(releaseNotesDir)
     into.consoleNamesDir.set(consoleNamesDir)
-    into.transientConsoleName.set(transientConsoleName.orNull)
+    into.transientConsoleName.set(transientConsoleName)
     into.mappingFile.set(mappingFile)
 }
 
