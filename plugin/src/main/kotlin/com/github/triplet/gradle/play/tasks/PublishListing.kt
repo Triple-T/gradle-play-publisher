@@ -19,12 +19,16 @@ import com.google.api.services.androidpublisher.model.AppDetails
 import com.google.api.services.androidpublisher.model.Listing
 import com.google.common.hash.Hashing
 import com.google.common.io.Files
+import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileType
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SkipWhenEmpty
@@ -45,43 +49,47 @@ abstract class PublishListing @Inject constructor(
     @get:Internal
     internal abstract val resDir: DirectoryProperty
 
-    @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:Incremental
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
     protected val detailFiles: FileCollection by lazy {
-        project.fileTree(resDir).builtBy(resDir).apply {
+        resDir.asFileTree.matching {
             // We can't simply use `project.files` because Gradle would expect those to exist for
             // stuff like `@SkipWhenEmpty` to work.
             for (detail in AppDetail.values()) include("/${detail.fileName}")
         }
     }
-    @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:Incremental
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
     protected val listingFiles: FileCollection by lazy {
-        project.fileTree(resDir).builtBy(resDir).apply {
+        resDir.asFileTree.matching {
             for (detail in ListingDetail.values()) include("/$LISTINGS_PATH/*/${detail.fileName}")
         }
     }
-    @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:Incremental
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
     protected val mediaFiles: FileCollection by lazy {
-        project.fileTree(resDir).builtBy(resDir).apply {
+        resDir.asFileTree.matching {
             for (image in ImageType.values()) {
                 include("/$LISTINGS_PATH/*/$GRAPHICS_PATH/${image.dirName}/*")
             }
         }
     }
 
-    @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
+    // Used by Gradle to skip the task if all inputs are empty
+    @Suppress("MemberVisibilityCanBePrivate", "unused")
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:SkipWhenEmpty
     @get:InputFiles
     protected val targetFiles: FileCollection by lazy { detailFiles + listingFiles + mediaFiles }
+
+    // This directory isn't used, but it's needed for up-to-date checks to work
+    @Suppress("MemberVisibilityCanBePrivate", "unused")
+    @get:Optional
+    @get:OutputDirectory
+    protected val outputDir = null
 
     @TaskAction
     fun publishListing(changes: InputChanges) {
@@ -100,15 +108,15 @@ abstract class PublishListing @Inject constructor(
         }
     }
 
-    private fun processDetails(changes: InputChanges): File? {
+    private fun processDetails(changes: InputChanges): Directory? {
         val changedDetails =
                 changes.getFileChanges(detailFiles).filter { it.fileType == FileType.FILE }
         if (changedDetails.isEmpty()) return null
-        if (AppDetail.values().map { resDir.file(it.fileName) }.none { it.get().asFile.exists() }) {
+        if (AppDetail.values().map { resDir.get().file(it.fileName) }.none { it.asFile.exists() }) {
             return null
         }
 
-        return resDir.asFile.get()
+        return resDir.get()
     }
 
     private fun processListings(
@@ -163,9 +171,9 @@ abstract class PublishListing @Inject constructor(
         }
 
         interface Params : EditPublishingParams {
-            val details: Property<File?>
-            val listings: Property<List<File>>
-            val media: Property<List<Media>>
+            val details: DirectoryProperty // Optional
+            val listings: ListProperty<File>
+            val media: ListProperty<Media>
         }
 
         data class Media(val imageDir: File, val type: ImageType) : Serializable
@@ -173,28 +181,28 @@ abstract class PublishListing @Inject constructor(
 
     internal abstract class DetailsUploader : EditWorkerBase<DetailsUploader.Params>() {
         override fun execute() {
-            println("Uploading app details")
             val details = AppDetails().apply {
-                fun AppDetail.read() =
-                        File(parameters.dir.get(), fileName).orNull()?.readProcessed()
-
                 defaultLanguage = AppDetail.DEFAULT_LANGUAGE.read()
                 contactEmail = AppDetail.CONTACT_EMAIL.read()
                 contactPhone = AppDetail.CONTACT_PHONE.read()
                 contactWebsite = AppDetail.CONTACT_WEBSITE.read()
             }
 
+            println("Uploading app details")
             edits.details().update(appId, editId, details).execute()
         }
 
+        private fun AppDetail.read() =
+                parameters.dir.get().file(fileName).asFile.orNull()?.readProcessed()
+
         interface Params : EditPublishingParams {
-            val dir: Property<File>
+            val dir: DirectoryProperty
         }
     }
 
     internal abstract class ListingUploader : EditWorkerBase<ListingUploader.Params>() {
         override fun execute() {
-            val locale = parameters.listingDir.get().name
+            val locale = parameters.listingDir.get().asFile.name
             val listing = Listing().apply {
                 title = ListingDetail.TITLE.read()
                 shortDescription = ListingDetail.SHORT_DESCRIPTION.read()
@@ -208,23 +216,25 @@ abstract class PublishListing @Inject constructor(
         }
 
         private fun ListingDetail.read() =
-                File(parameters.listingDir.get(), fileName).orNull()?.readProcessed()
+                parameters.listingDir.get().file(fileName).asFile.orNull()?.readProcessed()
 
         interface Params : EditPublishingParams {
-            val listingDir: Property<File>
+            val listingDir: DirectoryProperty
         }
     }
 
     internal abstract class MediaUploader : EditWorkerBase<MediaUploader.Params>() {
         override fun execute() {
             val typeName = parameters.imageType.get().publishedName
-            val files = parameters.imageDir.get().listFiles()?.sorted() ?: return
+            val files = parameters.imageDir.asFileTree.sorted()
             check(files.size <= parameters.imageType.get().maxNum) {
                 "You can only upload ${parameters.imageType.get().maxNum} $typeName."
             }
 
-            val locale =
-                    parameters.imageDir.get()/*icon*/.parentFile/*graphics*/.parentFile/*en-US*/.name
+            val locale = parameters.imageDir.get().asFile // icon
+                    .parentFile // graphics
+                    .parentFile // en-US
+                    .name
             val remoteHashes = edits.images().list(appId, editId, locale, typeName).execute()
                     .images.orEmpty()
                     .map { it.sha256 }
@@ -248,7 +258,7 @@ abstract class PublishListing @Inject constructor(
         }
 
         interface Params : EditPublishingParams {
-            val imageDir: Property<File>
+            val imageDir: DirectoryProperty
             val imageType: Property<ImageType>
         }
 

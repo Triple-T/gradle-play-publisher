@@ -1,6 +1,5 @@
 package com.github.triplet.gradle.play.tasks
 
-import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.internal.AppDetail
 import com.github.triplet.gradle.play.internal.ImageType
 import com.github.triplet.gradle.play.internal.LISTINGS_PATH
@@ -17,10 +16,13 @@ import com.github.triplet.gradle.play.internal.nullOrFull
 import com.github.triplet.gradle.play.internal.orNull
 import org.gradle.api.Action
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.provider.Property
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -34,32 +36,27 @@ import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkerExecutor
 import java.io.File
-import javax.inject.Inject
 
 @CacheableTask
-abstract class GenerateResources @Inject constructor(
-        private val variant: ApplicationVariant
-) : DefaultTask() {
-    @get:OutputDirectory
-    internal abstract val resDir: DirectoryProperty
-
-    private val resSrcDirNames by lazy { variant.sourceSets.map { "src/${it.name}/$PLAY_PATH" } }
-    private val resSrcDirs by lazy { resSrcDirNames.map { project.file(it) } }
+abstract class GenerateResources : DefaultTask() {
+    @get:Internal
+    internal abstract val resSrcDirs: ListProperty<Directory>
     @get:SkipWhenEmpty
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
-    protected val resSrcTree by lazy {
-        project.files(resSrcDirNames.map {
-            project.fileTree(it).apply { exclude("**/.*") }
-        })
-    }
+    internal abstract val resSrcTree: ConfigurableFileCollection
+
+    @get:OutputDirectory
+    internal abstract val resDir: DirectoryProperty
 
     @TaskAction
     fun generate(changes: InputChanges) {
         val files = changes.getFileChanges(resSrcTree).filter { change ->
             if (change.changeType == ChangeType.REMOVED) {
                 val file = change.file
-                val target = resSrcDirs.singleOrNull { file.startsWith(it) }
+                val target = resSrcDirs.get()
+                        .map { it.asFile }
+                        .singleOrNull { file.startsWith(it) }
                         ?.let { file.toRelativeString(it).nullOrFull() }
                 if (target != null) project.delete(resDir.file(target))
 
@@ -70,26 +67,26 @@ abstract class GenerateResources @Inject constructor(
         }.map { it.file }
 
         project.serviceOf<WorkerExecutor>().noIsolation().submit(Processor::class) {
-            resDir.set(this@GenerateResources.resDir.asFile.get())
-            resSrcDirs.set(this@GenerateResources.resSrcDirs)
-            resFiles.set(files)
+            outputDir.set(resDir)
+            inputDirs.set(resSrcDirs)
+            resources.set(files)
         }
     }
 
     internal abstract class Processor : WorkAction<Processor.Params> {
         override fun execute() {
-            val defaultLocale = parameters.resSrcDirs.get().mapNotNull {
-                File(it, AppDetail.DEFAULT_LANGUAGE.fileName).orNull()
+            val defaultLocale = parameters.inputDirs.get().mapNotNull {
+                it.file(AppDetail.DEFAULT_LANGUAGE.fileName).asFile.orNull()
                         ?.readText()?.normalized().nullOrFull()
             }.lastOrNull() // Pick the most specialized option available. E.g. `paidProdRelease`
 
-            val files = parameters.resFiles.get()
+            val files = parameters.resources.get()
                     .filterNot { it.isDirectory }
                     .sortedBy { file ->
-                        val dir = parameters.resSrcDirs.get().singleOrNull {
-                            file.startsWith(it)
+                        val dir = parameters.inputDirs.get().singleOrNull {
+                            file.startsWith(it.asFile)
                         }
-                        parameters.resSrcDirs.get().indexOf(dir)
+                        parameters.inputDirs.get().indexOf(dir)
                     }
                     .ifEmpty { return }
 
@@ -117,12 +114,11 @@ abstract class GenerateResources @Inject constructor(
                         .filterNot(File::exists)
                         .filterNot(::hasGraphicCategory)
                         .forEach {
-                            writeQueue += Action {
-                                default.copy(File(
-                                        parameters.resDir.get(),
-                                        it.parentFile.toRelativeString(parameters.resDir.get())
-                                ))
-                            }
+                            val destName = it.parentFile.toRelativeString(
+                                    parameters.outputDir.get().asFile)
+                            val dest = File(parameters.outputDir.get().asFile, destName)
+
+                            writeQueue += Action { default.copy(dest) }
                         }
             }
             writeQueue.forEach { it.execute(Unit) }
@@ -187,9 +183,11 @@ abstract class GenerateResources @Inject constructor(
 
         private fun File.copy(dest: File): File = copyTo(File(dest, name), true)
 
-        private fun File.findDest() = File(parameters.resDir.get(), toRelativeString(findOwner()))
+        private fun File.findDest() =
+                File(parameters.outputDir.get().asFile, toRelativeString(findOwner()))
 
-        private fun File.findOwner() = parameters.resSrcDirs.get().single { startsWith(it) }
+        private fun File.findOwner() =
+                parameters.inputDirs.get().single { startsWith(it.asFile) }.asFile
 
         private fun hasGraphicCategory(file: File): Boolean {
             val graphic = ImageType.values().find { file.isDirectChildOf(it.dirName) }
@@ -197,9 +195,9 @@ abstract class GenerateResources @Inject constructor(
         }
 
         interface Params : WorkParameters {
-            val resDir: Property<File>
-            val resSrcDirs: Property<List<File>>
-            val resFiles: Property<List<File>>
+            val outputDir: DirectoryProperty
+            val inputDirs: ListProperty<Directory>
+            val resources: ListProperty<File>
         }
     }
 }

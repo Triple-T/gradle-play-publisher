@@ -10,6 +10,7 @@ import com.github.triplet.gradle.play.tasks.internal.EditTaskBase
 import com.github.triplet.gradle.play.tasks.internal.buildPublisher
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.services.androidpublisher.AndroidPublisher
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.logging.Logging
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.TaskAction
@@ -18,7 +19,6 @@ import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkerExecutor
-import java.io.File
 import javax.inject.Inject
 
 abstract class GenerateEdit @Inject constructor(
@@ -32,7 +32,7 @@ abstract class GenerateEdit @Inject constructor(
 
     @TaskAction
     fun generate() {
-        val file = editIdFile.asFile.get()
+        val file = editIdFile.get().asFile
         project.serviceOf<WorkerExecutor>().noIsolation().submit(Generator::class) {
             config.set(extension.serializableConfig)
             editIdFile.set(file)
@@ -40,7 +40,7 @@ abstract class GenerateEdit @Inject constructor(
     }
 
     internal abstract class Generator : WorkAction<Generator.Params> {
-        private val file = parameters.editIdFile.get()
+        private val file = parameters.editIdFile.get().asFile
         private val appId = file.nameWithoutExtension
 
         override fun execute() {
@@ -82,7 +82,7 @@ abstract class GenerateEdit @Inject constructor(
 
         interface Params : WorkParameters {
             val config: Property<PlayPublisherExtension.Config>
-            val editIdFile: Property<File>
+            val editIdFile: RegularFileProperty
         }
     }
 }

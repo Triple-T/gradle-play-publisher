@@ -10,7 +10,8 @@ import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.findBundleFile
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.http.FileContent
-import org.gradle.api.provider.Property
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
@@ -26,16 +27,13 @@ abstract class PublishInternalSharingBundle @Inject constructor(
         extension: PlayPublisherExtension,
         variant: ApplicationVariant
 ) : PublishTaskBase(extension, variant), ArtifactExtensionOptions {
-    @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFile
-    val bundle: File?
+    protected val bundle: File?
         get() = findBundleFile()
-    @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
+
     @get:OutputDirectory
-    protected val outputDir by lazy {
-        File(project.buildDir, "outputs/internal-sharing/bundle/${variant.name}")
-    }
+    internal abstract val outputDirectory: DirectoryProperty
 
     @TaskAction
     fun publishBundle() {
@@ -44,25 +42,26 @@ abstract class PublishInternalSharingBundle @Inject constructor(
             paramsForBase(this)
 
             bundleFile.set(bundle)
-            outputDir.set(this@PublishInternalSharingBundle.outputDir)
+            outputDir.set(outputDirectory)
         }
     }
 
     internal abstract class BundleUploader : PlayWorkerBase<BundleUploader.Params>() {
         override fun execute() {
+            val bundleFile = parameters.bundleFile.get().asFile
             val bundle = publisher.internalappsharingartifacts()
-                    .uploadbundle(appId, FileContent(MIME_TYPE_STREAM, parameters.bundleFile.get()))
-                    .trackUploadProgress("App Bundle", parameters.bundleFile.get())
+                    .uploadbundle(appId, FileContent(MIME_TYPE_STREAM, bundleFile))
+                    .trackUploadProgress("App Bundle", bundleFile)
                     .execute()
 
-            File(parameters.outputDir.get(), "${System.currentTimeMillis()}.json")
+            parameters.outputDir.get().file("${System.currentTimeMillis()}.json").asFile
                     .writeText(bundle.toPrettyString())
             println("Upload successful: ${bundle.downloadUrl}")
         }
 
         interface Params : PlayPublishingParams {
-            val bundleFile: Property<File>
-            val outputDir: Property<File>
+            val bundleFile: RegularFileProperty
+            val outputDir: DirectoryProperty
         }
     }
 }

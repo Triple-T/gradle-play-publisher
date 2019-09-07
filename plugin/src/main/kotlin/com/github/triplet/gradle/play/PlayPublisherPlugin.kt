@@ -5,7 +5,9 @@ import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.internal.api.InstallableVariantImpl
 import com.github.triplet.gradle.play.internal.PLAY_CONFIGS_PATH
 import com.github.triplet.gradle.play.internal.PLAY_PATH
+import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
+import com.github.triplet.gradle.play.internal.flavorNameOrDefault
 import com.github.triplet.gradle.play.internal.getCommitEditTask
 import com.github.triplet.gradle.play.internal.getGenEditTask
 import com.github.triplet.gradle.play.internal.mergeExtensions
@@ -168,6 +170,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                             "https://github.com/Triple-T/gradle-play-publisher#quickstart",
                     arrayOf(extension, this, bootstrapOptionsHolder)
             ) {
+                srcDir.set(project.file("src/${variant.flavorNameOrDefault}/$PLAY_PATH"))
                 editIdFile.set(editFile)
 
                 dependsOn(genEditTask)
@@ -180,10 +183,16 @@ class PlayPublisherPlugin : Plugin<Project> {
             }
 
             val resourceDir = project.newTask<GenerateResources>(
-                    "generate${variantName}PlayResources",
-                    constructorArgs = arrayOf(this)
+                    "generate${variantName}PlayResources"
             ) {
+                val dirs = sourceSets.map {
+                    project.layout.projectDirectory.dir("src/${it.name}/$PLAY_PATH")
+                }
+                resSrcDirs.set(dirs)
+                resSrcTree.setFrom(dirs.map { project.fileTree(it).apply { exclude("**/.*") } })
+
                 resDir.set(File(project.buildDir, "$playPath/res"))
+
                 mustRunAfter(bootstrapTask)
             }.flatMap {
                 it.resDir
@@ -213,7 +222,11 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "Uploads all Play Store in-app products for variant '$name'. See " +
                             "https://github.com/Triple-T/gradle-play-publisher#publishing-in-app-products",
                     arrayOf(extension, this)
-            ) { resDir.set(resourceDir) }
+            ) {
+                productsDir.setFrom(resourceDir.map {
+                    it.dir(PRODUCTS_PATH).asFileTree.matching { include("*.json") }
+                })
+            }
             publishProductsAllTask { dependsOn(publishProductsTask) }
 
             val processArtifactMetadata = project.newTask<ProcessArtifactMetadata>(
@@ -265,7 +278,12 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "Uploads Internal Sharing APK for variant '$name'. See " +
                             "https://github.com/Triple-T/gradle-play-publisher#uploading-an-internal-sharing-artifact",
                     arrayOf(extension, this)
-            ) { dependsOn(publishApkTaskDependenciesHack) }
+            ) {
+                outputDirectory.set(project.layout.buildDirectory.dir(
+                        "outputs/internal-sharing/apk/${variant.name}"))
+
+                dependsOn(publishApkTaskDependenciesHack)
+            }
 
             val publishBundleTaskDependenciesHack = project.newTask(
                     "publish${variantName}BundleWrapper"
@@ -304,7 +322,12 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "Uploads Internal Sharing App Bundle for variant '$name'. See " +
                             "https://github.com/Triple-T/gradle-play-publisher#uploading-an-internal-sharing-artifact",
                     arrayOf(extension, this)
-            ) { dependsOn(publishBundleTaskDependenciesHack) }
+            ) {
+                outputDirectory.set(project.layout.buildDirectory.dir(
+                        "outputs/internal-sharing/bundle/${variant.name}"))
+
+                dependsOn(publishBundleTaskDependenciesHack)
+            }
 
             val promoteReleaseTask = project.newTask<PromoteRelease>(
                     "promote${variantName}Artifact",
