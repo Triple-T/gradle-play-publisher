@@ -25,6 +25,8 @@ import com.google.api.services.androidpublisher.model.LocalizedText
 import com.google.api.services.androidpublisher.model.Track
 import com.google.api.services.androidpublisher.model.TrackRelease
 import org.gradle.api.Task
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.provider.Property
@@ -41,8 +43,8 @@ internal fun PublishTaskBase.paramsForBase(params: PlayWorkerBase.PlayPublishing
         this as PublishEditTaskBase
 
         params.editId.set(editId)
-        params.commitMarker.set(editIdFile.asFile.get().marked("commit"))
-        params.skippedMarker.set(editIdFile.asFile.get().marked("skipped"))
+        params.commitMarker.set(editIdFile.get().asFile.marked("commit"))
+        params.skippedMarker.set(editIdFile.get().asFile.marked("skipped"))
     }
 
     if (params is ArtifactWorkerBase.ArtifactPublishingParams) {
@@ -67,8 +69,8 @@ internal fun EditWorkerBase.EditPublishingParams.copy(into: EditWorkerBase.EditP
     (this as PlayWorkerBase.PlayPublishingParams).copy(into)
 
     into.editId.set(editId.get())
-    into.commitMarker.set(commitMarker.get())
-    into.skippedMarker.set(skippedMarker.get())
+    into.commitMarker.set(commitMarker)
+    into.skippedMarker.set(skippedMarker)
 }
 
 internal fun ArtifactWorkerBase.ArtifactPublishingParams.copy(
@@ -79,10 +81,10 @@ internal fun ArtifactWorkerBase.ArtifactPublishingParams.copy(
     into.variantName.set(variantName.get())
     into.versionCode.set(versionCode.get())
 
-    into.releaseNotesDir.set(releaseNotesDir.orNull)
-    into.consoleNamesDir.set(consoleNamesDir.orNull)
+    into.releaseNotesDir.set(releaseNotesDir)
+    into.consoleNamesDir.set(consoleNamesDir)
     into.transientConsoleName.set(transientConsoleName.orNull)
-    into.mappingFile.set(mappingFile.orNull)
+    into.mappingFile.set(mappingFile)
 }
 
 internal abstract class PlayWorkerBase<T : PlayWorkerBase.PlayPublishingParams> : WorkAction<T> {
@@ -123,16 +125,16 @@ internal abstract class EditWorkerBase<T : EditWorkerBase.EditPublishingParams> 
 
     protected fun commit() {
         if (config.commitOrDefault) {
-            parameters.commitMarker.get().safeCreateNewFile()
+            parameters.commitMarker.get().asFile.safeCreateNewFile()
         } else {
-            parameters.skippedMarker.get().safeCreateNewFile()
+            parameters.skippedMarker.get().asFile.safeCreateNewFile()
         }
     }
 
     internal interface EditPublishingParams : PlayPublishingParams {
         val editId: Property<String>
-        val commitMarker: Property<File>
-        val skippedMarker: Property<File>
+        val commitMarker: RegularFileProperty
+        val skippedMarker: RegularFileProperty
     }
 }
 
@@ -148,7 +150,7 @@ internal abstract class ArtifactWorkerBase<T : ArtifactWorkerBase.ArtifactPublis
     abstract fun upload()
 
     protected fun updateTracks(versions: List<Long>) {
-        val track = if (parameters.skippedMarker.get().exists()) {
+        val track = if (parameters.skippedMarker.get().asFile.exists()) {
             createTrackForSkippedCommit(versions)
         } else if (config.releaseStatusOrDefault.isRollout()) {
             createTrackForRollout(versions)
@@ -204,7 +206,7 @@ internal abstract class ArtifactWorkerBase<T : ArtifactWorkerBase.ArtifactPublis
     }
 
     protected fun uploadMappingFile(versionCode: Int) {
-        val file = parameters.mappingFile.orNull
+        val file = parameters.mappingFile.orNull?.asFile
         if (file != null && file.length() > 0) {
             val mapping = FileContent(MIME_TYPE_STREAM, file)
             edits.deobfuscationfiles()
@@ -259,8 +261,8 @@ internal abstract class ArtifactWorkerBase<T : ArtifactWorkerBase.ArtifactPublis
             parameters.transientConsoleName.get()
         } else if (parameters.consoleNamesDir.isPresent) {
             val dir = parameters.consoleNamesDir.get()
-            val file = File(dir, "${config.trackOrDefault}.txt").orNull()
-                    ?: File(dir, RELEASE_NAMES_DEFAULT_NAME).orNull()
+            val file = dir.file("${config.trackOrDefault}.txt").asFile.orNull()
+                    ?: dir.file(RELEASE_NAMES_DEFAULT_NAME).asFile.orNull()
 
             file?.readProcessed()?.lines()?.firstOrNull()
         } else {
@@ -269,7 +271,7 @@ internal abstract class ArtifactWorkerBase<T : ArtifactWorkerBase.ArtifactPublis
     }
 
     private fun TrackRelease.maybeUpdateReleaseNotes() {
-        val locales = parameters.releaseNotesDir.orNull?.listFiles().orEmpty()
+        val locales = parameters.releaseNotesDir.orNull?.asFile?.listFiles().orEmpty()
         val releaseNotes = locales.mapNotNull { locale ->
             val file = File(locale, "${config.trackOrDefault}.txt").orNull() ?: run {
                 File(locale, RELEASE_NOTES_DEFAULT_NAME).orNull() ?: return@mapNotNull null
@@ -307,9 +309,9 @@ internal abstract class ArtifactWorkerBase<T : ArtifactWorkerBase.ArtifactPublis
         val variantName: Property<String>
         val versionCode: Property<Int>
 
-        val releaseNotesDir: Property<File?>
-        val consoleNamesDir: Property<File?>
+        val releaseNotesDir: DirectoryProperty // Optional
+        val consoleNamesDir: DirectoryProperty // Optional
         val transientConsoleName: Property<String?>
-        val mappingFile: Property<File?>
+        val mappingFile: RegularFileProperty // Optional
     }
 }

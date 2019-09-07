@@ -10,7 +10,8 @@ import com.github.triplet.gradle.play.tasks.internal.PlayWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.http.FileContent
-import org.gradle.api.provider.Property
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
@@ -26,7 +27,6 @@ abstract class PublishInternalSharingApk @Inject constructor(
         extension: PlayPublisherExtension,
         variant: ApplicationVariant
 ) : PublishTaskBase(extension, variant), ArtifactExtensionOptions {
-    @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFile
     protected val apk: File?
@@ -45,11 +45,9 @@ abstract class PublishInternalSharingApk @Inject constructor(
                 }
             }
         }
-    @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
+
     @get:OutputDirectory
-    protected val outputDir by lazy {
-        File(project.buildDir, "outputs/internal-sharing/apk/${variant.name}")
-    }
+    internal abstract val outputDirectory: DirectoryProperty
 
     @TaskAction
     fun publishApk() {
@@ -58,25 +56,26 @@ abstract class PublishInternalSharingApk @Inject constructor(
             paramsForBase(this)
 
             apkFile.set(apk)
-            outputDir.set(this@PublishInternalSharingApk.outputDir)
+            outputDir.set(outputDirectory)
         }
     }
 
     internal abstract class ApkUploader : PlayWorkerBase<ApkUploader.Params>() {
         override fun execute() {
+            val apkFile = parameters.apkFile.get().asFile
             val apk = publisher.internalappsharingartifacts()
-                    .uploadapk(appId, FileContent(MIME_TYPE_APK, parameters.apkFile.get()))
-                    .trackUploadProgress("APK", parameters.apkFile.get())
+                    .uploadapk(appId, FileContent(MIME_TYPE_APK, apkFile))
+                    .trackUploadProgress("APK", apkFile)
                     .execute()
 
-            File(parameters.outputDir.get(), "${System.currentTimeMillis()}.json")
+            parameters.outputDir.get().file("${System.currentTimeMillis()}.json").asFile
                     .writeText(apk.toPrettyString())
             println("Upload successful: ${apk.downloadUrl}")
         }
 
         interface Params : PlayPublishingParams {
-            val apkFile: Property<File>
-            val outputDir: Property<File>
+            val apkFile: RegularFileProperty
+            val outputDir: DirectoryProperty
         }
 
         private companion object {

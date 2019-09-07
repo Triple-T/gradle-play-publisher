@@ -4,7 +4,6 @@ import com.android.build.gradle.api.ApkVariantOutput
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.orNull
-import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.tasks.internal.ArtifactWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.PublishArtifactTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PublishableTrackExtensionOptions
@@ -14,8 +13,11 @@ import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.model.ExpansionFile
-import org.gradle.api.provider.Property
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -31,7 +33,6 @@ abstract class PublishApk @Inject constructor(
         variant: ApplicationVariant,
         optionsHolder: TransientTrackOptions.Holder
 ) : PublishArtifactTaskBase(extension, variant, optionsHolder), PublishableTrackExtensionOptions {
-    @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
     protected val inputApks: List<File>?
@@ -48,9 +49,12 @@ abstract class PublishApk @Inject constructor(
                 }
             }.ifEmpty { null }
         }
-    @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
-    @get:OutputDirectory // This directory isn't used, but it's needed for up-to-date checks to work
-    protected val outputDir by lazy { File(project.buildDir, "${variant.playPath}/apks") }
+
+    // This directory isn't used, but it's needed for up-to-date checks to work
+    @Suppress("MemberVisibilityCanBePrivate", "unused")
+    @get:Optional
+    @get:OutputDirectory
+    protected val outputDir = null
 
     @TaskAction
     fun publishApks() {
@@ -79,15 +83,15 @@ abstract class PublishApk @Inject constructor(
             }
             executor.await()
 
-            val versions = parameters.uploadResults.get().listFiles().orEmpty().map {
+            val versions = parameters.uploadResults.asFileTree.map {
                 it.name.toLong()
             }
             updateTracks(versions)
         }
 
         interface Params : ArtifactPublishingParams {
-            val apkFiles: Property<List<File>>
-            val uploadResults: Property<File>
+            val apkFiles: ListProperty<File>
+            val uploadResults: DirectoryProperty
         }
     }
 
@@ -97,13 +101,14 @@ abstract class PublishApk @Inject constructor(
         }
 
         override fun upload() {
+            val apkFile = parameters.apk.get().asFile
             val apk = try {
                 edits.apks()
-                        .upload(appId, editId, FileContent(MIME_TYPE_APK, parameters.apk.get()))
-                        .trackUploadProgress("APK", parameters.apk.get())
+                        .upload(appId, editId, FileContent(MIME_TYPE_APK, apkFile))
+                        .trackUploadProgress("APK", apkFile)
                         .execute()
             } catch (e: GoogleJsonResponseException) {
-                handleUploadFailures(e, parameters.apk.get())
+                handleUploadFailures(e, apkFile)
                 return
             }
 
@@ -111,7 +116,7 @@ abstract class PublishApk @Inject constructor(
             config.retain.patchObb?.attachObb(apk.versionCode, "patch")
 
             uploadMappingFile(apk.versionCode)
-            File(parameters.uploadResults.get(), apk.versionCode.toString()).createNewFile()
+            parameters.uploadResults.get().file(apk.versionCode.toString()).asFile.createNewFile()
         }
 
         private fun Int.attachObb(versionCode: Int, type: String) {
@@ -123,8 +128,8 @@ abstract class PublishApk @Inject constructor(
         }
 
         interface Params : ArtifactPublishingParams {
-            val apk: Property<File>
-            val uploadResults: Property<File>
+            val apk: RegularFileProperty
+            val uploadResults: DirectoryProperty
         }
 
         private companion object {

@@ -7,10 +7,8 @@ import com.github.triplet.gradle.play.internal.GRAPHICS_PATH
 import com.github.triplet.gradle.play.internal.ImageType
 import com.github.triplet.gradle.play.internal.LISTINGS_PATH
 import com.github.triplet.gradle.play.internal.ListingDetail
-import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
-import com.github.triplet.gradle.play.internal.flavorNameOrDefault
 import com.github.triplet.gradle.play.internal.nullOrFull
 import com.github.triplet.gradle.play.internal.safeCreateNewFile
 import com.github.triplet.gradle.play.internal.safeMkdirs
@@ -21,6 +19,10 @@ import com.github.triplet.gradle.play.tasks.internal.copy
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.model.Listing
+import org.gradle.api.file.Directory
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFile
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
@@ -39,11 +41,8 @@ abstract class Bootstrap @Inject constructor(
         variant: ApplicationVariant,
         optionsHolder: BootstrapOptions.Holder
 ) : PublishEditTaskBase(extension, variant), BootstrapOptions by optionsHolder {
-    @Suppress("MemberVisibilityCanBePrivate", "unused") // Used by Gradle
     @get:OutputDirectory
-    protected val srcDir: File by lazy {
-        project.file("src/${variant.flavorNameOrDefault}/$PLAY_PATH")
-    }
+    internal abstract val srcDir: DirectoryProperty
 
     init {
         // Always out-of-date since we don't know what's changed on the network
@@ -71,21 +70,21 @@ abstract class Bootstrap @Inject constructor(
     private fun bootstrapListings(executor: WorkerExecutor) {
         executor.noIsolation().submit(ListingsDownloader::class) {
             paramsForBase(this)
-            dir.set(File(srcDir, LISTINGS_PATH))
+            dir.set(srcDir.dir(LISTINGS_PATH))
         }
     }
 
     private fun bootstrapReleaseNotes(executor: WorkerExecutor) {
         executor.noIsolation().submit(ReleaseNotesDownloader::class) {
             paramsForBase(this)
-            dir.set(File(srcDir, RELEASE_NOTES_PATH))
+            dir.set(srcDir.dir(RELEASE_NOTES_PATH))
         }
     }
 
     private fun bootstrapProducts(executor: WorkerExecutor) {
         executor.noIsolation().submit(ProductsDownloader::class) {
             paramsForBase(this)
-            dir.set(File(srcDir, PRODUCTS_PATH))
+            dir.set(srcDir.dir(PRODUCTS_PATH))
         }
     }
 
@@ -100,10 +99,11 @@ abstract class Bootstrap @Inject constructor(
             details.defaultLanguage.nullOrFull()?.write(AppDetail.DEFAULT_LANGUAGE)
         }
 
-        private fun String.write(detail: AppDetail) = write(parameters.dir.get(), detail.fileName)
+        private fun String.write(detail: AppDetail) =
+                parameters.dir.get().file(detail.fileName).write(this)
 
         interface Params : EditPublishingParams {
-            val dir: Property<File>
+            val dir: DirectoryProperty
         }
     }
 
@@ -115,15 +115,15 @@ abstract class Bootstrap @Inject constructor(
             val listings = edits.listings().list(appId, editId).execute().listings ?: return
 
             for (listing in listings) {
-                val rootDir = File(parameters.dir.get(), listing.language)
+                val rootDir = parameters.dir.get().dir(listing.language)
 
                 listing.writeMetadata(rootDir)
                 listing.fetchImages(rootDir)
             }
         }
 
-        private fun Listing.writeMetadata(rootDir: File) {
-            fun String.write(detail: ListingDetail) = write(rootDir, detail.fileName)
+        private fun Listing.writeMetadata(rootDir: Directory) {
+            fun String.write(detail: ListingDetail) = rootDir.file(detail.fileName).write(this)
 
             println("Downloading $language listing")
             fullDescription.nullOrFull()?.write(ListingDetail.FULL_DESCRIPTION)
@@ -132,12 +132,12 @@ abstract class Bootstrap @Inject constructor(
             video.nullOrFull()?.write(ListingDetail.VIDEO)
         }
 
-        private fun Listing.fetchImages(rootDir: File) {
+        private fun Listing.fetchImages(rootDir: Directory) {
             for (type in ImageType.values()) {
                 executor.noIsolation().submit(ImageFetcher::class) {
                     parameters.copy(this)
 
-                    dir.set(File(rootDir, GRAPHICS_PATH))
+                    dir.set(rootDir.dir(GRAPHICS_PATH))
                     language.set(this@fetchImages.language)
                     imageType.set(type)
                 }
@@ -145,7 +145,7 @@ abstract class Bootstrap @Inject constructor(
         }
 
         interface Params : EditPublishingParams {
-            val dir: Property<File>
+            val dir: DirectoryProperty
         }
     }
 
@@ -158,8 +158,8 @@ abstract class Bootstrap @Inject constructor(
                     .list(appId, editId, parameters.language.get(), typeName)
                     .execute()
                     .images ?: return
-            val imageDir =
-                    File(parameters.dir.get(), parameters.imageType.get().dirName).safeMkdirs()
+            val imageDir = parameters.dir.get().dir(parameters.imageType.get().dirName)
+                    .asFile.safeMkdirs()
 
             println("Downloading ${parameters.language.get()} listing graphics for type '$typeName'")
             for ((i, image) in images.withIndex()) {
@@ -171,7 +171,7 @@ abstract class Bootstrap @Inject constructor(
         }
 
         interface Params : EditPublishingParams {
-            val dir: Property<File>
+            val dir: DirectoryProperty
             val language: Property<String>
             val imageType: Property<ImageType>
         }
@@ -179,7 +179,7 @@ abstract class Bootstrap @Inject constructor(
 
     internal abstract class ImageDownloader : WorkAction<ImageDownloader.Params> {
         override fun execute() {
-            parameters.target.get().safeCreateNewFile()
+            parameters.target.get().asFile.safeCreateNewFile()
                     .outputStream()
                     .use { local ->
                         val remote = try {
@@ -193,7 +193,7 @@ abstract class Bootstrap @Inject constructor(
         }
 
         interface Params : WorkParameters {
-            val target: Property<File>
+            val target: RegularFileProperty
             val url: Property<String>
         }
 
@@ -214,13 +214,14 @@ abstract class Bootstrap @Inject constructor(
                 }?.releaseNotes.orEmpty()
 
                 for (note in notes) {
-                    note.text.write(parameters.dir.get(), "${note.language}/${track.track}.txt")
+                    parameters.dir.get().file("${note.language}/${track.track}.txt")
+                            .write(note.text)
                 }
             }
         }
 
         interface Params : EditPublishingParams {
-            val dir: Property<File>
+            val dir: DirectoryProperty
         }
     }
 
@@ -228,19 +229,17 @@ abstract class Bootstrap @Inject constructor(
         override fun execute() {
             println("Downloading in-app products")
             publisher.inappproducts().list(appId).execute().inappproduct?.forEach {
-                JacksonFactory.getDefaultInstance()
-                        .toPrettyString(it)
-                        .write(parameters.dir.get(), "${it.sku}.json")
+                parameters.dir.get().file("${it.sku}.json")
+                        .write(JacksonFactory.getDefaultInstance().toPrettyString(it))
             }
         }
 
         interface Params : EditPublishingParams {
-            val dir: Property<File>
+            val dir: DirectoryProperty
         }
     }
 
     private companion object {
-        fun String.write(dir: File, fileName: String) =
-                File(dir, fileName).safeCreateNewFile().writeText(this + "\n")
+        fun RegularFile.write(text: String) = asFile.safeCreateNewFile().writeText(text + "\n")
     }
 }

@@ -13,5 +13,5 @@ abstract class PublishEditTaskBase(
     @get:LocalState
     internal abstract val editIdFile: RegularFileProperty
     @get:Internal
-    internal val editId by lazy { editIdFile.asFile.get().readText() }
+    internal val editId by lazy { editIdFile.get().asFile.readText() }
 }

@@ -4,6 +4,7 @@ import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.marked
 import com.github.triplet.gradle.play.tasks.internal.EditTaskBase
 import com.github.triplet.gradle.play.tasks.internal.buildPublisher
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
@@ -11,7 +12,6 @@ import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkerExecutor
-import java.io.File
 import javax.inject.Inject
 
 abstract class CommitEdit @Inject constructor(
@@ -19,7 +19,7 @@ abstract class CommitEdit @Inject constructor(
 ) : EditTaskBase(extension) {
     @TaskAction
     fun commit() {
-        val file = editIdFile.asFile.get()
+        val file = editIdFile.get().asFile
 
         if (project.gradle.taskGraph.allTasks.any { it.state.failure != null }) {
             println("Build failed, skipping")
@@ -35,7 +35,7 @@ abstract class CommitEdit @Inject constructor(
 
     internal abstract class Committer : WorkAction<Committer.Params> {
         override fun execute() {
-            val file = parameters.editIdFile.get()
+            val file = parameters.editIdFile.get().asFile
             if (file.marked("commit").exists()) {
                 println("Committing changes")
                 val appId = file.nameWithoutExtension
@@ -54,7 +54,7 @@ abstract class CommitEdit @Inject constructor(
 
         interface Params : WorkParameters {
             val config: Property<PlayPublisherExtension.Config>
-            val editIdFile: Property<File>
+            val editIdFile: RegularFileProperty
         }
     }
 }
