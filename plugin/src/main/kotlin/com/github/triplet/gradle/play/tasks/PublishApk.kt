@@ -35,7 +35,7 @@ abstract class PublishApk @Inject constructor(
 ) : PublishArtifactTaskBase(extension, variant, optionsHolder), PublishableTrackExtensionOptions {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
-    protected val inputApks: List<File>?
+    protected val apks: List<File>?
         get() {
             val customDir = extension.config.artifactDir
 
@@ -44,9 +44,11 @@ abstract class PublishApk @Inject constructor(
             } else if (customDir.isFile && customDir.extension == "apk") {
                 listOf(customDir)
             } else {
-                customDir.listFiles().orEmpty().filter { it.extension == "apk" }.also {
-                    if (it.isEmpty()) logger.warn("Warning: no APKs found in '$customDir' yet.")
+                val apks = customDir.listFiles().orEmpty().filter { it.extension == "apk" }
+                if (apks.isEmpty()) {
+                    logger.warn("Warning: '$customDir' does not yet contain any APKs.")
                 }
+                apks
             }.ifEmpty { null }
         }
 
@@ -58,10 +60,10 @@ abstract class PublishApk @Inject constructor(
 
     @TaskAction
     fun publishApks() {
-        val apks = inputApks.orEmpty().mapNotNull(File::orNull).ifEmpty { return }
+        val apks = apks.orEmpty().mapNotNull(File::orNull).ifEmpty { return }
 
         project.delete(temporaryDir) // Make sure previous executions get cleared out
-        project.serviceOf<WorkerExecutor>().noIsolation().submit(ApksUploader::class) {
+        project.serviceOf<WorkerExecutor>().noIsolation().submit(Processor::class) {
             paramsForBase(this)
 
             apkFiles.set(apks)
@@ -69,16 +71,16 @@ abstract class PublishApk @Inject constructor(
         }
     }
 
-    internal abstract class ApksUploader @Inject constructor(
+    internal abstract class Processor @Inject constructor(
             private val executor: WorkerExecutor
-    ) : ArtifactWorkerBase<ApksUploader.Params>() {
+    ) : ArtifactWorkerBase<Processor.Params>() {
         override fun upload() {
             for (apk in parameters.apkFiles.get()) {
-                executor.noIsolation().submit(Uploader::class) {
+                executor.noIsolation().submit(ApkUploader::class) {
                     parameters.copy(this)
 
-                    this.apk.set(apk)
-                    this.uploadResults.set(parameters.uploadResults.get())
+                    apkFile.set(apk)
+                    uploadResults.set(parameters.uploadResults)
                 }
             }
             executor.await()
@@ -95,13 +97,13 @@ abstract class PublishApk @Inject constructor(
         }
     }
 
-    internal abstract class Uploader : ArtifactWorkerBase<Uploader.Params>() {
+    internal abstract class ApkUploader : ArtifactWorkerBase<ApkUploader.Params>() {
         init {
             commit = false
         }
 
         override fun upload() {
-            val apkFile = parameters.apk.get().asFile
+            val apkFile = parameters.apkFile.get().asFile
             val apk = try {
                 edits.apks()
                         .upload(appId, editId, FileContent(MIME_TYPE_APK, apkFile))
@@ -128,7 +130,7 @@ abstract class PublishApk @Inject constructor(
         }
 
         interface Params : ArtifactPublishingParams {
-            val apk: RegularFileProperty
+            val apkFile: RegularFileProperty
             val uploadResults: DirectoryProperty
         }
 

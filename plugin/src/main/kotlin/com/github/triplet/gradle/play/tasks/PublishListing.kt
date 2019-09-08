@@ -148,7 +148,7 @@ abstract class PublishListing @Inject constructor(
             if (parameters.details.isPresent) {
                 executor.noIsolation().submit(DetailsUploader::class) {
                     parameters.copy(this)
-                    dir.set(parameters.details.get())
+                    dir.set(parameters.details)
                 }
             }
             for (listing in parameters.listings.get()) {
