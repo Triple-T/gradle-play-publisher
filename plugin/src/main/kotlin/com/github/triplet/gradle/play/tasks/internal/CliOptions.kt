@@ -4,13 +4,13 @@ import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.ReleaseStatus
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.orNull
+import org.gradle.api.Project
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.options.Option
 import org.gradle.api.tasks.options.OptionValues
-import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 
 internal interface ExtensionOptionsBase {
@@ -19,6 +19,9 @@ internal interface ExtensionOptionsBase {
 }
 
 internal interface ArtifactExtensionOptions : ExtensionOptionsBase {
+    @Internal
+    fun getProject(): Project
+
     @get:Internal
     @set:Option(
             option = "artifact-dir",
@@ -27,10 +30,10 @@ internal interface ArtifactExtensionOptions : ExtensionOptionsBase {
     var artifactDirOption: String
         get() = throw UnsupportedOperationException()
         set(value) {
-            val dir = File(value)
+            val dir = getProject().rootProject.file(value)
             extension.artifactDir = requireNotNull(dir.orNull()) {
-                "Folder '${dir.absolutePath}' does not exist."
-            }.absoluteFile
+                "Folder '$dir' does not exist."
+            }
         }
 }
 

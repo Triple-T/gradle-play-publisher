@@ -8,11 +8,13 @@ import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.tasks.internal.ArtifactExtensionOptions
 import com.github.triplet.gradle.play.tasks.internal.PlayWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
+import com.github.triplet.gradle.play.tasks.internal.copy
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.http.FileContent
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.tasks.InputFile
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -28,22 +30,24 @@ abstract class PublishInternalSharingApk @Inject constructor(
         variant: ApplicationVariant
 ) : PublishTaskBase(extension, variant), ArtifactExtensionOptions {
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    @get:InputFile
-    protected val apk: File?
+    @get:InputFiles
+    protected val apks: List<File>?
         get() {
             val customDir = extension.config.artifactDir
 
             return if (customDir == null) {
-                variant.outputs.filterIsInstance<ApkVariantOutput>().singleOrNull {
+                variant.outputs.filterIsInstance<ApkVariantOutput>().filter {
                     OutputType.valueOf(it.outputType) == OutputType.MAIN || it.filters.isEmpty()
-                }?.outputFile
+                }.map { it.outputFile }
             } else if (customDir.isFile && customDir.extension == "apk") {
-                customDir
+                listOf(customDir)
             } else {
-                customDir.listFiles().orEmpty().singleOrNull { it.extension == "apk" }.also {
-                    if (it == null) logger.warn("Warning: no APKs found in '$customDir' yet.")
+                val apks = customDir.listFiles().orEmpty().filter { it.extension == "apk" }
+                if (apks.isEmpty()) {
+                    logger.warn("Warning: '$customDir' does not yet contain any APKs.")
                 }
-            }
+                apks
+            }.ifEmpty { null }
         }
 
     @get:OutputDirectory
@@ -51,12 +55,33 @@ abstract class PublishInternalSharingApk @Inject constructor(
 
     @TaskAction
     fun publishApk() {
-        val apk = apk?.orNull() ?: return
-        project.serviceOf<WorkerExecutor>().noIsolation().submit(ApkUploader::class) {
+        val apks = apks.orEmpty().mapNotNull(File::orNull).ifEmpty { return }
+
+        project.serviceOf<WorkerExecutor>().noIsolation().submit(Processor::class) {
             paramsForBase(this)
 
-            apkFile.set(apk)
+            apkFiles.set(apks)
             outputDir.set(outputDirectory)
+        }
+    }
+
+    internal abstract class Processor @Inject constructor(
+            private val executor: WorkerExecutor
+    ) : PlayWorkerBase<Processor.Params>() {
+        override fun execute() {
+            for (apk in parameters.apkFiles.get()) {
+                executor.noIsolation().submit(ApkUploader::class) {
+                    parameters.copy(this)
+
+                    apkFile.set(apk)
+                    outputDir.set(parameters.outputDir)
+                }
+            }
+        }
+
+        interface Params : PlayPublishingParams {
+            val apkFiles: ListProperty<File>
+            val outputDir: DirectoryProperty
         }
     }
 

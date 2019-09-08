@@ -32,8 +32,12 @@ fun PublishTaskBase.findBundleFile(): File? {
     } else if (customDir.isFile && customDir.extension == "aab") {
         customDir
     } else {
-        customDir.listFiles().orEmpty().singleOrNull { it.extension == "aab" }.also {
-            if (it == null) logger.warn("Warning: no App Bundle found in '$customDir' yet.")
+        val bundles = customDir.listFiles().orEmpty().filter { it.extension == "aab" }
+        if (bundles.isEmpty()) {
+            logger.warn("Warning: '$customDir' does not yet contain an App Bundle.")
+        } else if (bundles.size > 1) {
+            logger.warn("Warning: '$customDir' contains multiple App Bundles. Only one is allowed.")
         }
+        bundles.singleOrNull()
     }
 }
