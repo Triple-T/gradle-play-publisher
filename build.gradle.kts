@@ -20,9 +20,14 @@ tasks.register<Delete>("clean") {
 tasks.register("ciBuild") {
     val isMaster = System.getenv("CIRCLE_BRANCH") == "master"
     val isPr = System.getenv("CIRCLE_PULL_REQUEST") != null
+    val isSnapshot = project("plugin").version.toString().contains("snapshot", true)
 
     if (isMaster && !isPr) { // Release build
-        dependsOn(":plugin:build", ":plugin:publish")
+        if (isSnapshot) {
+            dependsOn(":plugin:build", ":plugin:publish")
+        } else {
+            dependsOn(":plugin:build")
+        }
     } else {
         dependsOn(":plugin:check")
     }
