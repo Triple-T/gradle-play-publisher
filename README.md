@@ -204,7 +204,7 @@ To find available tasks, run `./gradlew tasks --group publishing` and use
 documentation for a specific task.
 
 > Note: if a task conflict occurs, say with the `maven-publish` plugin for example, be sure to apply
-> the GPP plugin _last_. Conflicting tasks will then be prefixed with `gpp` (ex: `publish` ->
+> the GPP plugin *last*. Conflicting tasks will then be prefixed with `gpp` (ex: `publish` ->
 > `gppPublish`).
 
 ## Managing artifacts
@@ -300,6 +300,21 @@ For quick access, you can also use the `--artifact-dir` CLI option:
 
 > Note: all artifacts in the specified directory will be published.
 
+#### Retaining artifacts
+
+GPP supports keeping around old artifacts such as OBB files or WearOS APKs:
+
+```kt
+play {
+    // ...
+    retain {
+        artifacts = listOf(123) // Old APK version code
+        mainObb = 123 // Old main OBB version code
+        patchObb = 123 // Old patch OBB version code
+    }
+}
+```
+
 ### Publishing an App Bundle
 
 Run `./gradlew publishBundle`.
@@ -331,9 +346,9 @@ for APKs. To upload an existing artifact, read about
 Existing releases can be promoted and/or updated to the [configured track](#common-configuration)
 with `./gradlew promoteArtifact`.
 
-By default, the track from which to promote a release will be determined by the most unstable
-channel that contains a release. Example: if the alpha channel has no releases, but the beta and
-prod channels do, the beta channel will be picked. To configure this manually, use the `fromTrack`
+By default, the track *from* which to promote a release is determined by the most unstable channel
+that contains a release. Example: if the alpha channel has no releases, but the beta and prod
+channels do, the beta channel will be picked. To configure this manually, use the `fromTrack`
 property:
 
 ```kt
@@ -343,12 +358,22 @@ play {
 }
 ```
 
+Similarly, the track *to* which to promote a release defaults to the `promoteTrack` property. If
+unspecified, the `track` property will be used instead. Example configuration:
+
+```kt
+play {
+    // ...
+    promoteTrack = "beta"
+}
+```
+
 If you need to execute a one-time promotion, you can use the CLI args. For example, this is how you
 would promote an artifact from the alpha ➡️ beta track with only 25% of users getting the release:
 
 ```sh
 ./gradlew promoteArtifact \
-  --from-track alpha --track beta \
+  --from-track alpha --promote-track beta \
   --release-status inProgress --user-fraction .25
 ```
 
@@ -615,7 +640,7 @@ android {
         }
 
         register("someFlavorN") {
-            // This isn't actually needed since the default is true. Here's what you _do_ need:
+            // This isn't actually needed since the default is true. Here's what you *do* need:
             // 1. A starter no-commit variant (someFlavor1 in this case)
             // 2. (Optional) Intermediate no-commit variants (someFlavor2, someFlavor3, ...)
             // 3. One finisher variant to commit (aka do NOT mark someFlavorN as no-commit)
@@ -660,7 +685,7 @@ android {
         }
 
         someFlavorN {
-            // This isn't actually needed since the default is true. Here's what you _do_ need:
+            // This isn't actually needed since the default is true. Here's what you *do* need:
             // 1. A starter no-commit variant (someFlavor1 in this case)
             // 2. (Optional) Intermediate no-commit variants (someFlavor2, someFlavor3, ...)
             // 3. One finisher variant to commit (aka do NOT mark someFlavorN as no-commit)
