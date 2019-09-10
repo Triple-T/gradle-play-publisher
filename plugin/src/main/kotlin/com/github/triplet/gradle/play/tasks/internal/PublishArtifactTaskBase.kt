@@ -44,7 +44,12 @@ abstract class PublishArtifactTaskBase(
             val customDir = extension.config.artifactDir
 
             return if (customDir == null) {
-                variant.mappingFileProvider.get().singleOrNull()
+                try {
+                    variant.mappingFileProvider.get().singleOrNull()
+                } catch (e: NoSuchMethodError) {
+                    @Suppress("DEPRECATION") // TODO remove when 3.6 is the minimum
+                    variant.mappingFile
+                }
             } else {
                 customDir.listFiles().orEmpty().singleOrNull { it.name == "mapping.txt" }
             }
