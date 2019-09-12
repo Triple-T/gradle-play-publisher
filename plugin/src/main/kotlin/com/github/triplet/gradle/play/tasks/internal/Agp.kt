@@ -4,6 +4,7 @@ import com.android.build.api.artifact.ArtifactType
 import com.android.build.gradle.internal.api.InstallableVariantImpl
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.github.triplet.gradle.play.internal.orNull
+import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.file.RegularFile
 import java.io.File
 
@@ -15,7 +16,10 @@ fun PublishTaskBase.findBundleFile(): File? {
 
         // TODO remove when AGP 3.6 is the minimum
         fun getFinalArtifactCompat(): Set<File> = try {
-            installable.getFinalArtifact(InternalArtifactType.BUNDLE).get().files
+            @Suppress("UNCHECKED_CAST") // Incorrect generics
+            installable.getFinalArtifact(
+                    InternalArtifactType.BUNDLE as ArtifactType<FileSystemLocation>
+            ).get().files
         } catch (e: NoSuchMethodError) {
             val artifact = installable.javaClass
                     .getMethod("getFinalArtifact", ArtifactType::class.java)

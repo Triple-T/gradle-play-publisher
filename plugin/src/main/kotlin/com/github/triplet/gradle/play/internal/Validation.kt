@@ -30,8 +30,8 @@ internal fun validateRuntime() {
     }
     // TODO remove when 3.6 is the minimum
     check(agpVersion < VersionNumber.parse("3.6.0-alpha01") ||
-                  agpVersion >= VersionNumber.parse("3.6.0-alpha05")
-    ) { "GPP is only known to be compatible with AGP 3.6 alpha 5. Please upgrade." }
+                  agpVersion >= VersionNumber.parse("3.6.0-alpha11")
+    ) { "GPP is only known to be compatible with AGP 3.6 alpha 11. Please upgrade." }
 }
 
 internal infix fun GoogleJsonResponseException.has(error: String) =
