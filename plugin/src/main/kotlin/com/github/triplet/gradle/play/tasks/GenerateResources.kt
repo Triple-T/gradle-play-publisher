@@ -8,7 +8,6 @@ import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NAMES_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
 import com.github.triplet.gradle.play.internal.climbUpTo
-import com.github.triplet.gradle.play.internal.findClosestDir
 import com.github.triplet.gradle.play.internal.isChildOf
 import com.github.triplet.gradle.play.internal.isDirectChildOf
 import com.github.triplet.gradle.play.internal.normalized
@@ -125,49 +124,6 @@ abstract class GenerateResources : DefaultTask() {
         }
 
         private fun File.validate() {
-            fun File.validateLocales() {
-                checkNotNull(listFiles()) {
-                    "$this must be a folder"
-                }.forEach {
-                    check(it.isDirectory) {
-                        "Files are not allowed under the listings directory: ${it.name}"
-                    }
-                }
-            }
-
-            fun validateListings() {
-                val listings = climbUpTo(LISTINGS_PATH) ?: return
-                check(listings.isDirectChildOf(PLAY_PATH)) {
-                    "Listings ($listings) must be under the '$PLAY_PATH' folder"
-                }
-                listings.validateLocales()
-            }
-
-            fun validateReleaseNotes() {
-                val releaseNotes = climbUpTo(RELEASE_NOTES_PATH) ?: return
-                check(releaseNotes.isDirectChildOf(PLAY_PATH)) {
-                    "Release notes ($releaseNotes) must be under the '$PLAY_PATH' folder"
-                }
-                releaseNotes.validateLocales()
-            }
-
-            fun validateReleaseNames() {
-                val releaseNames = climbUpTo(RELEASE_NAMES_PATH) ?: return
-                check(releaseNames.isDirectChildOf(PLAY_PATH)) {
-                    "Release names ($releaseNames) must be under the '$PLAY_PATH' folder"
-                }
-            }
-
-            fun validateProducts() {
-                val products = climbUpTo(PRODUCTS_PATH) ?: return
-                check(products.isDirectChildOf(PLAY_PATH)) {
-                    "Products ($products) must be under the '$PLAY_PATH' folder"
-                }
-                checkNotNull(products.listFiles()) {
-                    "$products must be a folder"
-                }
-            }
-
             val areRootsValid = isDirectChildOf(PLAY_PATH)
                     || isChildOf(LISTINGS_PATH)
                     || isChildOf(RELEASE_NOTES_PATH)
@@ -181,7 +137,60 @@ abstract class GenerateResources : DefaultTask() {
             validateProducts()
         }
 
+        private fun File.validateListings() {
+            val listings = climbUpTo(LISTINGS_PATH) ?: return
+            check(listings.isDirectChildOf(PLAY_PATH)) {
+                "Listings ($listings) must be under the '$PLAY_PATH' directory"
+            }
+            validateLocales(listings)
+        }
+
+        private fun File.validateReleaseNotes() {
+            val releaseNotes = climbUpTo(RELEASE_NOTES_PATH) ?: return
+            check(releaseNotes.isDirectChildOf(PLAY_PATH)) {
+                "Release notes ($releaseNotes) must be under the '$PLAY_PATH' directory"
+            }
+            validateLocales(releaseNotes)
+        }
+
+        private fun File.validateReleaseNames() {
+            val releaseNames = climbUpTo(RELEASE_NAMES_PATH) ?: return
+            check(releaseNames.isDirectChildOf(PLAY_PATH)) {
+                "Release names ($releaseNames) must be under the '$PLAY_PATH' directory"
+            }
+            check(releaseNames.isDirectory) {
+                "$releaseNames must be a directory"
+            }
+        }
+
+        private fun File.validateProducts() {
+            val products = climbUpTo(PRODUCTS_PATH) ?: return
+            check(products.isDirectChildOf(PLAY_PATH)) {
+                "Products ($products) must be under the '$PLAY_PATH' directory"
+            }
+            check(products.isDirectory) {
+                "$products must be a directory"
+            }
+        }
+
+        private fun File.validateLocales(category: File) {
+            // Locales should be a child directory of the category
+            var locale = this
+            while (locale.parentFile != category) {
+                locale = locale.parentFile
+            }
+
+            check(locale.isDirectory) {
+                "Files are not allowed under the ${category.name} directory: ${locale.name}"
+            }
+        }
+
         private fun File.copy(dest: File): File = copyTo(File(dest, name), true)
+
+        private tailrec fun File.findClosestDir(): File {
+            check(exists()) { "$this does not exist" }
+            return if (isDirectory) this else parentFile.findClosestDir()
+        }
 
         private fun File.findDest() =
                 File(parameters.outputDir.get().asFile, toRelativeString(findOwner()))
