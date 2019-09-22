@@ -26,21 +26,22 @@ class GenerateResourcesTest {
     // TODO add test making sure source files doesn't change
 
     @Test
-    fun `Various build types override main variant fallbacks`() {
+    fun `Product flavors override main variant fallbacks`() {
         // language=gradle
         val config = """
             flavorDimensions 'pricing'
-
             productFlavors {
-                free {
-                    dimension 'pricing'
-                }
-                paid {
-                    dimension 'pricing'
-                }
+                free { dimension 'pricing' }
+                paid { dimension 'pricing' }
             }
         """
-        execute(config, "clean", "generateFreeReleasePlayResources")
+
+        execute(
+                config,
+                "clean",
+                "generateFreeReleasePlayResources",
+                "generatePaidReleasePlayResources"
+        )
 
         "".exists()
         "freeRelease".exists()
@@ -51,8 +52,6 @@ class GenerateResourcesTest {
         "freeRelease/res/release-notes/en-US/default.txt" generated "free"
         "freeRelease/res/release-notes/fr-FR/default.txt" generated "main"
         "freeRelease/res/release-notes/de-DE/default.txt" generated "free german"
-
-        execute(config, "generatePaidReleasePlayResources")
 
         "paidRelease/res/release-notes/en-US/default.txt" generated "paid english"
         "paidRelease/res/release-notes/fr-FR/default.txt" generated "main"
@@ -67,30 +66,27 @@ class GenerateResourcesTest {
                 dogfood.initWith(buildTypes.release)
             }
         """
+
         execute(config, "clean", "generateDogfoodPlayResources")
 
         "dogfood/res/release-notes/en-US/default.txt" generated "dogfood english"
     }
 
     @Test
-    fun `Flavors override build type fallbacks`() {
+    fun `Product flavors override build type fallbacks`() {
         // language=gradle
         val config = """
             flavorDimensions 'pricing'
-
             productFlavors {
-                free {
-                    dimension 'pricing'
-                }
-                paid {
-                    dimension 'pricing'
-                }
+                free { dimension 'pricing' }
+                paid { dimension 'pricing' }
             }
 
             buildTypes {
                 dogfood.initWith(buildTypes.release)
             }
         """
+
         execute(config, "clean", "generatePaidDogfoodPlayResources")
 
         "paidDogfood/res/release-notes/en-US/default.txt" generated "dogfood english"
@@ -101,20 +97,16 @@ class GenerateResourcesTest {
         // language=gradle
         val config = """
             flavorDimensions 'pricing'
-
             productFlavors {
-                free {
-                    dimension 'pricing'
-                }
-                paid {
-                    dimension 'pricing'
-                }
+                free { dimension 'pricing' }
+                paid { dimension 'pricing' }
             }
 
             buildTypes {
                 dogfood.initWith(buildTypes.release)
             }
         """
+
         execute(config, "clean", "generateFreeDogfoodPlayResources")
 
         "freeDogfood/res/release-notes/en-US/default.txt" generated "free dogfood english"
@@ -125,7 +117,6 @@ class GenerateResourcesTest {
         // language=gradle
         val config = """
             flavorDimensions 'pricing', 'server'
-
             productFlavors {
                 free { dimension 'pricing' }
                 paid { dimension 'pricing' }
@@ -137,6 +128,7 @@ class GenerateResourcesTest {
                 dogfood.initWith(buildTypes.release)
             }
         """
+
         execute(config, "clean", "generateFreeStagingDogfoodPlayResources")
 
         "freeStagingDogfood/res/release-notes/en-US/default.txt" generated "freeStagingDogfood"
@@ -148,7 +140,6 @@ class GenerateResourcesTest {
         // language=gradle
         val config = """
             flavorDimensions 'pricing', 'server'
-
             productFlavors {
                 free { dimension 'pricing' }
                 paid { dimension 'pricing' }
@@ -156,6 +147,7 @@ class GenerateResourcesTest {
                 prod { dimension 'server' }
             }
         """
+
         execute(config, "clean", "generateFreeStagingReleasePlayResources")
 
         "freeStagingRelease/res/release-notes/en-US/default.txt" generated "freeStaging"
@@ -167,7 +159,6 @@ class GenerateResourcesTest {
         // language=gradle
         val config = """
             flavorDimensions 'pricing', 'server'
-
             productFlavors {
                 free { dimension 'pricing' }
                 paid { dimension 'pricing' }
@@ -175,6 +166,7 @@ class GenerateResourcesTest {
                 prod { dimension 'server' }
             }
         """
+
         execute(config, "clean", "generateFreeStagingReleasePlayResources")
 
         "freeStagingRelease/res/listings/en-US/short-description.txt" generated "free"
@@ -186,7 +178,6 @@ class GenerateResourcesTest {
         // language=gradle
         val config = """
             flavorDimensions 'server', 'pricing'
-
             productFlavors {
                 free { dimension 'pricing' }
                 paid { dimension 'pricing' }
@@ -194,6 +185,7 @@ class GenerateResourcesTest {
                 prod { dimension 'server' }
             }
         """
+
         execute(config, "clean", "generateProdFreeReleasePlayResources")
 
         "prodFreeRelease/res/release-notes/en-US/default.txt" generated "prod"
@@ -204,7 +196,6 @@ class GenerateResourcesTest {
         // language=gradle
         val config = """
             flavorDimensions 'pricing', 'server'
-
             productFlavors {
                 free { dimension 'pricing' }
                 paid { dimension 'pricing' }
@@ -212,6 +203,7 @@ class GenerateResourcesTest {
                 prod { dimension 'server' }
             }
         """
+
         execute(config, "clean", "generateFreeStagingReleasePlayResources")
 
         "freeStagingRelease/res/listings/en-US/title.txt" generated "main"
@@ -223,7 +215,6 @@ class GenerateResourcesTest {
         // language=gradle
         val config = """
             flavorDimensions 'pricing', 'server'
-
             productFlavors {
                 free { dimension 'server' }
                 paid { dimension 'pricing' }
@@ -231,6 +222,7 @@ class GenerateResourcesTest {
                 prod { dimension 'pricing' }
             }
         """
+
         execute(config, "clean", "generateProdStagingReleasePlayResources")
 
         "prodStagingRelease/res/listings/de-DE/title.txt" generated "main"
@@ -243,7 +235,6 @@ class GenerateResourcesTest {
         // language=gradle
         val config = """
             flavorDimensions 'pricing', 'server'
-
             productFlavors {
                 free { dimension 'server' }
                 paid { dimension 'pricing' }
@@ -251,6 +242,7 @@ class GenerateResourcesTest {
                 prod { dimension 'pricing' }
             }
         """
+
         execute(config, "clean", "generateProdStagingReleasePlayResources")
 
         "prodStagingRelease/res/listings/fr-FR/graphics/phone-screenshots/foo.jpg".exists(no)
@@ -265,11 +257,11 @@ class GenerateResourcesTest {
         // language=gradle
         val config = """
             flavorDimensions 'pricing'
-
             productFlavors {
                 hiddenFile { dimension 'pricing' }
             }
         """
+
         val result = execute(config, "clean", "generateHiddenFileReleasePlayResources")
 
         assertEquals(
@@ -279,15 +271,33 @@ class GenerateResourcesTest {
     }
 
     @Test
+    fun `Non-existent locale throws`() {
+        // language=gradle
+        val config = """
+            flavorDimensions 'pricing'
+            productFlavors {
+                invalidLocale { dimension 'pricing' }
+            }
+        """
+
+        val result = execute(config, true, "clean", "generateInvalidLocaleReleasePlayResources")
+
+        assertEquals(
+                TaskOutcome.FAILED,
+                result.task(":generateInvalidLocaleReleasePlayResources")!!.outcome
+        )
+    }
+
+    @Test
     fun `Files in wrong dir throw`() {
         // language=gradle
         val config = """
             flavorDimensions 'pricing'
-
             productFlavors {
                 unknownFile { dimension 'pricing' }
             }
         """
+
         val result = execute(config, true, "clean", "generateUnknownFileReleasePlayResources")
 
         assertEquals(
