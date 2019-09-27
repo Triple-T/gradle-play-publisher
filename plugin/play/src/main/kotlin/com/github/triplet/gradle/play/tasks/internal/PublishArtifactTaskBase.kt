@@ -48,7 +48,7 @@ abstract class PublishArtifactTaskBase(
                     variant.mappingFileProvider.get().singleOrNull()
                 } catch (e: NoSuchMethodError) {
                     @Suppress("DEPRECATION") // TODO(#708): remove when 3.6 is the minimum
-                    variant.mappingFile
+                    variant.mappingFile?.orNull()
                 }
             } else {
                 customDir.listFiles().orEmpty().singleOrNull { it.name == "mapping.txt" }
