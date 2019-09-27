@@ -15,6 +15,7 @@ class GPPBuildPlugin : Plugin<Project> {
         project.tasks.register("ciBuild") {
             if (isReleaseBuild()) {
                 val buildTasks = allTasks("build")
+
                 dependsOn(buildTasks)
                 if (isSnapshotBuild()) {
                     dependsOn(allTasks("publish").mustRunAfter(buildTasks))
