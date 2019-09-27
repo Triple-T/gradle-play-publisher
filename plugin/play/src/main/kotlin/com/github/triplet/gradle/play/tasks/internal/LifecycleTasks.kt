@@ -5,24 +5,24 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Nested
 import javax.inject.Inject
 
-internal open class WriteTrackLifecycleTask @Inject constructor(
+internal abstract class WriteTrackLifecycleTask @Inject constructor(
         @get:Nested override val extension: PlayPublisherExtension
 ) : DefaultTask(), WriteTrackExtensionOptions
 
-internal open class UpdatableTrackLifecycleTask @Inject constructor(
+internal abstract class UpdatableTrackLifecycleTask @Inject constructor(
         @get:Nested override val extension: PlayPublisherExtension,
         optionsHolder: TransientTrackOptions.Holder
 ) : DefaultTask(), UpdatableTrackExtensionOptions, TransientTrackOptions by optionsHolder
 
-internal open class PublishableTrackLifecycleTask @Inject constructor(
+internal abstract class PublishableTrackLifecycleTask @Inject constructor(
         @get:Nested override val extension: PlayPublisherExtension,
         optionsHolder: TransientTrackOptions.Holder
 ) : DefaultTask(), PublishableTrackExtensionOptions, TransientTrackOptions by optionsHolder
 
-internal open class GlobalPublishableArtifactLifecycleTask @Inject constructor(
+internal abstract class GlobalPublishableArtifactLifecycleTask @Inject constructor(
         @get:Nested override val extension: PlayPublisherExtension
 ) : DefaultTask(), GlobalPublishableArtifactExtensionOptions
 
-internal open class BootstrapLifecycleTask @Inject constructor(
+internal abstract class BootstrapLifecycleTask @Inject constructor(
         optionsHolder: BootstrapOptions.Holder
 ) : DefaultTask(), BootstrapOptions by optionsHolder
