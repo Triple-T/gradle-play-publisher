@@ -1,5 +1,7 @@
-package com.github.triplet.gradle.play
+package com.github.triplet.gradle.play.tasks
 
+import com.github.triplet.gradle.play.FIXTURE_WORKING_DIR
+import com.github.triplet.gradle.play.execute
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Test
 import java.io.File
@@ -7,7 +9,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class GenerateResourcesTest {
+class GenerateResourcesIntegrationTest {
     @Test
     fun `Basic resources are correctly copied to their respective folders`() {
         execute("", "clean", "generateReleasePlayResources")
@@ -129,7 +131,9 @@ class GenerateResourcesTest {
             }
         """
 
-        execute(config, "clean", "generateFreeStagingDogfoodPlayResources")
+        execute(config,
+                "clean",
+                "generateFreeStagingDogfoodPlayResources")
 
         "freeStagingDogfood/res/release-notes/en-US/default.txt" generated "freeStagingDogfood"
         "freeStagingDogfood/res/listings/en-US/full-description.txt" generated "freeStagingDogfood"
@@ -148,7 +152,9 @@ class GenerateResourcesTest {
             }
         """
 
-        execute(config, "clean", "generateFreeStagingReleasePlayResources")
+        execute(config,
+                "clean",
+                "generateFreeStagingReleasePlayResources")
 
         "freeStagingRelease/res/release-notes/en-US/default.txt" generated "freeStaging"
         "freeStagingRelease/res/listings/en-US/full-description.txt" generated "freeStagingRelease"
@@ -167,7 +173,9 @@ class GenerateResourcesTest {
             }
         """
 
-        execute(config, "clean", "generateFreeStagingReleasePlayResources")
+        execute(config,
+                "clean",
+                "generateFreeStagingReleasePlayResources")
 
         "freeStagingRelease/res/listings/en-US/short-description.txt" generated "free"
         "freeStagingRelease/res/listings/en-US/full-description.txt" generated "freeStagingRelease"
@@ -186,7 +194,9 @@ class GenerateResourcesTest {
             }
         """
 
-        execute(config, "clean", "generateProdFreeReleasePlayResources")
+        execute(config,
+                "clean",
+                "generateProdFreeReleasePlayResources")
 
         "prodFreeRelease/res/release-notes/en-US/default.txt" generated "prod"
     }
@@ -204,7 +214,9 @@ class GenerateResourcesTest {
             }
         """
 
-        execute(config, "clean", "generateFreeStagingReleasePlayResources")
+        execute(config,
+                "clean",
+                "generateFreeStagingReleasePlayResources")
 
         "freeStagingRelease/res/listings/en-US/title.txt" generated "main"
         "freeStagingRelease/res/listings/en-US/full-description.txt" generated "freeStagingRelease"
@@ -223,7 +235,9 @@ class GenerateResourcesTest {
             }
         """
 
-        execute(config, "clean", "generateProdStagingReleasePlayResources")
+        execute(config,
+                "clean",
+                "generateProdStagingReleasePlayResources")
 
         "prodStagingRelease/res/listings/de-DE/title.txt" generated "main"
         "prodStagingRelease/res/listings/de-DE/full-description.txt" generated "de-DE"
@@ -243,7 +257,9 @@ class GenerateResourcesTest {
             }
         """
 
-        execute(config, "clean", "generateProdStagingReleasePlayResources")
+        execute(config,
+                "clean",
+                "generateProdStagingReleasePlayResources")
 
         "prodStagingRelease/res/listings/fr-FR/graphics/phone-screenshots/foo.jpg".exists(no)
         "prodStagingRelease/res/listings/fr-FR/graphics/phone-screenshots/bar.jpg".exists()
@@ -262,7 +278,9 @@ class GenerateResourcesTest {
             }
         """
 
-        val result = execute(config, "clean", "generateHiddenFileReleasePlayResources")
+        val result = execute(config,
+                             "clean",
+                             "generateHiddenFileReleasePlayResources")
 
         assertEquals(
                 TaskOutcome.SUCCESS,
@@ -280,7 +298,10 @@ class GenerateResourcesTest {
             }
         """
 
-        val result = execute(config, true, "clean", "generateInvalidLocaleReleasePlayResources")
+        val result = execute(config,
+                             true,
+                             "clean",
+                             "generateInvalidLocaleReleasePlayResources")
 
         assertEquals(
                 TaskOutcome.FAILED,
@@ -298,7 +319,10 @@ class GenerateResourcesTest {
             }
         """
 
-        val result = execute(config, true, "clean", "generateUnknownFileReleasePlayResources")
+        val result = execute(config,
+                             true,
+                             "clean",
+                             "generateUnknownFileReleasePlayResources")
 
         assertEquals(
                 TaskOutcome.FAILED,

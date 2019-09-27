@@ -7,14 +7,16 @@ import com.github.triplet.gradle.play.internal.PLAY_CONFIGS_PATH
 import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
+import com.github.triplet.gradle.play.internal.buildExtension
 import com.github.triplet.gradle.play.internal.flavorNameOrDefault
 import com.github.triplet.gradle.play.internal.getCommitEditTask
 import com.github.triplet.gradle.play.internal.getGenEditTask
-import com.github.triplet.gradle.play.internal.mergeExtensions
 import com.github.triplet.gradle.play.internal.newTask
 import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
-import com.github.triplet.gradle.play.internal.validateRuntime
+import com.github.triplet.gradle.play.internal.validation.validateCreds
+import com.github.triplet.gradle.play.internal.validation.validateDebuggability
+import com.github.triplet.gradle.play.internal.validation.validateRuntime
 import com.github.triplet.gradle.play.tasks.Bootstrap
 import com.github.triplet.gradle.play.tasks.GenerateResources
 import com.github.triplet.gradle.play.tasks.ProcessArtifactMetadata
@@ -103,55 +105,14 @@ class PlayPublisherPlugin : Plugin<Project> {
         val android = project.the<AppExtension>()
         (android as ExtensionAware).extensions.add(PLAY_CONFIGS_PATH, extensionContainer)
         android.applicationVariants.whenObjectAdded {
-            val variantName = name.capitalize()
-
-            if (buildType.isDebuggable) {
-                val typeName = buildType.name
-                if (typeName.equals("release", true)) {
-                    project.logger.error(
-                            "GPP cannot configure variant '$name' because it is debuggable")
-                } else {
-                    project.logger.info("Skipping debuggable build with type '$typeName'")
-                }
-                return@whenObjectAdded
-            }
-
-            val extension = run {
-                val variantExtension = extensionContainer.findByName(name)
-                val flavorExtension = productFlavors.mapNotNull {
-                    extensionContainer.findByName(it.name)
-                }.singleOrNull()
-                val buildTypeExtension = extensionContainer.findByName(buildType.name)
-
-                mergeExtensions(listOfNotNull(
-                        variantExtension,
-                        flavorExtension,
-                        buildTypeExtension,
-                        baseExtension
-                ))
-            }
+            if (!validateDebuggability()) return@whenObjectAdded
+            val extension = buildExtension(extensionContainer, baseExtension)
 
             if (!extension.isEnabled) {
                 project.logger.info("Gradle Play Publisher is disabled for variant '$name'.")
                 return@whenObjectAdded
             }
-
-            extension.apply {
-                val creds = checkNotNull(config.serviceAccountCredentials) {
-                    "No credentials specified. Please read our docs for more details: " +
-                            "https://github.com/Triple-T/gradle-play-publisher" +
-                            "#authenticating-gradle-play-publisher"
-                }
-                if (creds.extension.equals("json", true)) {
-                    check(config.serviceAccountEmail == null) {
-                        "JSON credentials cannot specify a service account email."
-                    }
-                } else {
-                    check(config.serviceAccountEmail != null) {
-                        "PKCS12 credentials must specify a service account email."
-                    }
-                }
-            }
+            extension.validateCreds()
 
             if (!isSigningReady && !outputsAreSigned) {
                 project.logger.error(
@@ -159,6 +120,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                                 "Be sure to specify a signingConfig for variant '$name'.")
             }
 
+            val variantName = name.capitalize()
             val genEditTask = project.getGenEditTask(applicationId, extension)
             val commitEditTask = project.getCommitEditTask(applicationId, extension)
             val editFile = genEditTask.flatMap { it.editIdFile }

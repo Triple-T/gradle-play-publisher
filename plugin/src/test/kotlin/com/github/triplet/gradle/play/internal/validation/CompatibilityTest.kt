@@ -1,4 +1,4 @@
-package com.github.triplet.gradle.play
+package com.github.triplet.gradle.play.internal.validation
 
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder

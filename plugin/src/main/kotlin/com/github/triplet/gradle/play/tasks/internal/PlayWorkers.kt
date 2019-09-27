@@ -6,7 +6,6 @@ import com.github.triplet.gradle.play.internal.RELEASE_NAMES_DEFAULT_NAME
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_DEFAULT_NAME
 import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.commitOrDefault
-import com.github.triplet.gradle.play.internal.has
 import com.github.triplet.gradle.play.internal.isRollout
 import com.github.triplet.gradle.play.internal.marked
 import com.github.triplet.gradle.play.internal.orNull
@@ -16,6 +15,7 @@ import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
 import com.github.triplet.gradle.play.internal.safeCreateNewFile
 import com.github.triplet.gradle.play.internal.trackOrDefault
 import com.github.triplet.gradle.play.internal.userFractionOrDefault
+import com.github.triplet.gradle.play.internal.validation.has
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.googleapis.media.MediaHttpUploader
 import com.google.api.client.http.FileContent

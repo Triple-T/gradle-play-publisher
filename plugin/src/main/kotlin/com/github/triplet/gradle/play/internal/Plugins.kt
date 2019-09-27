@@ -1,33 +1,22 @@
 package com.github.triplet.gradle.play.internal
 
+import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.api.BaseVariant
-import com.android.builder.model.ProductFlavor
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.tasks.CommitEdit
 import com.github.triplet.gradle.play.tasks.GenerateEdit
 import com.github.triplet.gradle.play.tasks.internal.EditTaskBase
 import org.gradle.api.InvalidUserDataException
+import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.plugins.ExtensionAware
-import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.register
-import org.gradle.kotlin.dsl.the
 import java.io.File
 
 internal val BaseVariant.flavorNameOrDefault get() = flavorName.nullOrFull() ?: "main"
 
 internal val BaseVariant.playPath get() = "$RESOURCES_OUTPUT_PATH/$name"
-
-private val ProductFlavor.extras
-    get() = requireNotNull((this as ExtensionAware).the<ExtraPropertiesExtension>())
-
-internal operator fun ProductFlavor.get(name: String) = extras[name]
-
-internal operator fun ProductFlavor.set(name: String, value: Any?) {
-    extras[name] = value
-}
 
 internal fun Project.newTask(
         name: String,
@@ -60,6 +49,26 @@ internal fun Project.getCommitEditTask(
         appId: String,
         extension: PlayPublisherExtension
 ) = rootProject.getOrRegisterEditTask<CommitEdit>("commitEditFor", extension, appId)
+
+internal fun ApplicationVariant.buildExtension(
+        extensionContainer: NamedDomainObjectContainer<PlayPublisherExtension>,
+        baseExtension: PlayPublisherExtension
+): PlayPublisherExtension = buildExtensionInternal(this, extensionContainer, baseExtension)
+
+private fun buildExtensionInternal(
+        variant: ApplicationVariant,
+        extensionContainer: NamedDomainObjectContainer<PlayPublisherExtension>,
+        baseExtension: PlayPublisherExtension
+): PlayPublisherExtension {
+    val variantExtension = extensionContainer.findByName(variant.name)
+    val flavorExtension = variant.productFlavors.mapNotNull {
+        extensionContainer.findByName(it.name)
+    }.singleOrNull()
+    val buildTypeExtension = extensionContainer.findByName(variant.buildType.name)
+
+    return mergeExtensions(
+            listOfNotNull(variantExtension, flavorExtension, buildTypeExtension, baseExtension))
+}
 
 private inline fun <reified T : EditTaskBase> Project.getOrRegisterEditTask(
         baseName: String,
