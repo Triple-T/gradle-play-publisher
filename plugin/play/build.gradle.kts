@@ -16,8 +16,8 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation(Config.Libs.All.truth)
 
-    testImplementation(Config.Libs.All.agp)
     testImplementation(project(":common:validation", "default"))
+    testImplementation(Config.Libs.All.agp)
 }
 
 java {
