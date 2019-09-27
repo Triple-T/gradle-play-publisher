@@ -1,7 +1,10 @@
+import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
+
 buildscript {
-    repositories {
-        google()
-        jcenter()
+    repositories.deps()
+
+    dependencies {
+        classpath(kotlin("gradle-plugin", embeddedKotlinVersion))
     }
 }
 
@@ -22,20 +25,38 @@ tasks.register("ciBuild") {
     val isPr = System.getenv("CIRCLE_PULL_REQUEST") != null
     val isSnapshot = project("plugin").version.toString().contains("snapshot", true)
 
+    fun allTasks(name: String) = allprojects.mapNotNull { it.tasks.findByName(name) }
     if (isMaster && !isPr) { // Release build
         if (isSnapshot) {
-            dependsOn(":plugin:build", ":plugin:publish")
+            dependsOn(allTasks("build"), allTasks("publish"))
         } else {
-            dependsOn(":plugin:build")
+            dependsOn(allTasks("build"))
         }
     } else {
-        dependsOn(":plugin:check")
+        dependsOn(allTasks("check"))
     }
 }
 
 allprojects {
-    repositories {
-        google()
-        jcenter()
+    repositories.deps()
+
+    afterEvaluate {
+        convention.findByType<KotlinProjectExtension>()?.apply {
+            sourceSets.configureEach {
+                languageSettings.progressiveMode = true
+                languageSettings.enableLanguageFeature("NewInference")
+                languageSettings.useExperimentalAnnotation(
+                        "kotlinx.coroutines.ExperimentalCoroutinesApi")
+            }
+        }
+    }
+
+    if (System.getenv("CI") != null) {
+        tasks.withType<Test> {
+            testLogging {
+                events("passed", "failed", "skipped")
+                showStandardStreams = true
+            }
+        }
     }
 }
