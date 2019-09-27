@@ -20,7 +20,10 @@ jobs:
             echo -e "\n84831b9409646a918e30573bab4c9c91346d8abd\n504667f4c0de7af1a06de9f4b1727b84351f2910" > "$ANDROID_HOME/licenses/android-sdk-preview-license"
       - run:
           name: Setup environment
-          command: chmod +x gradlew
+          command: |
+              chmod +x gradlew
+              echo "gradle.publish.key=$PUBLISH_KEY" > $HOME/.gradle/gradle.properties
+              echo "gradle.publish.secret=$PUBLISH_SECRET" >> $HOME/.gradle/gradle.properties
       - run:
           name: Build
           command: ./gradlew clean ciBuild --stacktrace
