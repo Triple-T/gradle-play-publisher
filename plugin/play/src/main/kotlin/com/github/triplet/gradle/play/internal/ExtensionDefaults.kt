@@ -13,7 +13,7 @@ internal val PlayPublisherExtension.Config.userFractionOrDefault
 internal val PlayPublisherExtension.Config.resolutionStrategyOrDefault
     get() = resolutionStrategy ?: ResolutionStrategy.FAIL
 
-fun mergeExtensions(extensions: List<PlayPublisherExtension>): PlayPublisherExtension {
+internal fun mergeExtensions(extensions: List<PlayPublisherExtension>): PlayPublisherExtension {
     requireNotNull(extensions.isNotEmpty()) { "At least one extension must be provided." }
     if (extensions.size == 1) return extensions.single()
 
@@ -24,7 +24,9 @@ fun mergeExtensions(extensions: List<PlayPublisherExtension>): PlayPublisherExte
     return result
 }
 
-fun PlayPublisherExtension.mergeWith(default: PlayPublisherExtension?): PlayPublisherExtension {
+internal fun PlayPublisherExtension.mergeWith(
+        default: PlayPublisherExtension?
+): PlayPublisherExtension {
     if (default == null) return this
 
     fun PlayPublisherExtension.getMutableConfig(): Any {
