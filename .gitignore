@@ -2,6 +2,7 @@
 *.iml
 .gradle
 build
+!**/src/main/**/build
 local.properties
 out
 userHome

@@ -9,6 +9,7 @@ buildscript {
 }
 
 plugins {
+    id("com.github.triplet.gradle.build")
     id("com.github.ben-manes.versions") version "0.25.0"
 }
 
@@ -18,23 +19,6 @@ tasks.wrapper {
 
 tasks.register<Delete>("clean") {
     delete("build")
-}
-
-tasks.register("ciBuild") {
-    val isMaster = System.getenv("CIRCLE_BRANCH") == "master"
-    val isPr = System.getenv("CIRCLE_PULL_REQUEST") != null
-    val isSnapshot = project("plugin").version.toString().contains("snapshot", true)
-
-    fun allTasks(name: String) = allprojects.mapNotNull { it.tasks.findByName(name) }
-    if (isMaster && !isPr) { // Release build
-        if (isSnapshot) {
-            dependsOn(allTasks("build"), allTasks("publish"))
-        } else {
-            dependsOn(allTasks("build"))
-        }
-    } else {
-        dependsOn(allTasks("check"))
-    }
 }
 
 allprojects {
