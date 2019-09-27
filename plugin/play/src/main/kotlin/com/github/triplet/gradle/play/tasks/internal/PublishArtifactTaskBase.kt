@@ -47,7 +47,7 @@ abstract class PublishArtifactTaskBase(
                 try {
                     variant.mappingFileProvider.get().singleOrNull()
                 } catch (e: NoSuchMethodError) {
-                    @Suppress("DEPRECATION") // TODO remove when 3.6 is the minimum
+                    @Suppress("DEPRECATION") // TODO(#708): remove when 3.6 is the minimum
                     variant.mappingFile
                 }
             } else {

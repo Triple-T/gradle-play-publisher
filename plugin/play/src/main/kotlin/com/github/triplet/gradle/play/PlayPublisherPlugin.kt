@@ -102,10 +102,10 @@ class PlayPublisherPlugin : Plugin<Project> {
                         "https://github.com/Triple-T/gradle-play-publisher#publishing-in-app-products"
         )
 
-        // TODO add tests for validateDebuggability
-        // TODO add tests for buildExtension
-        // TODO add tests for validateCreds
-        // TODO add tests for GoogleJsonResponseException.has
+        // TODO(#709): add tests for validateDebuggability
+        // TODO(#709): add tests for buildExtension
+        // TODO(#709): add tests for validateCreds
+        // TODO(#709): add tests for GoogleJsonResponseException.has
         val android = project.the<AppExtension>()
         (android as ExtensionAware).extensions.add(PLAY_CONFIGS_PATH, extensionContainer)
         android.applicationVariants.whenObjectAdded {
@@ -142,7 +142,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                 dependsOn(genEditTask)
             }
             bootstrapAllTask { dependsOn(bootstrapTask) }
-            // TODO Remove in v3.0
+            // TODO(#710): Remove in v3.0
             project.newTask("bootstrap${variantName}PlayResources") {
                 dependsOn(bootstrapTask)
                 doFirst { logger.warn("$name is deprecated, use ${bootstrapTask.get().name} instead") }
@@ -177,7 +177,7 @@ class PlayPublisherPlugin : Plugin<Project> {
             }
             commitEditTask { mustRunAfter(publishListingTask) }
             publishListingAllTask { dependsOn(publishListingTask) }
-            // TODO Remove in v3.0
+            // TODO(#710): Remove in v3.0
             project.newTask("publishListing$variantName") {
                 dependsOn(publishListingTask)
                 doFirst { logger.warn("$name is deprecated, use ${publishListingTask.get().name} instead") }
@@ -233,7 +233,7 @@ class PlayPublisherPlugin : Plugin<Project> {
             }
             commitEditTask { mustRunAfter(publishApkTask) }
             publishApkAllTask { dependsOn(publishApkTask) }
-            // TODO Remove in v3.0
+            // TODO(#710): Remove in v3.0
             project.newTask("publishApk$variantName") {
                 dependsOn(publishApkTask)
                 doFirst { logger.warn("$name is deprecated, use ${publishApkTask.get().name} instead") }
@@ -256,7 +256,7 @@ class PlayPublisherPlugin : Plugin<Project> {
             ) {
                 if (extension.config.artifactDir == null) {
                     dependsOn(processArtifactMetadata)
-                    // TODO https://issuetracker.google.com/issues/109918868
+                    // TODO blocked by https://issuetracker.google.com/issues/109918868
                     project.tasks.findByName(
                             (this@whenObjectAdded as InstallableVariantImpl).variantData
                                     .getTaskName("bundle", "")

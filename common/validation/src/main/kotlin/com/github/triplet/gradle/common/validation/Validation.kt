@@ -13,7 +13,7 @@ fun validateRuntime() {
     val agpVersion = VersionNumber.parse(try {
         Version.ANDROID_GRADLE_PLUGIN_VERSION
     } catch (e: NoClassDefFoundError) {
-        @Suppress("DEPRECATION") // TODO remove when 3.6 is the minimum
+        @Suppress("DEPRECATION") // TODO(#708): remove when 3.6 is the minimum
         com.android.builder.model.Version.ANDROID_GRADLE_PLUGIN_VERSION
     })
     val validator = RuntimeValidator(

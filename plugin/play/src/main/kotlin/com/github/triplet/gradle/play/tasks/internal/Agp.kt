@@ -14,7 +14,7 @@ fun PublishTaskBase.findBundleFile(): File? {
     return if (customDir == null) {
         val installable = variant as InstallableVariantImpl
 
-        // TODO remove when AGP 3.6 is the minimum
+        // TODO(#708): remove when AGP 3.6 is the minimum
         fun getFinalArtifactCompat(): Set<File> = try {
             @Suppress("UNCHECKED_CAST") // Incorrect generics
             installable.getFinalArtifact(

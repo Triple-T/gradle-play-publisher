@@ -26,7 +26,7 @@ class GenerateResourcesIntegrationTest {
         "release/res/products/sku.json" generated "src/main/play/products/sku.json"()
     }
 
-    // TODO add test making sure source files doesn't change
+    // TODO(#709): add test making sure source files doesn't change
 
     @Test
     fun `Product flavors override main variant fallbacks`() {
