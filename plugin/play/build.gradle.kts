@@ -7,7 +7,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":common:validation", "default"))
+    compileOnly(project(":common:validation", "default"))
 
     compileOnly(Config.Libs.All.agp)
     implementation(Config.Libs.All.ap)
@@ -15,7 +15,9 @@ dependencies {
     testImplementation(Config.Libs.All.junit)
     testImplementation(kotlin("test"))
     testImplementation(Config.Libs.All.truth)
+
     testImplementation(Config.Libs.All.agp)
+    testImplementation(project(":common:validation", "default"))
 }
 
 java {

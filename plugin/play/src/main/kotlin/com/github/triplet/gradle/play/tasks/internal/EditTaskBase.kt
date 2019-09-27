@@ -13,7 +13,7 @@ abstract class EditTaskBase @Inject constructor(
     @get:LocalState
     internal abstract val editIdFile: RegularFileProperty
 
-    protected companion object {
+    internal companion object {
         fun File.reset() {
             val commitMarker = marked("commit")
             val skippedMarker = marked("skipped")

@@ -102,6 +102,10 @@ class PlayPublisherPlugin : Plugin<Project> {
                         "https://github.com/Triple-T/gradle-play-publisher#publishing-in-app-products"
         )
 
+        // TODO add tests for validateDebuggability
+        // TODO add tests for buildExtension
+        // TODO add tests for validateCreds
+        // TODO add tests for GoogleJsonResponseException.has
         val android = project.the<AppExtension>()
         (android as ExtensionAware).extensions.add(PLAY_CONFIGS_PATH, extensionContainer)
         android.applicationVariants.whenObjectAdded {
