@@ -25,14 +25,15 @@ tasks.register("ciBuild") {
     val isPr = System.getenv("CIRCLE_PULL_REQUEST") != null
     val isSnapshot = project("plugin").version.toString().contains("snapshot", true)
 
+    fun allTasks(name: String) = allprojects.mapNotNull { it.tasks.findByName(name) }
     if (isMaster && !isPr) { // Release build
         if (isSnapshot) {
-            dependsOn(":plugin:build", ":plugin:publish")
+            dependsOn(allTasks("build"), allTasks("publish"))
         } else {
-            dependsOn(":plugin:build")
+            dependsOn(allTasks("build"))
         }
     } else {
-        dependsOn(":plugin:check")
+        dependsOn(allTasks("check"))
     }
 }
 
