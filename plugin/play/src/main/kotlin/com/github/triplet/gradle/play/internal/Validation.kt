@@ -1,0 +1,32 @@
+package com.github.triplet.gradle.play.internal
+
+import com.android.build.gradle.api.ApplicationVariant
+import com.github.triplet.gradle.common.validation.validateDebuggability
+import com.github.triplet.gradle.play.PlayPublisherExtension
+import com.github.triplet.gradle.play.PlayPublisherPlugin
+import com.google.api.client.googleapis.json.GoogleJsonResponseException
+import org.gradle.api.logging.Logging
+
+internal fun PlayPublisherExtension.validateCreds() {
+    val creds = checkNotNull(config.serviceAccountCredentials) {
+        "No credentials specified. Please read our docs for more details: " +
+                "https://github.com/Triple-T/gradle-play-publisher" +
+                "#authenticating-gradle-play-publisher"
+    }
+
+    if (creds.extension.equals("json", true)) {
+        check(config.serviceAccountEmail == null) {
+            "JSON credentials cannot specify a service account email."
+        }
+    } else {
+        check(config.serviceAccountEmail != null) {
+            "PKCS12 credentials must specify a service account email."
+        }
+    }
+}
+
+internal fun ApplicationVariant.validateDebuggability() =
+        validateDebuggability(this, Logging.getLogger(PlayPublisherPlugin::class.java))
+
+internal infix fun GoogleJsonResponseException.has(error: String) =
+        details?.errors.orEmpty().any { it.reason == error }

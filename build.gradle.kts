@@ -1,7 +1,10 @@
+import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
+
 buildscript {
-    repositories {
-        google()
-        jcenter()
+    repositories.deps()
+
+    dependencies {
+        classpath(kotlin("gradle-plugin", embeddedKotlinVersion))
     }
 }
 
@@ -34,8 +37,25 @@ tasks.register("ciBuild") {
 }
 
 allprojects {
-    repositories {
-        google()
-        jcenter()
+    repositories.deps()
+
+    afterEvaluate {
+        convention.findByType<KotlinProjectExtension>()?.apply {
+            sourceSets.configureEach {
+                languageSettings.progressiveMode = true
+                languageSettings.enableLanguageFeature("NewInference")
+                languageSettings.useExperimentalAnnotation(
+                        "kotlinx.coroutines.ExperimentalCoroutinesApi")
+            }
+        }
+    }
+
+    if (System.getenv("CI") != null) {
+        tasks.withType<Test> {
+            testLogging {
+                events("passed", "failed", "skipped")
+                showStandardStreams = true
+            }
+        }
     }
 }
