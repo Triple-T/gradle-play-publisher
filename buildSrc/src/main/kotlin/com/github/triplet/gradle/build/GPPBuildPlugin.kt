@@ -13,7 +13,7 @@ class GPPBuildPlugin : Plugin<Project> {
         check(project === project.rootProject) { "Cannot apply build plugin to subprojects." }
 
         project.tasks.register("ciBuild") {
-            if (isReleaseBuild()) { // Release build
+            if (isReleaseBuild()) {
                 val buildTasks = allTasks("build")
                 dependsOn(buildTasks)
                 if (isSnapshotBuild()) {
