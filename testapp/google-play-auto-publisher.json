@@ -1,0 +1,12 @@
+{
+    "type": "service_account",
+    "project_id": "robot-scouter-app",
+    "private_key_id": "c2e5497d5987c9b9f27f938db867cd9ed1454b9b",
+    "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDH1Wz97xatCY+o\nRirCQERzMQUm0YZ14f8LIBA6mZ2oKlEnL8vLx4m5Xfy3NWkhs/MSzSiE5/YUGYcE\nDRX9O6UBGM1QVLdVleeMLXag2wCP509usrhTEIyrH++DFf500i88zmhNC2Zx13NZ\nAOsCeWoP6ScpoQ47X8hPf6q5hOLQgYlZ+FZ5bOlOmHnBzDiLrv/NtE3mZ3Udcn9Q\nEy6d1v0rC19p/Rfb/3BFOzGcPmACIH9D+PIjaH6Z3BdlZK8bJtxVcwlpVvcrh3sv\nqsQbgKI80OmaEOvrjjJoDGyN0gCs6sZaSAsd+1DMzx5K0be+K3998MapbUDgfXAI\nW9+AfaYJAgMBAAECggEABe+Lp+n3fSGmPWlYJneiO4mz4s32ddSbWXPqXNM99kYg\n2E54eeUYwi4jLjiils2xkAK9YV/tKfZYJwFR1ePKUu4EVePY+OyATuRK0ccE4pa2\n//gZtt3sT75IbwGy5+Vrtx1VG8oVkOwau69l9lIvmaljRb6dnZs1Z/xy0G/nYioU\nExAcc8sgiywr0oudll5LsngoPfZJmC7KTR2KXNu+zM+8qnya/QZ9/NTDYSrhEkJ7\nFQMY86CoyrUjqpiTFdtD1sLKTlhlA1HKgHp0w9M8xUiXEuZNJFkV3SdaP9QfW4RR\nm76KvgJFmr5bLWG7vquIHiRguWmYSiX+SWt3UbDDAQKBgQDqUCf9Conri2tjUUqB\nQCbr6r6Z0r8ZPPwpuGKLoDiXO1kaRSR1AxJD7OkszkB22gY1KtCchGEEd03/oRhs\nzXBi8mp4uqfB4TfEzy+3SqIorh8U9BVp32wdoUFiRFsJAa35gJE3kbBiFjwaIi+7\nll1QxrwGxvn1YrQycIwAOCeqhQKBgQDaVE9cbTBF4F1DfvVssF5s3CP86nhflbc8\nLieWZrjreVt05TR/NrcfSIdLkIASNl1E55mF1SxrUGqJbGtsl5LU//hLGO/+chiX\nN9m/MJsQolRTfPJifO+kcDB3dSnsfpFXtqA7GlyxYpclrwAry6ufxEqkHtBabeFh\ncKfMBKSetQKBgEpdplNpRNy9IxgidMMQ2UmG93daq8wWzvFu09f8wfk9nMn5p9h7\nYRCt4FOYIl2WVOIK9Kq4WRJRyy+WsWnWyhSdW611kEi4cjrEhyBlT5IZsUO1NBam\nEmpVA6tshngVUGIfq/c3BgQbinfA4eVnk7ZPXN3JyQtYiFh53/Ux3WUBAoGBAI55\nPDy1aC4BRvs3y1J9GXFyiu2N2LWPjr5v5BeKuxu22w7CT+rAOunoO5n9FwZLgbvo\nYs/qF42EMbGyFbwMgZ4L1+yxvlNOA2wS3z6bqmVFeT/uJoJMw1mMeKRLyerxgUk6\n/P70qg57puTJeZQa2cltn8PP8+k/ETez+1vwn7iNAoGBAIcYJVhmMtoCvtLq+IJ2\nYbi+4nY6DV0JLNd3HW82yMaxqirfiZG3PgzTRJMf8hvzu3QfSnSwli5xE8GSiAyI\nn2pYvMHiqcDBSTcVR5jo8icUu8tolHzDwKKQcViBCCIQkVo0THKCiVHDcPLffjsc\nXWg1O0g3PBlHHnUGleDIuPyU\n-----END PRIVATE KEY-----\n",
+    "client_email": "test-play-publisher@robot-scouter-app.iam.gserviceaccount.com",
+    "client_id": "112032282228779745838",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/test-play-publisher%40robot-scouter-app.iam.gserviceaccount.com"
+}

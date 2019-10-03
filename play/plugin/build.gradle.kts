@@ -52,7 +52,7 @@ tasks.named("test") {
 }
 
 group = "com.github.triplet.gradle"
-version = "2.5.0-SNAPSHOT"
+version = rootProject.file("version.txt").readText().trim()
 
 gradlePlugin {
     plugins.create("play") {

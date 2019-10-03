@@ -9,8 +9,14 @@ buildscript {
 }
 
 plugins {
+    `build-scan`
     id("com.github.triplet.gradle.build")
     id("com.github.ben-manes.versions") version "0.25.0"
+}
+
+buildScan {
+    termsOfServiceUrl = "https://gradle.com/terms-of-service"
+    termsOfServiceAgree = "yes"
 }
 
 tasks.wrapper {
@@ -18,7 +24,7 @@ tasks.wrapper {
 }
 
 tasks.register<Delete>("clean") {
-    delete("build")
+    delete("build", "testapp/build")
 }
 
 allprojects {
@@ -44,3 +50,5 @@ allprojects {
         }
     }
 }
+
+apply(from = "testapp-setup.gradle.kts")
