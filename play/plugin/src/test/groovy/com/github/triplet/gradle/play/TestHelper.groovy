@@ -62,7 +62,7 @@ class TestHelper {
             }
             dependencies {
                 classpath 'com.android.tools.build:gradle:3.6.0-alpha11'
-                classpath files('../../../../build/libs/play-${System.getProperty("VERSION_NAME")}.jar')
+                classpath files('../../../../build/libs/plugin-${System.getProperty("VERSION_NAME")}.jar')
 
                 // Manually define transitive dependencies for our plugin since we don't have the
                 // POM to fetch them for us

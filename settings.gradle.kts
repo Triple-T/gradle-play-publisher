@@ -1,1 +1,5 @@
-include(":plugin:play", ":common:validation")
+include(
+        ":common:validation",
+
+        ":play:plugin", ":play:publishing"
+)
