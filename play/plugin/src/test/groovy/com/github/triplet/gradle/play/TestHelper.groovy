@@ -1,6 +1,6 @@
 package com.github.triplet.gradle.play
 
-import com.github.triplet.gradle.play.internal.IoKt
+import com.github.triplet.gradle.common.utils.IoKt
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.BuildResult

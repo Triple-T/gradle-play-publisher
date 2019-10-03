@@ -1,7 +1,7 @@
 package com.github.triplet.gradle.play.tasks.internal
 
+import com.github.triplet.gradle.common.utils.marked
 import com.github.triplet.gradle.play.PlayPublisherExtension
-import com.github.triplet.gradle.play.internal.marked
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.LocalState
 import java.io.File

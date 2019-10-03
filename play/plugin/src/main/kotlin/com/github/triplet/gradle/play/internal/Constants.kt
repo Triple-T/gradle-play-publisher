@@ -1,8 +1,5 @@
 package com.github.triplet.gradle.play.internal
 
-internal const val PLUGIN_NAME = "gradle-play-publisher"
-internal const val PLUGIN_GROUP = "Publishing"
-
 internal const val PLAY_PATH = "play"
 internal const val PLAY_CONFIGS_PATH = "playConfigs"
 internal const val LISTINGS_PATH = "listings"

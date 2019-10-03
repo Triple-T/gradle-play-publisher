@@ -2,6 +2,8 @@ package com.github.triplet.gradle.play.internal
 
 import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.api.BaseVariant
+import com.github.triplet.gradle.common.utils.PLUGIN_GROUP
+import com.github.triplet.gradle.common.utils.nullOrFull
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.tasks.CommitEdit
 import com.github.triplet.gradle.play.tasks.GenerateEdit

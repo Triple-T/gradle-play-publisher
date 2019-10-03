@@ -1,7 +1,7 @@
 include(
-        ":common:validation",
+        ":common:utils", ":common:validation",
 
-        ":play:plugin", ":play:publishing"
+        ":play:plugin", ":play:android-publisher"
 )
 
 // The test app can only be used in development since it requires running

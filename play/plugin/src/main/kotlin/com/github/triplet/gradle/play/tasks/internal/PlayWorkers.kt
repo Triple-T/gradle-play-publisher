@@ -1,5 +1,10 @@
 package com.github.triplet.gradle.play.tasks.internal
 
+import com.github.triplet.gradle.androidpublisher.PlayPublisher
+import com.github.triplet.gradle.common.utils.marked
+import com.github.triplet.gradle.common.utils.orNull
+import com.github.triplet.gradle.common.utils.readProcessed
+import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.MIME_TYPE_STREAM
 import com.github.triplet.gradle.play.internal.RELEASE_NAMES_DEFAULT_NAME
@@ -8,12 +13,8 @@ import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.commitOrDefault
 import com.github.triplet.gradle.play.internal.has
 import com.github.triplet.gradle.play.internal.isRollout
-import com.github.triplet.gradle.play.internal.marked
-import com.github.triplet.gradle.play.internal.orNull
-import com.github.triplet.gradle.play.internal.readProcessed
 import com.github.triplet.gradle.play.internal.releaseStatusOrDefault
 import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
-import com.github.triplet.gradle.play.internal.safeCreateNewFile
 import com.github.triplet.gradle.play.internal.trackOrDefault
 import com.github.triplet.gradle.play.internal.userFractionOrDefault
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
@@ -92,6 +93,11 @@ internal abstract class PlayWorkerBase<T : PlayWorkerBase.PlayPublishingParams> 
     protected val appId = parameters.appId.get()
 
     protected val publisher = config.buildPublisher()
+    protected val publisher2 = PlayPublisher(
+            config.serviceAccountCredentials!!,
+            config.serviceAccountEmail,
+            appId
+    )
     protected val logger: Logger = Logging.getLogger(Task::class.java)
 
     protected fun <T> AndroidPublisherRequest<T>.trackUploadProgress(

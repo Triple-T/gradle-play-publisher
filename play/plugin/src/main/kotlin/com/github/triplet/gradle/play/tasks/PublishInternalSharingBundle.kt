@@ -1,15 +1,13 @@
 package com.github.triplet.gradle.play.tasks
 
 import com.android.build.gradle.api.ApplicationVariant
+import com.github.triplet.gradle.common.utils.orNull
 import com.github.triplet.gradle.play.PlayPublisherExtension
-import com.github.triplet.gradle.play.internal.MIME_TYPE_STREAM
-import com.github.triplet.gradle.play.internal.orNull
 import com.github.triplet.gradle.play.tasks.internal.ArtifactExtensionOptions
 import com.github.triplet.gradle.play.tasks.internal.PlayWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.findBundleFile
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
-import com.google.api.client.http.FileContent
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.InputFile
@@ -49,14 +47,10 @@ abstract class PublishInternalSharingBundle @Inject constructor(
     internal abstract class BundleUploader : PlayWorkerBase<BundleUploader.Params>() {
         override fun execute() {
             val bundleFile = parameters.bundleFile.get().asFile
-            val bundle = publisher.internalappsharingartifacts()
-                    .uploadbundle(appId, FileContent(MIME_TYPE_STREAM, bundleFile))
-                    .trackUploadProgress("App Bundle", bundleFile)
-                    .execute()
+            val response = publisher2.uploadInternalSharingBundle(bundleFile)
 
             parameters.outputDir.get().file("${System.currentTimeMillis()}.json").asFile
-                    .writeText(bundle.toPrettyString())
-            println("Upload successful: ${bundle.downloadUrl}")
+                    .writeText(response)
         }
 
         interface Params : PlayPublishingParams {

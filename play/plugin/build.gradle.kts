@@ -8,6 +8,7 @@ plugins {
 
 dependencies {
     compileOnly(project(":common:validation", "default"))
+    compileOnly(project(":play:android-publisher", "default"))
 
     compileOnly(Config.Libs.All.agp)
     implementation(Config.Libs.All.ap)
@@ -17,6 +18,7 @@ dependencies {
     testImplementation(Config.Libs.All.truth)
 
     testImplementation(project(":common:validation", "default"))
+    testImplementation(project(":play:android-publisher", "default"))
     testImplementation(Config.Libs.All.agp)
 }
 
