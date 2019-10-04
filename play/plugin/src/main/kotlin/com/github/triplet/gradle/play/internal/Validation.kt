@@ -14,6 +14,7 @@ internal fun PlayPublisherExtension.validateCreds() {
                 "#authenticating-gradle-play-publisher"
     }
 
+    // TODO(#710): remove once support for PKCS12 creds is gone
     if (creds.extension.equals("json", true)) {
         check(config.serviceAccountEmail == null) {
             "JSON credentials cannot specify a service account email."
@@ -22,6 +23,9 @@ internal fun PlayPublisherExtension.validateCreds() {
         check(config.serviceAccountEmail != null) {
             "PKCS12 credentials must specify a service account email."
         }
+        Logging.getLogger(PlayPublisherPlugin::class.java)
+                .warn("PKCS12 based authentication is deprecated. " +
+                              "Please use JSON credentials instead.")
     }
 }
 

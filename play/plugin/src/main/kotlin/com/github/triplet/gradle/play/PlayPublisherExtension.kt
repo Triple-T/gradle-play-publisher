@@ -57,9 +57,12 @@ open class PlayPublisherExtension @JvmOverloads constructor(
             _config.serviceAccountCredentials = value
         }
 
+    // TODO(#710): remove once support for PKCS12 creds is gone
     /** Service Account email. Only needed if PKCS12 credentials are used. */
     @get:Optional
     @get:Input
+    @get:Deprecated("Use JSON credentials instead.")
+    @set:Deprecated("Use JSON credentials instead.")
     var serviceAccountEmail: String?
         get() = _config.serviceAccountEmail
         set(value) {
