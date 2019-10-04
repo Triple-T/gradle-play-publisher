@@ -182,15 +182,6 @@ play {
 }
 ```
 
-#### Using a PKCS12 key instead
-
-```kt
-play {
-    serviceAccountEmail = "service-account-name@project-id.iam.gserviceaccount.com"
-    serviceAccountCredentials = file("your-key.p12")
-}
-```
-
 ## Task organization
 
 GPP follows the Android Gradle Plugin's naming convention: `[action][Variant][Thing]`. For example,
