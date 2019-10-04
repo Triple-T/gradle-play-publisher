@@ -7,8 +7,8 @@ plugins {
 }
 
 dependencies {
-    compileOnly(project(":common:validation", "default"))
-    compileOnly(project(":play:android-publisher", "default"))
+    implementation(project(":common:validation", "default"))
+    implementation(project(":play:android-publisher", "default"))
 
     compileOnly(Config.Libs.All.agp)
     implementation(Config.Libs.All.ap)
@@ -16,9 +16,6 @@ dependencies {
     testImplementation(Config.Libs.All.junit)
     testImplementation(kotlin("test"))
     testImplementation(Config.Libs.All.truth)
-
-    testImplementation(project(":common:validation", "default"))
-    testImplementation(project(":play:android-publisher", "default"))
     testImplementation(Config.Libs.All.agp)
 }
 
@@ -37,6 +34,13 @@ tasks.withType<Jar>().configureEach {
     }
 
     from(projectLibs.map { zipTree(it) })
+}
+
+tasks.withType<PluginUnderTestMetadata>().configureEach {
+    pluginClasspath.setFrom(/* reset */)
+
+    pluginClasspath.from(configurations.compileClasspath)
+    pluginClasspath.from(sourceSets.main.get().runtimeClasspath)
 }
 
 tasks.withType<ValidateTaskProperties>().configureEach {

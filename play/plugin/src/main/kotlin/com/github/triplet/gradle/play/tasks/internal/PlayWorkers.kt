@@ -92,7 +92,7 @@ internal abstract class PlayWorkerBase<T : PlayWorkerBase.PlayPublishingParams> 
     protected val config = parameters.config.get()
     protected val appId = parameters.appId.get()
 
-    protected val publisher = config.buildPublisher()
+    protected val publisher by lazy { config.buildPublisher() }
     protected val publisher2 = PlayPublisher(
             config.serviceAccountCredentials!!,
             config.serviceAccountEmail,
