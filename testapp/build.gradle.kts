@@ -5,10 +5,9 @@ import java.util.Properties
 
 buildscript {
     repositories {
-        mavenLocal()
         google()
         jcenter()
-        maven("https://oss.sonatype.org/content/repositories/snapshots")
+        mavenLocal()
     }
 
     dependencies {
