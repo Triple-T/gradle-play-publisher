@@ -7,12 +7,14 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":common:validation", "default"))
-    implementation(project(":play:android-publisher", "default"))
+    compileOnly(project(":common:validation", "default"))
+    compileOnly(project(":play:android-publisher", "default"))
 
     compileOnly(Config.Libs.All.agp)
     implementation(Config.Libs.All.ap)
 
+    testImplementation(project(":common:validation", "default"))
+    testImplementation(project(":play:android-publisher", "default"))
     testImplementation(Config.Libs.All.junit)
     testImplementation(kotlin("test"))
     testImplementation(Config.Libs.All.truth)
