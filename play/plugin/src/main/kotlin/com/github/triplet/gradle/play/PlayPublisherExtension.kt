@@ -20,6 +20,7 @@ import org.gradle.api.tasks.PathSensitivity
 import java.io.File
 import java.io.Serializable
 
+/** The entry point for all GPP related configuration. */
 open class PlayPublisherExtension @JvmOverloads constructor(
         @get:Internal internal val name: String = "default" // Needed for Gradle
 ) {
@@ -192,6 +193,15 @@ open class PlayPublisherExtension @JvmOverloads constructor(
             }
         }
 
+    /** Specify the Play Console developer facing release name. */
+    @get:Optional
+    @get:Input
+    var releaseName: String?
+        get() = _config.releaseName
+        set(value) {
+            _config.releaseName = value
+        }
+
     /**
      * Specify a directory where prebuilt artifacts such as APKs or App Bundles may be found. The
      * directory must exist and should contain only artifacts intended to be uploaded. If no
@@ -219,8 +229,9 @@ open class PlayPublisherExtension @JvmOverloads constructor(
         action.execute(_config.retain)
     }
 
-    override fun toString() = "PlayPublisherExtension(name='$name', config=$_config)"
+    override fun toString(): String = "PlayPublisherExtension(name='$name', config=$_config)"
 
+    /** Entry point for retainable artifact configuration. */
     data class Retain(
             /** Specify the version code(s) of an APK or App Bundle to retain. Defaults to none. */
             @get:Optional
@@ -261,6 +272,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
             var resolutionStrategy: ResolutionStrategy? = null,
             var outputProcessor: Action<ApkVariantOutput>? = null,
             var releaseStatus: ReleaseStatus? = null,
+            var releaseName: String? = null,
             var artifactDir: File? = null,
 
             val retain: Retain = Retain()

@@ -1,13 +1,15 @@
 package com.github.triplet.gradle.play.tasks.internal
 
+import com.android.build.VariantOutput.OutputType
 import com.android.build.api.artifact.ArtifactType
+import com.android.build.gradle.api.ApkVariantOutput
 import com.android.build.gradle.internal.api.InstallableVariantImpl
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.file.RegularFile
 import java.io.File
 
-fun PublishTaskBase.findBundleFile(): File? {
+internal fun PublishTaskBase.findBundleFile(): File? {
     val customDir = extension.config.artifactDir
 
     return if (customDir == null) {
@@ -43,4 +45,26 @@ fun PublishTaskBase.findBundleFile(): File? {
         }
         bundles.singleOrNull()
     }
+}
+
+internal fun PublishTaskBase.findApkFiles(allowSplits: Boolean): List<File>? {
+    val customDir = extension.config.artifactDir
+
+    return if (customDir == null) {
+        var result = variant.outputs.filterIsInstance<ApkVariantOutput>()
+        if (!allowSplits) {
+            result = result.filter {
+                OutputType.valueOf(it.outputType) == OutputType.MAIN || it.filters.isEmpty()
+            }
+        }
+        result.map { it.outputFile }
+    } else if (customDir.isFile && customDir.extension == "apk") {
+        listOf(customDir)
+    } else {
+        val apks = customDir.listFiles().orEmpty().filter { it.extension == "apk" }
+        if (apks.isEmpty()) {
+            logger.warn("Warning: '$customDir' does not yet contain any APKs.")
+        }
+        apks
+    }.ifEmpty { null }
 }

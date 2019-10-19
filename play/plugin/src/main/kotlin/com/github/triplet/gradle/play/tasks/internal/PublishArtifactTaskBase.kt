@@ -16,11 +16,10 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import java.io.File
 
-abstract class PublishArtifactTaskBase(
+internal abstract class PublishArtifactTaskBase(
         extension: PlayPublisherExtension,
-        variant: ApplicationVariant,
-        optionsHolder: TransientTrackOptions.Holder
-) : PublishEditTaskBase(extension, variant), TransientTrackOptions by optionsHolder {
+        variant: ApplicationVariant
+) : PublishEditTaskBase(extension, variant), TransientTrackOptions {
     @get:Internal
     internal abstract val resDir: DirectoryProperty
 

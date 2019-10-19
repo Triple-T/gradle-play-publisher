@@ -17,8 +17,8 @@ dependencies {
     testImplementation(project(":play:android-publisher", "default"))
     testImplementation(Config.Libs.All.agp)
 
-    testImplementation(Config.Libs.All.junit)
     testImplementation(kotlin("test"))
+    testImplementation(Config.Libs.All.junit)
     testImplementation(Config.Libs.All.truth)
 }
 

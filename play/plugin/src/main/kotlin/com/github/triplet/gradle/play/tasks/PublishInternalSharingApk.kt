@@ -1,7 +1,5 @@
 package com.github.triplet.gradle.play.tasks
 
-import com.android.build.VariantOutput.OutputType
-import com.android.build.gradle.api.ApkVariantOutput
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.common.utils.orNull
 import com.github.triplet.gradle.play.PlayPublisherExtension
@@ -9,6 +7,7 @@ import com.github.triplet.gradle.play.tasks.internal.ArtifactExtensionOptions
 import com.github.triplet.gradle.play.tasks.internal.PlayWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.copy
+import com.github.triplet.gradle.play.tasks.internal.findApkFiles
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
@@ -31,23 +30,7 @@ internal abstract class PublishInternalSharingApk @Inject constructor(
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
     protected val apks: List<File>?
-        get() {
-            val customDir = extension.config.artifactDir
-
-            return if (customDir == null) {
-                variant.outputs.filterIsInstance<ApkVariantOutput>().filter {
-                    OutputType.valueOf(it.outputType) == OutputType.MAIN || it.filters.isEmpty()
-                }.map { it.outputFile }
-            } else if (customDir.isFile && customDir.extension == "apk") {
-                listOf(customDir)
-            } else {
-                val apks = customDir.listFiles().orEmpty().filter { it.extension == "apk" }
-                if (apks.isEmpty()) {
-                    logger.warn("Warning: '$customDir' does not yet contain any APKs.")
-                }
-                apks
-            }.ifEmpty { null }
-        }
+        get() = findApkFiles(false)
 
     @get:OutputDirectory
     abstract val outputDirectory: DirectoryProperty

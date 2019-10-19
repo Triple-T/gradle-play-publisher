@@ -7,7 +7,6 @@ import com.github.triplet.gradle.play.internal.MIME_TYPE_STREAM
 import com.github.triplet.gradle.play.tasks.internal.ArtifactWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.PublishArtifactTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PublishableTrackExtensionOptions
-import com.github.triplet.gradle.play.tasks.internal.TransientTrackOptions
 import com.github.triplet.gradle.play.tasks.internal.findBundleFile
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
@@ -26,9 +25,8 @@ import javax.inject.Inject
 
 internal abstract class PublishBundle @Inject constructor(
         extension: PlayPublisherExtension,
-        variant: ApplicationVariant,
-        optionsHolder: TransientTrackOptions.Holder
-) : PublishArtifactTaskBase(extension, variant, optionsHolder), PublishableTrackExtensionOptions {
+        variant: ApplicationVariant
+) : PublishArtifactTaskBase(extension, variant), PublishableTrackExtensionOptions {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFile
     protected val bundle

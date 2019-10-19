@@ -89,18 +89,18 @@ internal interface TrackExtensionOptions : WriteTrackExtensionOptions {
         }
 }
 
-interface TransientTrackOptions {
+internal interface TransientTrackOptions : ExtensionOptionsBase {
     @get:Optional
     @get:Input
     @set:Option(
             option = "release-name",
             description = "Set the Play Console developer facing release name."
     )
-    var releaseName: String?
-
-    class Holder : TransientTrackOptions {
-        override var releaseName: String? = null
-    }
+    var releaseName: String
+        get() = throw UnsupportedOperationException()
+        set(value) {
+            extension.releaseName = value
+        }
 }
 
 internal interface UpdatableTrackExtensionOptions : TrackExtensionOptions {
@@ -168,7 +168,7 @@ internal interface GlobalPublishableArtifactExtensionOptions : PublishableTrackE
         }
 }
 
-interface BootstrapOptions {
+internal interface BootstrapOptions {
     @get:Internal
     @set:Option(
             option = "app-details",
