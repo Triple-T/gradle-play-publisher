@@ -14,7 +14,7 @@ import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.workers.WorkerExecutor
 import javax.inject.Inject
 
-abstract class PromoteRelease @Inject constructor(
+internal abstract class PromoteRelease @Inject constructor(
         extension: PlayPublisherExtension,
         variant: ApplicationVariant,
         optionsHolder: TransientTrackOptions.Holder
@@ -31,7 +31,7 @@ abstract class PromoteRelease @Inject constructor(
         }
     }
 
-    internal abstract class Promoter :
+    abstract class Promoter :
             ArtifactWorkerBase<ArtifactWorkerBase.ArtifactPublishingParams>() {
         override fun upload() {
             val tracks = edits.tracks().list(appId, editId).execute()

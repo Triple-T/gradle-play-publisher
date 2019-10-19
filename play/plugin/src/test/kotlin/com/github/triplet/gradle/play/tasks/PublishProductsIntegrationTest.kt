@@ -1,6 +1,7 @@
 package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.play.helpers.DefaultPlayPublisher
+import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.github.triplet.gradle.play.helpers.execute
 import com.google.api.services.androidpublisher.model.InAppProduct
 import com.google.common.truth.Truth.assertThat
@@ -79,6 +80,26 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Multiple products are all published`() {
+        @Suppress("UnnecessaryQualifiedReference")
+        // language=gradle
+        val config = """
+            com.github.triplet.gradle.play.tasks.PublishProductsIntegrationBridge.installFactories()
+
+            android.buildTypes {
+                multipleProducts {}
+            }
+        """
+
+        val result = execute(config, "publishMultipleProductsProducts")
+
+        assertThat(result.task(":publishMultipleProductsProducts")).isNotNull()
+        assertThat(result.task(":publishMultipleProductsProducts")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("sku1")
+        assertThat(result.output).contains("sku2")
+    }
+
+    @Test
+    fun `Republishing products uses cached build`() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """

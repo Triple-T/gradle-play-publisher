@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest package="com.example.publisher">
+
+    <!-- This needs to be an empty element as workaround for https://code.google.com/p/android/issues/detail?id=77890 -->
+
+</manifest>

@@ -2,6 +2,7 @@ package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.play.helpers.DefaultPlayPublisher
 import com.github.triplet.gradle.play.helpers.FIXTURE_WORKING_DIR
+import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.github.triplet.gradle.play.helpers.execute
 import com.github.triplet.gradle.play.helpers.executeExpectingFailure
 import com.google.common.truth.Truth.assertThat
@@ -24,6 +25,23 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":bundleRelease")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingBundle")
         assertThat(result.output).contains("aab")
+    }
+
+    @Test
+    fun `Rebuilding bundle on-the-fly uses cached build`() {
+        @Suppress("UnnecessaryQualifiedReference")
+        // language=gradle
+        val config = """
+            com.github.triplet.gradle.play.tasks.PublishInternalSharingBundleBridge.installFactories()
+        """
+
+        val result1 = execute(config, "uploadReleasePrivateBundle")
+        val result2 = execute(config, "uploadReleasePrivateBundle")
+
+        assertThat(result1.task(":uploadReleasePrivateBundle")).isNotNull()
+        assertThat(result1.task(":uploadReleasePrivateBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result2.task(":uploadReleasePrivateBundle")).isNotNull()
+        assertThat(result2.task(":uploadReleasePrivateBundle")!!.outcome).isEqualTo(TaskOutcome.UP_TO_DATE)
     }
 
     @Test
@@ -113,6 +131,28 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
                 .isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingBundle")
         assertThat(result.output).contains(tempDir.root.name)
+    }
+
+    @Test
+    fun `Reusing custom artifact uses cached build`() {
+        @Suppress("UnnecessaryQualifiedReference")
+        // language=gradle
+        val config = """
+            com.github.triplet.gradle.play.tasks.PublishInternalSharingBundleBridge.installFactories()
+
+            play {
+                artifactDir = file('${escapedTempDir()}')
+            }
+        """
+
+        File(tempDir.root, "foo.aab").createNewFile()
+        val result1 = execute(config, "uploadReleasePrivateBundle")
+        val result2 = execute(config, "uploadReleasePrivateBundle")
+
+        assertThat(result1.task(":uploadReleasePrivateBundle")).isNotNull()
+        assertThat(result1.task(":uploadReleasePrivateBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result2.task(":uploadReleasePrivateBundle")).isNotNull()
+        assertThat(result2.task(":uploadReleasePrivateBundle")!!.outcome).isEqualTo(TaskOutcome.UP_TO_DATE)
     }
 
     @Test

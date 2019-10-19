@@ -1,6 +1,7 @@
 package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.play.helpers.FIXTURE_WORKING_DIR
+import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.github.triplet.gradle.play.helpers.execute
 import com.github.triplet.gradle.play.helpers.executeExpectingFailure
 import org.gradle.testkit.runner.TaskOutcome

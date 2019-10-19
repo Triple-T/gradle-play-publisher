@@ -42,7 +42,7 @@ import java.io.File
 import java.io.Serializable
 import javax.inject.Inject
 
-abstract class PublishListing @Inject constructor(
+internal abstract class PublishListing @Inject constructor(
         extension: PlayPublisherExtension,
         variant: ApplicationVariant
 ) : PublishEditTaskBase(extension, variant), WriteTrackExtensionOptions {

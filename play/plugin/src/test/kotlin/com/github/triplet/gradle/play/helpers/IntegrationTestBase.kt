@@ -1,8 +1,6 @@
-package com.github.triplet.gradle.play.tasks
+package com.github.triplet.gradle.play.helpers
 
-import com.github.triplet.gradle.play.helpers.FIXTURES_DIR
-import com.github.triplet.gradle.play.helpers.FIXTURE_WORKING_DIR
-import com.github.triplet.gradle.play.helpers.execute
+import com.github.triplet.gradle.common.utils.orNull
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
@@ -15,18 +13,18 @@ abstract class IntegrationTestBase {
     val tempDir = TemporaryFolder()
 
     @Before
-    fun cleanDirs() {
+    fun resetOutputs() {
         execute("", "clean")
         assertThat(File(FIXTURE_WORKING_DIR, "build").exists()).isFalse()
     }
 
     @Before
-    fun copyResDirs() {
-        File(FIXTURES_DIR, javaClass.simpleName).copyRecursively(FIXTURE_WORKING_DIR)
+    fun initTestResources() {
+        File(FIXTURES_DIR, javaClass.simpleName).orNull()?.copyRecursively(FIXTURE_WORKING_DIR)
     }
 
     @After
-    fun cleanupResDirs() {
+    fun cleanupTestResources() {
         for (file in File(FIXTURES_DIR, javaClass.simpleName).listFiles().orEmpty()) {
             File(FIXTURE_WORKING_DIR, file.name).deleteRecursively()
         }

@@ -8,7 +8,7 @@ import com.github.triplet.gradle.play.tasks.internal.buildPublisher
 import org.gradle.api.tasks.TaskAction
 import javax.inject.Inject
 
-abstract class ProcessArtifactMetadata @Inject constructor(
+internal abstract class ProcessArtifactMetadata @Inject constructor(
         extension: PlayPublisherExtension,
         variant: ApplicationVariant
 ) : PublishEditTaskBase(extension, variant) {

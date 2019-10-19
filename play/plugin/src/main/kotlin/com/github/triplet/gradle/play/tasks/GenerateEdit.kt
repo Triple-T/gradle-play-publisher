@@ -21,7 +21,7 @@ import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkerExecutor
 import javax.inject.Inject
 
-abstract class GenerateEdit @Inject constructor(
+internal abstract class GenerateEdit @Inject constructor(
         extension: PlayPublisherExtension
 ) : EditTaskBase(extension) {
     init {
@@ -39,7 +39,7 @@ abstract class GenerateEdit @Inject constructor(
         }
     }
 
-    internal abstract class Generator : WorkAction<Generator.Params> {
+    abstract class Generator : WorkAction<Generator.Params> {
         private val file = parameters.editIdFile.get().asFile
         private val appId = file.nameWithoutExtension
 
