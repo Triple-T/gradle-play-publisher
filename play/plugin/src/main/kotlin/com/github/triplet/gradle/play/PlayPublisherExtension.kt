@@ -20,7 +20,6 @@ import org.gradle.api.tasks.PathSensitivity
 import java.io.File
 import java.io.Serializable
 
-@Suppress("PropertyName")
 open class PlayPublisherExtension @JvmOverloads constructor(
         @get:Internal internal val name: String = "default" // Needed for Gradle
 ) {

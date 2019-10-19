@@ -21,7 +21,7 @@ import org.gradle.workers.WorkerExecutor
 import java.io.File
 import javax.inject.Inject
 
-abstract class PublishInternalSharingBundle @Inject constructor(
+internal abstract class PublishInternalSharingBundle @Inject constructor(
         extension: PlayPublisherExtension,
         variant: ApplicationVariant
 ) : PublishTaskBase(extension, variant), ArtifactExtensionOptions {
@@ -31,7 +31,7 @@ abstract class PublishInternalSharingBundle @Inject constructor(
         get() = findBundleFile()
 
     @get:OutputDirectory
-    internal abstract val outputDirectory: DirectoryProperty
+    abstract val outputDirectory: DirectoryProperty
 
     @TaskAction
     fun publishBundle() {
@@ -44,7 +44,7 @@ abstract class PublishInternalSharingBundle @Inject constructor(
         }
     }
 
-    internal abstract class BundleUploader : PlayWorkerBase<BundleUploader.Params>() {
+    abstract class BundleUploader : PlayWorkerBase<BundleUploader.Params>() {
         override fun execute() {
             val bundleFile = parameters.bundleFile.get().asFile
             val response = publisher2.uploadInternalSharingBundle(bundleFile)

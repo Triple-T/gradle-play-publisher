@@ -37,16 +37,16 @@ import org.gradle.workers.WorkerExecutor
 import java.io.File
 
 @CacheableTask
-abstract class GenerateResources : DefaultTask() {
+internal abstract class GenerateResources : DefaultTask() {
     @get:Internal
-    internal abstract val resSrcDirs: ListProperty<Directory>
+    abstract val resSrcDirs: ListProperty<Directory>
     @get:SkipWhenEmpty
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
-    internal abstract val resSrcTree: ConfigurableFileCollection
+    abstract val resSrcTree: ConfigurableFileCollection
 
     @get:OutputDirectory
-    internal abstract val resDir: DirectoryProperty
+    abstract val resDir: DirectoryProperty
 
     @TaskAction
     fun generate(changes: InputChanges) {
@@ -72,7 +72,7 @@ abstract class GenerateResources : DefaultTask() {
         }
     }
 
-    internal abstract class Processor : WorkAction<Processor.Params> {
+    abstract class Processor : WorkAction<Processor.Params> {
         override fun execute() {
             val defaultLocale = parameters.inputDirs.get().mapNotNull {
                 it.file(AppDetail.DEFAULT_LANGUAGE.fileName).asFile.orNull()

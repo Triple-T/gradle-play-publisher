@@ -10,10 +10,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class GenerateResourcesIntegrationTest {
+class GenerateResourcesIntegrationTest : IntegrationTestBase() {
     @Test
     fun `Basic resources are correctly copied to their respective folders`() {
-        execute("", "clean", "generateReleasePlayResources")
+        execute("", "generateReleasePlayResources")
 
         "".exists()
         "release".exists()
@@ -70,7 +70,7 @@ class GenerateResourcesIntegrationTest {
             }
         """
 
-        execute(config, "clean", "generateDogfoodPlayResources")
+        execute(config, "generateDogfoodPlayResources")
 
         "dogfood/res/release-notes/en-US/default.txt" generated "dogfood english"
     }
@@ -90,7 +90,7 @@ class GenerateResourcesIntegrationTest {
             }
         """
 
-        execute(config, "clean", "generatePaidDogfoodPlayResources")
+        execute(config, "generatePaidDogfoodPlayResources")
 
         "paidDogfood/res/release-notes/en-US/default.txt" generated "dogfood english"
     }
@@ -110,7 +110,7 @@ class GenerateResourcesIntegrationTest {
             }
         """
 
-        execute(config, "clean", "generateFreeDogfoodPlayResources")
+        execute(config, "generateFreeDogfoodPlayResources")
 
         "freeDogfood/res/release-notes/en-US/default.txt" generated "free dogfood english"
     }
@@ -132,7 +132,7 @@ class GenerateResourcesIntegrationTest {
             }
         """
 
-        execute(config, "clean", "generateFreeStagingDogfoodPlayResources")
+        execute(config, "generateFreeStagingDogfoodPlayResources")
 
         "freeStagingDogfood/res/release-notes/en-US/default.txt" generated "freeStagingDogfood"
         "freeStagingDogfood/res/listings/en-US/full-description.txt" generated "freeStagingDogfood"
@@ -151,7 +151,7 @@ class GenerateResourcesIntegrationTest {
             }
         """
 
-        execute(config, "clean", "generateFreeStagingReleasePlayResources")
+        execute(config, "generateFreeStagingReleasePlayResources")
 
         "freeStagingRelease/res/release-notes/en-US/default.txt" generated "freeStaging"
         "freeStagingRelease/res/listings/en-US/full-description.txt" generated "freeStagingRelease"
@@ -170,7 +170,7 @@ class GenerateResourcesIntegrationTest {
             }
         """
 
-        execute(config, "clean", "generateFreeStagingReleasePlayResources")
+        execute(config, "generateFreeStagingReleasePlayResources")
 
         "freeStagingRelease/res/listings/en-US/short-description.txt" generated "free"
         "freeStagingRelease/res/listings/en-US/full-description.txt" generated "freeStagingRelease"
@@ -189,7 +189,7 @@ class GenerateResourcesIntegrationTest {
             }
         """
 
-        execute(config, "clean", "generateProdFreeReleasePlayResources")
+        execute(config, "generateProdFreeReleasePlayResources")
 
         "prodFreeRelease/res/release-notes/en-US/default.txt" generated "prod"
     }
@@ -207,7 +207,7 @@ class GenerateResourcesIntegrationTest {
             }
         """
 
-        execute(config, "clean", "generateFreeStagingReleasePlayResources")
+        execute(config, "generateFreeStagingReleasePlayResources")
 
         "freeStagingRelease/res/listings/en-US/title.txt" generated "main"
         "freeStagingRelease/res/listings/en-US/full-description.txt" generated "freeStagingRelease"
@@ -226,7 +226,7 @@ class GenerateResourcesIntegrationTest {
             }
         """
 
-        execute(config, "clean", "generateProdStagingReleasePlayResources")
+        execute(config, "generateProdStagingReleasePlayResources")
 
         "prodStagingRelease/res/listings/de-DE/title.txt" generated "main"
         "prodStagingRelease/res/listings/de-DE/full-description.txt" generated "de-DE"
@@ -246,7 +246,7 @@ class GenerateResourcesIntegrationTest {
             }
         """
 
-        execute(config, "clean", "generateProdStagingReleasePlayResources")
+        execute(config, "generateProdStagingReleasePlayResources")
 
         "prodStagingRelease/res/listings/fr-FR/graphics/phone-screenshots/foo.jpg".exists(no)
         "prodStagingRelease/res/listings/fr-FR/graphics/phone-screenshots/bar.jpg".exists()
@@ -265,7 +265,7 @@ class GenerateResourcesIntegrationTest {
             }
         """
 
-        val result = execute(config, "clean", "generateHiddenFileReleasePlayResources")
+        val result = execute(config, "generateHiddenFileReleasePlayResources")
 
         assertEquals(
                 TaskOutcome.SUCCESS,
@@ -284,7 +284,7 @@ class GenerateResourcesIntegrationTest {
         """
 
         val result = executeExpectingFailure(
-                config, "clean", "generateInvalidLocaleReleasePlayResources")
+                config, "generateInvalidLocaleReleasePlayResources")
 
         assertEquals(
                 TaskOutcome.FAILED,
@@ -303,7 +303,7 @@ class GenerateResourcesIntegrationTest {
         """
 
         val result = executeExpectingFailure(
-                config, "clean", "generateUnknownFileReleasePlayResources")
+                config, "generateUnknownFileReleasePlayResources")
 
         assertEquals(
                 TaskOutcome.FAILED,

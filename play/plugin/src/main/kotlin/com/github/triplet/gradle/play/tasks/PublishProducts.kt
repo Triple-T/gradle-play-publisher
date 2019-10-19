@@ -5,9 +5,7 @@ import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.tasks.internal.PlayWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
-import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.json.jackson2.JacksonFactory
-import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.InAppProduct
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.FileCollection
@@ -28,14 +26,14 @@ import org.gradle.work.InputChanges
 import org.gradle.workers.WorkerExecutor
 import javax.inject.Inject
 
-abstract class PublishProducts @Inject constructor(
+internal abstract class PublishProducts @Inject constructor(
         extension: PlayPublisherExtension,
         variant: ApplicationVariant
 ) : PublishTaskBase(extension, variant) {
     @get:Incremental
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
-    internal abstract val productsDir: ConfigurableFileCollection
+    abstract val productsDir: ConfigurableFileCollection
 
     // Used by Gradle to skip the task if all inputs are empty
     @Suppress("MemberVisibilityCanBePrivate", "unused")
@@ -64,31 +62,14 @@ abstract class PublishProducts @Inject constructor(
                 }
     }
 
-    internal abstract class Uploader : PlayWorkerBase<Uploader.Params>() {
+    abstract class Uploader : PlayWorkerBase<Uploader.Params>() {
         override fun execute() {
             val product = JacksonFactory.getDefaultInstance()
                     .createJsonParser(parameters.target.get().asFile.inputStream())
                     .parse(InAppProduct::class.java)
 
             println("Uploading ${product.sku}")
-            try {
-                publisher.inappproducts().update(appId, product.sku, product).withAutoPrices()
-                        .execute()
-            } catch (e: GoogleJsonResponseException) {
-                if (e.statusCode == 404) {
-                    publisher.inappproducts().insert(appId, product).withAutoPrices().execute()
-                } else {
-                    throw e
-                }
-            }
-        }
-
-        private fun AndroidPublisher.Inappproducts.Update.withAutoPrices() = apply {
-            autoConvertMissingPrices = true
-        }
-
-        private fun AndroidPublisher.Inappproducts.Insert.withAutoPrices() = apply {
-            autoConvertMissingPrices = true
+            publisher2.publishInAppProduct(product)
         }
 
         interface Params : PlayPublishingParams {
