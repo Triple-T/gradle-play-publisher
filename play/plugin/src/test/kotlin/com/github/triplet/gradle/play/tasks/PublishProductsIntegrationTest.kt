@@ -59,7 +59,7 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `File name is used as product SKU`() {
+    fun `Basic product publishes`() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
@@ -74,7 +74,27 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
 
         assertThat(result.task(":publishNameAsSkuProducts")).isNotNull()
         assertThat(result.task(":publishNameAsSkuProducts")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result.output).contains("sku: \"my-sku\"")
+        assertThat(result.output).contains("\"sku\":\"my-sku\"")
+    }
+
+    @Test
+    fun `Multiple products are all published`() {
+        @Suppress("UnnecessaryQualifiedReference")
+        // language=gradle
+        val config = """
+            com.github.triplet.gradle.play.tasks.PublishProductsIntegrationBridge.installFactories()
+
+            android.buildTypes {
+                multipleProducts {}
+            }
+        """
+
+        val result = execute(config, "publishMultipleProductsProducts")
+
+        assertThat(result.task(":publishMultipleProductsProducts")).isNotNull()
+        assertThat(result.task(":publishMultipleProductsProducts")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("sku1")
+        assertThat(result.output).contains("sku2")
     }
 }
 
