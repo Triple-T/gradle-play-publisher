@@ -49,8 +49,9 @@ internal abstract class PublishInternalSharingBundle @Inject constructor(
             val bundleFile = parameters.bundleFile.get().asFile
             val response = publisher2.uploadInternalSharingBundle(bundleFile)
 
+            println("Upload successful: ${response.downloadUrl}")
             parameters.outputDir.get().file("${System.currentTimeMillis()}.json").asFile
-                    .writeText(response)
+                    .writeText(response.json)
         }
 
         interface Params : PlayPublishingParams {

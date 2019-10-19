@@ -10,7 +10,6 @@ import com.github.triplet.gradle.play.tasks.internal.PlayWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.copy
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
-import com.google.api.client.http.FileContent
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
@@ -88,23 +87,16 @@ internal abstract class PublishInternalSharingApk @Inject constructor(
     abstract class ApkUploader : PlayWorkerBase<ApkUploader.Params>() {
         override fun execute() {
             val apkFile = parameters.apkFile.get().asFile
-            val apk = publisher.internalappsharingartifacts()
-                    .uploadapk(appId, FileContent(MIME_TYPE_APK, apkFile))
-                    .trackUploadProgress("APK", apkFile)
-                    .execute()
+            val response = publisher2.uploadInternalSharingApk(apkFile)
 
+            println("Upload successful: ${response.downloadUrl}")
             parameters.outputDir.get().file("${System.currentTimeMillis()}.json").asFile
-                    .writeText(apk.toPrettyString())
-            println("Upload successful: ${apk.downloadUrl}")
+                    .writeText(response.json)
         }
 
         interface Params : PlayPublishingParams {
             val apkFile: RegularFileProperty
             val outputDir: DirectoryProperty
-        }
-
-        private companion object {
-            const val MIME_TYPE_APK = "application/vnd.android.package-archive"
         }
     }
 }

@@ -6,8 +6,28 @@ import com.google.common.annotations.VisibleForTesting
 import java.io.File
 
 interface PlayPublisher {
-    fun uploadInternalSharingBundle(bundleFile: File): String
+    /**
+     * Uploads the given [bundleFile] as an Internal Sharing artifact.
+     *
+     * More docs
+     * [here](https://developers.google.com/android-publisher/api-ref/internalappsharingartifacts/uploadbundle).
+     */
+    fun uploadInternalSharingBundle(bundleFile: File): UploadInternalSharingArtifactResponse
 
+    /**
+     * Uploads the given [apkFile] as an Internal Sharing artifact.
+     *
+     * More docs
+     * [here](https://developers.google.com/android-publisher/api-ref/internalappsharingartifacts/uploadapk).
+     */
+    fun uploadInternalSharingApk(apkFile: File): UploadInternalSharingArtifactResponse
+
+    /**
+     * Uploads the given [product]. If it doesn't yet exist, it will be created. Otherwise, it will
+     * be updated.
+     *
+     * More docs [here](https://developers.google.com/android-publisher/api-ref/inappproducts).
+     */
     fun publishInAppProduct(product: InAppProduct)
 
     interface Factory {

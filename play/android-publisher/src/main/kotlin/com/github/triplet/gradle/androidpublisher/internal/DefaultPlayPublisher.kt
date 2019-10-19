@@ -1,6 +1,7 @@
 package com.github.triplet.gradle.androidpublisher.internal
 
 import com.github.triplet.gradle.androidpublisher.PlayPublisher
+import com.github.triplet.gradle.androidpublisher.UploadInternalSharingArtifactResponse
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
@@ -11,15 +12,22 @@ internal class DefaultPlayPublisher(
         private val publisher: AndroidPublisher,
         private val appId: String
 ) : PlayPublisher {
-    override fun uploadInternalSharingBundle(bundleFile: File): String {
+    override fun uploadInternalSharingBundle(bundleFile: File): UploadInternalSharingArtifactResponse {
         val bundle = publisher.internalappsharingartifacts()
                 .uploadbundle(appId, FileContent(MIME_TYPE_STREAM, bundleFile))
                 .trackUploadProgress("App Bundle", bundleFile)
                 .execute()
 
-        println("Upload successful: ${bundle.downloadUrl}")
+        return UploadInternalSharingArtifactResponse(bundle.toPrettyString(), bundle.downloadUrl)
+    }
 
-        return bundle.toPrettyString()
+    override fun uploadInternalSharingApk(apkFile: File): UploadInternalSharingArtifactResponse {
+        val apk = publisher.internalappsharingartifacts()
+                .uploadapk(appId, FileContent(MIME_TYPE_APK, apkFile))
+                .trackUploadProgress("APK", apkFile)
+                .execute()
+
+        return UploadInternalSharingArtifactResponse(apk.toPrettyString(), apk.downloadUrl)
     }
 
     override fun publishInAppProduct(product: InAppProduct) {

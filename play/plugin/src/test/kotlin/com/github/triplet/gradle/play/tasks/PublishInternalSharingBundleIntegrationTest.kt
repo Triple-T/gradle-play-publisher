@@ -1,5 +1,6 @@
 package com.github.triplet.gradle.play.tasks
 
+import com.github.triplet.gradle.androidpublisher.UploadInternalSharingArtifactResponse
 import com.github.triplet.gradle.play.helpers.DefaultPlayPublisher
 import com.github.triplet.gradle.play.helpers.FIXTURE_WORKING_DIR
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
@@ -62,8 +63,20 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
         assertThat(outputDir.listFiles()!!.first().name).endsWith(".json")
         assertThat(outputDir.listFiles()!!.first().name).isGreaterThan(minimumTime.toString())
         assertThat(outputDir.listFiles()!!.first().name).isLessThan(maximumTime.toString())
-        assertThat(outputDir.listFiles()!!.first().readText())
-                .isEqualTo("uploadInternalSharingBundle output")
+        assertThat(outputDir.listFiles()!!.first().readText()).isEqualTo("json-payload")
+    }
+
+    @Test
+    fun `Task logs download url to console`() {
+        @Suppress("UnnecessaryQualifiedReference")
+        // language=gradle
+        val config = """
+            com.github.triplet.gradle.play.tasks.PublishInternalSharingBundleBridge.installFactories()
+        """
+
+        val result = execute(config, "uploadReleasePrivateBundle")
+
+        assertThat(result.output).contains("Upload successful: http")
     }
 
     @Test
@@ -184,9 +197,9 @@ object PublishInternalSharingBundleBridge {
     @JvmStatic
     fun installFactories() {
         val publisher = object : DefaultPlayPublisher() {
-            override fun uploadInternalSharingBundle(bundleFile: File): String {
+            override fun uploadInternalSharingBundle(bundleFile: File): UploadInternalSharingArtifactResponse {
                 println("uploadInternalSharingBundle($bundleFile)")
-                return "uploadInternalSharingBundle output"
+                return UploadInternalSharingArtifactResponse("json-payload", "https://google.com")
             }
         }
         publisher.install()
