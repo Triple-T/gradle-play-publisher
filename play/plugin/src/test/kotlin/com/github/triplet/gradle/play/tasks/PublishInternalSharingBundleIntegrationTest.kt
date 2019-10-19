@@ -2,19 +2,15 @@ package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.play.helpers.DefaultPlayPublisher
 import com.github.triplet.gradle.play.helpers.FIXTURE_WORKING_DIR
+import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.github.triplet.gradle.play.helpers.execute
 import com.github.triplet.gradle.play.helpers.executeExpectingFailure
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.TemporaryFolder
 import java.io.File
 
-class PublishInternalSharingBundleIntegrationTest {
-    @get:Rule
-    val tempDir = TemporaryFolder()
-
+class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
     @Test
     fun `Builds bundle on-the-fly by default`() {
         @Suppress("UnnecessaryQualifiedReference")
@@ -23,11 +19,29 @@ class PublishInternalSharingBundleIntegrationTest {
             com.github.triplet.gradle.play.tasks.PublishInternalSharingBundleBridge.installFactories()
         """
 
-        val result = execute(config, "clean", "uploadReleasePrivateBundle")
+        val result = execute(config, "uploadReleasePrivateBundle")
 
         assertThat(result.task(":bundleRelease")).isNotNull()
         assertThat(result.task(":bundleRelease")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingBundle")
+        assertThat(result.output).contains("aab")
+    }
+
+    @Test
+    fun `Rebuilding bundle on-the-fly uses cached build`() {
+        @Suppress("UnnecessaryQualifiedReference")
+        // language=gradle
+        val config = """
+            com.github.triplet.gradle.play.tasks.PublishInternalSharingBundleBridge.installFactories()
+        """
+
+        val result1 = execute(config, "uploadReleasePrivateBundle")
+        val result2 = execute(config, "uploadReleasePrivateBundle")
+
+        assertThat(result1.task(":uploadReleasePrivateBundle")).isNotNull()
+        assertThat(result1.task(":uploadReleasePrivateBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result2.task(":uploadReleasePrivateBundle")).isNotNull()
+        assertThat(result2.task(":uploadReleasePrivateBundle")!!.outcome).isEqualTo(TaskOutcome.UP_TO_DATE)
     }
 
     @Test
@@ -40,7 +54,7 @@ class PublishInternalSharingBundleIntegrationTest {
         val outputDir = File(FIXTURE_WORKING_DIR, "build/outputs/internal-sharing/bundle/release")
 
         val minimumTime = System.currentTimeMillis()
-        execute(config, "clean", "uploadReleasePrivateBundle")
+        execute(config, "uploadReleasePrivateBundle")
         val maximumTime = System.currentTimeMillis()
 
         assertThat(outputDir.listFiles()).isNotNull()
@@ -64,8 +78,11 @@ class PublishInternalSharingBundleIntegrationTest {
             }
         """
 
-        val result = executeExpectingFailure(config, "clean", "uploadReleasePrivateBundle")
+        val result = executeExpectingFailure(config, "uploadReleasePrivateBundle")
 
+        assertThat(result.task(":uploadReleasePrivateBundle")).isNotNull()
+        assertThat(result.task(":uploadReleasePrivateBundle")!!.outcome)
+                .isEqualTo(TaskOutcome.FAILED)
         assertThat(result.output).contains("Warning")
         assertThat(result.output).contains(tempDir.root.name)
     }
@@ -84,8 +101,11 @@ class PublishInternalSharingBundleIntegrationTest {
 
         File(tempDir.root, "1.aab").createNewFile()
         File(tempDir.root, "2.aab").createNewFile()
-        val result = executeExpectingFailure(config, "clean", "uploadReleasePrivateBundle")
+        val result = executeExpectingFailure(config, "uploadReleasePrivateBundle")
 
+        assertThat(result.task(":uploadReleasePrivateBundle")).isNotNull()
+        assertThat(result.task(":uploadReleasePrivateBundle")!!.outcome)
+                .isEqualTo(TaskOutcome.FAILED)
         assertThat(result.output).contains("Warning")
         assertThat(result.output).contains(tempDir.root.name)
     }
@@ -103,10 +123,36 @@ class PublishInternalSharingBundleIntegrationTest {
         """
 
         File(tempDir.root, "foo.aab").createNewFile()
-        val result = execute(config, "clean", "uploadReleasePrivateBundle")
+        val result = execute(config, "uploadReleasePrivateBundle")
 
         assertThat(result.task(":bundleRelease")).isNull()
+        assertThat(result.task(":uploadReleasePrivateBundle")).isNotNull()
+        assertThat(result.task(":uploadReleasePrivateBundle")!!.outcome)
+                .isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingBundle")
+        assertThat(result.output).contains(tempDir.root.name)
+    }
+
+    @Test
+    fun `Reusing custom artifact uses cached build`() {
+        @Suppress("UnnecessaryQualifiedReference")
+        // language=gradle
+        val config = """
+            com.github.triplet.gradle.play.tasks.PublishInternalSharingBundleBridge.installFactories()
+
+            play {
+                artifactDir = file('${escapedTempDir()}')
+            }
+        """
+
+        File(tempDir.root, "foo.aab").createNewFile()
+        val result1 = execute(config, "uploadReleasePrivateBundle")
+        val result2 = execute(config, "uploadReleasePrivateBundle")
+
+        assertThat(result1.task(":uploadReleasePrivateBundle")).isNotNull()
+        assertThat(result1.task(":uploadReleasePrivateBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result2.task(":uploadReleasePrivateBundle")).isNotNull()
+        assertThat(result2.task(":uploadReleasePrivateBundle")!!.outcome).isEqualTo(TaskOutcome.UP_TO_DATE)
     }
 
     @Test
@@ -126,10 +172,12 @@ class PublishInternalSharingBundleIntegrationTest {
         )
 
         assertThat(result.task(":bundleRelease")).isNull()
+        assertThat(result.task(":uploadReleasePrivateBundle")).isNotNull()
+        assertThat(result.task(":uploadReleasePrivateBundle")!!.outcome)
+                .isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingBundle")
+        assertThat(result.output).contains(tempDir.root.name)
     }
-
-    private fun escapedTempDir() = tempDir.root.toString().replace("\\", "\\\\")
 }
 
 object PublishInternalSharingBundleBridge {

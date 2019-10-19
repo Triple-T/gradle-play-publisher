@@ -1,8 +1,11 @@
 package com.github.triplet.gradle.play
 
 import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
+import org.apache.commons.io.FileUtils
 import org.gradle.api.ProjectConfigurationException
 import org.gradle.testkit.runner.TaskOutcome
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 
 import java.lang.reflect.Field
@@ -13,6 +16,21 @@ import static org.junit.Assert.assertNotNull
 import static org.junit.Assert.assertThat
 
 class PlayPublisherPluginTest {
+    @Before
+    void initTestResources() {
+        FileUtils.copyDirectory(
+                new File(TestHelper.FIXTURES_DIR, "GenerateResourcesIntegrationTest"),
+                TestHelper.FIXTURE_WORKING_DIR
+        )
+    }
+
+    @After
+    void cleanupTestResources() {
+        for (file in new File(TestHelper.FIXTURES_DIR, "GenerateResourcesIntegrationTest")
+                .listFiles()) {
+            new File(TestHelper.FIXTURE_WORKING_DIR, file.name).deleteDir()
+        }
+    }
 
     @Test
     void testCreatesDefaultTask() {

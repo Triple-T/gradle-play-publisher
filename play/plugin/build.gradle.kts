@@ -57,7 +57,9 @@ tasks.named<Delete>("clean") {
 }
 
 tasks.named("test") {
-    inputs.files("src/test/fixtures/android_app/src")
+    inputs.files(fileTree("src/test/fixtures").exclude {
+        it.name == ".gradle" || it.name == "userHome" || it.name == "build"
+    })
 }
 
 group = "com.github.triplet.gradle"

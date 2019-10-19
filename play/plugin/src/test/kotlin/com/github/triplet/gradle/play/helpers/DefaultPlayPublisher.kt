@@ -1,6 +1,7 @@
 package com.github.triplet.gradle.play.helpers
 
 import com.github.triplet.gradle.androidpublisher.PlayPublisher
+import com.google.api.services.androidpublisher.model.InAppProduct
 import java.io.File
 
 open class DefaultPlayPublisher : PlayPublisher {
@@ -12,4 +13,6 @@ open class DefaultPlayPublisher : PlayPublisher {
     }
 
     override fun uploadInternalSharingBundle(bundleFile: File) = ""
+
+    override fun publishInAppProduct(product: InAppProduct) = Unit
 }

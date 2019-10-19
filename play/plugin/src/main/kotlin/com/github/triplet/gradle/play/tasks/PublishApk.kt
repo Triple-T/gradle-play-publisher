@@ -28,7 +28,7 @@ import org.gradle.workers.WorkerExecutor
 import java.io.File
 import javax.inject.Inject
 
-abstract class PublishApk @Inject constructor(
+internal abstract class PublishApk @Inject constructor(
         extension: PlayPublisherExtension,
         variant: ApplicationVariant,
         optionsHolder: TransientTrackOptions.Holder
@@ -71,7 +71,7 @@ abstract class PublishApk @Inject constructor(
         }
     }
 
-    internal abstract class Processor @Inject constructor(
+    abstract class Processor @Inject constructor(
             private val executor: WorkerExecutor
     ) : ArtifactWorkerBase<Processor.Params>() {
         override fun upload() {
@@ -97,7 +97,7 @@ abstract class PublishApk @Inject constructor(
         }
     }
 
-    internal abstract class ApkUploader : ArtifactWorkerBase<ApkUploader.Params>() {
+    abstract class ApkUploader : ArtifactWorkerBase<ApkUploader.Params>() {
         init {
             commit = false
         }

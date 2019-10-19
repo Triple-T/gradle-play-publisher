@@ -1,4 +1,4 @@
-val publicGppTasks = listOf(
+private val publicGppTasks = listOf(
         "bootstrap",
         "bootstrapRelease",
         "promoteArtifact",

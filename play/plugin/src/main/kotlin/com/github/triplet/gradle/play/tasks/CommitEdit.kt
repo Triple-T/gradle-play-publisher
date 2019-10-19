@@ -14,7 +14,7 @@ import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkerExecutor
 import javax.inject.Inject
 
-abstract class CommitEdit @Inject constructor(
+internal abstract class CommitEdit @Inject constructor(
         extension: PlayPublisherExtension
 ) : EditTaskBase(extension) {
     @TaskAction
@@ -33,7 +33,7 @@ abstract class CommitEdit @Inject constructor(
         }
     }
 
-    internal abstract class Committer : WorkAction<Committer.Params> {
+    abstract class Committer : WorkAction<Committer.Params> {
         override fun execute() {
             val file = parameters.editIdFile.get().asFile
             if (file.marked("commit").exists()) {

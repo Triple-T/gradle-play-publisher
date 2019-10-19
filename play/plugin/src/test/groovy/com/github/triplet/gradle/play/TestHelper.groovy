@@ -8,7 +8,8 @@ import org.gradle.testkit.runner.GradleRunner
 
 class TestHelper {
 
-    static final FIXTURE_WORKING_DIR = new File('src/test/fixtures/android_app')
+    static final FIXTURES_DIR = new File('src/test/fixtures')
+    static final FIXTURE_WORKING_DIR = new File(FIXTURES_DIR, 'android_app')
     private static final BUILD_FILE = new File(FIXTURE_WORKING_DIR, "build.gradle")
 
     static Project fixtureProject() {

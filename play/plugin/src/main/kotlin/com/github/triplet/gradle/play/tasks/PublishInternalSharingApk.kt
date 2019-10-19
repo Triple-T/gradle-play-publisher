@@ -25,7 +25,7 @@ import org.gradle.workers.WorkerExecutor
 import java.io.File
 import javax.inject.Inject
 
-abstract class PublishInternalSharingApk @Inject constructor(
+internal abstract class PublishInternalSharingApk @Inject constructor(
         extension: PlayPublisherExtension,
         variant: ApplicationVariant
 ) : PublishTaskBase(extension, variant), ArtifactExtensionOptions {
@@ -51,7 +51,7 @@ abstract class PublishInternalSharingApk @Inject constructor(
         }
 
     @get:OutputDirectory
-    internal abstract val outputDirectory: DirectoryProperty
+    abstract val outputDirectory: DirectoryProperty
 
     @TaskAction
     fun publishApk() {
@@ -65,7 +65,7 @@ abstract class PublishInternalSharingApk @Inject constructor(
         }
     }
 
-    internal abstract class Processor @Inject constructor(
+    abstract class Processor @Inject constructor(
             private val executor: WorkerExecutor
     ) : PlayWorkerBase<Processor.Params>() {
         override fun execute() {
@@ -85,7 +85,7 @@ abstract class PublishInternalSharingApk @Inject constructor(
         }
     }
 
-    internal abstract class ApkUploader : PlayWorkerBase<ApkUploader.Params>() {
+    abstract class ApkUploader : PlayWorkerBase<ApkUploader.Params>() {
         override fun execute() {
             val apkFile = parameters.apkFile.get().asFile
             val apk = publisher.internalappsharingartifacts()

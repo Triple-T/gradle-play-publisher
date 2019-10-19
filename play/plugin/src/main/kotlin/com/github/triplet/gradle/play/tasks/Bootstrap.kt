@@ -37,13 +37,13 @@ import java.io.FileNotFoundException
 import java.net.URL
 import javax.inject.Inject
 
-abstract class Bootstrap @Inject constructor(
+internal abstract class Bootstrap @Inject constructor(
         extension: PlayPublisherExtension,
         variant: ApplicationVariant,
         optionsHolder: BootstrapOptions.Holder
 ) : PublishEditTaskBase(extension, variant), BootstrapOptions by optionsHolder {
     @get:OutputDirectory
-    internal abstract val srcDir: DirectoryProperty
+    abstract val srcDir: DirectoryProperty
 
     init {
         // Always out-of-date since we don't know what's changed on the network
@@ -89,7 +89,7 @@ abstract class Bootstrap @Inject constructor(
         }
     }
 
-    internal abstract class DetailsDownloader : EditWorkerBase<DetailsDownloader.Params>() {
+    abstract class DetailsDownloader : EditWorkerBase<DetailsDownloader.Params>() {
         override fun execute() {
             println("Downloading app details")
             val details = edits.details().get(appId, editId).execute()
@@ -108,7 +108,7 @@ abstract class Bootstrap @Inject constructor(
         }
     }
 
-    internal abstract class ListingsDownloader @Inject constructor(
+    abstract class ListingsDownloader @Inject constructor(
             private val executor: WorkerExecutor
     ) : EditWorkerBase<ListingsDownloader.Params>() {
         override fun execute() {
@@ -150,7 +150,7 @@ abstract class Bootstrap @Inject constructor(
         }
     }
 
-    internal abstract class ImageFetcher @Inject constructor(
+    abstract class ImageFetcher @Inject constructor(
             private val executor: WorkerExecutor
     ) : EditWorkerBase<ImageFetcher.Params>() {
         override fun execute() {
@@ -178,7 +178,7 @@ abstract class Bootstrap @Inject constructor(
         }
     }
 
-    internal abstract class ImageDownloader : WorkAction<ImageDownloader.Params> {
+    abstract class ImageDownloader : WorkAction<ImageDownloader.Params> {
         override fun execute() {
             parameters.target.get().asFile.safeCreateNewFile()
                     .outputStream()
@@ -203,7 +203,7 @@ abstract class Bootstrap @Inject constructor(
         }
     }
 
-    internal abstract class ReleaseNotesDownloader :
+    abstract class ReleaseNotesDownloader :
             EditWorkerBase<ReleaseNotesDownloader.Params>() {
         override fun execute() {
             println("Downloading release notes")
@@ -226,7 +226,7 @@ abstract class Bootstrap @Inject constructor(
         }
     }
 
-    internal abstract class ProductsDownloader : EditWorkerBase<ProductsDownloader.Params>() {
+    abstract class ProductsDownloader : EditWorkerBase<ProductsDownloader.Params>() {
         override fun execute() {
             println("Downloading in-app products")
 

@@ -24,7 +24,7 @@ import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.workers.WorkerExecutor
 import javax.inject.Inject
 
-abstract class PublishBundle @Inject constructor(
+internal abstract class PublishBundle @Inject constructor(
         extension: PlayPublisherExtension,
         variant: ApplicationVariant,
         optionsHolder: TransientTrackOptions.Holder
@@ -49,7 +49,7 @@ abstract class PublishBundle @Inject constructor(
         }
     }
 
-    internal abstract class BundleUploader : ArtifactWorkerBase<BundleUploader.Params>() {
+    abstract class BundleUploader : ArtifactWorkerBase<BundleUploader.Params>() {
         override fun upload() {
             val bundleFile = parameters.bundleFile.get().asFile
             val bundle = try {

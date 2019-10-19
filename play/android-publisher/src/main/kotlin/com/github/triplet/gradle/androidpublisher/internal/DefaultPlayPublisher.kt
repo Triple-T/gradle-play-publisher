@@ -1,8 +1,10 @@
 package com.github.triplet.gradle.androidpublisher.internal
 
 import com.github.triplet.gradle.androidpublisher.PlayPublisher
+import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.AndroidPublisher
+import com.google.api.services.androidpublisher.model.InAppProduct
 import java.io.File
 
 internal class DefaultPlayPublisher(
@@ -18,6 +20,22 @@ internal class DefaultPlayPublisher(
         println("Upload successful: ${bundle.downloadUrl}")
 
         return bundle.toPrettyString()
+    }
+
+    override fun publishInAppProduct(product: InAppProduct) {
+        try {
+            publisher.inappproducts().update(appId, product.sku, product)
+                    .apply { autoConvertMissingPrices = true }
+                    .execute()
+        } catch (e: GoogleJsonResponseException) {
+            if (e.statusCode == 404) {
+                publisher.inappproducts().insert(appId, product)
+                        .apply { autoConvertMissingPrices = true }
+                        .execute()
+            } else {
+                throw e
+            }
+        }
     }
 
     companion object : PlayPublisher.Factory {

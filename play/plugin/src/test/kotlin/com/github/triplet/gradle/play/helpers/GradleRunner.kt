@@ -4,7 +4,8 @@ import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import java.io.File
 
-val FIXTURE_WORKING_DIR = File("src/test/fixtures/android_app")
+val FIXTURES_DIR = File("src/test/fixtures")
+val FIXTURE_WORKING_DIR = File(FIXTURES_DIR, "android_app")
 val BUILD_FILE = File(FIXTURE_WORKING_DIR, "build.gradle")
 
 fun execute(config: String, vararg tasks: String) = execute(config, false, *tasks)
