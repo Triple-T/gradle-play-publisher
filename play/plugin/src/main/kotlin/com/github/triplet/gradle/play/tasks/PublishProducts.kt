@@ -65,9 +65,7 @@ internal abstract class PublishProducts @Inject constructor(
         override fun execute() {
             val productFile = parameters.target.get().asFile
             val product = productFile.inputStream().use {
-                JacksonFactory.getDefaultInstance()
-                        .createJsonParser(it)
-                        .parse(Map::class.java)
+                JacksonFactory.getDefaultInstance().createJsonParser(it).parse(Map::class.java)
             }
 
             println("Uploading ${product["sku"]}")
