@@ -1,6 +1,6 @@
 package com.github.triplet.gradle.play.tasks
 
-import com.github.triplet.gradle.androidpublisher.InternalSharingArtifact
+import com.github.triplet.gradle.androidpublisher.UploadInternalSharingArtifactResponse
 import com.github.triplet.gradle.play.helpers.DefaultPlayPublisher
 import com.github.triplet.gradle.play.helpers.FIXTURE_WORKING_DIR
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
@@ -197,9 +197,9 @@ object PublishInternalSharingBundleBridge {
     @JvmStatic
     fun installFactories() {
         val publisher = object : DefaultPlayPublisher() {
-            override fun uploadInternalSharingBundle(bundleFile: File): InternalSharingArtifact {
+            override fun uploadInternalSharingBundle(bundleFile: File): UploadInternalSharingArtifactResponse {
                 println("uploadInternalSharingBundle($bundleFile)")
-                return InternalSharingArtifact("json-payload", "https://google.com")
+                return UploadInternalSharingArtifactResponse("json-payload", "https://google.com")
             }
         }
         publisher.install()

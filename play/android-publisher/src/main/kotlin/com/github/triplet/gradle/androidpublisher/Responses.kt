@@ -1,7 +1,7 @@
 package com.github.triplet.gradle.androidpublisher
 
 /** Response for an internal sharing artifact upload. */
-data class InternalSharingArtifact(
+data class UploadInternalSharingArtifactResponse(
         /** The response's full JSON payload. */
         val json: String,
 
