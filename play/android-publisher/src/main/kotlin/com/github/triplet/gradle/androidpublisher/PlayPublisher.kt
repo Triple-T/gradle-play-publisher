@@ -6,7 +6,9 @@ import com.google.common.annotations.VisibleForTesting
 import java.io.File
 
 interface PlayPublisher {
-    fun uploadInternalSharingBundle(bundleFile: File): String
+    fun uploadInternalSharingBundle(bundleFile: File): InternalSharingArtifact
+
+    fun uploadInternalSharingApk(apkFile: File): InternalSharingArtifact
 
     fun publishInAppProduct(product: InAppProduct)
 

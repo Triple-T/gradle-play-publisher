@@ -6,6 +6,7 @@ import java.io.File
 import kotlin.math.roundToInt
 
 internal const val MIME_TYPE_STREAM = "application/octet-stream"
+internal const val MIME_TYPE_APK = "application/vnd.android.package-archive"
 
 internal fun <T, R : AbstractGoogleClientRequest<T>> R.trackUploadProgress(
         thing: String,
