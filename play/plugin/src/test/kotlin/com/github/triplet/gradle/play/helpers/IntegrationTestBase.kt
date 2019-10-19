@@ -1,7 +1,6 @@
 package com.github.triplet.gradle.play.helpers
 
 import com.github.triplet.gradle.common.utils.orNull
-import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -14,8 +13,9 @@ abstract class IntegrationTestBase {
 
     @Before
     fun resetOutputs() {
-        execute("", "clean")
-        assertThat(File(FIXTURE_WORKING_DIR, "build").exists()).isFalse()
+        File(FIXTURE_WORKING_DIR, ".gradle").deleteRecursively()
+        File(FIXTURE_WORKING_DIR, "userHome").deleteRecursively()
+        File(FIXTURE_WORKING_DIR, "build").deleteRecursively()
     }
 
     @Before

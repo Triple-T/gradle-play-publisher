@@ -48,10 +48,6 @@ private fun execute(
         play {
             serviceAccountCredentials = file('creds.json')
         }
-
-        tasks.clean {
-            delete('userHome')
-        }
     """)
 
     val runner = GradleRunner.create()
