@@ -64,9 +64,11 @@ internal abstract class PublishProducts @Inject constructor(
 
     abstract class Uploader : PlayWorkerBase<Uploader.Params>() {
         override fun execute() {
-            val product = JacksonFactory.getDefaultInstance()
-                    .createJsonParser(parameters.target.get().asFile.inputStream())
-                    .parse(InAppProduct::class.java)
+            val product = parameters.target.get().asFile.inputStream().use {
+                JacksonFactory.getDefaultInstance()
+                        .createJsonParser(it)
+                        .parse(InAppProduct::class.java)
+            }
 
             println("Uploading ${product.sku}")
             publisher2.publishInAppProduct(product)
