@@ -3,10 +3,10 @@ package com.github.triplet.gradle.play.tasks
 import com.github.triplet.gradle.play.helpers.DefaultPlayPublisher
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.github.triplet.gradle.play.helpers.execute
-import com.google.api.services.androidpublisher.model.InAppProduct
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Test
+import java.io.File
 
 class PublishProductsIntegrationTest : IntegrationTestBase() {
     @Test
@@ -75,7 +75,8 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
 
         assertThat(result.task(":publishNameAsSkuProducts")).isNotNull()
         assertThat(result.task(":publishNameAsSkuProducts")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result.output).contains("\"sku\":\"my-sku\"")
+        assertThat(result.output).contains("product.json")
+        assertThat(result.output).contains("Uploading my-sku")
     }
 
     @Test
@@ -123,8 +124,8 @@ object PublishProductsIntegrationBridge {
     @JvmStatic
     fun installFactories() {
         val publisher = object : DefaultPlayPublisher() {
-            override fun publishInAppProduct(product: InAppProduct) {
-                println("publishInAppProduct($product)")
+            override fun publishInAppProduct(productFile: File) {
+                println("publishInAppProduct($productFile)")
             }
         }
         publisher.install()
