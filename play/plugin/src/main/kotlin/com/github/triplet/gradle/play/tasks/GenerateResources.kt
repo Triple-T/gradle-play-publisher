@@ -75,8 +75,7 @@ internal abstract class GenerateResources : DefaultTask() {
     abstract class Processor : WorkAction<Processor.Params> {
         override fun execute() {
             val defaultLocale = parameters.inputDirs.get().mapNotNull {
-                it.file(AppDetail.DEFAULT_LANGUAGE.fileName).asFile.orNull()
-                        ?.readProcessed().nullOrFull()
+                it.file(AppDetail.DEFAULT_LANGUAGE.fileName).asFile.orNull()?.readProcessed()
             }.lastOrNull() // Pick the most specialized option available. E.g. `paidProdRelease`
 
             val files = parameters.resources.get()

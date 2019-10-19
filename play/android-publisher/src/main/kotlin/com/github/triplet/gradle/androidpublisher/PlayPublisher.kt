@@ -5,8 +5,8 @@ import com.google.common.annotations.VisibleForTesting
 import java.io.File
 
 /**
- * Proxy for the AndroidPublisher API. Used to separate the build side configuration from API
- * dependencies to make testing easier.
+ * Proxy for the AndroidPublisher API. Separate the build side configuration from API dependencies
+ * to make testing easier.
  *
  * For the full API docs, see [here](https://developers.google.com/android-publisher/api-ref).
  */
