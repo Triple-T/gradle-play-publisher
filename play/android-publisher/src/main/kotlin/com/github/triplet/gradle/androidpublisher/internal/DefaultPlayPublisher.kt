@@ -4,6 +4,7 @@ import com.github.triplet.gradle.androidpublisher.PlayPublisher
 import com.github.triplet.gradle.androidpublisher.UploadInternalSharingArtifactResponse
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
+import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.InAppProduct
 import java.io.File
@@ -30,7 +31,13 @@ internal class DefaultPlayPublisher(
         return UploadInternalSharingArtifactResponse(apk.toPrettyString(), apk.downloadUrl)
     }
 
-    override fun publishInAppProduct(product: InAppProduct) {
+    override fun publishInAppProduct(productFile: File) {
+        val product = productFile.inputStream().use {
+            JacksonFactory.getDefaultInstance()
+                    .createJsonParser(it)
+                    .parse(InAppProduct::class.java)
+        }
+
         try {
             publisher.inappproducts().update(appId, product.sku, product)
                     .apply { autoConvertMissingPrices = true }

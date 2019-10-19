@@ -6,7 +6,6 @@ import com.github.triplet.gradle.play.tasks.internal.PlayWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.json.jackson2.JacksonFactory
-import com.google.api.services.androidpublisher.model.InAppProduct
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileType
@@ -64,14 +63,15 @@ internal abstract class PublishProducts @Inject constructor(
 
     abstract class Uploader : PlayWorkerBase<Uploader.Params>() {
         override fun execute() {
-            val product = parameters.target.get().asFile.inputStream().use {
+            val productFile = parameters.target.get().asFile
+            val product = productFile.inputStream().use {
                 JacksonFactory.getDefaultInstance()
                         .createJsonParser(it)
-                        .parse(InAppProduct::class.java)
+                        .parse(Map::class.java)
             }
 
-            println("Uploading ${product.sku}")
-            publisher2.publishInAppProduct(product)
+            println("Uploading ${product["sku"]}")
+            publisher2.publishInAppProduct(productFile)
         }
 
         interface Params : PlayPublishingParams {

@@ -1,7 +1,6 @@
 package com.github.triplet.gradle.androidpublisher
 
 import com.github.triplet.gradle.androidpublisher.internal.DefaultPlayPublisher
-import com.google.api.services.androidpublisher.model.InAppProduct
 import com.google.common.annotations.VisibleForTesting
 import java.io.File
 
@@ -23,12 +22,12 @@ interface PlayPublisher {
     fun uploadInternalSharingApk(apkFile: File): UploadInternalSharingArtifactResponse
 
     /**
-     * Uploads the given [product]. If it doesn't yet exist, it will be created. Otherwise, it will
-     * be updated.
+     * Uploads the given [productFile]. If it doesn't yet exist, it will be created. Otherwise, it
+     * will be updated.
      *
      * More docs [here](https://developers.google.com/android-publisher/api-ref/inappproducts).
      */
-    fun publishInAppProduct(product: InAppProduct)
+    fun publishInAppProduct(productFile: File)
 
     interface Factory {
         fun create(
