@@ -56,7 +56,6 @@ internal fun PublishTaskBase.paramsForBase(params: PlayWorkerBase.PlayPublishing
 
         params.releaseNotesDir.set(releaseNotesDir)
         params.consoleNamesDir.set(consoleNamesDir)
-        params.transientConsoleName.set(releaseName)
         params.mappingFile.set(mappingFile)
     }
 }
@@ -84,7 +83,6 @@ internal fun ArtifactWorkerBase.ArtifactPublishingParams.copy(
 
     into.releaseNotesDir.set(releaseNotesDir)
     into.consoleNamesDir.set(consoleNamesDir)
-    into.transientConsoleName.set(transientConsoleName.orNull)
     into.mappingFile.set(mappingFile)
 }
 
@@ -263,8 +261,8 @@ internal abstract class ArtifactWorkerBase<T : ArtifactWorkerBase.ArtifactPublis
     }
 
     private fun TrackRelease.updateConsoleName() {
-        name = if (parameters.transientConsoleName.isPresent) {
-            parameters.transientConsoleName.get()
+        name = if (config.releaseName != null) {
+            config.releaseName
         } else if (parameters.consoleNamesDir.isPresent) {
             val dir = parameters.consoleNamesDir.get()
             val file = dir.file("${config.trackOrDefault}.txt").asFile.orNull()
@@ -317,7 +315,6 @@ internal abstract class ArtifactWorkerBase<T : ArtifactWorkerBase.ArtifactPublis
 
         val releaseNotesDir: DirectoryProperty // Optional
         val consoleNamesDir: DirectoryProperty // Optional
-        val transientConsoleName: Property<String?>
         val mappingFile: RegularFileProperty // Optional
     }
 }

@@ -1,14 +1,13 @@
 package com.github.triplet.gradle.play.tasks
 
-import com.android.build.gradle.api.ApkVariantOutput
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.common.utils.orNull
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.tasks.internal.ArtifactWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.PublishArtifactTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PublishableTrackExtensionOptions
-import com.github.triplet.gradle.play.tasks.internal.TransientTrackOptions
 import com.github.triplet.gradle.play.tasks.internal.copy
+import com.github.triplet.gradle.play.tasks.internal.findApkFiles
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
@@ -30,27 +29,12 @@ import javax.inject.Inject
 
 internal abstract class PublishApk @Inject constructor(
         extension: PlayPublisherExtension,
-        variant: ApplicationVariant,
-        optionsHolder: TransientTrackOptions.Holder
-) : PublishArtifactTaskBase(extension, variant, optionsHolder), PublishableTrackExtensionOptions {
+        variant: ApplicationVariant
+) : PublishArtifactTaskBase(extension, variant), PublishableTrackExtensionOptions {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
-    protected val apks: List<File>?
-        get() {
-            val customDir = extension.config.artifactDir
-
-            return if (customDir == null) {
-                variant.outputs.filterIsInstance<ApkVariantOutput>().map { it.outputFile }
-            } else if (customDir.isFile && customDir.extension == "apk") {
-                listOf(customDir)
-            } else {
-                val apks = customDir.listFiles().orEmpty().filter { it.extension == "apk" }
-                if (apks.isEmpty()) {
-                    logger.warn("Warning: '$customDir' does not yet contain any APKs.")
-                }
-                apks
-            }.ifEmpty { null }
-        }
+    protected val apks
+        get() = findApkFiles(true)
 
     // This directory isn't used, but it's needed for up-to-date checks to work
     @Suppress("MemberVisibilityCanBePrivate", "unused")

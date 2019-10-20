@@ -5,7 +5,6 @@ import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.promoteTrackOrDefault
 import com.github.triplet.gradle.play.tasks.internal.ArtifactWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.PublishArtifactTaskBase
-import com.github.triplet.gradle.play.tasks.internal.TransientTrackOptions
 import com.github.triplet.gradle.play.tasks.internal.UpdatableTrackExtensionOptions
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
 import org.gradle.api.tasks.TaskAction
@@ -16,9 +15,8 @@ import javax.inject.Inject
 
 internal abstract class PromoteRelease @Inject constructor(
         extension: PlayPublisherExtension,
-        variant: ApplicationVariant,
-        optionsHolder: TransientTrackOptions.Holder
-) : PublishArtifactTaskBase(extension, variant, optionsHolder), UpdatableTrackExtensionOptions {
+        variant: ApplicationVariant
+) : PublishArtifactTaskBase(extension, variant), UpdatableTrackExtensionOptions {
     init {
         // Always out-of-date since we don't know what's changed on the network
         outputs.upToDateWhen { false }
@@ -62,7 +60,7 @@ internal abstract class PromoteRelease @Inject constructor(
                 it.applyChanges(
                         updateStatus = config.releaseStatus != null,
                         updateFraction = config.userFraction != null,
-                        updateConsoleName = parameters.transientConsoleName.isPresent
+                        updateConsoleName = config.releaseName != null
                 )
             }
 

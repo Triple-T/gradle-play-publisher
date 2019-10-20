@@ -7,13 +7,13 @@ import org.gradle.api.tasks.LocalState
 import java.io.File
 import javax.inject.Inject
 
-abstract class EditTaskBase @Inject constructor(
+internal abstract class EditTaskBase @Inject constructor(
         extension: PlayPublisherExtension
 ) : PlayTaskBase(extension) {
     @get:LocalState
-    internal abstract val editIdFile: RegularFileProperty
+    abstract val editIdFile: RegularFileProperty
 
-    internal companion object {
+    companion object {
         fun File.reset() {
             val commitMarker = marked("commit")
             val skippedMarker = marked("skipped")

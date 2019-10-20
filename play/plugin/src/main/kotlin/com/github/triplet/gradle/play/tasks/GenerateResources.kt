@@ -3,9 +3,9 @@ package com.github.triplet.gradle.play.tasks
 import com.github.triplet.gradle.common.utils.climbUpTo
 import com.github.triplet.gradle.common.utils.isChildOf
 import com.github.triplet.gradle.common.utils.isDirectChildOf
-import com.github.triplet.gradle.common.utils.normalized
 import com.github.triplet.gradle.common.utils.nullOrFull
 import com.github.triplet.gradle.common.utils.orNull
+import com.github.triplet.gradle.common.utils.readProcessed
 import com.github.triplet.gradle.play.internal.AppDetail
 import com.github.triplet.gradle.play.internal.ImageType
 import com.github.triplet.gradle.play.internal.LISTINGS_PATH
@@ -75,8 +75,7 @@ internal abstract class GenerateResources : DefaultTask() {
     abstract class Processor : WorkAction<Processor.Params> {
         override fun execute() {
             val defaultLocale = parameters.inputDirs.get().mapNotNull {
-                it.file(AppDetail.DEFAULT_LANGUAGE.fileName).asFile.orNull()
-                        ?.readText()?.normalized().nullOrFull()
+                it.file(AppDetail.DEFAULT_LANGUAGE.fileName).asFile.orNull()?.readProcessed()
             }.lastOrNull() // Pick the most specialized option available. E.g. `paidProdRelease`
 
             val files = parameters.resources.get()

@@ -6,12 +6,12 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.LocalState
 
-abstract class PublishEditTaskBase(
+internal abstract class PublishEditTaskBase(
         extension: PlayPublisherExtension,
         variant: ApplicationVariant
 ) : PublishTaskBase(extension, variant) {
     @get:LocalState
-    internal abstract val editIdFile: RegularFileProperty
+    abstract val editIdFile: RegularFileProperty
     @get:Internal
-    internal val editId by lazy { editIdFile.get().asFile.readText() }
+    val editId by lazy { editIdFile.get().asFile.readText() }
 }

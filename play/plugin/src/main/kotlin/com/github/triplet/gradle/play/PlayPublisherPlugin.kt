@@ -31,7 +31,6 @@ import com.github.triplet.gradle.play.tasks.internal.BootstrapLifecycleTask
 import com.github.triplet.gradle.play.tasks.internal.BootstrapOptions
 import com.github.triplet.gradle.play.tasks.internal.GlobalPublishableArtifactLifecycleTask
 import com.github.triplet.gradle.play.tasks.internal.PublishableTrackLifecycleTask
-import com.github.triplet.gradle.play.tasks.internal.TransientTrackOptions
 import com.github.triplet.gradle.play.tasks.internal.UpdatableTrackLifecycleTask
 import com.github.triplet.gradle.play.tasks.internal.WriteTrackLifecycleTask
 import org.gradle.api.Plugin
@@ -45,7 +44,7 @@ import org.gradle.kotlin.dsl.withType
 import java.io.File
 
 @Suppress("unused") // Used by Gradle
-class PlayPublisherPlugin : Plugin<Project> {
+internal class PlayPublisherPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         validateRuntime()
 
@@ -58,7 +57,6 @@ class PlayPublisherPlugin : Plugin<Project> {
         val baseExtension = project.extensions.create<PlayPublisherExtension>(PLAY_PATH)
         val extensionContainer = project.container<PlayPublisherExtension>()
         val bootstrapOptionsHolder = BootstrapOptions.Holder()
-        val transientTrackOptionsHolder = TransientTrackOptions.Holder()
 
         val bootstrapAllTask = project.newTask<BootstrapLifecycleTask>(
                 "bootstrap",
@@ -76,19 +74,19 @@ class PlayPublisherPlugin : Plugin<Project> {
                 "publishApk",
                 "Uploads APK for every variant. See " +
                         "https://github.com/Triple-T/gradle-play-publisher#publishing-apks",
-                arrayOf(baseExtension, transientTrackOptionsHolder)
+                arrayOf(baseExtension)
         )
         val publishBundleAllTask = project.newTask<PublishableTrackLifecycleTask>(
                 "publishBundle",
                 "Uploads App Bundle for every variant. See " +
                         "https://github.com/Triple-T/gradle-play-publisher#publishing-an-app-bundle",
-                arrayOf(baseExtension, transientTrackOptionsHolder)
+                arrayOf(baseExtension)
         )
         val promoteReleaseAllTask = project.newTask<UpdatableTrackLifecycleTask>(
                 "promoteArtifact",
                 "Promotes a release for every variant. See " +
                         "https://github.com/Triple-T/gradle-play-publisher#promoting-artifacts",
-                arrayOf(baseExtension, transientTrackOptionsHolder)
+                arrayOf(baseExtension)
         )
         val publishListingAllTask = project.newTask<WriteTrackLifecycleTask>(
                 "publishListing",
@@ -222,7 +220,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "publish${variantName}Apk",
                     "Uploads APK for variant '$name'. See " +
                             "https://github.com/Triple-T/gradle-play-publisher#publishing-apks",
-                    arrayOf(extension, this, transientTrackOptionsHolder)
+                    arrayOf(extension, this)
             ) {
                 resDir.set(resourceDir)
                 editIdFile.set(editFile)
@@ -271,7 +269,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "publish${variantName}Bundle",
                     "Uploads App Bundle for variant '$name'. See " +
                             "https://github.com/Triple-T/gradle-play-publisher#publishing-an-app-bundle",
-                    arrayOf(extension, this, transientTrackOptionsHolder)
+                    arrayOf(extension, this)
             ) {
                 resDir.set(resourceDir)
                 editIdFile.set(editFile)
@@ -299,7 +297,7 @@ class PlayPublisherPlugin : Plugin<Project> {
                     "promote${variantName}Artifact",
                     "Promotes a release for variant '$name'. See " +
                             "https://github.com/Triple-T/gradle-play-publisher#promoting-artifacts",
-                    arrayOf(extension, this, transientTrackOptionsHolder)
+                    arrayOf(extension, this)
             ) {
                 resDir.set(resourceDir)
                 editIdFile.set(editFile)

@@ -1,29 +1,53 @@
 package com.github.triplet.gradle.common.utils
 
+import org.gradle.kotlin.dsl.support.normaliseLineSeparators
 import java.io.File
 
-fun File.orNull() = takeIf { exists() }
+/** @return this file if it exists, null otherwise */
+fun File.orNull(): File? = takeIf { exists() }
 
-fun File.marked(marker: String) = File(parentFile, "$nameWithoutExtension.$marker")
+/** @return a new file marked with the [marker] for bookkeeping of the original file. */
+fun File.marked(marker: String): File = File(parentFile, "$nameWithoutExtension.$marker")
 
+/**
+ * Returns a new parent file named [parentName] if found, null otherwise.
+ *
+ * Note: file lookups are inclusive. That is, if the current file is named [parentName], it is
+ * returned without looking for true parents.
+ *
+ * @see [isChildOf], [isDirectChildOf]
+ */
 fun File.climbUpTo(parentName: String): File? =
         if (name == parentName) this else parentFile?.climbUpTo(parentName)
 
-fun File.isChildOf(parentName: String) = climbUpTo(parentName) != null
+/**
+ * @return true if this file is a child of [parentName], false otherwise
+ * @see [climbUpTo], [isDirectChildOf]
+ */
+fun File.isChildOf(parentName: String): Boolean = climbUpTo(parentName) != null
 
-fun File.isDirectChildOf(parentName: String) = parentFile?.name == parentName
+/**
+ * @return true if this file's direct parent (1 level up) is [parentName], false otherwise
+ * @see [climbUpTo], [isChildOf]
+ */
+fun File.isDirectChildOf(parentName: String): Boolean = parentFile?.name == parentName
 
-fun File.safeMkdirs() = apply {
+/** @return this directory after ensuring that it either already exists or was created */
+fun File.safeMkdirs(): File = apply {
     check(exists() || mkdirs()) { "Unable to create $this" }
 }
 
-fun File.safeCreateNewFile() = apply {
+/** @return this file after ensuring that it either already exists or was created */
+fun File.safeCreateNewFile(): File = apply {
     parentFile.safeMkdirs()
     check(exists() || createNewFile()) { "Unable to create $this" }
 }
 
-fun File.readProcessed() = readText().normalized()
+/**
+ * Returns the contents of this file trimmed and with line separators normalized, or null if the
+ * file is empty.
+ */
+fun File.readProcessed(): String? = readText().normaliseLineSeparators().trim().nullOrFull()
 
-fun String.normalized() = replace(Regex("\\r\\n"), "\n").trim()
-
-fun String?.nullOrFull() = takeUnless { isNullOrBlank() }
+/** @return this string if it contains content, null otherwise */
+fun String?.nullOrFull(): String? = takeUnless { isNullOrBlank() }

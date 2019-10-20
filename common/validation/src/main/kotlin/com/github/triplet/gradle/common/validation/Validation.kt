@@ -9,6 +9,10 @@ import org.gradle.util.VersionNumber
 private val MIN_GRADLE_VERSION = GradleVersion.version("5.6.1")
 private val MIN_AGP_VERSION = VersionNumber.parse("3.5.0")
 
+/**
+ * Validates required dependencies. If GPP can't run in the current context, an error will be
+ * thrown.
+ */
 fun validateRuntime() {
     val agpVersion = VersionNumber.parse(try {
         Version.ANDROID_GRADLE_PLUGIN_VERSION
@@ -22,6 +26,7 @@ fun validateRuntime() {
     validator.validate()
 }
 
+/** @return true if the variant is *not* debuggable and can therefore be published. */
 fun validateDebuggability(variant: ApplicationVariant, logger: Logger): Boolean {
     val isValid = !variant.buildType.isDebuggable
 
