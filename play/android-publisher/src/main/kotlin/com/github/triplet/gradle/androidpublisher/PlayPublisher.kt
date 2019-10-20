@@ -28,12 +28,20 @@ interface PlayPublisher {
     fun uploadInternalSharingApk(apkFile: File): UploadInternalSharingArtifactResponse
 
     /**
-     * Uploads the given [productFile]. If it doesn't yet exist, it will be created. Otherwise, it
-     * will be updated.
+     * Creates a new product from the given [productFile].
      *
-     * More docs [here](https://developers.google.com/android-publisher/api-ref/inappproducts).
+     * More docs
+     * [here](https://developers.google.com/android-publisher/api-ref/inappproducts/insert).
      */
-    fun publishInAppProduct(productFile: File)
+    fun insertInAppProduct(productFile: File)
+
+    /**
+     * Updates an existing product from the given [productFile].
+     *
+     * More docs
+     * [here](https://developers.google.com/android-publisher/api-ref/inappproducts/update).
+     */
+    fun updateInAppProduct(productFile: File): UpdateProductResponse
 
     /** Basic factory to create [PlayPublisher] instances. */
     interface Factory {

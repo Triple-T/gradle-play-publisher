@@ -1,5 +1,6 @@
 package com.github.triplet.gradle.play.tasks
 
+import com.github.triplet.gradle.androidpublisher.UpdateProductResponse
 import com.github.triplet.gradle.play.helpers.DefaultPlayPublisher
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.github.triplet.gradle.play.helpers.execute
@@ -67,14 +68,16 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
             com.github.triplet.gradle.play.tasks.PublishProductsIntegrationBridge.installFactories()
 
             android.buildTypes {
-                nameAsSku {}
+                simple {}
             }
         """
 
-        val result = execute(config, "publishNameAsSkuProducts")
+        val result = execute(config, "publishSimpleProducts")
 
-        assertThat(result.task(":publishNameAsSkuProducts")).isNotNull()
-        assertThat(result.task(":publishNameAsSkuProducts")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.task(":publishSimpleProducts")).isNotNull()
+        assertThat(result.task(":publishSimpleProducts")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("updateInAppProduct")
+        assertThat(result.output).doesNotContain("insertInAppProduct")
         assertThat(result.output).contains("product.json")
         assertThat(result.output).contains("Uploading my-sku")
     }
@@ -97,6 +100,28 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":publishMultipleProductsProducts")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("sku1")
         assertThat(result.output).contains("sku2")
+    }
+
+    @Test
+    fun `Non-existent product tries updating then inserts`() {
+        @Suppress("UnnecessaryQualifiedReference")
+        // language=gradle
+        val config = """
+            com.github.triplet.gradle.play.tasks.PublishProductsIntegrationBridge.installFactories()
+
+            android.buildTypes {
+                simple {}
+            }
+
+            System.setProperty("NEEDS_CREATING", "true")
+        """
+
+        val result = execute(config, "publishSimpleProducts")
+
+        assertThat(result.task(":publishSimpleProducts")).isNotNull()
+        assertThat(result.task(":publishSimpleProducts")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("updateInAppProduct")
+        assertThat(result.output).contains("insertInAppProduct")
     }
 
     @Test
@@ -124,8 +149,13 @@ object PublishProductsIntegrationBridge {
     @JvmStatic
     fun installFactories() {
         val publisher = object : DefaultPlayPublisher() {
-            override fun publishInAppProduct(productFile: File) {
-                println("publishInAppProduct($productFile)")
+            override fun insertInAppProduct(productFile: File) {
+                println("insertInAppProduct($productFile)")
+            }
+
+            override fun updateInAppProduct(productFile: File): UpdateProductResponse {
+                println("updateInAppProduct($productFile)")
+                return UpdateProductResponse(System.getProperty("NEEDS_CREATING") != null)
             }
         }
         publisher.install()

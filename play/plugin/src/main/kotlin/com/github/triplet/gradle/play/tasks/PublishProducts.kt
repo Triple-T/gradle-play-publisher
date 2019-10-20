@@ -69,7 +69,8 @@ internal abstract class PublishProducts @Inject constructor(
             }
 
             println("Uploading ${product["sku"]}")
-            publisher2.publishInAppProduct(productFile)
+            val response = publisher2.updateInAppProduct(productFile)
+            if (response.needsCreating) publisher2.insertInAppProduct(productFile)
         }
 
         interface Params : PlayPublishingParams {

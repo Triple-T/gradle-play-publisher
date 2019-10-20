@@ -1,6 +1,7 @@
 package com.github.triplet.gradle.androidpublisher.internal
 
 import com.github.triplet.gradle.androidpublisher.PlayPublisher
+import com.github.triplet.gradle.androidpublisher.UpdateProductResponse
 import com.github.triplet.gradle.androidpublisher.UploadInternalSharingArtifactResponse
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
@@ -31,26 +32,33 @@ internal class DefaultPlayPublisher(
         return UploadInternalSharingArtifactResponse(apk.toPrettyString(), apk.downloadUrl)
     }
 
-    override fun publishInAppProduct(productFile: File) {
-        val product = productFile.inputStream().use {
-            JacksonFactory.getDefaultInstance()
-                    .createJsonParser(it)
-                    .parse(InAppProduct::class.java)
-        }
+    override fun insertInAppProduct(productFile: File) {
+        publisher.inappproducts().insert(appId, readProductFile(productFile))
+                .apply { autoConvertMissingPrices = true }
+                .execute()
+    }
 
+    override fun updateInAppProduct(productFile: File): UpdateProductResponse {
+        val product = readProductFile(productFile)
         try {
             publisher.inappproducts().update(appId, product.sku, product)
                     .apply { autoConvertMissingPrices = true }
                     .execute()
         } catch (e: GoogleJsonResponseException) {
             if (e.statusCode == 404) {
-                publisher.inappproducts().insert(appId, product)
-                        .apply { autoConvertMissingPrices = true }
-                        .execute()
+                return UpdateProductResponse(true)
             } else {
                 throw e
             }
         }
+
+        return UpdateProductResponse(false)
+    }
+
+    private fun readProductFile(product: File) = product.inputStream().use {
+        JacksonFactory.getDefaultInstance()
+                .createJsonParser(it)
+                .parse(InAppProduct::class.java)
     }
 
     companion object : PlayPublisher.Factory {
