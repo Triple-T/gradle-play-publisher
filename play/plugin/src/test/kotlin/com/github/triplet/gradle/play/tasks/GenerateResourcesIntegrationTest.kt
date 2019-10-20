@@ -4,12 +4,10 @@ import com.github.triplet.gradle.play.helpers.FIXTURE_WORKING_DIR
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.github.triplet.gradle.play.helpers.execute
 import com.github.triplet.gradle.play.helpers.executeExpectingFailure
+import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Test
 import java.io.File
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 class GenerateResourcesIntegrationTest : IntegrationTestBase() {
     @Test
@@ -268,10 +266,8 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "generateHiddenFileReleasePlayResources")
 
-        assertEquals(
-                TaskOutcome.SUCCESS,
-                result.task(":generateHiddenFileReleasePlayResources")!!.outcome
-        )
+        assertThat(result.task(":generateHiddenFileReleasePlayResources")!!.outcome)
+                .isEqualTo(TaskOutcome.SUCCESS)
     }
 
     @Test
@@ -287,10 +283,8 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
         val result = executeExpectingFailure(
                 config, "generateInvalidLocaleReleasePlayResources")
 
-        assertEquals(
-                TaskOutcome.FAILED,
-                result.task(":generateInvalidLocaleReleasePlayResources")!!.outcome
-        )
+        assertThat(result.task(":generateInvalidLocaleReleasePlayResources")!!.outcome)
+                .isEqualTo(TaskOutcome.FAILED)
     }
 
     @Test
@@ -306,20 +300,18 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
         val result = executeExpectingFailure(
                 config, "generateUnknownFileReleasePlayResources")
 
-        assertEquals(
-                TaskOutcome.FAILED,
-                result.task(":generateUnknownFileReleasePlayResources")!!.outcome
-        )
+        assertThat(result.task(":generateUnknownFileReleasePlayResources")!!.outcome)
+                .isEqualTo(TaskOutcome.FAILED)
     }
 
-    private val yes: (Boolean) -> Unit = { assertTrue(it) }
-    private val no: (Boolean) -> Unit = { assertFalse(it) }
+    private val yes: (Boolean) -> Unit = { assertThat(it).isTrue() }
+    private val no: (Boolean) -> Unit = { assertThat(it).isFalse() }
     private fun String.exists(validator: (Boolean) -> Unit = yes) {
         validator(File(FIXTURE_WORKING_DIR, "build/generated/gpp/$this").exists())
     }
 
     private infix fun String.generated(content: String) {
-        assertEquals(content, "build/generated/gpp/$this"())
+        assertThat(content).isEqualTo("build/generated/gpp/$this"())
     }
 
     private operator fun String.invoke() = File(FIXTURE_WORKING_DIR, this).readText()

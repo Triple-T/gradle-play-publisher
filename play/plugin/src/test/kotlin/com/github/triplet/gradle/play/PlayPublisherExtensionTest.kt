@@ -5,8 +5,8 @@ import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.mergeExtensions
 import com.github.triplet.gradle.play.internal.mergeWith
 import com.google.common.truth.Truth.assertThat
+import org.junit.Assert.assertThrows
 import org.junit.Test
-import kotlin.test.assertFails
 
 class PlayPublisherExtensionTest {
     @Test
@@ -64,7 +64,7 @@ class PlayPublisherExtensionTest {
     fun `Merging extensions with empty throws`() {
         val exts = emptyList<PlayPublisherExtension>()
 
-        assertFails { mergeExtensions(exts) }
+        assertThrows(Exception::class.java) { mergeExtensions(exts) }
     }
 
     @Test

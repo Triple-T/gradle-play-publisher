@@ -21,7 +21,7 @@ object Config {
             const val ap =
                     "com.google.apis:google-api-services-androidpublisher:v3-rev20190910-1.30.1"
 
-            const val junit = "junit:junit:4.12"
+            const val junit = "junit:junit:4.13-beta-3"
             const val truth = "com.google.truth:truth:1.0"
         }
     }

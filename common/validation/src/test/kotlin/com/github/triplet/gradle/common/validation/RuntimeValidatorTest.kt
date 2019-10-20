@@ -2,8 +2,8 @@ package com.github.triplet.gradle.common.validation
 
 import org.gradle.util.GradleVersion
 import org.gradle.util.VersionNumber
+import org.junit.Assert.assertThrows
 import org.junit.Test
-import kotlin.test.assertFails
 
 class RuntimeValidatorTest {
     @Test
@@ -13,7 +13,7 @@ class RuntimeValidatorTest {
                 minGradle = GradleVersion.version("1.0.0")
         )
 
-        assertFails { validator.validate() }
+        assertThrows(Exception::class.java) { validator.validate() }
     }
 
     @Test
@@ -43,7 +43,7 @@ class RuntimeValidatorTest {
                 minAgp = VersionNumber.parse("1.0.0")
         )
 
-        assertFails { validator.validate() }
+        assertThrows(Exception::class.java) { validator.validate() }
     }
 
     @Test
