@@ -14,7 +14,7 @@ internal interface TrackManager {
             val releaseNotes: Map<String, String?>,
             val retainableArtifacts: List<Long>?,
             val releaseName: String?,
-            val isBuildSkippingCommit: Boolean
+            val didPreviousBuildSkipCommit: Boolean
     )
 
     fun update(config: UpdateConfig)
@@ -25,7 +25,7 @@ internal class DefaultTrackManager(
         private val editId: String
 ) : TrackManager {
     override fun update(config: TrackManager.UpdateConfig) {
-        val track = if (config.isBuildSkippingCommit) {
+        val track = if (config.didPreviousBuildSkipCommit) {
             createTrackForSkippedCommit(config)
         } else if (config.releaseStatus.isRollout()) {
             createTrackForRollout(config)
@@ -42,12 +42,17 @@ internal class DefaultTrackManager(
         track.releases = if (track.releases.isNullOrEmpty()) {
             listOf(TrackRelease().applyChanges(config.versionCodes, config))
         } else {
-            track.releases.map {
-                if (it.status == config.releaseStatus.publishedName) {
-                    it.applyChanges(it.versionCodes.orEmpty() + config.versionCodes, config)
-                } else {
-                    it
+            val hasReleaseType = track.releases.firstOrNull { it.status == config.releaseStatus.publishedName } != null
+            if (hasReleaseType) {
+                track.releases.map {
+                    if (it.status == config.releaseStatus.publishedName) {
+                        it.applyChanges(it.versionCodes.orEmpty() + config.versionCodes, config)
+                    } else {
+                        it
+                    }
                 }
+            } else {
+                track.releases + listOf(TrackRelease().applyChanges(config.versionCodes, config))
             }
         }
 

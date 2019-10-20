@@ -23,6 +23,7 @@ object Config {
 
             const val junit = "junit:junit:4.13-beta-3"
             const val truth = "com.google.truth:truth:1.0"
+            const val mockito = "org.mockito:mockito-core:3.1.0"
         }
     }
 }
