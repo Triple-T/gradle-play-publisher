@@ -14,7 +14,7 @@ interface PlayPublisher {
     /**
      * Uploads the given [bundleFile] as an Internal Sharing artifact.
      *
-     * More docs
+     * More docs are available
      * [here](https://developers.google.com/android-publisher/api-ref/internalappsharingartifacts/uploadbundle).
      */
     fun uploadInternalSharingBundle(bundleFile: File): UploadInternalSharingArtifactResponse
@@ -22,7 +22,7 @@ interface PlayPublisher {
     /**
      * Uploads the given [apkFile] as an Internal Sharing artifact.
      *
-     * More docs
+     * More docs are available
      * [here](https://developers.google.com/android-publisher/api-ref/internalappsharingartifacts/uploadapk).
      */
     fun uploadInternalSharingApk(apkFile: File): UploadInternalSharingArtifactResponse
@@ -30,7 +30,7 @@ interface PlayPublisher {
     /**
      * Creates a new product from the given [productFile].
      *
-     * More docs
+     * More docs are available
      * [here](https://developers.google.com/android-publisher/api-ref/inappproducts/insert).
      */
     fun insertInAppProduct(productFile: File)
@@ -38,7 +38,7 @@ interface PlayPublisher {
     /**
      * Updates an existing product from the given [productFile].
      *
-     * More docs
+     * More docs are available
      * [here](https://developers.google.com/android-publisher/api-ref/inappproducts/update).
      */
     fun updateInAppProduct(productFile: File): UpdateProductResponse

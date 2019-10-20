@@ -1,8 +1,8 @@
 package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.androidpublisher.UploadInternalSharingArtifactResponse
-import com.github.triplet.gradle.play.helpers.DefaultPlayPublisher
 import com.github.triplet.gradle.play.helpers.FIXTURE_WORKING_DIR
+import com.github.triplet.gradle.play.helpers.FakePlayPublisher
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.github.triplet.gradle.play.helpers.execute
 import com.github.triplet.gradle.play.helpers.executeExpectingFailure
@@ -43,40 +43,6 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
         assertThat(result1.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result2.task(":uploadReleasePrivateApk")).isNotNull()
         assertThat(result2.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.UP_TO_DATE)
-    }
-
-    @Test
-    fun `Task outputs file with API response`() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.PublishInternalSharingApkBridge.installFactories()
-        """
-        val outputDir = File(FIXTURE_WORKING_DIR, "build/outputs/internal-sharing/apk/release")
-
-        val minimumTime = System.currentTimeMillis()
-        execute(config, "uploadReleasePrivateApk")
-        val maximumTime = System.currentTimeMillis()
-
-        assertThat(outputDir.listFiles()).isNotNull()
-        assertThat(outputDir.listFiles()!!.size).isEqualTo(1)
-        assertThat(outputDir.listFiles()!!.first().name).endsWith(".json")
-        assertThat(outputDir.listFiles()!!.first().name).isGreaterThan(minimumTime.toString())
-        assertThat(outputDir.listFiles()!!.first().name).isLessThan(maximumTime.toString())
-        assertThat(outputDir.listFiles()!!.first().readText()).isEqualTo("json-payload")
-    }
-
-    @Test
-    fun `Task logs download url to console`() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.PublishInternalSharingApkBridge.installFactories()
-        """
-
-        val result = execute(config, "uploadReleasePrivateApk")
-
-        assertThat(result.output).contains("Upload successful: http")
     }
 
     @Test
@@ -152,12 +118,7 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
         """
 
         File(tempDir.root, "foo.apk").createNewFile()
-        val result = execute(
-                config,
-                "clean",
-                "uploadReleasePrivateApk",
-                "--artifact-dir=${tempDir.root}"
-        )
+        val result = execute(config, "uploadReleasePrivateApk", "--artifact-dir=${tempDir.root}")
 
         assertThat(result.task(":assembleRelease")).isNull()
         assertThat(result.task(":uploadReleasePrivateApk")).isNotNull()
@@ -187,12 +148,46 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
         assertThat(result.output).contains("1.apk")
         assertThat(result.output).contains("2.apk")
     }
+
+    @Test
+    fun `Task outputs file with API response`() {
+        @Suppress("UnnecessaryQualifiedReference")
+        // language=gradle
+        val config = """
+            com.github.triplet.gradle.play.tasks.PublishInternalSharingApkBridge.installFactories()
+        """
+        val outputDir = File(FIXTURE_WORKING_DIR, "build/outputs/internal-sharing/apk/release")
+
+        val minimumTime = System.currentTimeMillis()
+        execute(config, "uploadReleasePrivateApk")
+        val maximumTime = System.currentTimeMillis()
+
+        assertThat(outputDir.listFiles()).isNotNull()
+        assertThat(outputDir.listFiles()!!.size).isEqualTo(1)
+        assertThat(outputDir.listFiles()!!.first().name).endsWith(".json")
+        assertThat(outputDir.listFiles()!!.first().name).isGreaterThan(minimumTime.toString())
+        assertThat(outputDir.listFiles()!!.first().name).isLessThan(maximumTime.toString())
+        assertThat(outputDir.listFiles()!!.first().readText()).isEqualTo("json-payload")
+    }
+
+    @Test
+    fun `Task logs download url to console`() {
+        @Suppress("UnnecessaryQualifiedReference")
+        // language=gradle
+        val config = """
+            com.github.triplet.gradle.play.tasks.PublishInternalSharingApkBridge.installFactories()
+        """
+
+        val result = execute(config, "uploadReleasePrivateApk")
+
+        assertThat(result.output).contains("Upload successful: http")
+    }
 }
 
 object PublishInternalSharingApkBridge {
     @JvmStatic
     fun installFactories() {
-        val publisher = object : DefaultPlayPublisher() {
+        val publisher = object : FakePlayPublisher() {
             override fun uploadInternalSharingApk(apkFile: File): UploadInternalSharingArtifactResponse {
                 println("uploadInternalSharingApk($apkFile)")
                 return UploadInternalSharingArtifactResponse("json-payload", "https://google.com")

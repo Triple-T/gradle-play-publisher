@@ -3,14 +3,15 @@ package com.github.triplet.gradle.play.tasks
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.common.utils.orNull
 import com.github.triplet.gradle.play.PlayPublisherExtension
-import com.github.triplet.gradle.play.internal.MIME_TYPE_STREAM
+import com.github.triplet.gradle.play.internal.releaseStatusOrDefault
+import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
+import com.github.triplet.gradle.play.internal.trackOrDefault
+import com.github.triplet.gradle.play.internal.userFractionOrDefault
 import com.github.triplet.gradle.play.tasks.internal.ArtifactWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.PublishArtifactTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PublishableTrackExtensionOptions
 import com.github.triplet.gradle.play.tasks.internal.findBundleFile
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
-import com.google.api.client.googleapis.json.GoogleJsonResponseException
-import com.google.api.client.http.FileContent
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
@@ -49,17 +50,20 @@ internal abstract class PublishBundle @Inject constructor(
 
     abstract class BundleUploader : ArtifactWorkerBase<BundleUploader.Params>() {
         override fun upload() {
-            val bundleFile = parameters.bundleFile.get().asFile
-            val bundle = try {
-                edits.bundles().upload(appId, editId, FileContent(MIME_TYPE_STREAM, bundleFile))
-                        .trackUploadProgress("App Bundle", bundleFile)
-                        .execute()
-            } catch (e: GoogleJsonResponseException) {
-                handleUploadFailures(e, bundleFile)
-            } ?: return
-
-            uploadMappingFile(bundle.versionCode)
-            updateTracks(listOf(bundle.versionCode.toLong()))
+            edits2.uploadBundle(
+                    parameters.bundleFile.get().asFile,
+                    parameters.mappingFile.orNull?.asFile,
+                    config.resolutionStrategyOrDefault,
+                    parameters.versionCode.get().toLong(),
+                    parameters.variantName.get(),
+                    parameters.skippedMarker.get().asFile.exists(),
+                    config.releaseStatusOrDefault,
+                    config.trackOrDefault,
+                    config.retain.artifacts,
+                    findReleaseName(),
+                    findReleaseNotes(),
+                    config.userFractionOrDefault
+            )
         }
 
         interface Params : ArtifactPublishingParams {

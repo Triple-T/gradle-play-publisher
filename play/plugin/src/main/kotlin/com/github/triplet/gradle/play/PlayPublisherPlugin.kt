@@ -3,11 +3,11 @@ package com.github.triplet.gradle.play
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.internal.api.InstallableVariantImpl
+import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import com.github.triplet.gradle.common.validation.validateRuntime
 import com.github.triplet.gradle.play.internal.PLAY_CONFIGS_PATH
 import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
-import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.buildExtension
 import com.github.triplet.gradle.play.internal.flavorNameOrDefault
 import com.github.triplet.gradle.play.internal.getCommitEditTask

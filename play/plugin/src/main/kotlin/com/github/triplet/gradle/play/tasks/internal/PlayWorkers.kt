@@ -1,6 +1,8 @@
 package com.github.triplet.gradle.play.tasks.internal
 
+import com.github.triplet.gradle.androidpublisher.EditManager
 import com.github.triplet.gradle.androidpublisher.PlayPublisher
+import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import com.github.triplet.gradle.common.utils.marked
 import com.github.triplet.gradle.common.utils.orNull
 import com.github.triplet.gradle.common.utils.readProcessed
@@ -9,7 +11,6 @@ import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.MIME_TYPE_STREAM
 import com.github.triplet.gradle.play.internal.RELEASE_NAMES_DEFAULT_NAME
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_DEFAULT_NAME
-import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.commitOrDefault
 import com.github.triplet.gradle.play.internal.has
 import com.github.triplet.gradle.play.internal.isRollout
@@ -126,6 +127,7 @@ internal abstract class EditWorkerBase<T : EditWorkerBase.EditPublishingParams> 
         PlayWorkerBase<T>() {
     protected val editId = parameters.editId.get()
     protected val edits: AndroidPublisher.Edits = publisher.edits()
+    protected val edits2 = EditManager(publisher2, editId)
 
     protected fun commit() {
         if (config.commitOrDefault) {
@@ -261,7 +263,11 @@ internal abstract class ArtifactWorkerBase<T : ArtifactWorkerBase.ArtifactPublis
     }
 
     private fun TrackRelease.updateConsoleName() {
-        name = if (config.releaseName != null) {
+        name = findReleaseName()
+    }
+
+    protected fun findReleaseName(): String? {
+        return if (config.releaseName != null) {
             config.releaseName
         } else if (parameters.consoleNamesDir.isPresent) {
             val dir = parameters.consoleNamesDir.get()
@@ -288,6 +294,17 @@ internal abstract class ArtifactWorkerBase<T : ArtifactWorkerBase.ArtifactPublis
         }
 
         if (releaseNotes.isNotEmpty()) updateReleaseNotes(releaseNotes)
+    }
+
+    protected fun findReleaseNotes(): Map<String, String?> {
+        val locales = parameters.releaseNotesDir.orNull?.asFile?.listFiles().orEmpty()
+        return locales.mapNotNull { locale ->
+            var result = File(locale, "${config.trackOrDefault}.txt").orNull()
+            if (result == null) result = File(locale, RELEASE_NOTES_DEFAULT_NAME).orNull()
+            result
+        }.associate { notes ->
+            notes.parentFile.name to notes.readProcessed()
+        }
     }
 
     private fun TrackRelease.updateReleaseNotes(releaseNotes: List<LocalizedText>) {

@@ -1,7 +1,7 @@
 package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.androidpublisher.UpdateProductResponse
-import com.github.triplet.gradle.play.helpers.DefaultPlayPublisher
+import com.github.triplet.gradle.play.helpers.FakePlayPublisher
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.github.triplet.gradle.play.helpers.execute
 import com.google.common.truth.Truth.assertThat
@@ -148,7 +148,7 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
 object PublishProductsIntegrationBridge {
     @JvmStatic
     fun installFactories() {
-        val publisher = object : DefaultPlayPublisher() {
+        val publisher = object : FakePlayPublisher() {
             override fun insertInAppProduct(productFile: File) {
                 println("insertInAppProduct($productFile)")
             }

@@ -1,8 +1,8 @@
 package com.github.triplet.gradle.play
 
 import com.android.build.gradle.api.ApkVariantOutput
-import com.github.triplet.gradle.play.internal.ReleaseStatus
-import com.github.triplet.gradle.play.internal.ResolutionStrategy
+import com.github.triplet.gradle.androidpublisher.ReleaseStatus
+import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.commitOrDefault
 import com.github.triplet.gradle.play.internal.promoteTrackOrDefault
 import com.github.triplet.gradle.play.internal.releaseStatusOrDefault
@@ -229,7 +229,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
         action.execute(_config.retain)
     }
 
-    override fun toString(): String = "PlayPublisherExtension(name='$name', config=$_config)"
+    override fun toString(): String = "PlayPublisherExtension(name=$name, config=$_config)"
 
     /** Entry point for retainable artifact configuration. */
     data class Retain(

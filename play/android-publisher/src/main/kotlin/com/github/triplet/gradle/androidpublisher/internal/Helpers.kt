@@ -1,7 +1,10 @@
 package com.github.triplet.gradle.androidpublisher.internal
 
+import com.github.triplet.gradle.androidpublisher.ReleaseStatus
+import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.googleapis.media.MediaHttpUploader
 import com.google.api.client.googleapis.services.AbstractGoogleClientRequest
+import com.google.api.services.androidpublisher.model.TrackRelease
 import java.io.File
 import kotlin.math.roundToInt
 
@@ -25,3 +28,13 @@ internal fun <T, R : AbstractGoogleClientRequest<T>> R.trackUploadProgress(
     }
     return this
 }
+
+internal fun ReleaseStatus.isRollout() =
+        this == ReleaseStatus.IN_PROGRESS || this == ReleaseStatus.HALTED
+
+internal fun TrackRelease.isRollout() =
+        status == ReleaseStatus.IN_PROGRESS.publishedName ||
+                status == ReleaseStatus.HALTED.publishedName
+
+internal infix fun GoogleJsonResponseException.has(error: String) =
+        details?.errors.orEmpty().any { it.reason == error }

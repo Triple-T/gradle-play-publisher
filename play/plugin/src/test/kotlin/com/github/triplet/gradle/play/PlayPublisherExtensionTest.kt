@@ -1,7 +1,7 @@
 package com.github.triplet.gradle.play
 
-import com.github.triplet.gradle.play.internal.ReleaseStatus
-import com.github.triplet.gradle.play.internal.ResolutionStrategy
+import com.github.triplet.gradle.androidpublisher.ReleaseStatus
+import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.mergeExtensions
 import com.github.triplet.gradle.play.internal.mergeWith
 import com.google.common.truth.Truth.assertThat
