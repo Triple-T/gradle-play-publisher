@@ -5,6 +5,7 @@ import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.tasks.internal.EditTaskBase
 import com.github.triplet.gradle.play.tasks.internal.buildPublisher
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.logging.Logging
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
@@ -48,7 +49,7 @@ internal abstract class CommitEdit @Inject constructor(
             } else if (file.marked("skipped").exists()) {
                 println("Changes pending commit")
             } else {
-                println("Nothing to commit, skipping")
+                Logging.getLogger(CommitEdit::class.java).info("Nothing to commit, skipping")
             }
         }
 
