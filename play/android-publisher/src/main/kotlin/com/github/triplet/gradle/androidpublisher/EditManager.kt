@@ -17,13 +17,13 @@ interface EditManager {
             strategy: ResolutionStrategy,
             versionCode: Long,
             variantName: String,
-            isBuildSkippingCommit: Boolean,
-            releaseStatus: ReleaseStatus,
+            didPreviousBuildSkipCommit: Boolean,
             trackName: String,
-            retainableArtifacts: List<Long>?,
+            releaseStatus: ReleaseStatus,
             releaseName: String?,
             releaseNotes: Map</* locale= */String, /* text= */String?>,
-            userFraction: Double
+            userFraction: Double,
+            retainableArtifacts: List<Long>?
     )
 
     /** Basic factory to create [EditManager] instances. */

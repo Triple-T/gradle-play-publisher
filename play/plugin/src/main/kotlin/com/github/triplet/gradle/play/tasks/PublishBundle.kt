@@ -57,12 +57,12 @@ internal abstract class PublishBundle @Inject constructor(
                     parameters.versionCode.get().toLong(),
                     parameters.variantName.get(),
                     parameters.skippedMarker.get().asFile.exists(),
-                    config.releaseStatusOrDefault,
                     config.trackOrDefault,
-                    config.retain.artifacts,
+                    config.releaseStatusOrDefault,
                     findReleaseName(),
                     findReleaseNotes(),
-                    config.userFractionOrDefault
+                    config.userFractionOrDefault,
+                    config.retain.artifacts
             )
         }
 

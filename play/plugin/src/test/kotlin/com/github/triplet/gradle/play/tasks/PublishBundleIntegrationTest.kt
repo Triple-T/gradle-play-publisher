@@ -162,16 +162,16 @@ object PublishBundleIntegrationBridge {
                     strategy: ResolutionStrategy,
                     versionCode: Long,
                     variantName: String,
-                    isBuildSkippingCommit: Boolean,
-                    releaseStatus: ReleaseStatus,
+                    didPreviousBuildSkipCommit: Boolean,
                     trackName: String,
-                    retainableArtifacts: List<Long>?,
+                    releaseStatus: ReleaseStatus,
                     releaseName: String?,
                     releaseNotes: Map<String, String?>,
-                    userFraction: Double
+                    userFraction: Double,
+                    retainableArtifacts: List<Long>?
             ) {
                 println("uploadBundle($bundleFile, $mappingFile, $strategy, $versionCode, " +
-                                "$variantName, $isBuildSkippingCommit, $releaseStatus, " +
+                                "$variantName, $didPreviousBuildSkipCommit, $releaseStatus, " +
                                 "$trackName, $retainableArtifacts, $releaseName, $releaseNotes, " +
                                 "$userFraction)")
             }

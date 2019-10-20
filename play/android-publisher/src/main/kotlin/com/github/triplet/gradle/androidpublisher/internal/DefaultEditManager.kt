@@ -10,8 +10,8 @@ import java.io.File
 
 internal class DefaultEditManager(
         private val publisher: InternalPlayPublisher,
-        private val editId: String,
-        private val tracks: TrackManager
+        private val tracks: TrackManager,
+        private val editId: String
 ) : EditManager {
     override fun uploadBundle(
             bundleFile: File,
@@ -19,13 +19,13 @@ internal class DefaultEditManager(
             strategy: ResolutionStrategy,
             versionCode: Long,
             variantName: String,
-            isBuildSkippingCommit: Boolean,
-            releaseStatus: ReleaseStatus,
+            didPreviousBuildSkipCommit: Boolean,
             trackName: String,
-            retainableArtifacts: List<Long>?,
+            releaseStatus: ReleaseStatus,
             releaseName: String?,
             releaseNotes: Map<String, String?>,
-            userFraction: Double
+            userFraction: Double,
+            retainableArtifacts: List<Long>?
     ) {
         val bundle = try {
             publisher.uploadBundle(editId, bundleFile)
@@ -42,7 +42,7 @@ internal class DefaultEditManager(
                 releaseNotes,
                 retainableArtifacts,
                 releaseName,
-                isBuildSkippingCommit
+                didPreviousBuildSkipCommit
         ))
     }
 
@@ -58,7 +58,11 @@ internal class DefaultEditManager(
             artifact: File,
             versionCode: Long,
             variantName: String
-    ): Nothing? = if (e has "apkUpgradeVersionConflict" || e has "apkNoUpgradePath") {
+    ): Nothing? = if (
+            e has "apkNotificationMessageKeyUpgradeVersionConflict" ||
+            e has "apkUpgradeVersionConflict" ||
+            e has "apkNoUpgradePath"
+    ) {
         when (strategy) {
             ResolutionStrategy.AUTO -> throw IllegalStateException(
                     "Concurrent uploads for variant $variantName (version code $versionCode " +
@@ -83,8 +87,8 @@ internal class DefaultEditManager(
     companion object : EditManager.Factory {
         override fun create(publisher: PlayPublisher, editId: String) = DefaultEditManager(
                 publisher as InternalPlayPublisher,
-                editId,
-                DefaultTrackManager(publisher, editId)
+                DefaultTrackManager(publisher, editId),
+                editId
         )
     }
 }
