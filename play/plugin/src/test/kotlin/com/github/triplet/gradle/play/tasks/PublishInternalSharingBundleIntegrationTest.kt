@@ -1,11 +1,8 @@
 package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.androidpublisher.UploadInternalSharingArtifactResponse
-import com.github.triplet.gradle.play.helpers.FIXTURE_WORKING_DIR
 import com.github.triplet.gradle.play.helpers.FakePlayPublisher
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
-import com.github.triplet.gradle.play.helpers.execute
-import com.github.triplet.gradle.play.helpers.executeExpectingFailure
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Test
@@ -160,7 +157,7 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
         val config = """
             com.github.triplet.gradle.play.tasks.PublishInternalSharingBundleBridge.installFactories()
         """
-        val outputDir = File(FIXTURE_WORKING_DIR, "build/outputs/internal-sharing/bundle/release")
+        val outputDir = File(appDir, "build/outputs/internal-sharing/bundle/release")
 
         val minimumTime = System.currentTimeMillis()
         execute(config, "uploadReleasePrivateBundle")

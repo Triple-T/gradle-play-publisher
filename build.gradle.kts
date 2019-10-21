@@ -49,6 +49,10 @@ allprojects {
             }
         }
     }
+
+    tasks.withType<Test> {
+        maxParallelForks = 5
+    }
 }
 
 apply(from = "testapp-setup.gradle.kts")

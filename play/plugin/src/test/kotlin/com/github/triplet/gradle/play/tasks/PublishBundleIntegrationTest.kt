@@ -6,8 +6,6 @@ import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import com.github.triplet.gradle.play.helpers.FakeEditManager
 import com.github.triplet.gradle.play.helpers.FakePlayPublisher
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
-import com.github.triplet.gradle.play.helpers.execute
-import com.github.triplet.gradle.play.helpers.executeExpectingFailure
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Test
