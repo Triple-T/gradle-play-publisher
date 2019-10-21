@@ -381,7 +381,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `Build uses correct release notes`() {
+    fun `Build picks default release notes when no track specific ones are available`() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
@@ -398,7 +398,32 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":publishReleaseNotesBundle")!!.outcome)
                 .isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadBundle(")
-        assertThat(result.output).contains("releaseNotes={en-US=My custom release notes}")
+        assertThat(result.output).contains("releaseNotes={en-US=My custom release notes, " +
+                                                   "fr-FR=Mes notes de mise à jour}")
+    }
+
+    @Test
+    fun `Build picks track specific release notes when available`() {
+        @Suppress("UnnecessaryQualifiedReference")
+        // language=gradle
+        val config = """
+            com.github.triplet.gradle.play.tasks.PublishBundleIntegrationBridge.installFactories()
+
+            android.buildTypes {
+                releaseNotes {}
+            }
+
+            play.track 'custom-track'
+        """
+
+        val result = execute(config, "publishReleaseNotesBundle")
+
+        assertThat(result.task(":publishReleaseNotesBundle")).isNotNull()
+        assertThat(result.task(":publishReleaseNotesBundle")!!.outcome)
+                .isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("uploadBundle(")
+        assertThat(result.output).contains("releaseNotes={en-US=Custom track release notes, " +
+                                                   "fr-FR=Mes notes de mise à jour}")
     }
 
     @Test

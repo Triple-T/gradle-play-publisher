@@ -50,7 +50,7 @@ class DefaultEditManagerTest {
                 retainableArtifacts = listOf(777)
         )
 
-        verify(mockPublisher).uploadDeobfuscationFile(eq("edit-id"), any(), eq(888))
+        verify(mockPublisher).uploadDeobfuscationFile(eq("edit-id"), eq(mockFile), eq(888))
         verify(mockTracks).update(TrackManager.UpdateConfig(
                 versionCodes = listOf(888L),
                 didPreviousBuildSkipCommit = false,
@@ -183,6 +183,8 @@ class DefaultEditManagerTest {
         }
     }
 
+    // TODO(asaveau): remove once https://github.com/googleapis/google-api-java-client/pull/1395
+    //  goes through
     private fun newExceptionMock(
             jsonFactory: JsonFactory,
             httpCode: Int,
