@@ -80,7 +80,7 @@ internal abstract class GenerateEdit @Inject constructor(
                 Logging.getLogger(GenerateEdit::class.java)
                         .error("Failed to retrieve saved edit, regenerating.")
                 return getOrCreateEditId()
-            } else if (response.isUnauthenticated()) {
+            } else if (response.isUnauthorized()) {
                 response.rethrow(
                         "Service account not authenticated. See the README for instructions: " +
                                 "https://github.com/Triple-T/gradle-play-publisher/" +

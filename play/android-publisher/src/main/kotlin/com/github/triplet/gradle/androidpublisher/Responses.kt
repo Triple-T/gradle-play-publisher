@@ -24,7 +24,7 @@ sealed class EditResponse {
                 e has "editAlreadyCommitted" || e has "editNotFound" || e has "editExpired"
 
         /** @return true if the user doesn't have permission to access this app, false otherwise */
-        fun isUnauthenticated(): Boolean = e.statusCode == 401
+        fun isUnauthorized(): Boolean = e.statusCode == 401
 
         /** Cleanly rethrows the error. */
         fun rethrow(): Nothing = throw e
