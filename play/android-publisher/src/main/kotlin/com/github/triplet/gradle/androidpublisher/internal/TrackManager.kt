@@ -48,20 +48,23 @@ internal class DefaultTrackManager(
     private fun createTrackForSkippedCommit(config: TrackManager.UpdateConfig): Track {
         val track = publisher.getTrack(editId, config.trackName)
 
-        track.releases = if (track.releases.isNullOrEmpty()) {
-            listOf(TrackRelease().applyChanges(config.versionCodes, config))
+        if (track.releases.isNullOrEmpty()) {
+            track.releases = listOf(TrackRelease().applyChanges(config.versionCodes, config))
         } else {
-            val hasReleaseType = track.releases.firstOrNull { it.status == config.releaseStatus.publishedName } != null
-            if (hasReleaseType) {
-                track.releases.map {
-                    if (it.status == config.releaseStatus.publishedName) {
-                        it.applyChanges(it.versionCodes.orEmpty() + config.versionCodes, config)
-                    } else {
-                        it
+            val hasReleaseToBeUpdated = track.releases.firstOrNull {
+                it.status == config.releaseStatus.publishedName
+            } != null
+
+            if (hasReleaseToBeUpdated) {
+                for (release in track.releases) {
+                    if (release.status == config.releaseStatus.publishedName) {
+                        release.applyChanges(
+                                release.versionCodes.orEmpty() + config.versionCodes, config)
                     }
                 }
             } else {
-                track.releases + listOf(TrackRelease().applyChanges(config.versionCodes, config))
+                track.releases = track.releases +
+                        listOf(TrackRelease().applyChanges(config.versionCodes, config))
             }
         }
 
@@ -85,14 +88,12 @@ internal class DefaultTrackManager(
     private fun TrackRelease.applyChanges(
             versionCodes: List<Long>,
             config: TrackManager.UpdateConfig
-    ): TrackRelease {
+    ) = apply {
         updateVersionCodes(versionCodes, config.retainableArtifacts)
         updateStatus(config.releaseStatus)
         updateConsoleName(config.releaseName)
         updateReleaseNotes(config.releaseNotes)
         updateUserFraction(config.userFraction)
-
-        return this
     }
 
     private fun TrackRelease.updateVersionCodes(versionCodes: List<Long>, retainableArtifacts: List<Long>?) {
@@ -108,10 +109,10 @@ internal class DefaultTrackManager(
     }
 
     private fun TrackRelease.updateReleaseNotes(rawReleaseNotes: Map<String, String?>) {
-        val releaseNotes = rawReleaseNotes.map {
+        val releaseNotes = rawReleaseNotes.map { (locale, notes) ->
             LocalizedText().apply {
-                language = it.key
-                text = it.value
+                language = locale
+                text = notes
             }
         }
         val existingReleaseNotes = this.releaseNotes.orEmpty()

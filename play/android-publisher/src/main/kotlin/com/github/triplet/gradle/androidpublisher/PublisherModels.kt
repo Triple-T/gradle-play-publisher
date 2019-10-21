@@ -32,8 +32,8 @@ enum class ResolutionStrategy(
 ) {
     /** Conflicts should be automagically resolved. */
     AUTO("auto"),
-    /** Failed the build at the first sign of conflict. */
+    /** Fail the build at the first sign of conflict. */
     FAIL("fail"),
-    /** Keep going and pretend like there were no conflicts. */
+    /** Keep going and pretend like nothing happened. */
     IGNORE("ignore")
 }

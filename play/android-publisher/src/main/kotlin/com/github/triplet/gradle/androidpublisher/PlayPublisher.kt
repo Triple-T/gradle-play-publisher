@@ -28,7 +28,7 @@ interface PlayPublisher {
     fun getEdit(id: String): EditResponse
 
     /**
-     * Commits the edit with the given [id].
+     * Commits an edit with the given [id].
      *
      * More docs are available
      * [here](https://developers.google.com/android-publisher/api-ref/edits/commit).

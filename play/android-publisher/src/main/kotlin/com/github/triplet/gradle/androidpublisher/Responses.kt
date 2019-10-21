@@ -2,17 +2,20 @@ package com.github.triplet.gradle.androidpublisher
 
 import com.github.triplet.gradle.androidpublisher.internal.has
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
+import com.google.common.annotations.VisibleForTesting
 
 /** Response for an edit request. */
 sealed class EditResponse {
     /** Response for a successful edit request. */
-    data class Success(
+    data class Success @VisibleForTesting constructor(
             /** The id of the edit in question. */
             val id: String
     ) : EditResponse()
 
     /** Response for an unsuccessful edit request. */
-    class Failure(private val e: GoogleJsonResponseException) : EditResponse() {
+    class Failure @VisibleForTesting constructor(
+            private val e: GoogleJsonResponseException
+    ) : EditResponse() {
         /** @return true if the app wasn't found in the Play Console, false otherwise */
         fun isNewApp(): Boolean = e has "applicationNotFound"
 
@@ -32,7 +35,7 @@ sealed class EditResponse {
 }
 
 /** Response for an internal sharing artifact upload. */
-data class UploadInternalSharingArtifactResponse(
+data class UploadInternalSharingArtifactResponse @VisibleForTesting constructor(
         /** The response's full JSON payload. */
         val json: String,
 
@@ -41,7 +44,7 @@ data class UploadInternalSharingArtifactResponse(
 )
 
 /** Response for a product update request. */
-data class UpdateProductResponse(
+data class UpdateProductResponse @VisibleForTesting constructor(
         /** @return true if the product doesn't exist and needs to be created, false otherwise. */
         val needsCreating: Boolean
 )
