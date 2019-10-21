@@ -1,5 +1,7 @@
 package com.github.triplet.gradle.play.internal
 
+import com.github.triplet.gradle.androidpublisher.ReleaseStatus
+import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import com.github.triplet.gradle.play.PlayPublisherExtension
 
 internal val PlayPublisherExtension.Config.commitOrDefault get() = commit ?: true

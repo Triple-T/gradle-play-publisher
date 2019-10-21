@@ -1,14 +1,12 @@
 package com.github.triplet.gradle.play.tasks.internal
 
+import com.github.triplet.gradle.androidpublisher.ReleaseStatus
+import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import com.github.triplet.gradle.common.utils.orNull
 import com.github.triplet.gradle.play.PlayPublisherExtension
-import com.github.triplet.gradle.play.internal.ReleaseStatus
-import com.github.triplet.gradle.play.internal.ResolutionStrategy
 import org.gradle.api.Project
-import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
-import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.options.Option
 import org.gradle.api.tasks.options.OptionValues
 import java.util.concurrent.atomic.AtomicBoolean
@@ -90,8 +88,7 @@ internal interface TrackExtensionOptions : WriteTrackExtensionOptions {
 }
 
 internal interface TransientTrackOptions : ExtensionOptionsBase {
-    @get:Optional
-    @get:Input
+    @get:Internal
     @set:Option(
             option = "release-name",
             description = "Set the Play Console developer facing release name."

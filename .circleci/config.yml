@@ -29,7 +29,7 @@ jobs:
           name: Build
           command: ./gradlew clean ciBuild --stacktrace
       - store_test_results:
-          path: plugin/play/build/test-results
+          path: play/plugin/build/test-results
       - save_cache:
           key: v1-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}-{{ .Branch }}-{{ .Revision }}
           when: always

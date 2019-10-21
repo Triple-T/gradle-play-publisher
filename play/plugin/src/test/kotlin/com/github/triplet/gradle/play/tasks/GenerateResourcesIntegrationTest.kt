@@ -38,12 +38,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
             }
         """
 
-        execute(
-                config,
-                "clean",
-                "generateFreeReleasePlayResources",
-                "generatePaidReleasePlayResources"
-        )
+        execute(config, "generateFreeReleasePlayResources", "generatePaidReleasePlayResources")
 
         "".exists()
         "freeRelease".exists()

@@ -1,7 +1,7 @@
 package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.androidpublisher.UpdateProductResponse
-import com.github.triplet.gradle.play.helpers.DefaultPlayPublisher
+import com.github.triplet.gradle.play.helpers.FakePlayPublisher
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.github.triplet.gradle.play.helpers.execute
 import com.google.common.truth.Truth.assertThat
@@ -76,8 +76,8 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
 
         assertThat(result.task(":publishSimpleProducts")).isNotNull()
         assertThat(result.task(":publishSimpleProducts")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result.output).contains("updateInAppProduct")
-        assertThat(result.output).doesNotContain("insertInAppProduct")
+        assertThat(result.output).contains("updateInAppProduct(")
+        assertThat(result.output).doesNotContain("insertInAppProduct(")
         assertThat(result.output).contains("product.json")
         assertThat(result.output).contains("Uploading my-sku")
     }
@@ -120,8 +120,8 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
 
         assertThat(result.task(":publishSimpleProducts")).isNotNull()
         assertThat(result.task(":publishSimpleProducts")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result.output).contains("updateInAppProduct")
-        assertThat(result.output).contains("insertInAppProduct")
+        assertThat(result.output).contains("updateInAppProduct(")
+        assertThat(result.output).contains("insertInAppProduct(")
     }
 
     @Test
@@ -148,7 +148,7 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
 object PublishProductsIntegrationBridge {
     @JvmStatic
     fun installFactories() {
-        val publisher = object : DefaultPlayPublisher() {
+        val publisher = object : FakePlayPublisher() {
             override fun insertInAppProduct(productFile: File) {
                 println("insertInAppProduct($productFile)")
             }
