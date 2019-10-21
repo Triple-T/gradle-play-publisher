@@ -41,17 +41,17 @@ allprojects {
         }
     }
 
-    if (System.getenv("CI") != null) {
+    if (System.getenv("CI") == null) {
+        tasks.withType<Test> {
+            maxParallelForks = 3
+        }
+    } else {
         tasks.withType<Test> {
             testLogging {
                 events("passed", "failed", "skipped")
                 showStandardStreams = true
             }
         }
-    }
-
-    tasks.withType<Test> {
-        maxParallelForks = 5
     }
 }
 
