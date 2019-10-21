@@ -1,7 +1,8 @@
 package com.github.triplet.gradle.play.helpers
 
 import com.github.triplet.gradle.common.utils.orNull
-import org.junit.After
+import org.gradle.testkit.runner.BuildResult
+import org.gradle.testkit.runner.GradleRunner
 import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -10,25 +11,74 @@ import java.io.File
 abstract class IntegrationTestBase {
     @get:Rule
     val tempDir = TemporaryFolder()
-
-    @Before
-    fun resetOutputs() {
-        File(FIXTURE_WORKING_DIR, ".gradle").deleteRecursively()
-        File(FIXTURE_WORKING_DIR, "userHome").deleteRecursively()
-        File(FIXTURE_WORKING_DIR, "build").deleteRecursively()
-    }
+    protected val appDir by lazy { File(tempDir.root, "app") }
 
     @Before
     fun initTestResources() {
-        File(FIXTURES_DIR, javaClass.simpleName).orNull()?.copyRecursively(FIXTURE_WORKING_DIR)
-    }
-
-    @After
-    fun cleanupTestResources() {
-        for (file in File(FIXTURES_DIR, javaClass.simpleName).listFiles().orEmpty()) {
-            File(FIXTURE_WORKING_DIR, file.name).deleteRecursively()
-        }
+        File("src/test/fixtures/app").copyRecursively(appDir)
+        File("src/test/fixtures/${javaClass.simpleName}").orNull()?.copyRecursively(appDir)
     }
 
     protected fun escapedTempDir() = tempDir.root.toString().replace("\\", "\\\\")
+
+    protected fun execute(config: String, vararg tasks: String) = execute(config, false, *tasks)
+
+    protected fun executeExpectingFailure(config: String, vararg tasks: String) =
+            execute(config, true, *tasks)
+
+    private fun execute(
+            config: String,
+            expectFailure: Boolean,
+            vararg tasks: String
+    ): BuildResult {
+        // language=gradle
+        File(appDir, "build.gradle").writeText("""
+            plugins {
+                id 'com.android.application'
+                id 'com.github.triplet.play'
+            }
+
+            allprojects {
+                repositories {
+                    google()
+                    jcenter()
+                }
+            }
+
+            android {
+                compileSdkVersion 28
+
+                defaultConfig {
+                    applicationId "com.example.publisher"
+                    minSdkVersion 21
+                    targetSdkVersion 28
+                    versionCode 1
+                    versionName "1.0"
+                }
+
+                $config
+            }
+
+            play {
+                serviceAccountCredentials = file('creds.json')
+            }
+        """)
+
+        val runner = GradleRunner.create()
+                .withPluginClasspath()
+                .withProjectDir(appDir)
+                .withArguments("-S", *tasks)
+
+        // We're doing some pretty wack (and disgusting, shameful) shit to run integration tests without
+        // actually publishing anything. The idea is have the build file call into the test class to run
+        // some code. Unfortunately, it'll mostly be limited to printlns since we can't actually share
+        // any state due to the same code being run in completely different classpaths (possibly
+        // even different processes), but at least we can validate that tasks are trying to publish the
+        // correct stuff now.
+        runner.withPluginClasspath(runner.pluginClasspath + listOf(
+                File("build/classes/kotlin/test")
+        ))
+
+        return if (expectFailure) runner.buildAndFail() else runner.build()
+    }
 }

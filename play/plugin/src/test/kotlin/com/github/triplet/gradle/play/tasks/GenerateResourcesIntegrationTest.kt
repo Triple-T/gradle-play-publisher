@@ -1,9 +1,6 @@
 package com.github.triplet.gradle.play.tasks
 
-import com.github.triplet.gradle.play.helpers.FIXTURE_WORKING_DIR
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
-import com.github.triplet.gradle.play.helpers.execute
-import com.github.triplet.gradle.play.helpers.executeExpectingFailure
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Test
@@ -302,12 +299,12 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
     private val yes: (Boolean) -> Unit = { assertThat(it).isTrue() }
     private val no: (Boolean) -> Unit = { assertThat(it).isFalse() }
     private fun String.exists(validator: (Boolean) -> Unit = yes) {
-        validator(File(FIXTURE_WORKING_DIR, "build/generated/gpp/$this").exists())
+        validator(File(appDir, "build/generated/gpp/$this").exists())
     }
 
     private infix fun String.generated(content: String) {
         assertThat(content).isEqualTo("build/generated/gpp/$this"())
     }
 
-    private operator fun String.invoke() = File(FIXTURE_WORKING_DIR, this).readText()
+    private operator fun String.invoke() = File(appDir, this).readText()
 }

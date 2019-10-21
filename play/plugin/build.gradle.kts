@@ -50,15 +50,8 @@ tasks.withType<ValidateTaskProperties>().configureEach {
     failOnWarning = true
 }
 
-tasks.named<Delete>("clean") {
-    val deletables = listOf(".gradle", "build", "userHome")
-    delete(deletables.map { "src/test/fixtures/android_app/$it" })
-}
-
 tasks.named("test") {
-    inputs.files(fileTree("src/test/fixtures").exclude {
-        it.name == ".gradle" || it.name == "userHome" || it.name == "build"
-    })
+    inputs.files(fileTree("src/test/fixtures"))
 }
 
 group = "com.github.triplet.gradle"
