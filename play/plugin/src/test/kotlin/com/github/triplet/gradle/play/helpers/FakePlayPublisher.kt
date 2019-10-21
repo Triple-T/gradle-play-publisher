@@ -1,5 +1,6 @@
 package com.github.triplet.gradle.play.helpers
 
+import com.github.triplet.gradle.androidpublisher.EditResponse
 import com.github.triplet.gradle.androidpublisher.PlayPublisher
 import com.github.triplet.gradle.androidpublisher.UpdateProductResponse
 import com.github.triplet.gradle.androidpublisher.UploadInternalSharingArtifactResponse
@@ -12,6 +13,15 @@ abstract class FakePlayPublisher : PlayPublisher {
                     this@FakePlayPublisher
         })
     }
+
+    override fun insertEdit(): EditResponse =
+            throw IllegalStateException("Test wasn't expecting this method to be called.")
+
+    override fun getEdit(id: String): EditResponse =
+            throw IllegalStateException("Test wasn't expecting this method to be called.")
+
+    override fun commitEdit(id: String): Unit =
+            throw IllegalStateException("Test wasn't expecting this method to be called.")
 
     override fun uploadInternalSharingBundle(bundleFile: File): UploadInternalSharingArtifactResponse =
             throw IllegalStateException("Test wasn't expecting this method to be called.")

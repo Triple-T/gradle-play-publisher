@@ -13,6 +13,10 @@ internal class DefaultEditManager(
         private val tracks: TrackManager,
         private val editId: String
 ) : EditManager {
+    override fun findMaxAppVersionCode(): Long {
+        return tracks.findMaxAppVersionCode()
+    }
+
     override fun uploadBundle(
             bundleFile: File,
             mappingFile: File?,

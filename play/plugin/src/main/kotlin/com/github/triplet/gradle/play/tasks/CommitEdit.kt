@@ -1,9 +1,9 @@
 package com.github.triplet.gradle.play.tasks
 
+import com.github.triplet.gradle.androidpublisher.PlayPublisher
 import com.github.triplet.gradle.common.utils.marked
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.tasks.internal.EditTaskBase
-import com.github.triplet.gradle.play.tasks.internal.buildPublisher
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.logging.Logging
 import org.gradle.api.provider.Property
@@ -35,14 +35,19 @@ internal abstract class CommitEdit @Inject constructor(
     }
 
     abstract class Committer : WorkAction<Committer.Params> {
+        private val file = parameters.editIdFile.get().asFile
+        private val appId = file.nameWithoutExtension
+        private val publisher = PlayPublisher(
+                parameters.config.get().serviceAccountCredentials!!,
+                parameters.config.get().serviceAccountEmail,
+                appId
+        )
+
         override fun execute() {
-            val file = parameters.editIdFile.get().asFile
             if (file.marked("commit").exists()) {
                 println("Committing changes")
-                val appId = file.nameWithoutExtension
                 try {
-                    parameters.config.get().buildPublisher()
-                            .edits().commit(appId, file.readText()).execute()
+                    publisher.commitEdit(file.readText())
                 } finally {
                     file.reset()
                 }

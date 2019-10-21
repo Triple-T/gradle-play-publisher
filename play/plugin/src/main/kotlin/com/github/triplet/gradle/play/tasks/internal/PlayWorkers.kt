@@ -126,7 +126,7 @@ internal abstract class PlayWorkerBase<T : PlayWorkerBase.PlayPublishingParams> 
 internal abstract class EditWorkerBase<T : EditWorkerBase.EditPublishingParams> :
         PlayWorkerBase<T>() {
     protected val editId = parameters.editId.get()
-    protected val edits: AndroidPublisher.Edits = publisher.edits()
+    protected val edits: AndroidPublisher.Edits by lazy { publisher.edits() }
     protected val edits2 = EditManager(publisher2, editId)
 
     protected fun commit() {

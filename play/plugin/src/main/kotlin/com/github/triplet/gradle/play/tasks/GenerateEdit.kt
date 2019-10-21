@@ -1,15 +1,13 @@
 package com.github.triplet.gradle.play.tasks
 
+import com.github.triplet.gradle.androidpublisher.EditResponse
+import com.github.triplet.gradle.androidpublisher.PlayPublisher
 import com.github.triplet.gradle.common.utils.marked
 import com.github.triplet.gradle.common.utils.nullOrFull
 import com.github.triplet.gradle.common.utils.orNull
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.PlayPublisherExtension
-import com.github.triplet.gradle.play.internal.has
 import com.github.triplet.gradle.play.tasks.internal.EditTaskBase
-import com.github.triplet.gradle.play.tasks.internal.buildPublisher
-import com.google.api.client.googleapis.json.GoogleJsonResponseException
-import com.google.api.services.androidpublisher.AndroidPublisher
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.logging.Logging
 import org.gradle.api.provider.Property
@@ -42,41 +40,53 @@ internal abstract class GenerateEdit @Inject constructor(
     abstract class Generator : WorkAction<Generator.Params> {
         private val file = parameters.editIdFile.get().asFile
         private val appId = file.nameWithoutExtension
+        private val publisher = PlayPublisher(
+                parameters.config.get().serviceAccountCredentials!!,
+                parameters.config.get().serviceAccountEmail,
+                appId
+        )
 
         override fun execute() {
-            val editId = parameters.config.get().buildPublisher().getOrCreateEditId()
-            file.safeCreateNewFile().writeText(editId)
+            file.safeCreateNewFile().writeText(getOrCreateEditId())
         }
 
-        private fun AndroidPublisher.getOrCreateEditId(): String = try {
+        private fun getOrCreateEditId(): String {
             val editId = file.orNull()?.readText().nullOrFull()?.takeIf {
                 file.marked("skipped").exists()
             }
             file.reset()
 
-            if (editId == null) {
-                edits().insert(appId, null).execute().id
+            val response = if (editId == null) {
+                publisher.insertEdit()
             } else {
                 file.marked("skipped").safeCreateNewFile()
-                edits().get(appId, editId).execute().id
+                publisher.getEdit(editId)
             }
-        } catch (e: GoogleJsonResponseException) {
-            when {
-                e has "applicationNotFound" -> throw IllegalArgumentException(
-                        // Rethrow for clarity
+
+            return when (response) {
+                is EditResponse.Success -> response.id
+                is EditResponse.Failure -> handleFailure(response)
+            }
+        }
+
+        private fun handleFailure(response: EditResponse.Failure): String {
+            if (response.isNewApp()) {
+                // Rethrow for clarity
+                response.rethrow(
                         "No application found for the package name $appId. " +
                                 "The first version of your app must be uploaded via the " +
-                                "Play Store console.", e)
-                e has "editAlreadyCommitted" || e has "editNotFound" || e has "editExpired" -> {
-                    Logging.getLogger(GenerateEdit::class.java)
-                            .error("Failed to retrieve saved edit, regenerating.")
-                    getOrCreateEditId()
-                }
-                e.statusCode == 401 -> throw IllegalArgumentException(
+                                "Play Store console.")
+            } else if (response.isInvalidEdit()) {
+                Logging.getLogger(GenerateEdit::class.java)
+                        .error("Failed to retrieve saved edit, regenerating.")
+                return getOrCreateEditId()
+            } else if (response.isUnauthenticated()) {
+                response.rethrow(
                         "Service account not authenticated. See the README for instructions: " +
                                 "https://github.com/Triple-T/gradle-play-publisher/" +
-                                "blob/master/README.md#service-account", e)
-                else -> throw e
+                                "blob/master/README.md#service-account")
+            } else {
+                response.rethrow()
             }
         }
 

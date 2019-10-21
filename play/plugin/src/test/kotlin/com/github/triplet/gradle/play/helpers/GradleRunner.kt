@@ -35,7 +35,7 @@ private fun execute(
             compileSdkVersion 28
 
             defaultConfig {
-                applicationId "com.github.triplet.gradle.play.test"
+                applicationId "com.example.publisher"
                 minSdkVersion 21
                 targetSdkVersion 28
                 versionCode 1

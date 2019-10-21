@@ -1,9 +1,12 @@
 package com.github.triplet.gradle.androidpublisher.internal
 
+import com.github.triplet.gradle.androidpublisher.EditResponse
 import com.github.triplet.gradle.androidpublisher.PlayPublisher
 import com.github.triplet.gradle.androidpublisher.UpdateProductResponse
 import com.github.triplet.gradle.androidpublisher.UploadInternalSharingArtifactResponse
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
+import com.google.api.client.googleapis.media.MediaHttpUploader
+import com.google.api.client.googleapis.services.AbstractGoogleClientRequest
 import com.google.api.client.http.FileContent
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.AndroidPublisher
@@ -12,13 +15,38 @@ import com.google.api.services.androidpublisher.model.DeobfuscationFilesUploadRe
 import com.google.api.services.androidpublisher.model.InAppProduct
 import com.google.api.services.androidpublisher.model.Track
 import java.io.File
+import kotlin.math.roundToInt
 
 internal class DefaultPlayPublisher(
         private val publisher: AndroidPublisher,
         private val appId: String
 ) : InternalPlayPublisher {
+    override fun insertEdit(): EditResponse {
+        return try {
+            EditResponse.Success(publisher.edits().insert(appId, null).execute().id)
+        } catch (e: GoogleJsonResponseException) {
+            EditResponse.Failure(e)
+        }
+    }
+
+    override fun getEdit(id: String): EditResponse {
+        return try {
+            EditResponse.Success(publisher.edits().get(appId, id).execute().id)
+        } catch (e: GoogleJsonResponseException) {
+            EditResponse.Failure(e)
+        }
+    }
+
+    override fun commitEdit(id: String) {
+        publisher.edits().commit(appId, id).execute()
+    }
+
     override fun getTrack(editId: String, track: String): Track {
         return publisher.edits().tracks().get(appId, editId, track).execute()
+    }
+
+    override fun listTracks(editId: String): List<Track> {
+        return publisher.edits().tracks().list(appId, editId).execute().tracks.orEmpty()
     }
 
     override fun updateTrack(editId: String, track: Track) {
@@ -94,7 +122,28 @@ internal class DefaultPlayPublisher(
                 .parse(InAppProduct::class.java)
     }
 
+    private fun <T, R : AbstractGoogleClientRequest<T>> R.trackUploadProgress(
+            thing: String,
+            file: File
+    ): R {
+        mediaHttpUploader?.setProgressListener {
+            @Suppress("NON_EXHAUSTIVE_WHEN")
+            when (it.uploadState) {
+                MediaHttpUploader.UploadState.INITIATION_STARTED ->
+                    println("Starting $thing upload: $file")
+                MediaHttpUploader.UploadState.MEDIA_IN_PROGRESS ->
+                    println("Uploading $thing: ${(it.progress * 100).roundToInt()}% complete")
+                MediaHttpUploader.UploadState.MEDIA_COMPLETE ->
+                    println("${thing.capitalize()} upload complete")
+            }
+        }
+        return this
+    }
+
     companion object : PlayPublisher.Factory {
+        private const val MIME_TYPE_STREAM = "application/octet-stream"
+        private const val MIME_TYPE_APK = "application/vnd.android.package-archive"
+
         override fun create(
                 credentials: File,
                 email: String?,

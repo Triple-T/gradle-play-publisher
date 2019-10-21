@@ -10,6 +10,9 @@ import java.io.File
  * For more information on edits, see [here](https://developers.google.com/android-publisher/edits).
  */
 interface EditManager {
+    /** Retrieves the highest version code available for this app. */
+    fun findMaxAppVersionCode(): Long
+
     /** Uploads and publishes the given [bundleFile]. */
     fun uploadBundle(
             bundleFile: File,

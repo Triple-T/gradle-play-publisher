@@ -13,6 +13,9 @@ abstract class FakeEditManager : EditManager {
         })
     }
 
+    override fun findMaxAppVersionCode(): Long =
+            throw IllegalStateException("Test wasn't expecting this method to be called.")
+
     override fun uploadBundle(
             bundleFile: File,
             mappingFile: File?,

@@ -24,8 +24,8 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
 
         assertThat(result.task(":assembleRelease")).isNotNull()
         assertThat(result.task(":assembleRelease")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result.output).contains("uploadInternalSharingApk")
-        assertThat(result.output).contains("apk")
+        assertThat(result.output).contains("uploadInternalSharingApk(")
+        assertThat(result.output).contains(".apk")
     }
 
     @Test
@@ -83,7 +83,7 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":assembleRelease")).isNull()
         assertThat(result.task(":uploadReleasePrivateApk")).isNotNull()
         assertThat(result.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result.output).contains("uploadInternalSharingApk")
+        assertThat(result.output).contains("uploadInternalSharingApk(")
         assertThat(result.output).contains(tempDir.root.name)
     }
 
@@ -123,7 +123,7 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":assembleRelease")).isNull()
         assertThat(result.task(":uploadReleasePrivateApk")).isNotNull()
         assertThat(result.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result.output).contains("uploadInternalSharingApk")
+        assertThat(result.output).contains("uploadInternalSharingApk(")
         assertThat(result.output).contains(tempDir.root.name)
     }
 

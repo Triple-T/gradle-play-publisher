@@ -2,9 +2,10 @@ package com.github.triplet.gradle.play.tasks
 
 import com.android.build.gradle.api.ApkVariantOutput
 import com.android.build.gradle.api.ApplicationVariant
+import com.github.triplet.gradle.androidpublisher.EditManager
+import com.github.triplet.gradle.androidpublisher.PlayPublisher
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.tasks.internal.PublishEditTaskBase
-import com.github.triplet.gradle.play.tasks.internal.buildPublisher
 import org.gradle.api.tasks.TaskAction
 import javax.inject.Inject
 
@@ -19,11 +20,13 @@ internal abstract class ProcessArtifactMetadata @Inject constructor(
 
     @TaskAction
     fun process() {
-        val maxVersionCode = extension.config.buildPublisher().edits().tracks()
-                .list(variant.applicationId, editId).execute().tracks
-                ?.flatMap { it.releases.orEmpty() }
-                ?.flatMap { it.versionCodes.orEmpty() }
-                ?.max() ?: 1
+        val publisher = PlayPublisher(
+                extension.config.serviceAccountCredentials!!,
+                extension.config.serviceAccountEmail,
+                variant.applicationId
+        )
+        val edits = EditManager(publisher, editId)
+        val maxVersionCode = edits.findMaxAppVersionCode()
 
         val outputs = variant.outputs.filterIsInstance<ApkVariantOutput>()
         val smallestVersionCode = outputs.map { it.versionCode }.min() ?: 1

@@ -76,8 +76,8 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
 
         assertThat(result.task(":publishSimpleProducts")).isNotNull()
         assertThat(result.task(":publishSimpleProducts")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result.output).contains("updateInAppProduct")
-        assertThat(result.output).doesNotContain("insertInAppProduct")
+        assertThat(result.output).contains("updateInAppProduct(")
+        assertThat(result.output).doesNotContain("insertInAppProduct(")
         assertThat(result.output).contains("product.json")
         assertThat(result.output).contains("Uploading my-sku")
     }
@@ -120,8 +120,8 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
 
         assertThat(result.task(":publishSimpleProducts")).isNotNull()
         assertThat(result.task(":publishSimpleProducts")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result.output).contains("updateInAppProduct")
-        assertThat(result.output).contains("insertInAppProduct")
+        assertThat(result.output).contains("updateInAppProduct(")
+        assertThat(result.output).contains("insertInAppProduct(")
     }
 
     @Test

@@ -6,6 +6,8 @@ import com.google.api.services.androidpublisher.model.Track
 import com.google.api.services.androidpublisher.model.TrackRelease
 
 internal interface TrackManager {
+    fun findMaxAppVersionCode(): Long
+
     data class UpdateConfig(
             val trackName: String,
             val versionCodes: List<Long>,
@@ -24,6 +26,13 @@ internal class DefaultTrackManager(
         private val publisher: InternalPlayPublisher,
         private val editId: String
 ) : TrackManager {
+    override fun findMaxAppVersionCode(): Long {
+        return publisher.listTracks(editId)
+                .flatMap { it.releases.orEmpty() }
+                .flatMap { it.versionCodes.orEmpty() }
+                .max() ?: 1
+    }
+
     override fun update(config: TrackManager.UpdateConfig) {
         val track = if (config.didPreviousBuildSkipCommit) {
             createTrackForSkippedCommit(config)
@@ -62,7 +71,7 @@ internal class DefaultTrackManager(
     private fun createTrackForRollout(config: TrackManager.UpdateConfig): Track {
         val track = publisher.getTrack(editId, config.trackName)
 
-        val keep = track.releases.orEmpty().filterNot(TrackRelease::isRollout)
+        val keep = track.releases.orEmpty().filterNot { it.isRollout() }
         track.releases = keep + listOf(TrackRelease().applyChanges(config.versionCodes, config))
 
         return track
@@ -123,4 +132,11 @@ internal class DefaultTrackManager(
     private fun TrackRelease.updateUserFraction(userFraction: Double) {
         this.userFraction = userFraction.takeIf { isRollout() }
     }
+
+    private fun ReleaseStatus.isRollout() =
+            this == ReleaseStatus.IN_PROGRESS || this == ReleaseStatus.HALTED
+
+    private fun TrackRelease.isRollout() =
+            status == ReleaseStatus.IN_PROGRESS.publishedName ||
+                    status == ReleaseStatus.HALTED.publishedName
 }

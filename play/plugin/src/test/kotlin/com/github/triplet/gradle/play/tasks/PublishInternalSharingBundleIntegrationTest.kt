@@ -24,8 +24,8 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
 
         assertThat(result.task(":bundleRelease")).isNotNull()
         assertThat(result.task(":bundleRelease")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result.output).contains("uploadInternalSharingBundle")
-        assertThat(result.output).contains("aab")
+        assertThat(result.output).contains("uploadInternalSharingBundle(")
+        assertThat(result.output).contains(".aab")
     }
 
     @Test
@@ -108,7 +108,7 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":uploadReleasePrivateBundle")).isNotNull()
         assertThat(result.task(":uploadReleasePrivateBundle")!!.outcome)
                 .isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result.output).contains("uploadInternalSharingBundle")
+        assertThat(result.output).contains("uploadInternalSharingBundle(")
         assertThat(result.output).contains(tempDir.root.name)
     }
 
@@ -149,7 +149,7 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":uploadReleasePrivateBundle")).isNotNull()
         assertThat(result.task(":uploadReleasePrivateBundle")!!.outcome)
                 .isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result.output).contains("uploadInternalSharingBundle")
+        assertThat(result.output).contains("uploadInternalSharingBundle(")
         assertThat(result.output).contains(tempDir.root.name)
     }
 

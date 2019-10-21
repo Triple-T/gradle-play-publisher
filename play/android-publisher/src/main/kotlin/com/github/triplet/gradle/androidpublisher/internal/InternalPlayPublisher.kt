@@ -12,6 +12,9 @@ internal interface InternalPlayPublisher : PlayPublisher {
     fun getTrack(editId: String, track: String): Track
 
     @Throws(IOException::class)
+    fun listTracks(editId: String): List<Track>
+
+    @Throws(IOException::class)
     fun updateTrack(editId: String, track: Track)
 
     @Throws(IOException::class)
