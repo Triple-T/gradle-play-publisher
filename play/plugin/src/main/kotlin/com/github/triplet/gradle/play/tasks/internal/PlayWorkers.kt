@@ -304,7 +304,7 @@ internal abstract class ArtifactWorkerBase<T : ArtifactWorkerBase.ArtifactPublis
             result
         }.associate { notes ->
             notes.parentFile.name to notes.readProcessed()
-        }
+        }.toSortedMap()
     }
 
     private fun TrackRelease.updateReleaseNotes(releaseNotes: List<LocalizedText>) {
