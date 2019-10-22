@@ -10,8 +10,10 @@ import com.google.api.client.googleapis.services.AbstractGoogleClientRequest
 import com.google.api.client.http.FileContent
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.AndroidPublisher
+import com.google.api.services.androidpublisher.model.Apk
 import com.google.api.services.androidpublisher.model.Bundle
 import com.google.api.services.androidpublisher.model.DeobfuscationFilesUploadResponse
+import com.google.api.services.androidpublisher.model.ExpansionFile
 import com.google.api.services.androidpublisher.model.InAppProduct
 import com.google.api.services.androidpublisher.model.Track
 import java.io.File
@@ -60,6 +62,20 @@ internal class DefaultPlayPublisher(
         val content = FileContent(MIME_TYPE_STREAM, bundleFile)
         return publisher.edits().bundles().upload(appId, editId, content)
                 .trackUploadProgress("App Bundle", bundleFile)
+                .execute()
+    }
+
+    override fun uploadApk(editId: String, apkFile: File): Apk {
+        val content = FileContent(MIME_TYPE_APK, apkFile)
+        return publisher.edits().apks().upload(appId, editId, content)
+                .trackUploadProgress("APK", apkFile)
+                .execute()
+    }
+
+    override fun attachObb(editId: String, type: String, appVersion: Int, obbVersion: Int) {
+        val obb = ExpansionFile().also { it.referencesVersion = obbVersion }
+        publisher.edits().expansionfiles()
+                .update(appId, editId, appVersion, type, obb)
                 .execute()
     }
 

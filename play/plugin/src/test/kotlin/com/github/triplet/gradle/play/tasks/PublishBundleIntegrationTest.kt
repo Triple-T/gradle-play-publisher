@@ -251,7 +251,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
         val config = """
             com.github.triplet.gradle.play.tasks.PublishBundleIntegrationBridge.installFactories()
 
-            play.resolutionStrategy = "auto"
+            play.resolutionStrategy = 'auto'
         """
 
         val result = execute(config, "publishReleaseBundle")
@@ -285,6 +285,23 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
         assertThat(result.output).contains("uploadBundle(")
         assertThat(result.output).contains("mappingFile=")
         assertThat(result.output).doesNotContain("mappingFile=null")
+    }
+
+    @Test
+    fun `Build fails by default when upload fails`() {
+        @Suppress("UnnecessaryQualifiedReference")
+        // language=gradle
+        val config = """
+            com.github.triplet.gradle.play.tasks.PublishBundleIntegrationBridge.installFactories()
+
+            System.setProperty("FAIL", "true")
+        """
+
+        val result = executeExpectingFailure(config, "publishReleaseBundle")
+
+        assertThat(result.task(":publishReleaseBundle")).isNotNull()
+        assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.FAILED)
+        assertThat(result.output).contains("Upload failed")
     }
 
     @Test
@@ -482,7 +499,7 @@ object PublishBundleIntegrationBridge {
         val edits = object : FakeEditManager() {
             override fun findMaxAppVersionCode(): Long {
                 println("findMaxAppVersionCode()")
-                return 123L
+                return 123
             }
 
             override fun uploadBundle(
@@ -512,6 +529,8 @@ object PublishBundleIntegrationBridge {
                                 "releaseNotes=$releaseNotes, " +
                                 "userFraction=$userFraction, " +
                                 "retainableArtifacts=$retainableArtifacts)")
+
+                if (System.getProperty("FAIL") != null) error("Upload failed")
             }
         }
 
