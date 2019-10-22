@@ -184,15 +184,14 @@ class DefaultEditManagerTest {
     }
 
     @Test
-    fun `uploadApk completes successfully`() {
+    fun `uploadApk doesn't update tracks`() {
         `when`(mockPublisher.uploadApk(any(), any())).thenReturn(Apk().apply {
             versionCode = 888
         })
-        `when`(mockFile.length()).thenReturn(1)
 
         val versionCode = edits.uploadApk(
                 apkFile = mockFile,
-                mappingFile = mockFile,
+                mappingFile = null,
                 strategy = ResolutionStrategy.FAIL,
                 versionCode = 789,
                 variantName = "release",
@@ -200,7 +199,6 @@ class DefaultEditManagerTest {
                 patchObbRetainable = 321
         )
 
-        verify(mockPublisher).uploadDeobfuscationFile(eq("edit-id"), eq(mockFile), eq(888))
         verify(mockTracks, never()).update(any())
         assertThat(versionCode).isEqualTo(888)
     }
