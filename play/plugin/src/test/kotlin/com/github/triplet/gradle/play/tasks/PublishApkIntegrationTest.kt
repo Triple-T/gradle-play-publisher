@@ -133,7 +133,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `Using custom artifact CLI arg skips on-the-fly bundle build`() {
+    fun `Using custom artifact CLI arg skips on-the-fly APK build`() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
