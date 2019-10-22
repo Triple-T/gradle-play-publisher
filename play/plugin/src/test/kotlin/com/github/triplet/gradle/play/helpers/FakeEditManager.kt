@@ -30,4 +30,25 @@ abstract class FakeEditManager : EditManager {
             userFraction: Double,
             retainableArtifacts: List<Long>?
     ): Unit = throw IllegalStateException("Test wasn't expecting this method to be called.")
+
+    override fun uploadApk(
+            apkFile: File,
+            mappingFile: File?,
+            strategy: ResolutionStrategy,
+            versionCode: Long,
+            variantName: String,
+            mainObbRetainable: Int?,
+            patchObbRetainable: Int?
+    ): Long? = throw IllegalStateException("Test wasn't expecting this method to be called.")
+
+    override fun publishApk(
+            versionCodes: List<Long>,
+            didPreviousBuildSkipCommit: Boolean,
+            trackName: String,
+            releaseStatus: ReleaseStatus,
+            releaseName: String?,
+            releaseNotes: Map<String, String?>,
+            userFraction: Double,
+            retainableArtifacts: List<Long>?
+    ): Unit = throw IllegalStateException("Test wasn't expecting this method to be called.")
 }

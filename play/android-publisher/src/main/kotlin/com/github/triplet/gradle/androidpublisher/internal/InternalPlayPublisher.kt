@@ -1,6 +1,7 @@
 package com.github.triplet.gradle.androidpublisher.internal
 
 import com.github.triplet.gradle.androidpublisher.PlayPublisher
+import com.google.api.services.androidpublisher.model.Apk
 import com.google.api.services.androidpublisher.model.Bundle
 import com.google.api.services.androidpublisher.model.DeobfuscationFilesUploadResponse
 import com.google.api.services.androidpublisher.model.Track
@@ -19,6 +20,12 @@ internal interface InternalPlayPublisher : PlayPublisher {
 
     @Throws(IOException::class)
     fun uploadBundle(editId: String, bundleFile: File): Bundle
+
+    @Throws(IOException::class)
+    fun uploadApk(editId: String, apkFile: File): Apk
+
+    @Throws(IOException::class)
+    fun attachObb(editId: String, type: String, appVersion: Int, obbVersion: Int)
 
     fun uploadDeobfuscationFile(
             editId: String,

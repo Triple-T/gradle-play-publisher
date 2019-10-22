@@ -9,7 +9,9 @@ import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.client.testing.http.HttpTesting
 import com.google.api.client.testing.http.MockHttpTransport.Builder
 import com.google.api.client.testing.http.MockLowLevelHttpResponse
+import com.google.api.services.androidpublisher.model.Apk
 import com.google.api.services.androidpublisher.model.Bundle
+import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.mockito.ArgumentMatchers.any
@@ -33,11 +35,10 @@ class DefaultEditManagerTest {
         `when`(mockPublisher.uploadBundle(any(), any())).thenReturn(Bundle().apply {
             versionCode = 888
         })
-        `when`(mockFile.length()).thenReturn(1)
 
         edits.uploadBundle(
                 bundleFile = mockFile,
-                mappingFile = mockFile,
+                mappingFile = null,
                 strategy = ResolutionStrategy.FAIL,
                 versionCode = 888,
                 variantName = "release",
@@ -50,7 +51,6 @@ class DefaultEditManagerTest {
                 retainableArtifacts = listOf(777)
         )
 
-        verify(mockPublisher).uploadDeobfuscationFile(eq("edit-id"), eq(mockFile), eq(888))
         verify(mockTracks).update(TrackManager.UpdateConfig(
                 versionCodes = listOf(888L),
                 didPreviousBuildSkipCommit = false,
@@ -181,6 +181,202 @@ class DefaultEditManagerTest {
                     retainableArtifacts = listOf(777)
             )
         }
+    }
+
+    @Test
+    fun `uploadApk doesn't update tracks`() {
+        `when`(mockPublisher.uploadApk(any(), any())).thenReturn(Apk().apply {
+            versionCode = 888
+        })
+
+        val versionCode = edits.uploadApk(
+                apkFile = mockFile,
+                mappingFile = null,
+                strategy = ResolutionStrategy.FAIL,
+                versionCode = 789,
+                variantName = "release",
+                mainObbRetainable = 123,
+                patchObbRetainable = 321
+        )
+
+        verify(mockTracks, never()).update(any())
+        assertThat(versionCode).isEqualTo(888)
+    }
+
+    @Test
+    fun `uploadApk skips mapping file upload when null`() {
+        `when`(mockPublisher.uploadApk(any(), any())).thenReturn(Apk().apply {
+            versionCode = 888
+        })
+
+        edits.uploadApk(
+                apkFile = mockFile,
+                mappingFile = mockFile,
+                strategy = ResolutionStrategy.FAIL,
+                versionCode = 888,
+                variantName = "release",
+                mainObbRetainable = 123,
+                patchObbRetainable = 321
+        )
+
+        verify(mockPublisher, never()).uploadDeobfuscationFile(any(), any(), anyInt())
+    }
+
+    @Test
+    fun `uploadApk skips mapping file upload when empty`() {
+        `when`(mockPublisher.uploadApk(any(), any())).thenReturn(Apk().apply {
+            versionCode = 888
+        })
+        `when`(mockFile.length()).thenReturn(0)
+
+        edits.uploadApk(
+                apkFile = mockFile,
+                mappingFile = mockFile,
+                strategy = ResolutionStrategy.FAIL,
+                versionCode = 888,
+                variantName = "release",
+                mainObbRetainable = 123,
+                patchObbRetainable = 321
+        )
+
+        verify(mockPublisher, never()).uploadDeobfuscationFile(any(), any(), anyInt())
+    }
+
+    @Test
+    fun `uploadApk uploads mapping file when non-empty`() {
+        `when`(mockPublisher.uploadApk(any(), any())).thenReturn(Apk().apply {
+            versionCode = 888
+        })
+        `when`(mockFile.length()).thenReturn(1)
+
+        edits.uploadApk(
+                apkFile = mockFile,
+                mappingFile = mockFile,
+                strategy = ResolutionStrategy.FAIL,
+                versionCode = 888,
+                variantName = "release",
+                mainObbRetainable = 123,
+                patchObbRetainable = 321
+        )
+
+        verify(mockPublisher).uploadDeobfuscationFile(eq("edit-id"), eq(mockFile), eq(888))
+    }
+
+    @Test
+    fun `uploadApk fails silently when conflict occurs with ignore strategy`() {
+        `when`(mockPublisher.uploadApk(any(), any())).thenThrow(newExceptionMock(
+                JacksonFactory.getDefaultInstance(), 400, "apkUpgradeVersionConflict"))
+
+        edits.uploadApk(
+                apkFile = mockFile,
+                mappingFile = mockFile,
+                strategy = ResolutionStrategy.IGNORE,
+                versionCode = 888,
+                variantName = "release",
+                mainObbRetainable = 123,
+                patchObbRetainable = 321
+        )
+
+        verify(mockTracks, never()).update(any())
+    }
+
+    @Test
+    fun `uploadApk fails when conflict occurs with fail strategy`() {
+        `when`(mockPublisher.uploadApk(any(), any())).thenThrow(newExceptionMock(
+                JacksonFactory.getDefaultInstance(), 400, "apkUpgradeVersionConflict"))
+
+        assertThrows(Exception::class.java) {
+            edits.uploadApk(
+                    apkFile = mockFile,
+                    mappingFile = mockFile,
+                    strategy = ResolutionStrategy.FAIL,
+                    versionCode = 888,
+                    variantName = "release",
+                    mainObbRetainable = 123,
+                    patchObbRetainable = 321
+            )
+        }
+    }
+
+    @Test
+    fun `uploadApk attaches OBBs when provided`() {
+        `when`(mockPublisher.uploadApk(any(), any())).thenReturn(Apk().apply {
+            versionCode = 888
+        })
+
+        edits.uploadApk(
+                apkFile = mockFile,
+                mappingFile = mockFile,
+                strategy = ResolutionStrategy.FAIL,
+                versionCode = 888,
+                variantName = "release",
+                mainObbRetainable = 123,
+                patchObbRetainable = 321
+        )
+
+        verify(mockPublisher).attachObb(eq("edit-id"), eq("main"), eq(888), eq(123))
+        verify(mockPublisher).attachObb(eq("edit-id"), eq("patch"), eq(888), eq(321))
+    }
+
+    @Test
+    fun `uploadApk ignores OBBs when not provided`() {
+        `when`(mockPublisher.uploadApk(any(), any())).thenReturn(Apk().apply {
+            versionCode = 888
+        })
+
+        edits.uploadApk(
+                apkFile = mockFile,
+                mappingFile = mockFile,
+                strategy = ResolutionStrategy.FAIL,
+                versionCode = 888,
+                variantName = "release",
+                mainObbRetainable = null,
+                patchObbRetainable = null
+        )
+
+        verify(mockPublisher, never()).attachObb(any(), any(), anyInt(), anyInt())
+        verify(mockPublisher, never()).attachObb(any(), any(), anyInt(), anyInt())
+    }
+
+    @Test
+    fun `publishApk ignores empty version codes`() {
+        edits.publishApk(
+                versionCodes = emptyList(),
+                didPreviousBuildSkipCommit = false,
+                trackName = "alpha",
+                releaseStatus = ReleaseStatus.COMPLETED,
+                releaseName = "relname",
+                releaseNotes = mapOf("locale" to "notes"),
+                userFraction = .88,
+                retainableArtifacts = listOf(777)
+        )
+
+        verify(mockTracks, never()).update(any())
+    }
+
+    @Test
+    fun `publishApk forwards config to track manager`() {
+        edits.publishApk(
+                versionCodes = listOf(888L),
+                didPreviousBuildSkipCommit = false,
+                trackName = "alpha",
+                releaseStatus = ReleaseStatus.COMPLETED,
+                releaseName = "relname",
+                releaseNotes = mapOf("locale" to "notes"),
+                userFraction = .88,
+                retainableArtifacts = listOf(777)
+        )
+
+        verify(mockTracks).update(TrackManager.UpdateConfig(
+                versionCodes = listOf(888L),
+                didPreviousBuildSkipCommit = false,
+                trackName = "alpha",
+                releaseStatus = ReleaseStatus.COMPLETED,
+                releaseName = "relname",
+                releaseNotes = mapOf("locale" to "notes"),
+                userFraction = .88,
+                retainableArtifacts = listOf(777)
+        ))
     }
 
     // TODO(asaveau): remove once https://github.com/googleapis/google-api-java-client/pull/1395

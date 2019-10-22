@@ -3,15 +3,16 @@ package com.github.triplet.gradle.play.tasks
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.common.utils.orNull
 import com.github.triplet.gradle.play.PlayPublisherExtension
+import com.github.triplet.gradle.play.internal.releaseStatusOrDefault
+import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
+import com.github.triplet.gradle.play.internal.trackOrDefault
+import com.github.triplet.gradle.play.internal.userFractionOrDefault
 import com.github.triplet.gradle.play.tasks.internal.ArtifactWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.PublishArtifactTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PublishableTrackExtensionOptions
 import com.github.triplet.gradle.play.tasks.internal.copy
 import com.github.triplet.gradle.play.tasks.internal.findApkFiles
 import com.github.triplet.gradle.play.tasks.internal.paramsForBase
-import com.google.api.client.googleapis.json.GoogleJsonResponseException
-import com.google.api.client.http.FileContent
-import com.google.api.services.androidpublisher.model.ExpansionFile
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
@@ -71,8 +72,17 @@ internal abstract class PublishApk @Inject constructor(
 
             val versions = parameters.uploadResults.asFileTree.map {
                 it.name.toLong()
-            }
-            updateTracks(versions)
+            }.sorted()
+            edits2.publishApk(
+                    versions,
+                    parameters.skippedMarker.get().asFile.exists(),
+                    config.trackOrDefault,
+                    config.releaseStatusOrDefault,
+                    findReleaseName(),
+                    findReleaseNotes(),
+                    config.userFractionOrDefault,
+                    config.retain.artifacts
+            )
         }
 
         interface Params : ArtifactPublishingParams {
@@ -88,38 +98,22 @@ internal abstract class PublishApk @Inject constructor(
 
         override fun upload() {
             val apkFile = parameters.apkFile.get().asFile
-            val apk = try {
-                edits.apks()
-                        .upload(appId, editId, FileContent(MIME_TYPE_APK, apkFile))
-                        .trackUploadProgress("APK", apkFile)
-                        .execute()
-            } catch (e: GoogleJsonResponseException) {
-                handleUploadFailures(e, apkFile)
-                return
-            }
+            val versionCode = edits2.uploadApk(
+                    apkFile,
+                    parameters.mappingFile.orNull?.asFile,
+                    config.resolutionStrategyOrDefault,
+                    findBestVersionCode(apkFile),
+                    parameters.variantName.get(),
+                    config.retain.mainObb,
+                    config.retain.patchObb
+            ) ?: return
 
-            config.retain.mainObb?.attachObb(apk.versionCode, "main")
-            config.retain.patchObb?.attachObb(apk.versionCode, "patch")
-
-            uploadMappingFile(apk.versionCode)
-            parameters.uploadResults.get().file(apk.versionCode.toString()).asFile.createNewFile()
-        }
-
-        private fun Int.attachObb(versionCode: Int, type: String) {
-            println("Attaching $type OBB ($this) to APK $versionCode")
-            val obb = ExpansionFile().also { it.referencesVersion = this }
-            edits.expansionfiles()
-                    .update(appId, editId, versionCode, type, obb)
-                    .execute()
+            parameters.uploadResults.get().file(versionCode.toString()).asFile.createNewFile()
         }
 
         interface Params : ArtifactPublishingParams {
             val apkFile: RegularFileProperty
             val uploadResults: DirectoryProperty
-        }
-
-        private companion object {
-            const val MIME_TYPE_APK = "application/vnd.android.package-archive"
         }
     }
 }

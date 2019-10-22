@@ -50,10 +50,63 @@ internal class DefaultEditManager(
         ))
     }
 
+    override fun uploadApk(
+            apkFile: File,
+            mappingFile: File?,
+            strategy: ResolutionStrategy,
+            versionCode: Long,
+            variantName: String,
+            mainObbRetainable: Int?,
+            patchObbRetainable: Int?
+    ): Long? {
+        val apk = try {
+            publisher.uploadApk(editId, apkFile)
+        } catch (e: GoogleJsonResponseException) {
+            handleUploadFailures(e, strategy, apkFile, versionCode, variantName)
+            return null
+        }
+
+        mainObbRetainable?.attachObb("main", apk.versionCode)
+        patchObbRetainable?.attachObb("patch", apk.versionCode)
+
+        uploadMappingFile(apk.versionCode, mappingFile)
+
+        return apk.versionCode.toLong()
+    }
+
+    override fun publishApk(
+            versionCodes: List<Long>,
+            didPreviousBuildSkipCommit: Boolean,
+            trackName: String,
+            releaseStatus: ReleaseStatus,
+            releaseName: String?,
+            releaseNotes: Map<String, String?>,
+            userFraction: Double,
+            retainableArtifacts: List<Long>?
+    ) {
+        if (versionCodes.isEmpty()) return
+
+        tracks.update(TrackManager.UpdateConfig(
+                trackName,
+                versionCodes,
+                releaseStatus,
+                userFraction,
+                releaseNotes,
+                retainableArtifacts,
+                releaseName,
+                didPreviousBuildSkipCommit
+        ))
+    }
+
     private fun uploadMappingFile(versionCode: Int, mappingFile: File?) {
         if (mappingFile != null && mappingFile.length() > 0) {
             publisher.uploadDeobfuscationFile(editId, mappingFile, versionCode)
         }
+    }
+
+    private fun Int.attachObb(type: String, versionCode: Int) {
+        println("Attaching $type OBB ($this) to APK $versionCode")
+        publisher.attachObb(editId, type, versionCode, this)
     }
 
     private fun handleUploadFailures(

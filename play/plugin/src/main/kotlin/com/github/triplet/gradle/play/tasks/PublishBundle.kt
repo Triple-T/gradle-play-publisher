@@ -50,11 +50,12 @@ internal abstract class PublishBundle @Inject constructor(
 
     abstract class BundleUploader : ArtifactWorkerBase<BundleUploader.Params>() {
         override fun upload() {
+            val bundleFile = parameters.bundleFile.get().asFile
             edits2.uploadBundle(
-                    parameters.bundleFile.get().asFile,
+                    bundleFile,
                     parameters.mappingFile.orNull?.asFile,
                     config.resolutionStrategyOrDefault,
-                    parameters.versionCode.get().toLong(),
+                    findBestVersionCode(bundleFile),
                     parameters.variantName.get(),
                     parameters.skippedMarker.get().asFile.exists(),
                     config.trackOrDefault,

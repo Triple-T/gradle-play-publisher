@@ -29,6 +29,34 @@ interface EditManager {
             retainableArtifacts: List<Long>?
     )
 
+    /**
+     * Uploads the given [apkFile].
+     *
+     * Note: since APKs have splits, APK management is a two step process. The APKs must first be
+     * uploaded and then published using [publishApk].
+     */
+    fun uploadApk(
+            apkFile: File,
+            mappingFile: File?,
+            strategy: ResolutionStrategy,
+            versionCode: Long,
+            variantName: String,
+            mainObbRetainable: Int?,
+            patchObbRetainable: Int?
+    ): Long?
+
+    /** Publishes a set of APKs uploaded with [uploadApk]. */
+    fun publishApk(
+            versionCodes: List<Long>,
+            didPreviousBuildSkipCommit: Boolean,
+            trackName: String,
+            releaseStatus: ReleaseStatus,
+            releaseName: String?,
+            releaseNotes: Map</* locale= */String, /* text= */String?>,
+            userFraction: Double,
+            retainableArtifacts: List<Long>?
+    )
+
     /** Basic factory to create [EditManager] instances. */
     interface Factory {
         /** Creates a new [EditManager]. */
