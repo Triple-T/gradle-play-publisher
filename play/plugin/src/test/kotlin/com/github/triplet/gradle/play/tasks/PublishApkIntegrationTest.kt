@@ -608,7 +608,6 @@ object PublishApkIntegrationBridge {
 
             override fun publishApk(
                     versionCodes: List<Long>,
-                    variantName: String,
                     didPreviousBuildSkipCommit: Boolean,
                     trackName: String,
                     releaseStatus: ReleaseStatus,
@@ -619,7 +618,6 @@ object PublishApkIntegrationBridge {
             ) {
                 println("publishApk(" +
                                 "versionCodes=$versionCodes, " +
-                                "variantName=$variantName, " +
                                 "didPreviousBuildSkipCommit=$didPreviousBuildSkipCommit, " +
                                 "trackName=$trackName, " +
                                 "releaseStatus=$releaseStatus, " +

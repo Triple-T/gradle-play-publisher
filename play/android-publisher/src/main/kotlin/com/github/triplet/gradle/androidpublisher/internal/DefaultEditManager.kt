@@ -76,12 +76,11 @@ internal class DefaultEditManager(
 
     override fun publishApk(
             versionCodes: List<Long>,
-            variantName: String,
             didPreviousBuildSkipCommit: Boolean,
             trackName: String,
             releaseStatus: ReleaseStatus,
             releaseName: String?,
-            releaseNotes: Map</* locale= */String, /* text= */String?>,
+            releaseNotes: Map<String, String?>,
             userFraction: Double,
             retainableArtifacts: List<Long>?
     ) {

@@ -75,7 +75,6 @@ internal abstract class PublishApk @Inject constructor(
             }.sorted()
             edits2.publishApk(
                     versions,
-                    parameters.variantName.get(),
                     parameters.skippedMarker.get().asFile.exists(),
                     config.trackOrDefault,
                     config.releaseStatusOrDefault,

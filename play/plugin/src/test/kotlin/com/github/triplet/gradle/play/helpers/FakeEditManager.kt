@@ -43,7 +43,6 @@ abstract class FakeEditManager : EditManager {
 
     override fun publishApk(
             versionCodes: List<Long>,
-            variantName: String,
             didPreviousBuildSkipCommit: Boolean,
             trackName: String,
             releaseStatus: ReleaseStatus,

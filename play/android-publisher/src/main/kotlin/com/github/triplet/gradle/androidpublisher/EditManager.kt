@@ -48,7 +48,6 @@ interface EditManager {
     /** Publishes a set of APKs uploaded with [uploadApk]. */
     fun publishApk(
             versionCodes: List<Long>,
-            variantName: String,
             didPreviousBuildSkipCommit: Boolean,
             trackName: String,
             releaseStatus: ReleaseStatus,

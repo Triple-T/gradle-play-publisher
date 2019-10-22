@@ -344,7 +344,6 @@ class DefaultEditManagerTest {
     fun `publishApk ignores empty version codes`() {
         edits.publishApk(
                 versionCodes = emptyList(),
-                variantName = "release",
                 didPreviousBuildSkipCommit = false,
                 trackName = "alpha",
                 releaseStatus = ReleaseStatus.COMPLETED,
@@ -361,7 +360,6 @@ class DefaultEditManagerTest {
     fun `publishApk forwards config to track manager`() {
         edits.publishApk(
                 versionCodes = listOf(888L),
-                variantName = "release",
                 didPreviousBuildSkipCommit = false,
                 trackName = "alpha",
                 releaseStatus = ReleaseStatus.COMPLETED,
