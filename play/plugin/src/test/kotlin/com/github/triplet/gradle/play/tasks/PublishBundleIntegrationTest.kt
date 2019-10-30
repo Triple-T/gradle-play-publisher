@@ -513,7 +513,7 @@ object PublishBundleIntegrationBridge {
                     releaseStatus: ReleaseStatus,
                     releaseName: String?,
                     releaseNotes: Map<String, String?>,
-                    userFraction: Double,
+                    userFraction: Double?,
                     retainableArtifacts: List<Long>?
             ) {
                 println("uploadBundle(" +

@@ -16,7 +16,15 @@ abstract class FakeEditManager : EditManager {
     override fun findMaxAppVersionCode(): Long =
             throw IllegalStateException("Test wasn't expecting this method to be called.")
 
-    override fun promoteRelease(promoteTrackName: String, fromTrackName: String?, releaseStatus: ReleaseStatus, releaseName: String?, releaseNotes: Map<String, String?>, userFraction: Double, retainableArtifacts: List<Long>?): Unit =
+    override fun promoteRelease(
+            promoteTrackName: String,
+            fromTrackName: String?,
+            releaseStatus: ReleaseStatus,
+            releaseName: String?,
+            releaseNotes: Map<String, String?>,
+            userFraction: Double?,
+            retainableArtifacts: List<Long>?
+    ): Unit =
             throw IllegalStateException("Test wasn't expecting this method to be called.")
 
     override fun uploadBundle(
@@ -30,7 +38,7 @@ abstract class FakeEditManager : EditManager {
             releaseStatus: ReleaseStatus,
             releaseName: String?,
             releaseNotes: Map<String, String?>,
-            userFraction: Double,
+            userFraction: Double?,
             retainableArtifacts: List<Long>?
     ): Unit = throw IllegalStateException("Test wasn't expecting this method to be called.")
 
@@ -51,7 +59,7 @@ abstract class FakeEditManager : EditManager {
             releaseStatus: ReleaseStatus,
             releaseName: String?,
             releaseNotes: Map<String, String?>,
-            userFraction: Double,
+            userFraction: Double?,
             retainableArtifacts: List<Long>?
     ): Unit = throw IllegalStateException("Test wasn't expecting this method to be called.")
 }
