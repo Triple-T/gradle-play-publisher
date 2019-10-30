@@ -64,16 +64,15 @@ internal class DefaultTrackManager(
         }
         check(activeTracks.isNotEmpty()) { "Nothing to promote. Did you mean to run publish?" }
 
-        // Get the target track
-        val fromTrackName = config.fromTrackName
-        val track = if (fromTrackName == null) {
+        // Find the target track
+        val track = if (config.fromTrackName == null) {
             // Get the track with the highest version code
             activeTracks.sortedByDescending {
                 it.releases.flatMap { it.versionCodes.orEmpty() }.max()
             }.first()
         } else {
-            checkNotNull(activeTracks.find { it.track.equals(fromTrackName, true) }) {
-                "${fromTrackName.capitalize()} track has no active artifacts"
+            checkNotNull(activeTracks.find { it.track.equals(config.fromTrackName, true) }) {
+                "${config.fromTrackName.capitalize()} track has no active artifacts"
             }
         }
 

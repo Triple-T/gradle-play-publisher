@@ -287,7 +287,7 @@ class DefaultTrackManagerTest {
                 base = TrackManager.BaseConfig(
                         releaseStatus = null,
                         userFraction = null,
-                        releaseNotes = emptyMap(),
+                        releaseNotes = null,
                         retainableArtifacts = null,
                         releaseName = null
                 )
@@ -650,7 +650,7 @@ class DefaultTrackManagerTest {
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         userFraction = null,
-                        releaseNotes = emptyMap(),
+                        releaseNotes = null,
                         retainableArtifacts = null,
                         releaseName = null
                 )
@@ -689,7 +689,7 @@ class DefaultTrackManagerTest {
                 base = TrackManager.BaseConfig(
                         releaseStatus = null,
                         userFraction = null,
-                        releaseNotes = emptyMap(),
+                        releaseNotes = null,
                         retainableArtifacts = null,
                         releaseName = null
                 )
@@ -733,7 +733,7 @@ class DefaultTrackManagerTest {
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         userFraction = null,
-                        releaseNotes = emptyMap(),
+                        releaseNotes = null,
                         retainableArtifacts = null,
                         releaseName = null
                 )
