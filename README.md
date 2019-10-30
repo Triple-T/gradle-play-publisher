@@ -332,6 +332,15 @@ Run `./gradlew uploadReleasePrivateBundle` for App Bundles and `./gradlew upload
 for APKs. To upload an existing artifact, read about
 [how to do so](#uploading-a-pre-existing-artifact).
 
+#### Installing Internal Sharing artifacts
+
+To accelerate development, GPP supports uploading and then immediately installing Internal Sharing
+artifacts. This is similar to the AGP's `install[Variant]` task.
+
+Run `./gradlew installReleasePrivateArtifact` to install an artifact built on-the-fly and
+`./gradlew uploadReleasePrivateBundle --artifact-dir path/to/artifact installReleasePrivateArtifact`
+to install an existing artifact.
+
 ### Promoting artifacts
 
 Existing releases can be promoted and/or updated to the [configured track](#common-configuration)
