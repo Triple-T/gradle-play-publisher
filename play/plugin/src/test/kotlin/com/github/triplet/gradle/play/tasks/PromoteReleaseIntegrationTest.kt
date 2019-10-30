@@ -82,6 +82,53 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `CLI params can be used to configure task`() {
+        @Suppress("UnnecessaryQualifiedReference")
+        // language=gradle
+        val config = """
+            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationBridge.installFactories()
+        """
+
+        val result = execute(
+                config,
+                "promoteReleaseArtifact",
+                "--no-commit",
+                "--from-track=myFromTrack",
+                "--promote-track=myPromoteTrack",
+                "--track=myDefaultTrack",
+                "--release-name=myRelName",
+                "--release-status=draft",
+                "--user-fraction=.88"
+        )
+
+        assertThat(result.task(":promoteReleaseArtifact")).isNotNull()
+        assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("promoteRelease(")
+        assertThat(result.output).contains("fromTrackName=myFromTrack")
+        assertThat(result.output).contains("promoteTrackName=myPromoteTrack")
+        assertThat(result.output).contains("releaseName=myRelName")
+        assertThat(result.output).contains("releaseStatus=DRAFT")
+        assertThat(result.output).contains("userFraction=0.88")
+    }
+
+    @Test
+    fun `CLI params can be used to update track`() {
+        @Suppress("UnnecessaryQualifiedReference")
+        // language=gradle
+        val config = """
+            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationBridge.installFactories()
+        """
+
+        val result = execute(config, "promoteReleaseArtifact", "--update=myUpdateTrack")
+
+        assertThat(result.task(":promoteReleaseArtifact")).isNotNull()
+        assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("promoteRelease(")
+        assertThat(result.output).contains("fromTrackName=myUpdateTrack")
+        assertThat(result.output).contains("promoteTrackName=myUpdateTrack")
+    }
+
+    @Test
     fun `Build uses correct release status`() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
@@ -219,6 +266,40 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         assertThat(result2.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result1.output).contains("promoteRelease(")
         assertThat(result2.output).contains("promoteRelease(")
+    }
+
+    @Test
+    fun `Build generates and commits edit by default`() {
+        @Suppress("UnnecessaryQualifiedReference")
+        // language=gradle
+        val config = """
+            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationBridge.installFactories()
+        """
+
+        val result = execute(config, "promoteReleaseArtifact")
+
+        assertThat(result.task(":promoteReleaseArtifact")).isNotNull()
+        assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("insertEdit()")
+        assertThat(result.output).contains("commitEdit(edit-id)")
+    }
+
+    @Test
+    fun `Build skips commit when no-commit flag is passed`() {
+        @Suppress("UnnecessaryQualifiedReference")
+        // language=gradle
+        val config = """
+            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationBridge.installFactories()
+
+            play.commit = false
+        """
+
+        val result = execute(config, "promoteReleaseArtifact")
+
+        assertThat(result.task(":promoteReleaseArtifact")).isNotNull()
+        assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("insertEdit()")
+        assertThat(result.output).doesNotContain("commitEdit(")
     }
 }
 
