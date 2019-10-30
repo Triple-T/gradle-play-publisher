@@ -4,10 +4,10 @@ import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.common.utils.orNull
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.tasks.internal.ArtifactExtensionOptions
-import com.github.triplet.gradle.play.tasks.internal.PlayWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.findBundleFile
-import com.github.triplet.gradle.play.tasks.internal.paramsForBase
+import com.github.triplet.gradle.play.tasks.internal.workers.PlayWorkerBase
+import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.InputFile

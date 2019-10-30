@@ -4,10 +4,10 @@ import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.promoteTrackOrDefault
 import com.github.triplet.gradle.play.internal.releaseStatusOrDefault
-import com.github.triplet.gradle.play.tasks.internal.ArtifactWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.PublishArtifactTaskBase
 import com.github.triplet.gradle.play.tasks.internal.UpdatableTrackExtensionOptions
-import com.github.triplet.gradle.play.tasks.internal.paramsForBase
+import com.github.triplet.gradle.play.tasks.internal.workers.ArtifactWorkerBase
+import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
 import org.gradle.kotlin.dsl.support.serviceOf

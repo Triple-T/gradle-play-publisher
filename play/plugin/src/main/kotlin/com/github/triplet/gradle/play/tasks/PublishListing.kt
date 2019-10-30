@@ -9,11 +9,11 @@ import com.github.triplet.gradle.play.internal.GRAPHICS_PATH
 import com.github.triplet.gradle.play.internal.ImageType
 import com.github.triplet.gradle.play.internal.LISTINGS_PATH
 import com.github.triplet.gradle.play.internal.ListingDetail
-import com.github.triplet.gradle.play.tasks.internal.EditWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.PublishEditTaskBase
 import com.github.triplet.gradle.play.tasks.internal.WriteTrackExtensionOptions
-import com.github.triplet.gradle.play.tasks.internal.copy
-import com.github.triplet.gradle.play.tasks.internal.paramsForBase
+import com.github.triplet.gradle.play.tasks.internal.workers.EditWorkerBase
+import com.github.triplet.gradle.play.tasks.internal.workers.copy
+import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
 import com.google.api.client.http.FileContent
 import com.google.api.services.androidpublisher.model.AppDetails
 import com.google.api.services.androidpublisher.model.Listing
