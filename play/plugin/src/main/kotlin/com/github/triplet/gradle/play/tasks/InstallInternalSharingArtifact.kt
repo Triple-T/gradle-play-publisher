@@ -26,7 +26,7 @@ internal abstract class InstallInternalSharingArtifact @Inject constructor(
     abstract val uploadedArtifacts: DirectoryProperty
 
     init {
-        // Always out-of-date since we don't know anything about the device
+        // Always out-of-date since we don't know anything about the target device
         outputs.upToDateWhen { false }
     }
 
