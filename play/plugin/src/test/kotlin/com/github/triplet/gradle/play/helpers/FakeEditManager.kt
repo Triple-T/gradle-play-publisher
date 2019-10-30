@@ -21,7 +21,7 @@ abstract class FakeEditManager : EditManager {
             fromTrackName: String?,
             releaseStatus: ReleaseStatus,
             releaseName: String?,
-            releaseNotes: Map<String, String?>,
+            releaseNotes: Map<String, String?>?,
             userFraction: Double?,
             retainableArtifacts: List<Long>?
     ): Unit =
@@ -37,7 +37,7 @@ abstract class FakeEditManager : EditManager {
             trackName: String,
             releaseStatus: ReleaseStatus,
             releaseName: String?,
-            releaseNotes: Map<String, String?>,
+            releaseNotes: Map<String, String?>?,
             userFraction: Double?,
             retainableArtifacts: List<Long>?
     ): Unit = throw IllegalStateException("Test wasn't expecting this method to be called.")
@@ -58,7 +58,7 @@ abstract class FakeEditManager : EditManager {
             trackName: String,
             releaseStatus: ReleaseStatus,
             releaseName: String?,
-            releaseNotes: Map<String, String?>,
+            releaseNotes: Map<String, String?>?,
             userFraction: Double?,
             retainableArtifacts: List<Long>?
     ): Unit = throw IllegalStateException("Test wasn't expecting this method to be called.")

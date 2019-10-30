@@ -22,7 +22,7 @@ internal class DefaultEditManager(
             fromTrackName: String?,
             releaseStatus: ReleaseStatus,
             releaseName: String?,
-            releaseNotes: Map<String, String?>,
+            releaseNotes: Map<String, String?>?,
             userFraction: Double?,
             retainableArtifacts: List<Long>?
     ) {
@@ -49,7 +49,7 @@ internal class DefaultEditManager(
             trackName: String,
             releaseStatus: ReleaseStatus,
             releaseName: String?,
-            releaseNotes: Map<String, String?>,
+            releaseNotes: Map<String, String?>?,
             userFraction: Double?,
             retainableArtifacts: List<Long>?
     ) {
@@ -104,7 +104,7 @@ internal class DefaultEditManager(
             trackName: String,
             releaseStatus: ReleaseStatus,
             releaseName: String?,
-            releaseNotes: Map<String, String?>,
+            releaseNotes: Map<String, String?>?,
             userFraction: Double?,
             retainableArtifacts: List<Long>?
     ) {

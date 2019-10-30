@@ -22,7 +22,7 @@ interface EditManager {
             fromTrackName: String?,
             releaseStatus: ReleaseStatus,
             releaseName: String?,
-            releaseNotes: Map<String, String?>,
+            releaseNotes: Map</* locale= */String, /* text= */String?>?,
             userFraction: Double?,
             retainableArtifacts: List<Long>?
     )
@@ -38,7 +38,7 @@ interface EditManager {
             trackName: String,
             releaseStatus: ReleaseStatus,
             releaseName: String?,
-            releaseNotes: Map</* locale= */String, /* text= */String?>,
+            releaseNotes: Map</* locale= */String, /* text= */String?>?,
             userFraction: Double?,
             retainableArtifacts: List<Long>?
     )
@@ -66,7 +66,7 @@ interface EditManager {
             trackName: String,
             releaseStatus: ReleaseStatus,
             releaseName: String?,
-            releaseNotes: Map</* locale= */String, /* text= */String?>,
+            releaseNotes: Map</* locale= */String, /* text= */String?>?,
             userFraction: Double?,
             retainableArtifacts: List<Long>?
     )

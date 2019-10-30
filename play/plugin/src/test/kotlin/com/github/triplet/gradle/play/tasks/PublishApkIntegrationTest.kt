@@ -612,7 +612,7 @@ object PublishApkIntegrationBridge {
                     trackName: String,
                     releaseStatus: ReleaseStatus,
                     releaseName: String?,
-                    releaseNotes: Map<String, String?>,
+                    releaseNotes: Map<String, String?>?,
                     userFraction: Double?,
                     retainableArtifacts: List<Long>?
             ) {
