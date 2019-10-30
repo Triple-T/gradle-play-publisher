@@ -24,8 +24,7 @@ abstract class FakeEditManager : EditManager {
             releaseNotes: Map<String, String?>?,
             userFraction: Double?,
             retainableArtifacts: List<Long>?
-    ): Unit =
-            throw IllegalStateException("Test wasn't expecting this method to be called.")
+    ): Unit = throw IllegalStateException("Test wasn't expecting this method to be called.")
 
     override fun uploadBundle(
             bundleFile: File,

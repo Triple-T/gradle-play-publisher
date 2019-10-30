@@ -67,7 +67,7 @@ internal class DefaultTrackManager(
         // Get the target track
         val fromTrackName = config.fromTrackName
         val track = if (fromTrackName == null) {
-            // Get the highest version code across all tracks
+            // Get the track with the highest version code
             activeTracks.sortedByDescending {
                 it.releases.flatMap { it.versionCodes.orEmpty() }.max()
             }.first()
@@ -147,8 +147,8 @@ internal class DefaultTrackManager(
     }
 
     private fun TrackRelease.updateVersionCodes(versionCodes: List<Long>?, retainableArtifacts: List<Long>?) {
-        val updatedCodes = versionCodes ?: this.versionCodes.orEmpty()
-        this.versionCodes = updatedCodes + retainableArtifacts.orEmpty()
+        val newVersions = versionCodes ?: this.versionCodes.orEmpty()
+        this.versionCodes = newVersions + retainableArtifacts.orEmpty()
     }
 
     private fun TrackRelease.updateStatus(releaseStatus: ReleaseStatus?) {
