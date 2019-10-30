@@ -20,7 +20,7 @@ internal class DefaultEditManager(
     override fun promoteRelease(
             promoteTrackName: String,
             fromTrackName: String?,
-            releaseStatus: ReleaseStatus,
+            releaseStatus: ReleaseStatus?,
             releaseName: String?,
             releaseNotes: Map<String, String?>?,
             userFraction: Double?,
@@ -63,6 +63,7 @@ internal class DefaultEditManager(
         tracks.update(TrackManager.UpdateConfig(
                 trackName,
                 listOf(bundle.versionCode.toLong()),
+                releaseStatus,
                 didPreviousBuildSkipCommit,
                 TrackManager.BaseConfig(
                         releaseStatus,
@@ -113,6 +114,7 @@ internal class DefaultEditManager(
         tracks.update(TrackManager.UpdateConfig(
                 trackName,
                 versionCodes,
+                releaseStatus,
                 didPreviousBuildSkipCommit,
                 TrackManager.BaseConfig(
                         releaseStatus,

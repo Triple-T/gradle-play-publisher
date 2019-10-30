@@ -53,9 +53,10 @@ class DefaultEditManagerTest {
         )
 
         verify(mockTracks).update(TrackManager.UpdateConfig(
-                versionCodes = listOf(888L),
-                didPreviousBuildSkipCommit = false,
                 trackName = "alpha",
+                versionCodes = listOf(888L),
+                releaseStatus = ReleaseStatus.COMPLETED,
+                didPreviousBuildSkipCommit = false,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         releaseName = "relname",
@@ -371,9 +372,10 @@ class DefaultEditManagerTest {
         )
 
         verify(mockTracks).update(TrackManager.UpdateConfig(
-                versionCodes = listOf(888L),
-                didPreviousBuildSkipCommit = false,
                 trackName = "alpha",
+                versionCodes = listOf(888L),
+                releaseStatus = ReleaseStatus.COMPLETED,
+                didPreviousBuildSkipCommit = false,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         releaseName = "relname",

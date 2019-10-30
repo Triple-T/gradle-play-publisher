@@ -244,7 +244,7 @@ object PromoteReleaseIntegrationBridge {
             override fun promoteRelease(
                     promoteTrackName: String,
                     fromTrackName: String?,
-                    releaseStatus: ReleaseStatus,
+                    releaseStatus: ReleaseStatus?,
                     releaseName: String?,
                     releaseNotes: Map<String, String?>?,
                     userFraction: Double?,

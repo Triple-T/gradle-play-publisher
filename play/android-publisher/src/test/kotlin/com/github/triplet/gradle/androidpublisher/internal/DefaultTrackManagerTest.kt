@@ -24,6 +24,7 @@ class DefaultTrackManagerTest {
         val config = TrackManager.UpdateConfig(
                 trackName = "alpha",
                 versionCodes = listOf(888),
+                releaseStatus = ReleaseStatus.COMPLETED,
                 didPreviousBuildSkipCommit = false,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
@@ -56,6 +57,7 @@ class DefaultTrackManagerTest {
         val config = TrackManager.UpdateConfig(
                 trackName = "alpha",
                 versionCodes = listOf(888),
+                releaseStatus = ReleaseStatus.IN_PROGRESS,
                 didPreviousBuildSkipCommit = false,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.IN_PROGRESS,
@@ -99,6 +101,7 @@ class DefaultTrackManagerTest {
         val config = TrackManager.UpdateConfig(
                 trackName = "alpha",
                 versionCodes = listOf(888),
+                releaseStatus = ReleaseStatus.IN_PROGRESS,
                 didPreviousBuildSkipCommit = false,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.IN_PROGRESS,
@@ -148,6 +151,7 @@ class DefaultTrackManagerTest {
         val config = TrackManager.UpdateConfig(
                 trackName = "alpha",
                 versionCodes = listOf(888),
+                releaseStatus = ReleaseStatus.COMPLETED,
                 didPreviousBuildSkipCommit = true,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
@@ -182,6 +186,7 @@ class DefaultTrackManagerTest {
         val config = TrackManager.UpdateConfig(
                 trackName = "alpha",
                 versionCodes = listOf(888),
+                releaseStatus = ReleaseStatus.COMPLETED,
                 didPreviousBuildSkipCommit = true,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
@@ -230,6 +235,7 @@ class DefaultTrackManagerTest {
         val config = TrackManager.UpdateConfig(
                 trackName = "alpha",
                 versionCodes = listOf(888),
+                releaseStatus = ReleaseStatus.COMPLETED,
                 didPreviousBuildSkipCommit = true,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
@@ -276,9 +282,10 @@ class DefaultTrackManagerTest {
         val config = TrackManager.UpdateConfig(
                 trackName = "alpha",
                 versionCodes = listOf(888),
+                releaseStatus = ReleaseStatus.DRAFT,
                 didPreviousBuildSkipCommit = true,
                 base = TrackManager.BaseConfig(
-                        releaseStatus = ReleaseStatus.COMPLETED,
+                        releaseStatus = null,
                         userFraction = null,
                         releaseNotes = emptyMap(),
                         retainableArtifacts = null,
@@ -287,7 +294,7 @@ class DefaultTrackManagerTest {
         )
         `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().apply {
             releases = listOf(TrackRelease().apply {
-                status = "completed"
+                status = "draft"
                 name = "foobar"
                 userFraction = 789.0
                 versionCodes = listOf(3, 4, 5)
@@ -306,6 +313,7 @@ class DefaultTrackManagerTest {
         verify(mockPublisher).updateTrack(eq("edit-id"), trackCaptor.capture())
         assertThat(trackCaptor.value.releases).hasSize(1)
         assertThat(trackCaptor.value.releases.single().name).isEqualTo("foobar")
+        assertThat(trackCaptor.value.releases.single().status).isEqualTo("draft")
         assertThat(trackCaptor.value.releases.single().userFraction).isEqualTo(789.0)
         assertThat(trackCaptor.value.releases.single().versionCodes).containsExactly(3L, 4L, 5L, 888L)
         assertThat(trackCaptor.value.releases.single().releaseNotes).hasSize(1)
@@ -320,6 +328,7 @@ class DefaultTrackManagerTest {
         val config = TrackManager.UpdateConfig(
                 trackName = "alpha",
                 versionCodes = listOf(888),
+                releaseStatus = ReleaseStatus.DRAFT,
                 didPreviousBuildSkipCommit = true,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.DRAFT,
@@ -678,7 +687,7 @@ class DefaultTrackManagerTest {
                 promoteTrackName = "alpha",
                 fromTrackName = null,
                 base = TrackManager.BaseConfig(
-                        releaseStatus = ReleaseStatus.COMPLETED,
+                        releaseStatus = null,
                         userFraction = null,
                         releaseNotes = emptyMap(),
                         retainableArtifacts = null,
@@ -706,6 +715,7 @@ class DefaultTrackManagerTest {
         verify(mockPublisher).updateTrack(eq("edit-id"), trackCaptor.capture())
         assertThat(trackCaptor.value.releases).hasSize(1)
         assertThat(trackCaptor.value.releases.single().name).isEqualTo("foobar")
+        assertThat(trackCaptor.value.releases.single().status).isEqualTo("completed")
         assertThat(trackCaptor.value.releases.single().userFraction).isEqualTo(789.0)
         assertThat(trackCaptor.value.releases.single().versionCodes).containsExactly(3L, 4L, 5L)
         assertThat(trackCaptor.value.releases.single().releaseNotes).hasSize(1)

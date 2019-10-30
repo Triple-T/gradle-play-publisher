@@ -3,7 +3,6 @@ package com.github.triplet.gradle.play.tasks
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.promoteTrackOrDefault
-import com.github.triplet.gradle.play.internal.releaseStatusOrDefault
 import com.github.triplet.gradle.play.tasks.internal.PublishArtifactTaskBase
 import com.github.triplet.gradle.play.tasks.internal.UpdatableTrackExtensionOptions
 import com.github.triplet.gradle.play.tasks.internal.workers.ArtifactWorkerBase
@@ -36,7 +35,7 @@ internal abstract class PromoteRelease @Inject constructor(
             edits2.promoteRelease(
                     config.promoteTrackOrDefault,
                     config.fromTrack,
-                    config.releaseStatusOrDefault,
+                    config.releaseStatus,
                     findReleaseName(),
                     findReleaseNotes(),
                     config.userFraction,

@@ -13,7 +13,7 @@ internal interface TrackManager {
     fun promote(config: PromoteConfig)
 
     data class BaseConfig(
-            val releaseStatus: ReleaseStatus,
+            val releaseStatus: ReleaseStatus?,
             val userFraction: Double?,
             val releaseNotes: Map<String, String?>?,
             val retainableArtifacts: List<Long>?,
@@ -23,6 +23,7 @@ internal interface TrackManager {
     data class UpdateConfig(
             val trackName: String,
             val versionCodes: List<Long>,
+            val releaseStatus: ReleaseStatus,
             val didPreviousBuildSkipCommit: Boolean,
             val base: BaseConfig
     )
@@ -48,7 +49,7 @@ internal class DefaultTrackManager(
     override fun update(config: TrackManager.UpdateConfig) {
         val track = if (config.didPreviousBuildSkipCommit) {
             createTrackForSkippedCommit(config)
-        } else if (config.base.releaseStatus.isRollout()) {
+        } else if (config.releaseStatus.isRollout()) {
             createTrackForRollout(config)
         } else {
             createDefaultTrack(config)
@@ -101,12 +102,12 @@ internal class DefaultTrackManager(
             track.releases = listOf(TrackRelease().mergeChanges(config.versionCodes, config.base))
         } else {
             val hasReleaseToBeUpdated = track.releases.firstOrNull {
-                it.status == config.base.releaseStatus.publishedName
+                it.status == config.releaseStatus.publishedName
             } != null
 
             if (hasReleaseToBeUpdated) {
                 for (release in track.releases) {
-                    if (release.status == config.base.releaseStatus.publishedName) {
+                    if (release.status == config.releaseStatus.publishedName) {
                         release.mergeChanges(
                                 release.versionCodes.orEmpty() + config.versionCodes, config.base)
                     }
@@ -150,8 +151,8 @@ internal class DefaultTrackManager(
         this.versionCodes = updatedCodes + retainableArtifacts.orEmpty()
     }
 
-    private fun TrackRelease.updateStatus(releaseStatus: ReleaseStatus) {
-        status = releaseStatus.publishedName
+    private fun TrackRelease.updateStatus(releaseStatus: ReleaseStatus?) {
+        if (releaseStatus != null) status = releaseStatus.publishedName
     }
 
     private fun TrackRelease.updateConsoleName(releaseName: String?) {

@@ -20,7 +20,7 @@ interface EditManager {
     fun promoteRelease(
             promoteTrackName: String,
             fromTrackName: String?,
-            releaseStatus: ReleaseStatus,
+            releaseStatus: ReleaseStatus?,
             releaseName: String?,
             releaseNotes: Map</* locale= */String, /* text= */String?>?,
             userFraction: Double?,
