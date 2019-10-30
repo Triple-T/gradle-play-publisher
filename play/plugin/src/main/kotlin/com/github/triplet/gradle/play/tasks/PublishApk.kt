@@ -78,8 +78,8 @@ internal abstract class PublishApk @Inject constructor(
                     parameters.skippedMarker.get().asFile.exists(),
                     config.trackOrDefault,
                     config.releaseStatusOrDefault,
-                    findReleaseName(),
-                    findReleaseNotes(),
+                    findReleaseName(config.trackOrDefault),
+                    findReleaseNotes(config.trackOrDefault),
                     config.userFractionOrDefault,
                     config.retain.artifacts
             )
