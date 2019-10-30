@@ -2,9 +2,9 @@ package com.github.triplet.gradle.play.tasks
 
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.PlayPublisherExtension
-import com.github.triplet.gradle.play.tasks.internal.PlayWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
-import com.github.triplet.gradle.play.tasks.internal.paramsForBase
+import com.github.triplet.gradle.play.tasks.internal.workers.PlayWorkerBase
+import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
 import com.google.api.client.json.jackson2.JacksonFactory
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.FileCollection

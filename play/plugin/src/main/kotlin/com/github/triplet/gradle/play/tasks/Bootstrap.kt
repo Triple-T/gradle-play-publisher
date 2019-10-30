@@ -13,10 +13,10 @@ import com.github.triplet.gradle.play.internal.ListingDetail
 import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
 import com.github.triplet.gradle.play.tasks.internal.BootstrapOptions
-import com.github.triplet.gradle.play.tasks.internal.EditWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.PublishEditTaskBase
-import com.github.triplet.gradle.play.tasks.internal.copy
-import com.github.triplet.gradle.play.tasks.internal.paramsForBase
+import com.github.triplet.gradle.play.tasks.internal.workers.EditWorkerBase
+import com.github.triplet.gradle.play.tasks.internal.workers.copy
+import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.Listing

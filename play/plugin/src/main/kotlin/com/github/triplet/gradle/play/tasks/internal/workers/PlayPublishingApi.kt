@@ -1,4 +1,4 @@
-package com.github.triplet.gradle.play.tasks.internal
+package com.github.triplet.gradle.play.tasks.internal.workers
 
 import com.github.triplet.gradle.common.utils.PLUGIN_NAME
 import com.github.triplet.gradle.play.PlayPublisherExtension

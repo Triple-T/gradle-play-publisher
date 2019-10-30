@@ -512,8 +512,8 @@ object PublishBundleIntegrationBridge {
                     trackName: String,
                     releaseStatus: ReleaseStatus,
                     releaseName: String?,
-                    releaseNotes: Map<String, String?>,
-                    userFraction: Double,
+                    releaseNotes: Map<String, String?>?,
+                    userFraction: Double?,
                     retainableArtifacts: List<Long>?
             ) {
                 println("uploadBundle(" +

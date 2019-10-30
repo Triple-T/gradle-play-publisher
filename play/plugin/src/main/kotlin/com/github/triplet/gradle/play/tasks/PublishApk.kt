@@ -7,12 +7,12 @@ import com.github.triplet.gradle.play.internal.releaseStatusOrDefault
 import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
 import com.github.triplet.gradle.play.internal.trackOrDefault
 import com.github.triplet.gradle.play.internal.userFractionOrDefault
-import com.github.triplet.gradle.play.tasks.internal.ArtifactWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.PublishArtifactTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PublishableTrackExtensionOptions
-import com.github.triplet.gradle.play.tasks.internal.copy
 import com.github.triplet.gradle.play.tasks.internal.findApkFiles
-import com.github.triplet.gradle.play.tasks.internal.paramsForBase
+import com.github.triplet.gradle.play.tasks.internal.workers.ArtifactWorkerBase
+import com.github.triplet.gradle.play.tasks.internal.workers.copy
+import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
