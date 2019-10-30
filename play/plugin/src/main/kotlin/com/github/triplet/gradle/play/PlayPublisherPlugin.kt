@@ -19,6 +19,7 @@ import com.github.triplet.gradle.play.internal.validateCreds
 import com.github.triplet.gradle.play.internal.validateDebuggability
 import com.github.triplet.gradle.play.tasks.Bootstrap
 import com.github.triplet.gradle.play.tasks.GenerateResources
+import com.github.triplet.gradle.play.tasks.InstallInternalSharingArtifact
 import com.github.triplet.gradle.play.tasks.ProcessArtifactMetadata
 import com.github.triplet.gradle.play.tasks.PromoteRelease
 import com.github.triplet.gradle.play.tasks.PublishApk
@@ -237,7 +238,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 doFirst { logger.warn("$name is deprecated, use ${publishApkTask.get().name} instead") }
             }
 
-            project.newTask<PublishInternalSharingApk>(
+            val publishInternalSharingApkTask = project.newTask<PublishInternalSharingApk>(
                     "upload${variantName}PrivateApk",
                     "Uploads Internal Sharing APK for variant '$name'. See " +
                             "https://github.com/Triple-T/gradle-play-publisher#uploading-an-internal-sharing-artifact",
@@ -281,7 +282,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
             commitEditTask { mustRunAfter(publishBundleTask) }
             publishBundleAllTask { dependsOn(publishBundleTask) }
 
-            project.newTask<PublishInternalSharingBundle>(
+            val publishInternalSharingBundleTask = project.newTask<PublishInternalSharingBundle>(
                     "upload${variantName}PrivateBundle",
                     "Uploads Internal Sharing App Bundle for variant '$name'. See " +
                             "https://github.com/Triple-T/gradle-play-publisher#uploading-an-internal-sharing-artifact",
@@ -322,6 +323,20 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 dependsOn(publishProductsTask)
             }
             publishAllTask { dependsOn(publishTask) }
+
+            val installTask = project.newTask<InstallInternalSharingArtifact>(
+                    "install${variantName}PrivateArtifact",
+                    "Launches an intent to install an Internal Sharing artifact for variant " +
+                            "'$name'. See " +
+                            "https://github.com/Triple-T/gradle-play-publisher#installing-internal-sharing-artifacts",
+                    arrayOf(android)
+            ) {
+                uploadedArtifacts.set(if (extension.defaultToAppBundles) {
+                    publishInternalSharingBundleTask.flatMap { it.outputDirectory }
+                } else {
+                    publishInternalSharingApkTask.flatMap { it.outputDirectory }
+                })
+            }
         }
     }
 }
