@@ -29,15 +29,14 @@ internal abstract class PromoteRelease @Inject constructor(
         }
     }
 
-    abstract class Promoter :
-            ArtifactWorkerBase<ArtifactWorkerBase.ArtifactPublishingParams>() {
+    abstract class Promoter : ArtifactWorkerBase<ArtifactWorkerBase.ArtifactPublishingParams>() {
         override fun upload() {
             edits2.promoteRelease(
                     config.promoteTrackOrDefault,
                     config.fromTrack,
                     config.releaseStatus,
-                    findReleaseName(),
-                    findReleaseNotes(),
+                    findReleaseName(config.promoteTrackOrDefault),
+                    findReleaseNotes(config.promoteTrackOrDefault),
                     config.userFraction,
                     config.retain.artifacts
             )

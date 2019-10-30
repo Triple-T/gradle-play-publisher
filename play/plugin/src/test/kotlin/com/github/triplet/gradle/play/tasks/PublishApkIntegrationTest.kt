@@ -433,7 +433,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `Build uses correct release name`() {
+    fun `Build picks default release name when no track specific ones are available`() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
@@ -442,6 +442,53 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
             android.buildTypes {
                 consoleNames {}
             }
+        """
+
+        val result = execute(config, "publishConsoleNamesApk")
+
+        assertThat(result.task(":publishConsoleNamesApk")).isNotNull()
+        assertThat(result.task(":publishConsoleNamesApk")!!.outcome)
+                .isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("publishApk(")
+        assertThat(result.output).contains("releaseName=myDefaultName")
+    }
+
+    @Test
+    fun `Build picks track specific release name when available`() {
+        @Suppress("UnnecessaryQualifiedReference")
+        // language=gradle
+        val config = """
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+
+            android.buildTypes {
+                consoleNames {}
+            }
+
+            play.track 'custom-track'
+        """
+
+        val result = execute(config, "publishConsoleNamesApk")
+
+        assertThat(result.task(":publishConsoleNamesApk")).isNotNull()
+        assertThat(result.task(":publishConsoleNamesApk")!!.outcome)
+                .isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("publishApk(")
+        assertThat(result.output).contains("releaseName=myCustomName")
+    }
+
+    @Test
+    fun `Build ignores promote track specific release name when available`() {
+        @Suppress("UnnecessaryQualifiedReference")
+        // language=gradle
+        val config = """
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+
+            android.buildTypes {
+                consoleNames {}
+            }
+
+            play.track 'custom-track'
+            play.promoteTrack 'promote-track'
         """
 
         val result = execute(config, "publishConsoleNamesApk")
@@ -471,7 +518,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":publishReleaseNotesApk")!!.outcome)
                 .isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("publishApk(")
-        assertThat(result.output).contains("releaseNotes={en-US=My custom release notes, " +
+        assertThat(result.output).contains("releaseNotes={en-US=My default release notes, " +
                                                    "fr-FR=Mes notes de mise à jour}")
     }
 
@@ -487,6 +534,31 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
             }
 
             play.track 'custom-track'
+        """
+
+        val result = execute(config, "publishReleaseNotesApk")
+
+        assertThat(result.task(":publishReleaseNotesApk")).isNotNull()
+        assertThat(result.task(":publishReleaseNotesApk")!!.outcome)
+                .isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("publishApk(")
+        assertThat(result.output).contains("releaseNotes={en-US=Custom track release notes, " +
+                                                   "fr-FR=Mes notes de mise à jour}")
+    }
+
+    @Test
+    fun `Build ignores promote track specific release notes when available`() {
+        @Suppress("UnnecessaryQualifiedReference")
+        // language=gradle
+        val config = """
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+
+            android.buildTypes {
+                releaseNotes {}
+            }
+
+            play.track 'custom-track'
+            play.promoteTrack 'promote-track'
         """
 
         val result = execute(config, "publishReleaseNotesApk")

@@ -1,1 +1,1 @@
-My custom release notes
+My default release notes

@@ -147,7 +147,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `Build uses correct release name`() {
+    fun `Build picks default release name when no track specific ones are available`() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
@@ -164,7 +164,54 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":promoteConsoleNamesArtifact")!!.outcome)
                 .isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("promoteRelease(")
+        assertThat(result.output).contains("releaseName=myDefaultName")
+    }
+
+    @Test
+    fun `Build picks track specific release name when available`() {
+        @Suppress("UnnecessaryQualifiedReference")
+        // language=gradle
+        val config = """
+            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationBridge.installFactories()
+
+            android.buildTypes {
+                consoleNames {}
+            }
+
+            play.track 'custom-track'
+        """
+
+        val result = execute(config, "promoteConsoleNamesArtifact")
+
+        assertThat(result.task(":promoteConsoleNamesArtifact")).isNotNull()
+        assertThat(result.task(":promoteConsoleNamesArtifact")!!.outcome)
+                .isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("promoteRelease(")
         assertThat(result.output).contains("releaseName=myCustomName")
+    }
+
+    @Test
+    fun `Build picks promote track specific release name when available`() {
+        @Suppress("UnnecessaryQualifiedReference")
+        // language=gradle
+        val config = """
+            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationBridge.installFactories()
+
+            android.buildTypes {
+                consoleNames {}
+            }
+
+            play.track 'custom-track'
+            play.promoteTrack 'promote-track'
+        """
+
+        val result = execute(config, "promoteConsoleNamesArtifact")
+
+        assertThat(result.task(":promoteConsoleNamesArtifact")).isNotNull()
+        assertThat(result.task(":promoteConsoleNamesArtifact")!!.outcome)
+                .isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("promoteRelease(")
+        assertThat(result.output).contains("releaseName=myPromoteName")
     }
 
     @Test
@@ -185,7 +232,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":promoteReleaseNotesArtifact")!!.outcome)
                 .isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("promoteRelease(")
-        assertThat(result.output).contains("releaseNotes={en-US=My custom release notes, " +
+        assertThat(result.output).contains("releaseNotes={en-US=My default release notes, " +
                                                    "fr-FR=Mes notes de mise à jour}")
     }
 
@@ -210,6 +257,31 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
                 .isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("promoteRelease(")
         assertThat(result.output).contains("releaseNotes={en-US=Custom track release notes, " +
+                                                   "fr-FR=Mes notes de mise à jour}")
+    }
+
+    @Test
+    fun `Build picks promote track specific release notes when available`() {
+        @Suppress("UnnecessaryQualifiedReference")
+        // language=gradle
+        val config = """
+            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationBridge.installFactories()
+
+            android.buildTypes {
+                releaseNotes {}
+            }
+
+            play.track 'custom-track'
+            play.promoteTrack 'promote-track'
+        """
+
+        val result = execute(config, "promoteReleaseNotesArtifact")
+
+        assertThat(result.task(":promoteReleaseNotesArtifact")).isNotNull()
+        assertThat(result.task(":promoteReleaseNotesArtifact")!!.outcome)
+                .isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("promoteRelease(")
+        assertThat(result.output).contains("releaseNotes={en-US=Promote track release notes, " +
                                                    "fr-FR=Mes notes de mise à jour}")
     }
 

@@ -4,7 +4,6 @@ import com.github.triplet.gradle.common.utils.orNull
 import com.github.triplet.gradle.common.utils.readProcessed
 import com.github.triplet.gradle.play.internal.RELEASE_NAMES_DEFAULT_NAME
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_DEFAULT_NAME
-import com.github.triplet.gradle.play.internal.trackOrDefault
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
@@ -32,12 +31,12 @@ internal abstract class ArtifactWorkerBase<T : ArtifactWorkerBase.ArtifactPublis
         return onTheFlyBuild
     }
 
-    protected fun findReleaseName(): String? {
+    protected fun findReleaseName(track: String): String? {
         return if (config.releaseName != null) {
             config.releaseName
         } else if (parameters.consoleNamesDir.isPresent) {
             val dir = parameters.consoleNamesDir.get()
-            val file = dir.file("${config.trackOrDefault}.txt").asFile.orNull()
+            val file = dir.file("$track.txt").asFile.orNull()
                     ?: dir.file(RELEASE_NAMES_DEFAULT_NAME).asFile.orNull()
 
             file?.readProcessed()?.lines()?.firstOrNull()
@@ -46,10 +45,10 @@ internal abstract class ArtifactWorkerBase<T : ArtifactWorkerBase.ArtifactPublis
         }
     }
 
-    protected fun findReleaseNotes(): Map<String, String?> {
+    protected fun findReleaseNotes(track: String): Map<String, String?> {
         val locales = parameters.releaseNotesDir.orNull?.asFile?.listFiles().orEmpty()
         return locales.mapNotNull { locale ->
-            var result = File(locale, "${config.trackOrDefault}.txt").orNull()
+            var result = File(locale, "$track.txt").orNull()
             if (result == null) result = File(locale, RELEASE_NOTES_DEFAULT_NAME).orNull()
             result
         }.associate { notes ->
