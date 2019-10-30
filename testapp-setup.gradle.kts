@@ -15,7 +15,7 @@ private val publicGppTasks = listOf(
         "publishReleaseProducts",
         "uploadReleasePrivateApk",
         "uploadReleasePrivateBundle",
-        "installPrivateRelease"
+        "installReleasePrivateBundle"
 )
 
 for (name in publicGppTasks) {
