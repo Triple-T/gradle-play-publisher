@@ -64,7 +64,7 @@ class PlayPublisherExtensionTest {
     fun `Merging extensions with empty throws`() {
         val exts = emptyList<PlayPublisherExtension>()
 
-        assertThrows(Exception::class.java) { mergeExtensions(exts) }
+        assertThrows(NoSuchElementException::class.java) { mergeExtensions(exts) }
     }
 
     @Test

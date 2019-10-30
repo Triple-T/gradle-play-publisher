@@ -1,5 +1,6 @@
 package com.github.triplet.gradle.androidpublisher.internal
 
+import com.github.triplet.gradle.androidpublisher.EditManager
 import com.github.triplet.gradle.androidpublisher.ReleaseStatus
 import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
@@ -26,7 +27,7 @@ import java.io.File
 class DefaultEditManagerTest {
     private var mockPublisher = mock(InternalPlayPublisher::class.java)
     private var mockTracks = mock(TrackManager::class.java)
-    private var edits = DefaultEditManager(mockPublisher, mockTracks, "edit-id")
+    private var edits: EditManager = DefaultEditManager(mockPublisher, mockTracks, "edit-id")
 
     private var mockFile = mock(File::class.java)
 
@@ -55,11 +56,13 @@ class DefaultEditManagerTest {
                 versionCodes = listOf(888L),
                 didPreviousBuildSkipCommit = false,
                 trackName = "alpha",
-                releaseStatus = ReleaseStatus.COMPLETED,
-                releaseName = "relname",
-                releaseNotes = mapOf("locale" to "notes"),
-                userFraction = .88,
-                retainableArtifacts = listOf(777)
+                base = TrackManager.BaseConfig(
+                        releaseStatus = ReleaseStatus.COMPLETED,
+                        releaseName = "relname",
+                        releaseNotes = mapOf("locale" to "notes"),
+                        userFraction = .88,
+                        retainableArtifacts = listOf(777)
+                )
         ))
     }
 
@@ -165,7 +168,7 @@ class DefaultEditManagerTest {
         `when`(mockPublisher.uploadBundle(any(), any())).thenThrow(newExceptionMock(
                 JacksonFactory.getDefaultInstance(), 400, "apkUpgradeVersionConflict"))
 
-        assertThrows(Exception::class.java) {
+        assertThrows(IllegalStateException::class.java) {
             edits.uploadBundle(
                     bundleFile = mockFile,
                     mappingFile = mockFile,
@@ -285,7 +288,7 @@ class DefaultEditManagerTest {
         `when`(mockPublisher.uploadApk(any(), any())).thenThrow(newExceptionMock(
                 JacksonFactory.getDefaultInstance(), 400, "apkUpgradeVersionConflict"))
 
-        assertThrows(Exception::class.java) {
+        assertThrows(IllegalStateException::class.java) {
             edits.uploadApk(
                     apkFile = mockFile,
                     mappingFile = mockFile,
@@ -371,12 +374,46 @@ class DefaultEditManagerTest {
                 versionCodes = listOf(888L),
                 didPreviousBuildSkipCommit = false,
                 trackName = "alpha",
+                base = TrackManager.BaseConfig(
+                        releaseStatus = ReleaseStatus.COMPLETED,
+                        releaseName = "relname",
+                        releaseNotes = mapOf("locale" to "notes"),
+                        userFraction = .88,
+                        retainableArtifacts = listOf(777)
+                )
+        ))
+    }
+
+    @Test
+    fun `promoteRelease forwards config to track manager`() {
+        edits.promoteRelease(
+                promoteTrackName = "alpha",
+                fromTrackName = "internal",
                 releaseStatus = ReleaseStatus.COMPLETED,
                 releaseName = "relname",
                 releaseNotes = mapOf("locale" to "notes"),
                 userFraction = .88,
                 retainableArtifacts = listOf(777)
+        )
+
+        verify(mockTracks).promote(TrackManager.PromoteConfig(
+                promoteTrackName = "alpha",
+                fromTrackName = "internal",
+                base = TrackManager.BaseConfig(
+                        releaseStatus = ReleaseStatus.COMPLETED,
+                        releaseName = "relname",
+                        releaseNotes = mapOf("locale" to "notes"),
+                        userFraction = .88,
+                        retainableArtifacts = listOf(777)
+                )
         ))
+    }
+
+    @Test
+    fun `findMaxAppVersionCode forwards config to track manager`() {
+        edits.findMaxAppVersionCode()
+
+        verify(mockTracks).findMaxAppVersionCode()
     }
 
     // TODO(asaveau): remove once https://github.com/googleapis/google-api-java-client/pull/1395

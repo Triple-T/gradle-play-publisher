@@ -13,7 +13,7 @@ class RuntimeValidatorTest {
                 minGradle = GradleVersion.version("1.0.0")
         )
 
-        assertThrows(Exception::class.java) { validator.validate() }
+        assertThrows(IllegalStateException::class.java) { validator.validate() }
     }
 
     @Test
@@ -43,7 +43,7 @@ class RuntimeValidatorTest {
                 minAgp = VersionNumber.parse("1.0.0")
         )
 
-        assertThrows(Exception::class.java) { validator.validate() }
+        assertThrows(IllegalStateException::class.java) { validator.validate() }
     }
 
     @Test

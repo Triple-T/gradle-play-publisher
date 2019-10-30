@@ -13,6 +13,20 @@ interface EditManager {
     /** Retrieves the highest version code available for this app. */
     fun findMaxAppVersionCode(): Long
 
+    /**
+     * Promote a release from [fromTrackName] to [promoteTrackName] with the specified update
+     * params.
+     */
+    fun promoteRelease(
+            promoteTrackName: String,
+            fromTrackName: String?,
+            releaseStatus: ReleaseStatus,
+            releaseName: String?,
+            releaseNotes: Map<String, String?>,
+            userFraction: Double,
+            retainableArtifacts: List<Long>?
+    )
+
     /** Uploads and publishes the given [bundleFile]. */
     fun uploadBundle(
             bundleFile: File,

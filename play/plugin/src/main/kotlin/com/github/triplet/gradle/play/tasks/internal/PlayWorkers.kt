@@ -10,13 +10,8 @@ import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.RELEASE_NAMES_DEFAULT_NAME
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_DEFAULT_NAME
 import com.github.triplet.gradle.play.internal.commitOrDefault
-import com.github.triplet.gradle.play.internal.isRollout
-import com.github.triplet.gradle.play.internal.releaseStatusOrDefault
 import com.github.triplet.gradle.play.internal.trackOrDefault
-import com.github.triplet.gradle.play.internal.userFractionOrDefault
 import com.google.api.services.androidpublisher.AndroidPublisher
-import com.google.api.services.androidpublisher.model.LocalizedText
-import com.google.api.services.androidpublisher.model.TrackRelease
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
@@ -134,33 +129,6 @@ internal abstract class ArtifactWorkerBase<T : ArtifactWorkerBase.ArtifactPublis
         return onTheFlyBuild
     }
 
-    protected fun TrackRelease.applyChanges(
-            versionCodes: List<Long>? = null,
-            updateStatus: Boolean = true,
-            updateFraction: Boolean = true,
-            updateConsoleName: Boolean = true
-    ): TrackRelease {
-        versionCodes?.let { updateVersionCodes(it) }
-        if (updateStatus) updateStatus()
-        if (updateConsoleName) updateConsoleName()
-        maybeUpdateReleaseNotes()
-        if (updateFraction) updateUserFraction()
-
-        return this
-    }
-
-    private fun TrackRelease.updateVersionCodes(it: List<Long>) {
-        this.versionCodes = it + config.retain.artifacts.orEmpty()
-    }
-
-    private fun TrackRelease.updateStatus() {
-        status = config.releaseStatusOrDefault.publishedName
-    }
-
-    private fun TrackRelease.updateConsoleName() {
-        name = findReleaseName()
-    }
-
     protected fun findReleaseName(): String? {
         return if (config.releaseName != null) {
             config.releaseName
@@ -175,22 +143,6 @@ internal abstract class ArtifactWorkerBase<T : ArtifactWorkerBase.ArtifactPublis
         }
     }
 
-    private fun TrackRelease.maybeUpdateReleaseNotes() {
-        val locales = parameters.releaseNotesDir.orNull?.asFile?.listFiles().orEmpty()
-        val releaseNotes = locales.mapNotNull { locale ->
-            val file = File(locale, "${config.trackOrDefault}.txt").orNull() ?: run {
-                File(locale, RELEASE_NOTES_DEFAULT_NAME).orNull() ?: return@mapNotNull null
-            }
-
-            LocalizedText().apply {
-                language = locale.name
-                text = file.readProcessed()
-            }
-        }
-
-        if (releaseNotes.isNotEmpty()) updateReleaseNotes(releaseNotes)
-    }
-
     protected fun findReleaseNotes(): Map<String, String?> {
         val locales = parameters.releaseNotesDir.orNull?.asFile?.listFiles().orEmpty()
         return locales.mapNotNull { locale ->
@@ -200,25 +152,6 @@ internal abstract class ArtifactWorkerBase<T : ArtifactWorkerBase.ArtifactPublis
         }.associate { notes ->
             notes.parentFile.name to notes.readProcessed()
         }.toSortedMap()
-    }
-
-    private fun TrackRelease.updateReleaseNotes(releaseNotes: List<LocalizedText>) {
-        val existingReleaseNotes = this.releaseNotes.orEmpty()
-        this.releaseNotes = if (existingReleaseNotes.isEmpty()) {
-            releaseNotes
-        } else {
-            val merged = releaseNotes.toMutableList()
-
-            for (existing in existingReleaseNotes) {
-                if (merged.none { it.language == existing.language }) merged += existing
-            }
-
-            merged
-        }
-    }
-
-    private fun TrackRelease.updateUserFraction() {
-        userFraction = config.userFractionOrDefault.takeIf { isRollout() }
     }
 
     internal interface ArtifactPublishingParams : EditPublishingParams {

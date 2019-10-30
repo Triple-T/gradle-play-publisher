@@ -17,6 +17,28 @@ internal class DefaultEditManager(
         return tracks.findMaxAppVersionCode()
     }
 
+    override fun promoteRelease(
+            promoteTrackName: String,
+            fromTrackName: String?,
+            releaseStatus: ReleaseStatus,
+            releaseName: String?,
+            releaseNotes: Map<String, String?>,
+            userFraction: Double,
+            retainableArtifacts: List<Long>?
+    ) {
+        tracks.promote(TrackManager.PromoteConfig(
+                promoteTrackName,
+                fromTrackName,
+                TrackManager.BaseConfig(
+                        releaseStatus,
+                        userFraction,
+                        releaseNotes,
+                        retainableArtifacts,
+                        releaseName
+                )
+        ))
+    }
+
     override fun uploadBundle(
             bundleFile: File,
             mappingFile: File?,
@@ -41,12 +63,14 @@ internal class DefaultEditManager(
         tracks.update(TrackManager.UpdateConfig(
                 trackName,
                 listOf(bundle.versionCode.toLong()),
-                releaseStatus,
-                userFraction,
-                releaseNotes,
-                retainableArtifacts,
-                releaseName,
-                didPreviousBuildSkipCommit
+                didPreviousBuildSkipCommit,
+                TrackManager.BaseConfig(
+                        releaseStatus,
+                        userFraction,
+                        releaseNotes,
+                        retainableArtifacts,
+                        releaseName
+                )
         ))
     }
 
@@ -89,12 +113,14 @@ internal class DefaultEditManager(
         tracks.update(TrackManager.UpdateConfig(
                 trackName,
                 versionCodes,
-                releaseStatus,
-                userFraction,
-                releaseNotes,
-                retainableArtifacts,
-                releaseName,
-                didPreviousBuildSkipCommit
+                didPreviousBuildSkipCommit,
+                TrackManager.BaseConfig(
+                        releaseStatus,
+                        userFraction,
+                        releaseNotes,
+                        retainableArtifacts,
+                        releaseName
+                )
         ))
     }
 
