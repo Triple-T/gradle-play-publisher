@@ -6,6 +6,7 @@ import com.github.triplet.gradle.play.internal.RELEASE_NAMES_DEFAULT_NAME
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_DEFAULT_NAME
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import java.io.File
 
@@ -58,7 +59,7 @@ internal abstract class ArtifactWorkerBase<T : ArtifactWorkerBase.ArtifactPublis
 
     internal interface ArtifactPublishingParams : EditPublishingParams {
         val variantName: Property<String>
-        val versionCodes: Property<Map<File, Int>>
+        val versionCodes: MapProperty<File, Int>
 
         val releaseNotesDir: DirectoryProperty // Optional
         val consoleNamesDir: DirectoryProperty // Optional

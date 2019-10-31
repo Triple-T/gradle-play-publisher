@@ -21,10 +21,11 @@ jobs:
       - run:
           name: Setup environment
           command: |
-              chmod +x gradlew
-              echo "gradle.publish.key=$PUBLISH_KEY" > $HOME/.gradle/gradle.properties
-              echo "gradle.publish.secret=$PUBLISH_SECRET" >> $HOME/.gradle/gradle.properties
-              ./gradlew -Dbootstrap publishToMavenLocal
+            chmod +x gradlew
+            mkdir -p $HOME/.gradle
+            echo "gradle.publish.key=$PUBLISH_KEY" > $HOME/.gradle/gradle.properties
+            echo "gradle.publish.secret=$PUBLISH_SECRET" >> $HOME/.gradle/gradle.properties
+            ./gradlew -Dbootstrap publishToMavenLocal
       - run:
           name: Build
           command: ./gradlew clean ciBuild --stacktrace

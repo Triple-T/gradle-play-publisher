@@ -9,7 +9,6 @@ buildscript {
 }
 
 plugins {
-    `build-scan`
     id("com.github.triplet.gradle.build")
     id("com.github.ben-manes.versions") version "0.25.0"
 }

@@ -1,3 +1,7 @@
+plugins {
+    `gradle-enterprise`
+}
+
 include(
         ":common:utils", ":common:validation",
 

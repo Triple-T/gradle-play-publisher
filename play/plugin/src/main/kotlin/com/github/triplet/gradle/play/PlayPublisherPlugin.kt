@@ -324,7 +324,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
             }
             publishAllTask { dependsOn(publishTask) }
 
-            val installTask = project.newTask<InstallInternalSharingArtifact>(
+            project.newTask<InstallInternalSharingArtifact>(
                     "install${variantName}PrivateArtifact",
                     "Launches an intent to install an Internal Sharing artifact for variant " +
                             "'$name'. See " +

@@ -24,6 +24,9 @@ dependencies {
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
+
+    withJavadocJar()
+    withSourcesJar()
 }
 
 // We want to be able to organize our project into multiple modules, but that typically requires
@@ -35,7 +38,7 @@ tasks.withType<Jar>().configureEach {
         it.path.contains(rootProject.layout.projectDirectory.asFile.path)
     }
 
-    from(projectLibs.map { zipTree(it) })
+    from(projectLibs.elements.map { it.map { zipTree(it) } })
 }
 
 tasks.withType<PluginUnderTestMetadata>().configureEach {
@@ -45,9 +48,8 @@ tasks.withType<PluginUnderTestMetadata>().configureEach {
     pluginClasspath.from(sourceSets.main.get().runtimeClasspath)
 }
 
-tasks.withType<ValidateTaskProperties>().configureEach {
-    enableStricterValidation = true
-    failOnWarning = true
+tasks.withType<ValidatePlugins>().configureEach {
+    enableStricterValidation.set(true)
 }
 
 tasks.named("test") {
@@ -92,16 +94,9 @@ publishing {
     }
 }
 
-val sourcesJar by tasks.registering(Jar::class) {
-    archiveClassifier.set("sources")
-    from(sourceSets["main"].allSource)
-    dependsOn("classes")
-}
-
 afterEvaluate {
     publishing.publications.named<MavenPublication>("pluginMaven") {
         artifactId = "play-publisher"
-        artifact(sourcesJar.get())
 
         pom {
             name.set("Google Play Publisher")
@@ -120,29 +115,10 @@ afterEvaluate {
 
             developers {
                 developer {
-                    id.set("bhurling")
-                    name.set("Björn Hurling")
-                    roles.set(listOf("Owner"))
-                    timezone.set("+2")
-                }
-                developer {
                     id.set("SUPERCILEX")
                     name.set("Alex Saveau")
                     email.set("saveau.alexandre@gmail.com")
-                    roles.set(listOf("Developer"))
-                    timezone.set("-8")
-                }
-                developer {
-                    id.set("ChristianBecker")
-                    name.set("Christian Becker")
-                    email.set("christian.becker.1987@gmail.com")
-                    roles.set(listOf("Developer"))
-                    timezone.set("+2")
-                }
-                developer {
-                    id.set("gtcompscientist")
-                    name.set("Charles Anderson")
-                    roles.set(listOf("Developer"))
+                    roles.set(listOf("Owner"))
                     timezone.set("-8")
                 }
             }

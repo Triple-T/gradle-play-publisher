@@ -855,6 +855,7 @@ ij_html_space_inside_empty_tag = false
 ij_html_text_wrap = normal
 
 [{*.yml, *.yaml}]
+indent_size = 2
 ij_continuation_indent_size = 4
 ij_yaml_keep_indents_on_empty_lines = false
 ij_yaml_keep_line_breaks = true
