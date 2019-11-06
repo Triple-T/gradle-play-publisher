@@ -9,5 +9,3 @@ internal const val RELEASE_NAMES_PATH = "release-names"
 internal const val PRODUCTS_PATH = "products"
 internal const val OUTPUT_PATH = "gpp"
 internal const val RESOURCES_OUTPUT_PATH = "generated/$OUTPUT_PATH"
-
-internal const val MIME_TYPE_STREAM = "application/octet-stream"

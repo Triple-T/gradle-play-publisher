@@ -4,7 +4,6 @@ import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.common.validation.validateDebuggability
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.PlayPublisherPlugin
-import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import org.gradle.api.logging.Logging
 
 internal fun PlayPublisherExtension.validateCreds() {
@@ -31,6 +30,3 @@ internal fun PlayPublisherExtension.validateCreds() {
 
 internal fun ApplicationVariant.validateDebuggability() =
         validateDebuggability(this, Logging.getLogger(PlayPublisherPlugin::class.java))
-
-internal infix fun GoogleJsonResponseException.has(error: String) =
-        details?.errors.orEmpty().any { it.reason == error }
