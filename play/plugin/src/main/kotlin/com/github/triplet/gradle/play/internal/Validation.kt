@@ -5,6 +5,7 @@ import com.github.triplet.gradle.common.validation.validateDebuggability
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.PlayPublisherPlugin
 import org.gradle.api.logging.Logging
+import org.gradle.util.DeprecationLogger
 
 internal fun PlayPublisherExtension.validateCreds() {
     val creds = checkNotNull(config.serviceAccountCredentials) {
@@ -22,9 +23,13 @@ internal fun PlayPublisherExtension.validateCreds() {
         check(config.serviceAccountEmail != null) {
             "PKCS12 credentials must specify a service account email."
         }
-        Logging.getLogger(PlayPublisherPlugin::class.java)
-                .warn("PKCS12 based authentication is deprecated. " +
-                              "Please use JSON credentials instead.")
+        DeprecationLogger.nagUserWith(
+                "Gradle Play Publisher's PKCS12 based authentication is deprecated.",
+                "This is scheduled to be removed in GPP 3.0.",
+                "Use JSON based authentication instead. " +
+                        "https://github.com/Triple-T/gradle-play-publisher#service-account",
+                null
+        )
     }
 }
 

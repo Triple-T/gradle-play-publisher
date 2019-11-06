@@ -119,7 +119,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
 
             if (!isSigningReady && !outputsAreSigned) {
                 project.logger.error(
-                        "Signing not ready. " +
+                        "Signing not ready for Gradle Play Publisher. " +
                                 "Be sure to specify a signingConfig for variant '$name'.")
             }
 
