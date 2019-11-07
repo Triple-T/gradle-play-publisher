@@ -1,28 +1,44 @@
 package com.github.triplet.gradle.play.tasks
 
+import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
+import com.google.common.hash.HashCode
+import com.google.common.hash.Hashing
+import com.google.common.io.Files
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 import java.io.File
 
 class GenerateResourcesIntegrationTest : IntegrationTestBase() {
+    private var disableSrcCheck = false
+    private lateinit var srcHash: List<HashCode>
+
+    @Before
+    fun saveHashedSrc() {
+        disableSrcCheck = false
+        srcHash = hashSrc()
+    }
+
+    @After
+    fun `Ensure src hashes haven't changed`() {
+        if (!disableSrcCheck) assertThat(srcHash).isEqualTo(hashSrc())
+    }
+
     @Test
     fun `Basic resources are correctly copied to their respective folders`() {
         execute("", "generateReleasePlayResources")
 
-        "".exists()
-        "release".exists()
-        "release/res/listings/en-US".exists()
-        "release/res/listings/fr-FR".exists()
+        "release/play/listings/en-US".exists()
+        "release/play/listings/fr-FR".exists()
 
-        "release/res/release-notes/en-US/default.txt" generated "main"
-        "release/res/release-notes/fr-FR/default.txt" generated "main"
+        "release/play/release-notes/en-US/default.txt" generated "main"
+        "release/play/release-notes/fr-FR/default.txt" generated "main"
 
-        "release/res/products/sku.json" generated "src/main/play/products/sku.json"()
+        "release/play/products/sku.json" generated "src/main/play/products/sku.json"()
     }
-
-    // TODO(#709): add test making sure source files doesn't change
 
     @Test
     fun `Product flavors override main variant fallbacks`() {
@@ -37,19 +53,21 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
 
         execute(config, "generateFreeReleasePlayResources", "generatePaidReleasePlayResources")
 
-        "".exists()
-        "freeRelease".exists()
-        "freeRelease/res/listings/en-US".exists()
-        "freeRelease/res/listings/fr-FR".exists()
-        "freeRelease/res/listings/de-DE".exists()
+        "freeRelease/play/listings/en-US".exists()
+        "freeRelease/play/listings/fr-FR".exists()
+        "freeRelease/play/listings/de-DE".exists()
 
-        "freeRelease/res/release-notes/en-US/default.txt" generated "free"
-        "freeRelease/res/release-notes/fr-FR/default.txt" generated "main"
-        "freeRelease/res/release-notes/de-DE/default.txt" generated "free german"
+        "freeRelease/play/release-notes/en-US/default.txt" generated "free"
+        "freeRelease/play/release-notes/fr-FR/default.txt" generated "main"
+        "freeRelease/play/release-notes/de-DE/default.txt" generated "free german"
 
-        "paidRelease/res/release-notes/en-US/default.txt" generated "paid english"
-        "paidRelease/res/release-notes/fr-FR/default.txt" generated "main"
-        "paidRelease/res/release-notes/de-DE/default.txt" generated "paid german"
+        "paidRelease/play/listings/en-US".exists()
+        "paidRelease/play/listings/fr-FR".exists()
+        "paidRelease/play/listings/de-DE".exists()
+
+        "paidRelease/play/release-notes/en-US/default.txt" generated "paid english"
+        "paidRelease/play/release-notes/fr-FR/default.txt" generated "main"
+        "paidRelease/play/release-notes/de-DE/default.txt" generated "paid german"
     }
 
     @Test
@@ -63,7 +81,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
 
         execute(config, "generateDogfoodPlayResources")
 
-        "dogfood/res/release-notes/en-US/default.txt" generated "dogfood english"
+        "dogfood/play/release-notes/en-US/default.txt" generated "dogfood english"
     }
 
     @Test
@@ -83,7 +101,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
 
         execute(config, "generatePaidDogfoodPlayResources")
 
-        "paidDogfood/res/release-notes/en-US/default.txt" generated "dogfood english"
+        "paidDogfood/play/release-notes/en-US/default.txt" generated "dogfood english"
     }
 
     @Test
@@ -103,7 +121,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
 
         execute(config, "generateFreeDogfoodPlayResources")
 
-        "freeDogfood/res/release-notes/en-US/default.txt" generated "free dogfood english"
+        "freeDogfood/play/release-notes/en-US/default.txt" generated "free dogfood english"
     }
 
     @Test
@@ -125,8 +143,8 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
 
         execute(config, "generateFreeStagingDogfoodPlayResources")
 
-        "freeStagingDogfood/res/release-notes/en-US/default.txt" generated "freeStagingDogfood"
-        "freeStagingDogfood/res/listings/en-US/full-description.txt" generated "freeStagingDogfood"
+        "freeStagingDogfood/play/release-notes/en-US/default.txt" generated "freeStagingDogfood"
+        "freeStagingDogfood/play/listings/en-US/full-description.txt" generated "freeStagingDogfood"
     }
 
     @Test
@@ -144,8 +162,8 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
 
         execute(config, "generateFreeStagingReleasePlayResources")
 
-        "freeStagingRelease/res/release-notes/en-US/default.txt" generated "freeStaging"
-        "freeStagingRelease/res/listings/en-US/full-description.txt" generated "freeStagingRelease"
+        "freeStagingRelease/play/release-notes/en-US/default.txt" generated "freeStaging"
+        "freeStagingRelease/play/listings/en-US/full-description.txt" generated "freeStagingRelease"
     }
 
     @Test
@@ -163,8 +181,8 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
 
         execute(config, "generateFreeStagingReleasePlayResources")
 
-        "freeStagingRelease/res/listings/en-US/short-description.txt" generated "free"
-        "freeStagingRelease/res/listings/en-US/full-description.txt" generated "freeStagingRelease"
+        "freeStagingRelease/play/listings/en-US/short-description.txt" generated "free"
+        "freeStagingRelease/play/listings/en-US/full-description.txt" generated "freeStagingRelease"
     }
 
     @Test
@@ -182,7 +200,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
 
         execute(config, "generateProdFreeReleasePlayResources")
 
-        "prodFreeRelease/res/release-notes/en-US/default.txt" generated "prod"
+        "prodFreeRelease/play/release-notes/en-US/default.txt" generated "prod"
     }
 
     @Test
@@ -200,12 +218,12 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
 
         execute(config, "generateFreeStagingReleasePlayResources")
 
-        "freeStagingRelease/res/listings/en-US/title.txt" generated "main"
-        "freeStagingRelease/res/listings/en-US/full-description.txt" generated "freeStagingRelease"
+        "freeStagingRelease/play/listings/en-US/title.txt" generated "main"
+        "freeStagingRelease/play/listings/en-US/full-description.txt" generated "freeStagingRelease"
     }
 
     @Test
-    fun `Resources merge across languages`() {
+    fun `Resources are merged across languages`() {
         // language=gradle
         val config = """
             flavorDimensions 'pricing', 'server'
@@ -219,13 +237,36 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
 
         execute(config, "generateProdStagingReleasePlayResources")
 
-        "prodStagingRelease/res/listings/de-DE/title.txt" generated "main"
-        "prodStagingRelease/res/listings/de-DE/full-description.txt" generated "de-DE"
-        "prodStagingRelease/res/listings/de-DE/short-description.txt" generated "staging"
+        "prodStagingRelease/play/listings/de-DE/title.txt" generated "main"
+        "prodStagingRelease/play/listings/de-DE/full-description.txt" generated "de-DE"
+        "prodStagingRelease/play/listings/de-DE/short-description.txt" generated "staging"
     }
 
     @Test
-    fun `Graphics language merge only across categories`() {
+    fun `Child resource merges with parent languages`() {
+        disableSrcCheck = true
+        // language=gradle
+        val config = """
+            flavorDimensions 'pricing', 'server'
+            productFlavors {
+                free { dimension 'server' }
+                paid { dimension 'pricing' }
+                staging { dimension 'server' }
+                prod { dimension 'pricing' }
+            }
+        """
+        File(appDir, "src/main/play/default-language.txt").writeText("ja-JA")
+
+        execute(config, "generateProdStagingReleasePlayResources")
+
+        "prodStagingRelease/play/listings/ja-JA/parent-child-test.txt" generated "staging-pct"
+        "prodStagingRelease/play/listings/en-US/parent-child-test.txt" generated "staging-pct"
+        "prodStagingRelease/play/listings/fr-FR/parent-child-test.txt" generated "staging-pct"
+        "prodStagingRelease/play/listings/de-DE/parent-child-test.txt" generated "staging-pct"
+    }
+
+    @Test
+    fun `Graphics aren't merged across languages`() {
         // language=gradle
         val config = """
             flavorDimensions 'pricing', 'server'
@@ -239,11 +280,13 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
 
         execute(config, "generateProdStagingReleasePlayResources")
 
-        "prodStagingRelease/res/listings/fr-FR/graphics/phone-screenshots/foo.jpg".exists(no)
-        "prodStagingRelease/res/listings/fr-FR/graphics/phone-screenshots/bar.jpg".exists()
-        "prodStagingRelease/res/listings/fr-FR/graphics/tablet-screenshots/baz.jpg".exists()
-        "prodStagingRelease/res/listings/de-DE/graphics/phone-screenshots/foo.jpg".exists()
-        "prodStagingRelease/res/listings/de-DE/graphics/tablet-screenshots/baz.jpg".exists()
+        "prodStagingRelease/play/listings/en-US/graphics/phone-screenshots/foo.jpg".exists()
+        "prodStagingRelease/play/listings/en-US/graphics/tablet-screenshots/baz.jpg".exists()
+        "prodStagingRelease/play/listings/fr-FR/graphics/phone-screenshots/bar.jpg".exists()
+        "prodStagingRelease/play/listings/fr-FR/graphics/phone-screenshots/foo.jpg".exists(no)
+        "prodStagingRelease/play/listings/fr-FR/graphics/tablet-screenshots/baz.jpg".exists(no)
+        "prodStagingRelease/play/listings/de-DE/graphics/phone-screenshots/foo.jpg".exists(no)
+        "prodStagingRelease/play/listings/de-DE/graphics/tablet-screenshots/baz.jpg".exists(no)
     }
 
     @Test
@@ -296,6 +339,233 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 .isEqualTo(TaskOutcome.FAILED)
     }
 
+    @Test
+    fun `Empty src skips task`() {
+        disableSrcCheck = true
+        // language=gradle
+        val config = """
+            flavorDimensions 'pricing', 'server'
+            productFlavors {
+                free { dimension 'server' }
+                paid { dimension 'pricing' }
+                staging { dimension 'server' }
+                prod { dimension 'pricing' }
+            }
+        """
+
+        File(appDir, "src").walkTopDown()
+                .filter { it.isFile && it.path.contains("play") }
+                .forEach { it.delete() }
+
+        val result = execute(config, "generateProdStagingReleasePlayResources")
+
+        assertThat(result.task(":generateProdStagingReleasePlayResources")!!.outcome)
+                .isEqualTo(TaskOutcome.NO_SOURCE)
+    }
+
+    @Test
+    fun `Rerunning task uses cached build`() {
+        // language=gradle
+        val config = """
+            flavorDimensions 'pricing', 'server'
+            productFlavors {
+                free { dimension 'server' }
+                paid { dimension 'pricing' }
+                staging { dimension 'server' }
+                prod { dimension 'pricing' }
+            }
+        """
+
+        val result1 = execute(config, "generateProdStagingReleasePlayResources")
+        val result2 = execute(config, "generateProdStagingReleasePlayResources")
+
+        assertThat(result1.task(":generateProdStagingReleasePlayResources")!!.outcome)
+                .isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result2.task(":generateProdStagingReleasePlayResources")!!.outcome)
+                .isEqualTo(TaskOutcome.UP_TO_DATE)
+    }
+
+    @Test
+    fun `Incrementally adding file applies across languages`() {
+        disableSrcCheck = true
+        // language=gradle
+        val config = """
+            flavorDimensions 'pricing', 'server'
+            productFlavors {
+                free { dimension 'server' }
+                paid { dimension 'pricing' }
+                staging { dimension 'server' }
+                prod { dimension 'pricing' }
+            }
+        """
+        val file = File(appDir, "src/main/play/listings/en-US/incremental.txt")
+
+        execute(config, "generateProdStagingReleasePlayResources")
+        file.safeCreateNewFile().writeText("en-US incremental")
+        execute(config, "generateProdStagingReleasePlayResources")
+
+        "prodStagingRelease/play/listings/en-US/incremental.txt" generated "en-US incremental"
+        "prodStagingRelease/play/listings/fr-FR/incremental.txt" generated "en-US incremental"
+        "prodStagingRelease/play/listings/de-DE/incremental.txt" generated "en-US incremental"
+    }
+
+    @Test
+    fun `Incrementally modifying file applies across languages`() {
+        disableSrcCheck = true
+        // language=gradle
+        val config = """
+            flavorDimensions 'pricing', 'server'
+            productFlavors {
+                free { dimension 'server' }
+                paid { dimension 'pricing' }
+                staging { dimension 'server' }
+                prod { dimension 'pricing' }
+            }
+        """
+        val file = File(appDir, "src/main/play/listings/en-US/incremental.txt")
+
+        file.safeCreateNewFile().writeText("en-US incremental")
+        execute(config, "generateProdStagingReleasePlayResources")
+        file.safeCreateNewFile().writeText("new en-US incremental")
+        execute(config, "generateProdStagingReleasePlayResources")
+
+        "prodStagingRelease/play/listings/en-US/incremental.txt" generated "new en-US incremental"
+        "prodStagingRelease/play/listings/fr-FR/incremental.txt" generated "new en-US incremental"
+        "prodStagingRelease/play/listings/de-DE/incremental.txt" generated "new en-US incremental"
+    }
+
+    @Test
+    fun `Incrementally deleting file applies across languages`() {
+        disableSrcCheck = true
+        // language=gradle
+        val config = """
+            flavorDimensions 'pricing', 'server'
+            productFlavors {
+                free { dimension 'server' }
+                paid { dimension 'pricing' }
+                staging { dimension 'server' }
+                prod { dimension 'pricing' }
+            }
+        """
+        val file = File(appDir, "src/main/play/listings/en-US/incremental.txt")
+
+        file.safeCreateNewFile().writeText("en-US incremental")
+        execute(config, "generateProdStagingReleasePlayResources")
+        file.delete()
+        execute(config, "generateProdStagingReleasePlayResources")
+
+        "prodStagingRelease/play/listings/en-US/incremental.txt".exists(no)
+        "prodStagingRelease/play/listings/fr-FR/incremental.txt".exists(no)
+        "prodStagingRelease/play/listings/de-DE/incremental.txt".exists(no)
+    }
+
+    @Test
+    fun `Incrementally adding file with existing language doesn't overwrite`() {
+        disableSrcCheck = true
+        // language=gradle
+        val config = """
+            flavorDimensions 'pricing', 'server'
+            productFlavors {
+                free { dimension 'server' }
+                paid { dimension 'pricing' }
+                staging { dimension 'server' }
+                prod { dimension 'pricing' }
+            }
+        """
+        val file1 = File(appDir, "src/main/play/listings/en-US/incremental.txt")
+        val file2 = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
+
+        file1.safeCreateNewFile().writeText("en-US incremental")
+        execute(config, "generateProdStagingReleasePlayResources")
+        file1.safeCreateNewFile().writeText("new en-US incremental")
+        file2.safeCreateNewFile().writeText("fr-FR incremental")
+        execute(config, "generateProdStagingReleasePlayResources")
+
+        "prodStagingRelease/play/listings/en-US/incremental.txt" generated "new en-US incremental"
+        "prodStagingRelease/play/listings/fr-FR/incremental.txt" generated "fr-FR incremental"
+        "prodStagingRelease/play/listings/de-DE/incremental.txt" generated "new en-US incremental"
+    }
+
+    @Test
+    fun `Incrementally adding file with conflicting language doesn't overwrite`() {
+        disableSrcCheck = true
+        // language=gradle
+        val config = """
+            flavorDimensions 'pricing', 'server'
+            productFlavors {
+                free { dimension 'server' }
+                paid { dimension 'pricing' }
+                staging { dimension 'server' }
+                prod { dimension 'pricing' }
+            }
+        """
+        val file1 = File(appDir, "src/main/play/listings/en-US/incremental.txt")
+        val file2 = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
+
+        execute(config, "generateProdStagingReleasePlayResources")
+        file1.safeCreateNewFile().writeText("en-US incremental")
+        file2.safeCreateNewFile().writeText("fr-FR incremental")
+        execute(config, "generateProdStagingReleasePlayResources")
+
+        "prodStagingRelease/play/listings/en-US/incremental.txt" generated "en-US incremental"
+        "prodStagingRelease/play/listings/fr-FR/incremental.txt" generated "fr-FR incremental"
+        "prodStagingRelease/play/listings/de-DE/incremental.txt" generated "en-US incremental"
+    }
+
+    @Test
+    fun `Incrementally deleting file with existing language doesn't overwrite`() {
+        disableSrcCheck = true
+        // language=gradle
+        val config = """
+            flavorDimensions 'pricing', 'server'
+            productFlavors {
+                free { dimension 'server' }
+                paid { dimension 'pricing' }
+                staging { dimension 'server' }
+                prod { dimension 'pricing' }
+            }
+        """
+        val file1 = File(appDir, "src/main/play/listings/en-US/incremental.txt")
+        val file2 = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
+
+        file1.safeCreateNewFile().writeText("en-US incremental")
+        file2.safeCreateNewFile().writeText("fr-FR incremental")
+        execute(config, "generateProdStagingReleasePlayResources")
+        file1.delete()
+        execute(config, "generateProdStagingReleasePlayResources")
+
+        "prodStagingRelease/play/listings/en-US/incremental.txt".exists(no)
+        "prodStagingRelease/play/listings/fr-FR/incremental.txt".exists()
+        "prodStagingRelease/play/listings/de-DE/incremental.txt".exists(no)
+    }
+
+    @Test
+    fun `Incrementally modifying file with conflicting language doesn't overwrite`() {
+        disableSrcCheck = true
+        // language=gradle
+        val config = """
+            flavorDimensions 'pricing', 'server'
+            productFlavors {
+                free { dimension 'server' }
+                paid { dimension 'pricing' }
+                staging { dimension 'server' }
+                prod { dimension 'pricing' }
+            }
+        """
+        val file1 = File(appDir, "src/main/play/listings/en-US/incremental.txt")
+        val file2 = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
+
+        file1.safeCreateNewFile().writeText("en-US incremental")
+        file2.safeCreateNewFile().writeText("fr-FR incremental")
+        execute(config, "generateProdStagingReleasePlayResources")
+        file1.safeCreateNewFile().writeText("new en-US incremental")
+        execute(config, "generateProdStagingReleasePlayResources")
+
+        "prodStagingRelease/play/listings/en-US/incremental.txt" generated "new en-US incremental"
+        "prodStagingRelease/play/listings/fr-FR/incremental.txt" generated "fr-FR incremental"
+        "prodStagingRelease/play/listings/de-DE/incremental.txt" generated "new en-US incremental"
+    }
+
     private val yes: (Boolean) -> Unit = { assertThat(it).isTrue() }
     private val no: (Boolean) -> Unit = { assertThat(it).isFalse() }
     private fun String.exists(validator: (Boolean) -> Unit = yes) {
@@ -303,8 +573,17 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
     }
 
     private infix fun String.generated(content: String) {
-        assertThat(content).isEqualTo("build/generated/gpp/$this"())
+        assertThat("build/generated/gpp/$this"()).isEqualTo(content)
     }
 
     private operator fun String.invoke() = File(appDir, this).readText()
+
+    private fun hashSrc() = File(appDir, "src").walkTopDown().map {
+        val hashes = mutableListOf<HashCode>()
+        if (it.isFile) {
+            hashes += Files.asByteSource(it).hash(Hashing.sha256())
+        }
+        hashes += Hashing.sha256().hashUnencodedChars(it.absolutePath)
+        hashes
+    }.flatten().toList()
 }

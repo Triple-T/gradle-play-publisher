@@ -79,6 +79,8 @@ abstract class IntegrationTestBase {
                 File("build/classes/kotlin/test")
         ))
 
-        return if (expectFailure) runner.buildAndFail() else runner.build()
+        val result = if (expectFailure) runner.buildAndFail() else runner.build()
+        println(result.output)
+        return result
     }
 }

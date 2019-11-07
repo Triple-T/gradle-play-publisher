@@ -3,21 +3,21 @@ package com.github.triplet.gradle.play.tasks
 import com.github.triplet.gradle.common.utils.climbUpTo
 import com.github.triplet.gradle.common.utils.isChildOf
 import com.github.triplet.gradle.common.utils.isDirectChildOf
-import com.github.triplet.gradle.common.utils.nullOrFull
+import com.github.triplet.gradle.common.utils.marked
 import com.github.triplet.gradle.common.utils.orNull
 import com.github.triplet.gradle.common.utils.readProcessed
+import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.internal.AppDetail
-import com.github.triplet.gradle.play.internal.ImageType
 import com.github.triplet.gradle.play.internal.LISTINGS_PATH
 import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NAMES_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
-import org.gradle.api.Action
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.FileType
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.InputFiles
@@ -34,7 +34,9 @@ import org.gradle.work.InputChanges
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkerExecutor
+import java.io.BufferedReader
 import java.io.File
+import java.util.TreeSet
 
 @CacheableTask
 internal abstract class GenerateResources : DefaultTask() {
@@ -50,76 +52,34 @@ internal abstract class GenerateResources : DefaultTask() {
 
     @TaskAction
     fun generate(changes: InputChanges) {
-        val files = changes.getFileChanges(resSrcTree).filter { change ->
-            if (change.changeType == ChangeType.REMOVED) {
-                val file = change.file
-                val target = resSrcDirs.get()
-                        .map { it.asFile }
-                        .singleOrNull { file.startsWith(it) }
-                        ?.let { file.toRelativeString(it).nullOrFull() }
-                if (target != null) project.delete(resDir.file(target))
+        val fileChanges = changes.getFileChanges(resSrcTree)
+        val validateChanges = fileChanges
+                .filter { it.fileType == FileType.FILE }
+                .filterNot { it.changeType == ChangeType.REMOVED }
+                .map { it.file }
+        val generateChanges = fileChanges
+                .filter { it.fileType == FileType.FILE }
+                .map { it.changeType to it.file }
 
-                false
-            } else {
-                true
+        val work = project.serviceOf<WorkerExecutor>().noIsolation()
+        if (validateChanges.isNotEmpty()) {
+            work.submit(Validator::class) {
+                files.set(validateChanges)
             }
-        }.map { it.file }
-
-        project.serviceOf<WorkerExecutor>().noIsolation().submit(Processor::class) {
-            outputDir.set(resDir)
-            inputDirs.set(resSrcDirs)
-            resources.set(files)
+        }
+        if (generateChanges.isNotEmpty()) {
+            work.submit(Generator::class) {
+                projectDir.set(project.projectDir)
+                inputDirs.set(resSrcDirs)
+                outputDir.set(resDir)
+                changedFiles.set(generateChanges)
+            }
         }
     }
 
-    abstract class Processor : WorkAction<Processor.Params> {
+    abstract class Validator : WorkAction<Validator.Params> {
         override fun execute() {
-            val defaultLocale = parameters.inputDirs.get().mapNotNull {
-                it.file(AppDetail.DEFAULT_LANGUAGE.fileName).asFile.orNull()?.readProcessed()
-            }.lastOrNull() // Pick the most specialized option available. E.g. `paidProdRelease`
-
-            val files = parameters.resources.get()
-                    .filterNot { it.isDirectory }
-                    .sortedBy { file ->
-                        val dir = parameters.inputDirs.get().singleOrNull {
-                            file.startsWith(it.asFile)
-                        }
-                        parameters.inputDirs.get().indexOf(dir)
-                    }
-                    .ifEmpty { return }
-
-            val changedDefaults = mutableListOf<File>()
-            for (file in files) {
-                file.validate()
-
-                defaultLocale.nullOrFull()?.let {
-                    if (file.isChildOf(LISTINGS_PATH) && file.isChildOf(it)) {
-                        changedDefaults += file
-                    }
-                }
-                file.copy(file.findClosestDir().findDest())
-            }
-
-            val writeQueue = mutableListOf<Action<Unit>>()
-            for (default in changedDefaults) {
-                val listings = default.findDest().climbUpTo(LISTINGS_PATH)!!
-                val relativePath = default.invariantSeparatorsPath.split("$defaultLocale/").last()
-
-                listings.listFiles()
-                        .orEmpty()
-                        .filter { it.name != defaultLocale }
-                        .map { File(it, relativePath) }
-                        .filterNot(File::exists)
-                        .filterNot(::hasGraphicCategory)
-                        .forEach {
-                            val destName = it.parentFile.toRelativeString(
-                                    parameters.outputDir.get().asFile)
-                            val dest = File(parameters.outputDir.get().asFile, destName)
-
-                            writeQueue += Action { default.copy(dest) }
-                        }
-            }
-            writeQueue.forEach { it.execute(Unit) }
+            for (file in parameters.files.get()) file.validate()
         }
 
         private fun File.validate() {
@@ -129,6 +89,10 @@ internal abstract class GenerateResources : DefaultTask() {
                     || isChildOf(RELEASE_NAMES_PATH)
                     || isChildOf(PRODUCTS_PATH)
             check(areRootsValid) { "Unknown Play resource file: $this" }
+            check(extension != "index") { "Resources cannot use the 'index' extension: $this" }
+            check(name != PLAY_PATH || !isChildOf(PLAY_PATH)) {
+                "The file name 'play' is illegal: $this"
+            }
 
             validateListings()
             validateReleaseNotes()
@@ -184,11 +148,271 @@ internal abstract class GenerateResources : DefaultTask() {
             }
         }
 
-        private fun File.copy(dest: File): File = copyTo(File(dest, name), true)
+        interface Params : WorkParameters {
+            val files: ListProperty<File>
+        }
+    }
 
-        private tailrec fun File.findClosestDir(): File {
-            check(exists()) { "$this does not exist" }
-            return if (isDirectory) this else parentFile.findClosestDir()
+    abstract class Generator : WorkAction<Generator.Params> {
+        private val projectDir = parameters.projectDir.get().asFile
+        private val defaultLocale by lazy(::findDefaultLocale)
+        private val genOrder = newGenOrder()
+
+        override fun execute() {
+            // ## Definitions
+            //
+            // Index: Map<GeneratedFile, SortedSet<ProducerFile>>
+            // Reverse index: Map<ProducerFile, SortedSet<GeneratedFile>>
+            // Index on disk: combo of the two, looks something like this.
+            //   $ cat GeneratedFile.index
+            //   -
+            //   ProducerFile1
+            //   GeneratedFile1
+            //   GeneratedFile2
+            //   ...
+            //   -
+            //   ProducerFile2
+            //   GeneratedFile1
+            //   GeneratedFile2
+            //   ...
+            //
+            // The paths are in unix separators and relative to the project root.
+            //
+            // ## Algorithm
+            //
+            // 1. Collect all locales from src/**/listings/*
+            // 2. Collect all previous *.index files from build/**/$outputDir/**
+            // 3. Build partial index from input changes
+            // 4. Merge both indexes, saving which GeneratedFiles need updating
+            // 5. Write new merged index to disk
+            // 6. Follow the index to write the changed GeneratedFiles
+            //
+            // ## Merge algorithm
+            //
+            // Spec: keep each locale's producers ordered by the $inputDirs. The default locale is
+            // on top, the actual locale on bottom.
+            //
+            // ### ADD
+            //
+            // 1. If for $defaultLocale: collect all locales and add to reverse index.
+            // 2. Update index with each GeneratedFile and its producer.
+            //
+            // ### INSERT
+            //
+            // 1. If for $defaultLocale: collect all locales and add to reverse index.
+            // 2. For each GeneratedFile:
+            //    1. Take all $defaultLocale changes from partial index node and merge them with the
+            //       top of the node. All $defaultLocale producers should be at the top.
+            //    2. Take all non-$defaultLocale changes from partial index node and merge them with
+            //       the bottom.
+            //
+            // ### MODIFY
+            //
+            // Do nothing. Keeping track of which GeneratedFiles changed is enough.
+            //
+            // ### DELETE
+            //
+            // Follow each GeneratedFile the producer produced from the reverse index and remove it
+            // from the index.
+            //
+            // ## Writing the generated files
+            //
+            // Use the index: the last ProducerFile wins and gets written as the GeneratedFile.
+
+            val locales = mutableSetOf<String>()
+            val prevIndex = mutableMapOf<File, MutableSet<File>>()
+            val prevReverseIndex = mutableMapOf<File, MutableSet<File>>()
+            val index = mutableMapOf<File, MutableSet<File>>()
+            val reverseIndex = mutableMapOf<File, MutableSet<File>>()
+            val prunedResources = mutableSetOf<File>()
+
+            parseSrcTree(prevIndex, prevReverseIndex, locales)
+            buildIndex(index, reverseIndex, prunedResources)
+            pruneOutdatedReferences(prevReverseIndex, index, reverseIndex)
+            mergeExistingReferences(prevIndex, prevReverseIndex, index, reverseIndex)
+            insertNewLocales(index, reverseIndex, locales)
+            writeIndex(index, reverseIndex)
+            pruneGeneratedResources(prevIndex, prevReverseIndex, prunedResources)
+            generateResources(index)
+        }
+
+        private fun parseSrcTree(
+                index: MutableMap<File, MutableSet<File>>,
+                reverseIndex: MutableMap<File, MutableSet<File>>,
+                locales: MutableSet<String>
+        ) {
+            for (dir in parameters.inputDirs.get()) {
+                dir.asFileTree.visit {
+                    if (file.isDirectChildOf(LISTINGS_PATH) && name != defaultLocale) {
+                        locales += name
+                    }
+                }
+            }
+            parameters.outputDir.get().asFileTree.visit {
+                if (file.extension == "index") {
+                    open().bufferedReader().use { reader ->
+                        reader.readIndex(index, reverseIndex)
+                    }
+                }
+            }
+        }
+
+        private fun BufferedReader.readIndex(
+                index: MutableMap<File, MutableSet<File>>,
+                reverseIndex: MutableMap<File, MutableSet<File>>
+        ) {
+            var line: String?
+            lateinit var producer: File
+
+            while (true) {
+                line = readLine()
+                if (line == null) break
+
+                if (line == "-") {
+                    producer = File(projectDir, readLine())
+                    continue
+                }
+
+                val generated = File(projectDir, line)
+                safeAddValue(index, reverseIndex, generated, producer)
+            }
+        }
+
+        private fun buildIndex(
+                index: MutableMap<File, MutableSet<File>>,
+                reverseIndex: MutableMap<File, MutableSet<File>>,
+                prunedResources: MutableSet<File>
+        ) {
+            for ((type, producer) in parameters.changedFiles.get()) {
+                if (type == ChangeType.REMOVED) {
+                    prunedResources += producer
+                    continue
+                }
+                val generated = producer.findDest()
+
+                safeAddValue(index, reverseIndex, generated, producer)
+            }
+        }
+
+        private fun pruneOutdatedReferences(
+                prevReverseIndex: Map<File, Set<File>>,
+                index: MutableMap<File, out Set<File>>,
+                reverseIndex: MutableMap<File, out Set<File>>
+        ) {
+            for ((producer, prevGens) in prevReverseIndex) {
+                val gens = reverseIndex[producer]
+                if (gens != null) continue
+
+                reverseIndex -= producer
+                for (generated in prevGens) {
+                    index -= generated
+                }
+            }
+        }
+
+        private fun mergeExistingReferences(
+                prevIndex: MutableMap<File, MutableSet<File>>,
+                prevReverseIndex: Map<File, Set<File>>,
+                index: MutableMap<File, MutableSet<File>>,
+                reverseIndex: MutableMap<File, MutableSet<File>>
+        ) {
+            for (producer in reverseIndex.keys) {
+                val prevGens = prevReverseIndex[producer].orEmpty()
+                for (prevGenerated in prevGens) {
+                    val prevProducers = prevIndex[prevGenerated].orEmpty()
+                    for (prevProducer in prevProducers) {
+                        safeAddValue(index, reverseIndex, prevGenerated, prevProducer)
+                    }
+                }
+            }
+        }
+
+        private fun insertNewLocales(
+                index: MutableMap<File, MutableSet<File>>,
+                reverseIndex: MutableMap<File, MutableSet<File>>,
+                locales: Set<String>
+        ) {
+            for (producer in reverseIndex.keys) {
+                if (producer.isDefaultResource()) {
+                    val listings = producer.climbUpTo(LISTINGS_PATH)!!
+                    val pathFromDefault =
+                            producer.toRelativeString(File(listings, defaultLocale!!))
+                    val destListings = listings.findDest()
+                    for (locale in locales) {
+                        val genLocale = File(File(destListings, locale), pathFromDefault)
+                        safeAddValue(index, reverseIndex, genLocale, producer)
+                    }
+                }
+            }
+        }
+
+        private fun writeIndex(
+                index: Map<File, Set<File>>,
+                reverseIndex: Map<File, Set<File>>
+        ) {
+            for ((generated, producers) in index) {
+                val builder = StringBuilder()
+                for (producer in producers) {
+                    builder.apply {
+                        append("-").append("\n")
+                        val pathFromRootToProducer =
+                                producer.relativeTo(projectDir).invariantSeparatorsPath
+                        append(pathFromRootToProducer).append("\n")
+                    }
+
+                    for (reverseGenerated in reverseIndex.getValue(producer)) {
+                        val pathFromRootToGenerated =
+                                reverseGenerated.relativeTo(projectDir).invariantSeparatorsPath
+                        builder.append(pathFromRootToGenerated).append("\n")
+                    }
+                }
+                generated.marked("index").safeCreateNewFile().writeText(builder.toString())
+            }
+        }
+
+        private fun pruneGeneratedResources(
+                prevIndex: MutableMap<File, MutableSet<File>>,
+                prevReverseIndex: Map<File, Set<File>>,
+                prunedResources: Set<File>
+        ) {
+            for (producer in prunedResources) {
+                val prevGens = prevReverseIndex[producer].orEmpty()
+                for (prevGenerated in prevGens) {
+                    val prevProducers = prevIndex[prevGenerated].orEmpty()
+                    if (prevProducers.first() == producer) {
+                        prevGenerated.delete()
+                    }
+                }
+            }
+        }
+
+        private fun generateResources(index: Map<File, Set<File>>) {
+            for ((generated, producers) in index) {
+                producers.first().copyTo(generated, overwrite = true)
+            }
+        }
+
+        private fun safeAddValue(
+                index: MutableMap<File, MutableSet<File>>,
+                reverseIndex: MutableMap<File, MutableSet<File>>,
+                generated: File,
+                producer: File
+        ) {
+            index.safeAddValue(generated, producer)
+            reverseIndex.safeAddValue(producer, generated)
+        }
+
+        private fun MutableMap<File, MutableSet<File>>.safeAddValue(key: File, value: File) {
+            val store = get(key) ?: TreeSet(genOrder)
+            store += value
+            put(key, store)
+        }
+
+        private fun File.isDefaultResource(): Boolean {
+            val defaultLocale = defaultLocale
+            return defaultLocale != null &&
+                    isChildOf(LISTINGS_PATH) &&
+                    isDirectChildOf(defaultLocale)
         }
 
         private fun File.findDest() =
@@ -197,15 +421,28 @@ internal abstract class GenerateResources : DefaultTask() {
         private fun File.findOwner() =
                 parameters.inputDirs.get().single { startsWith(it.asFile) }.asFile
 
-        private fun hasGraphicCategory(file: File): Boolean {
-            val graphic = ImageType.values().find { file.isDirectChildOf(it.dirName) }
-            return graphic != null && file.climbUpTo(graphic.dirName)?.orNull() != null
+        private fun newGenOrder() = compareBy<File> { f ->
+            f.isDefaultResource()
+        }.thenByDescending { f ->
+            val flavor = checkNotNull(f.climbUpTo(PLAY_PATH)?.parentFile?.name) {
+                "File not a play resource: $f"
+            }
+            parameters.inputDirs.get().indexOfFirst {
+                it.asFile.parentFile.name == flavor
+            }
+        }.thenBy { f ->
+            f.path
         }
 
+        private fun findDefaultLocale() = parameters.inputDirs.get().mapNotNull {
+            it.file(AppDetail.DEFAULT_LANGUAGE.fileName).asFile.orNull()?.readProcessed()
+        }.lastOrNull() // Pick the most specialized option available. E.g. `paidProdRelease`
+
         interface Params : WorkParameters {
+            val projectDir: DirectoryProperty
             val outputDir: DirectoryProperty
             val inputDirs: ListProperty<Directory>
-            val resources: ListProperty<File>
+            val changedFiles: ListProperty<Pair<ChangeType, File>>
         }
     }
 }
