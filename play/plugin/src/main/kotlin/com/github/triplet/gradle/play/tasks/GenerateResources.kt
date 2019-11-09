@@ -228,7 +228,7 @@ internal abstract class GenerateResources : DefaultTask() {
 
             parseSrcTree(prevIndex, prevReverseIndex, locales)
             buildIndex(index, reverseIndex, prunedResources)
-            pruneOutdatedReferences(prevReverseIndex, index, reverseIndex)
+            pruneOutdatedReferences(index, reverseIndex, prunedResources)
             mergeExistingReferences(prevIndex, prevReverseIndex, index, reverseIndex)
             insertNewLocales(index, reverseIndex, locales)
             writeIndex(index, reverseIndex)
@@ -295,15 +295,14 @@ internal abstract class GenerateResources : DefaultTask() {
         }
 
         private fun pruneOutdatedReferences(
-                prevReverseIndex: Map<File, Set<File>>,
                 index: MutableMap<File, out Set<File>>,
-                reverseIndex: MutableMap<File, out Set<File>>
+                reverseIndex: MutableMap<File, out Set<File>>,
+                prunedResources: Set<File>
         ) {
-            for ((producer, prevGens) in prevReverseIndex) {
-                val gens = reverseIndex[producer]
-                if (gens != null) continue
+            for (prevProducer in prunedResources) {
+                val prevGens = reverseIndex[prevProducer] ?: continue
 
-                reverseIndex -= producer
+                reverseIndex -= prevProducer
                 for (generated in prevGens) {
                     index -= generated
                 }
