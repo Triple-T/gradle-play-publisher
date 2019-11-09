@@ -247,7 +247,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 prod { dimension 'pricing' }
             }
         """
-        File(appDir, "src/main/play/default-language.txt").writeText("ja-JA")
+        File(appDir, "src/main/play/default-language.txt")("ja-JA")
 
         execute(config, "generateProdStagingReleasePlayResources")
 
@@ -391,7 +391,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
         val file = File(appDir, "src/main/play/listings/en-US/incremental.txt")
 
         execute(config, "generateProdStagingReleasePlayResources")
-        file.safeCreateNewFile().writeText("en-US incremental")
+        file("en-US incremental")
         execute(config, "generateProdStagingReleasePlayResources")
 
         "prodStagingRelease/play/listings/en-US/incremental.txt" generated "en-US incremental"
@@ -414,10 +414,10 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
         val file1 = File(appDir, "src/main/play/listings/en-US/incremental.txt")
         val file2 = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
 
-        file1.safeCreateNewFile().writeText("en-US incremental")
+        file1("en-US incremental")
         execute(config, "generateProdStagingReleasePlayResources")
-        file1.safeCreateNewFile().writeText("new en-US incremental")
-        file2.safeCreateNewFile().writeText("fr-FR incremental")
+        file1("new en-US incremental")
+        file2("fr-FR incremental")
         execute(config, "generateProdStagingReleasePlayResources")
 
         "prodStagingRelease/play/listings/en-US/incremental.txt" generated "new en-US incremental"
@@ -441,8 +441,8 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
         val file2 = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
 
         execute(config, "generateProdStagingReleasePlayResources")
-        file1.safeCreateNewFile().writeText("en-US incremental")
-        file2.safeCreateNewFile().writeText("fr-FR incremental")
+        file1("en-US incremental")
+        file2("fr-FR incremental")
         execute(config, "generateProdStagingReleasePlayResources")
 
         "prodStagingRelease/play/listings/en-US/incremental.txt" generated "en-US incremental"
@@ -464,9 +464,9 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
         """
         val file = File(appDir, "src/main/play/listings/en-US/incremental.txt")
 
-        file.safeCreateNewFile().writeText("en-US incremental")
+        file("en-US incremental")
         execute(config, "generateProdStagingReleasePlayResources")
-        file.safeCreateNewFile().writeText("new en-US incremental")
+        file("new en-US incremental")
         execute(config, "generateProdStagingReleasePlayResources")
 
         "prodStagingRelease/play/listings/en-US/incremental.txt" generated "new en-US incremental"
@@ -489,10 +489,10 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
         val file1 = File(appDir, "src/main/play/listings/en-US/incremental.txt")
         val file2 = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
 
-        file1.safeCreateNewFile().writeText("en-US incremental")
-        file2.safeCreateNewFile().writeText("fr-FR incremental")
+        file1("en-US incremental")
+        file2("fr-FR incremental")
         execute(config, "generateProdStagingReleasePlayResources")
-        file1.safeCreateNewFile().writeText("new en-US incremental")
+        file1("new en-US incremental")
         execute(config, "generateProdStagingReleasePlayResources")
 
         "prodStagingRelease/play/listings/en-US/incremental.txt" generated "new en-US incremental"
@@ -514,7 +514,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
         """
         val file = File(appDir, "src/main/play/listings/en-US/incremental.txt")
 
-        file.safeCreateNewFile().writeText("en-US incremental")
+        file("en-US incremental")
         execute(config, "generateProdStagingReleasePlayResources")
         file.delete()
         execute(config, "generateProdStagingReleasePlayResources")
@@ -539,8 +539,8 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
         val file1 = File(appDir, "src/main/play/listings/en-US/incremental.txt")
         val file2 = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
 
-        file1.safeCreateNewFile().writeText("en-US incremental")
-        file2.safeCreateNewFile().writeText("fr-FR incremental")
+        file1("en-US incremental")
+        file2("fr-FR incremental")
         execute(config, "generateProdStagingReleasePlayResources")
         file1.delete()
         execute(config, "generateProdStagingReleasePlayResources")
@@ -561,6 +561,8 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
     }
 
     private operator fun String.invoke() = File(appDir, this).readText()
+
+    private operator fun File.invoke(text: String) = safeCreateNewFile().writeText(text)
 
     private fun hashSrc() = File(appDir, "src").walkTopDown().map {
         val hashes = mutableListOf<HashCode>()
