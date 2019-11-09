@@ -35,11 +35,7 @@ abstract class IntegrationTestBase {
 
         // language=gradle
         File(appDir, "settings.gradle").writeText("""
-            buildCache {
-                local {
-                    directory = new File('$buildCacheDir')
-                }
-            }
+            buildCache.local.directory = new File('$buildCacheDir')
         """)
 
         // language=gradle
