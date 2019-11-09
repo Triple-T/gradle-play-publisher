@@ -7,26 +7,10 @@ import com.google.common.hash.Hashing
 import com.google.common.io.Files
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 import java.io.File
 
 class GenerateResourcesIntegrationTest : IntegrationTestBase() {
-    private var disableSrcCheck = false
-    private lateinit var srcHash: List<HashCode>
-
-    @Before
-    fun saveHashedSrc() {
-        disableSrcCheck = false
-        srcHash = hashSrc()
-    }
-
-    @After
-    fun `Ensure src hashes haven't changed`() {
-        if (!disableSrcCheck) assertThat(srcHash).isEqualTo(hashSrc())
-    }
-
     @Test
     fun `Basic resources are correctly copied to their respective folders`() {
         execute("", "generateReleasePlayResources")
@@ -38,6 +22,15 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
         "release/play/release-notes/fr-FR/default.txt" generated "main"
 
         "release/play/products/sku.json" generated "src/main/play/products/sku.json"()
+    }
+
+    @Test
+    fun `Checksum src files`() {
+        val srcHash = hashSrc()
+
+        execute("", "generateReleasePlayResources")
+
+        assertThat(hashSrc()).isEqualTo(srcHash)
     }
 
     @Test
@@ -244,7 +237,6 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Child resource merges with parent languages`() {
-        disableSrcCheck = true
         // language=gradle
         val config = """
             flavorDimensions 'pricing', 'server'
@@ -341,7 +333,6 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Empty src skips task`() {
-        disableSrcCheck = true
         // language=gradle
         val config = """
             flavorDimensions 'pricing', 'server'
@@ -387,7 +378,6 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Incrementally adding file applies across languages`() {
-        disableSrcCheck = true
         // language=gradle
         val config = """
             flavorDimensions 'pricing', 'server'
@@ -410,58 +400,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `Incrementally modifying file applies across languages`() {
-        disableSrcCheck = true
-        // language=gradle
-        val config = """
-            flavorDimensions 'pricing', 'server'
-            productFlavors {
-                free { dimension 'server' }
-                paid { dimension 'pricing' }
-                staging { dimension 'server' }
-                prod { dimension 'pricing' }
-            }
-        """
-        val file = File(appDir, "src/main/play/listings/en-US/incremental.txt")
-
-        file.safeCreateNewFile().writeText("en-US incremental")
-        execute(config, "generateProdStagingReleasePlayResources")
-        file.safeCreateNewFile().writeText("new en-US incremental")
-        execute(config, "generateProdStagingReleasePlayResources")
-
-        "prodStagingRelease/play/listings/en-US/incremental.txt" generated "new en-US incremental"
-        "prodStagingRelease/play/listings/fr-FR/incremental.txt" generated "new en-US incremental"
-        "prodStagingRelease/play/listings/de-DE/incremental.txt" generated "new en-US incremental"
-    }
-
-    @Test
-    fun `Incrementally deleting file applies across languages`() {
-        disableSrcCheck = true
-        // language=gradle
-        val config = """
-            flavorDimensions 'pricing', 'server'
-            productFlavors {
-                free { dimension 'server' }
-                paid { dimension 'pricing' }
-                staging { dimension 'server' }
-                prod { dimension 'pricing' }
-            }
-        """
-        val file = File(appDir, "src/main/play/listings/en-US/incremental.txt")
-
-        file.safeCreateNewFile().writeText("en-US incremental")
-        execute(config, "generateProdStagingReleasePlayResources")
-        file.delete()
-        execute(config, "generateProdStagingReleasePlayResources")
-
-        "prodStagingRelease/play/listings/en-US/incremental.txt".exists(no)
-        "prodStagingRelease/play/listings/fr-FR/incremental.txt".exists(no)
-        "prodStagingRelease/play/listings/de-DE/incremental.txt".exists(no)
-    }
-
-    @Test
     fun `Incrementally adding file with existing language doesn't overwrite`() {
-        disableSrcCheck = true
         // language=gradle
         val config = """
             flavorDimensions 'pricing', 'server'
@@ -488,7 +427,6 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Incrementally adding file with conflicting language doesn't overwrite`() {
-        disableSrcCheck = true
         // language=gradle
         val config = """
             flavorDimensions 'pricing', 'server'
@@ -513,8 +451,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `Incrementally deleting file with existing language doesn't overwrite`() {
-        disableSrcCheck = true
+    fun `Incrementally modifying file applies across languages`() {
         // language=gradle
         val config = """
             flavorDimensions 'pricing', 'server'
@@ -525,23 +462,20 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 prod { dimension 'pricing' }
             }
         """
-        val file1 = File(appDir, "src/main/play/listings/en-US/incremental.txt")
-        val file2 = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
+        val file = File(appDir, "src/main/play/listings/en-US/incremental.txt")
 
-        file1.safeCreateNewFile().writeText("en-US incremental")
-        file2.safeCreateNewFile().writeText("fr-FR incremental")
+        file.safeCreateNewFile().writeText("en-US incremental")
         execute(config, "generateProdStagingReleasePlayResources")
-        file1.delete()
+        file.safeCreateNewFile().writeText("new en-US incremental")
         execute(config, "generateProdStagingReleasePlayResources")
 
-        "prodStagingRelease/play/listings/en-US/incremental.txt".exists(no)
-        "prodStagingRelease/play/listings/fr-FR/incremental.txt".exists()
-        "prodStagingRelease/play/listings/de-DE/incremental.txt".exists(no)
+        "prodStagingRelease/play/listings/en-US/incremental.txt" generated "new en-US incremental"
+        "prodStagingRelease/play/listings/fr-FR/incremental.txt" generated "new en-US incremental"
+        "prodStagingRelease/play/listings/de-DE/incremental.txt" generated "new en-US incremental"
     }
 
     @Test
     fun `Incrementally modifying file with conflicting language doesn't overwrite`() {
-        disableSrcCheck = true
         // language=gradle
         val config = """
             flavorDimensions 'pricing', 'server'
@@ -564,6 +498,56 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
         "prodStagingRelease/play/listings/en-US/incremental.txt" generated "new en-US incremental"
         "prodStagingRelease/play/listings/fr-FR/incremental.txt" generated "fr-FR incremental"
         "prodStagingRelease/play/listings/de-DE/incremental.txt" generated "new en-US incremental"
+    }
+
+    @Test
+    fun `Incrementally deleting file applies across languages`() {
+        // language=gradle
+        val config = """
+            flavorDimensions 'pricing', 'server'
+            productFlavors {
+                free { dimension 'server' }
+                paid { dimension 'pricing' }
+                staging { dimension 'server' }
+                prod { dimension 'pricing' }
+            }
+        """
+        val file = File(appDir, "src/main/play/listings/en-US/incremental.txt")
+
+        file.safeCreateNewFile().writeText("en-US incremental")
+        execute(config, "generateProdStagingReleasePlayResources")
+        file.delete()
+        execute(config, "generateProdStagingReleasePlayResources")
+
+        "prodStagingRelease/play/listings/en-US/incremental.txt".exists(no)
+        "prodStagingRelease/play/listings/fr-FR/incremental.txt".exists(no)
+        "prodStagingRelease/play/listings/de-DE/incremental.txt".exists(no)
+    }
+
+    @Test
+    fun `Incrementally deleting file with existing language doesn't overwrite`() {
+        // language=gradle
+        val config = """
+            flavorDimensions 'pricing', 'server'
+            productFlavors {
+                free { dimension 'server' }
+                paid { dimension 'pricing' }
+                staging { dimension 'server' }
+                prod { dimension 'pricing' }
+            }
+        """
+        val file1 = File(appDir, "src/main/play/listings/en-US/incremental.txt")
+        val file2 = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
+
+        file1.safeCreateNewFile().writeText("en-US incremental")
+        file2.safeCreateNewFile().writeText("fr-FR incremental")
+        execute(config, "generateProdStagingReleasePlayResources")
+        file1.delete()
+        execute(config, "generateProdStagingReleasePlayResources")
+
+        "prodStagingRelease/play/listings/en-US/incremental.txt".exists(no)
+        "prodStagingRelease/play/listings/fr-FR/incremental.txt".exists()
+        "prodStagingRelease/play/listings/de-DE/incremental.txt".exists(no)
     }
 
     private val yes: (Boolean) -> Unit = { assertThat(it).isTrue() }
