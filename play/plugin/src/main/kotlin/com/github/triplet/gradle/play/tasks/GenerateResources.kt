@@ -228,11 +228,11 @@ internal abstract class GenerateResources : DefaultTask() {
 
             parseSrcTree(prevIndex, prevReverseIndex, locales)
             buildIndex(index, reverseIndex, prunedResources)
-            pruneOutdatedReferences(index, reverseIndex, prunedResources)
-            mergeExistingReferences(prevIndex, prevReverseIndex, index, reverseIndex)
             insertNewLocales(index, reverseIndex, locales)
+            mergeExistingReferences(prevIndex, index, reverseIndex)
+            pruneOutdatedReferences(prevReverseIndex, index, reverseIndex, prunedResources)
             writeIndex(index, reverseIndex)
-            pruneGeneratedResources(prevIndex, prevReverseIndex, prunedResources)
+            pruneGeneratedResources(prevIndex, prevReverseIndex, index, prunedResources)
             generateResources(index)
         }
 
@@ -284,45 +284,8 @@ internal abstract class GenerateResources : DefaultTask() {
                 prunedResources: MutableSet<File>
         ) {
             for ((type, producer) in parameters.changedFiles.get()) {
-                if (type == ChangeType.REMOVED) {
-                    prunedResources += producer
-                    continue
-                }
-                val generated = producer.findDest()
-
-                safeAddValue(index, reverseIndex, generated, producer)
-            }
-        }
-
-        private fun pruneOutdatedReferences(
-                index: MutableMap<File, out Set<File>>,
-                reverseIndex: MutableMap<File, out Set<File>>,
-                prunedResources: Set<File>
-        ) {
-            for (prevProducer in prunedResources) {
-                val prevGens = reverseIndex[prevProducer] ?: continue
-
-                reverseIndex -= prevProducer
-                for (generated in prevGens) {
-                    index -= generated
-                }
-            }
-        }
-
-        private fun mergeExistingReferences(
-                prevIndex: MutableMap<File, MutableSet<File>>,
-                prevReverseIndex: Map<File, Set<File>>,
-                index: MutableMap<File, MutableSet<File>>,
-                reverseIndex: MutableMap<File, MutableSet<File>>
-        ) {
-            for (producer in reverseIndex.keys) {
-                val prevGens = prevReverseIndex[producer].orEmpty()
-                for (prevGenerated in prevGens) {
-                    val prevProducers = prevIndex[prevGenerated].orEmpty()
-                    for (prevProducer in prevProducers) {
-                        safeAddValue(index, reverseIndex, prevGenerated, prevProducer)
-                    }
-                }
+                if (type == ChangeType.REMOVED) prunedResources += producer
+                safeAddValue(index, reverseIndex, producer.findDest(), producer)
             }
         }
 
@@ -331,7 +294,7 @@ internal abstract class GenerateResources : DefaultTask() {
                 reverseIndex: MutableMap<File, MutableSet<File>>,
                 locales: Set<String>
         ) {
-            for (producer in reverseIndex.keys) {
+            for (producer in reverseIndex.keys.toSet()) {
                 if (producer.isDefaultResource()) {
                     val listings = producer.climbUpTo(LISTINGS_PATH)!!
                     val pathFromDefault =
@@ -341,6 +304,37 @@ internal abstract class GenerateResources : DefaultTask() {
                         val genLocale = File(File(destListings, locale), pathFromDefault)
                         safeAddValue(index, reverseIndex, genLocale, producer)
                     }
+                }
+            }
+        }
+
+        private fun mergeExistingReferences(
+                prevIndex: Map<File, Set<File>>,
+                index: MutableMap<File, MutableSet<File>>,
+                reverseIndex: MutableMap<File, MutableSet<File>>
+        ) {
+            for (generated in index.keys.toSet()) {
+                val prevProducers = prevIndex[generated].orEmpty()
+                for (prevProducer in prevProducers) {
+                    safeAddValue(index, reverseIndex, generated, prevProducer)
+                }
+            }
+        }
+
+        private fun pruneOutdatedReferences(
+                prevReverseIndex: Map<File, Set<File>>,
+                index: MutableMap<File, MutableSet<File>>,
+                reverseIndex: MutableMap<File, MutableSet<File>>,
+                prunedResources: Set<File>
+        ) {
+            for (prevProducer in prunedResources) {
+                val prevGens = prevReverseIndex[prevProducer] ?: continue
+
+                reverseIndex -= prevProducer
+                for (prevGenerated in prevGens) {
+                    val producers = index[prevGenerated] ?: continue
+                    producers -= prevProducer
+                    if (producers.isEmpty()) index -= prevGenerated
                 }
             }
         }
@@ -370,16 +364,18 @@ internal abstract class GenerateResources : DefaultTask() {
         }
 
         private fun pruneGeneratedResources(
-                prevIndex: MutableMap<File, MutableSet<File>>,
+                prevIndex: Map<File, Set<File>>,
                 prevReverseIndex: Map<File, Set<File>>,
+                index: Map<File, Set<File>>,
                 prunedResources: Set<File>
         ) {
             for (producer in prunedResources) {
                 val prevGens = prevReverseIndex[producer].orEmpty()
                 for (prevGenerated in prevGens) {
                     val prevProducers = prevIndex[prevGenerated].orEmpty()
-                    if (prevProducers.first() == producer) {
+                    if (prevProducers.first() == producer && index[prevGenerated] == null) {
                         prevGenerated.delete()
+                        prevGenerated.marked("index").delete()
                     }
                 }
             }

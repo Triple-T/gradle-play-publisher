@@ -26,11 +26,12 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Checksum src files`() {
-        val srcHash = hashSrc()
+        val srcDir = File(appDir, "src")
+        val srcHash = srcDir.hashAll()
 
         execute("", "generateReleasePlayResources")
 
-        assertThat(hashSrc()).isEqualTo(srcHash)
+        assertThat(srcDir.hashAll()).isEqualTo(srcHash)
     }
 
     @Test
@@ -377,6 +378,34 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Rerunning task with same inputs restores build from cache`() {
+        // language=gradle
+        val config = """
+            flavorDimensions 'pricing', 'server'
+            productFlavors {
+                free { dimension 'server' }
+                paid { dimension 'pricing' }
+                staging { dimension 'server' }
+                prod { dimension 'pricing' }
+            }
+        """
+        val mainUS = File(appDir, "src/main/play/listings/en-US/incremental.txt")
+
+        val result1 = execute(config, "generateProdStagingReleasePlayResources")
+        mainUS("foo")
+        val result2 = execute(config, "generateProdStagingReleasePlayResources")
+        mainUS.delete()
+        val result3 = execute(config, "generateProdStagingReleasePlayResources")
+
+        assertThat(result1.task(":generateProdStagingReleasePlayResources")!!.outcome)
+                .isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result2.task(":generateProdStagingReleasePlayResources")!!.outcome)
+                .isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result3.task(":generateProdStagingReleasePlayResources")!!.outcome)
+                .isEqualTo(TaskOutcome.FROM_CACHE)
+    }
+
+    @Test
     fun `Incrementally adding file applies across languages`() {
         // language=gradle
         val config = """
@@ -388,10 +417,10 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 prod { dimension 'pricing' }
             }
         """
-        val file = File(appDir, "src/main/play/listings/en-US/incremental.txt")
+        val mainUS = File(appDir, "src/main/play/listings/en-US/incremental.txt")
 
         execute(config, "generateProdStagingReleasePlayResources")
-        file("en-US incremental")
+        mainUS("en-US incremental")
         execute(config, "generateProdStagingReleasePlayResources")
 
         "prodStagingRelease/play/listings/en-US/incremental.txt" generated "en-US incremental"
@@ -411,13 +440,13 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 prod { dimension 'pricing' }
             }
         """
-        val file1 = File(appDir, "src/main/play/listings/en-US/incremental.txt")
-        val file2 = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
+        val mainUS = File(appDir, "src/main/play/listings/en-US/incremental.txt")
+        val mainFR = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
 
-        file1("en-US incremental")
+        mainUS("en-US incremental")
         execute(config, "generateProdStagingReleasePlayResources")
-        file1("new en-US incremental")
-        file2("fr-FR incremental")
+        mainUS("new en-US incremental")
+        mainFR("fr-FR incremental")
         execute(config, "generateProdStagingReleasePlayResources")
 
         "prodStagingRelease/play/listings/en-US/incremental.txt" generated "new en-US incremental"
@@ -437,17 +466,67 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 prod { dimension 'pricing' }
             }
         """
-        val file1 = File(appDir, "src/main/play/listings/en-US/incremental.txt")
-        val file2 = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
+        val mainUS = File(appDir, "src/main/play/listings/en-US/incremental.txt")
+        val mainFR = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
 
         execute(config, "generateProdStagingReleasePlayResources")
-        file1("en-US incremental")
-        file2("fr-FR incremental")
+        mainUS("en-US incremental")
+        mainFR("fr-FR incremental")
         execute(config, "generateProdStagingReleasePlayResources")
 
         "prodStagingRelease/play/listings/en-US/incremental.txt" generated "en-US incremental"
         "prodStagingRelease/play/listings/fr-FR/incremental.txt" generated "fr-FR incremental"
         "prodStagingRelease/play/listings/de-DE/incremental.txt" generated "en-US incremental"
+    }
+
+    @Test
+    fun `Doubly incrementally adding file across variants and languages succeeds`() {
+        // language=gradle
+        val config = """
+            flavorDimensions 'pricing', 'server'
+            productFlavors {
+                free { dimension 'server' }
+                paid { dimension 'pricing' }
+                staging { dimension 'server' }
+                prod { dimension 'pricing' }
+            }
+        """
+        val stagingUS = File(appDir, "src/staging/play/listings/en-US/incremental.txt")
+        val mainFR = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
+        val releaseDE = File(appDir, "src/release/play/listings/de-DE/incremental.txt")
+        val prodJA = File(appDir, "src/prod/play/listings/ja-JA/incremental.txt")
+
+        releaseDE("de-DE incremental")
+        execute(config, "generateProdStagingReleasePlayResources")
+
+        "prodStagingRelease/play/listings/en-US/incremental.txt".exists(no)
+        "prodStagingRelease/play/listings/fr-FR/incremental.txt".exists(no)
+        "prodStagingRelease/play/listings/de-DE/incremental.txt" generated "de-DE incremental"
+        "prodStagingRelease/play/listings/ja-JA/incremental.txt".exists(no)
+
+        mainFR("fr-FR incremental")
+        execute(config, "generateProdStagingReleasePlayResources")
+
+        "prodStagingRelease/play/listings/en-US/incremental.txt".exists(no)
+        "prodStagingRelease/play/listings/fr-FR/incremental.txt" generated "fr-FR incremental"
+        "prodStagingRelease/play/listings/de-DE/incremental.txt" generated "de-DE incremental"
+        "prodStagingRelease/play/listings/ja-JA/incremental.txt".exists(no)
+
+        stagingUS("en-US incremental")
+        execute(config, "generateProdStagingReleasePlayResources")
+
+        "prodStagingRelease/play/listings/en-US/incremental.txt" generated "en-US incremental"
+        "prodStagingRelease/play/listings/fr-FR/incremental.txt" generated "fr-FR incremental"
+        "prodStagingRelease/play/listings/de-DE/incremental.txt" generated "de-DE incremental"
+        "prodStagingRelease/play/listings/ja-JA/incremental.txt" generated "en-US incremental"
+
+        prodJA("ja-JA incremental")
+        execute(config, "generateProdStagingReleasePlayResources")
+
+        "prodStagingRelease/play/listings/en-US/incremental.txt" generated "en-US incremental"
+        "prodStagingRelease/play/listings/fr-FR/incremental.txt" generated "fr-FR incremental"
+        "prodStagingRelease/play/listings/de-DE/incremental.txt" generated "de-DE incremental"
+        "prodStagingRelease/play/listings/ja-JA/incremental.txt" generated "ja-JA incremental"
     }
 
     @Test
@@ -462,11 +541,11 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 prod { dimension 'pricing' }
             }
         """
-        val file = File(appDir, "src/main/play/listings/en-US/incremental.txt")
+        val mainUS = File(appDir, "src/main/play/listings/en-US/incremental.txt")
 
-        file("en-US incremental")
+        mainUS("en-US incremental")
         execute(config, "generateProdStagingReleasePlayResources")
-        file("new en-US incremental")
+        mainUS("new en-US incremental")
         execute(config, "generateProdStagingReleasePlayResources")
 
         "prodStagingRelease/play/listings/en-US/incremental.txt" generated "new en-US incremental"
@@ -486,18 +565,72 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 prod { dimension 'pricing' }
             }
         """
-        val file1 = File(appDir, "src/main/play/listings/en-US/incremental.txt")
-        val file2 = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
+        val mainUS = File(appDir, "src/main/play/listings/en-US/incremental.txt")
+        val mainFR = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
 
-        file1("en-US incremental")
-        file2("fr-FR incremental")
+        mainUS("en-US incremental")
+        mainFR("fr-FR incremental")
         execute(config, "generateProdStagingReleasePlayResources")
-        file1("new en-US incremental")
+        mainUS("new en-US incremental")
         execute(config, "generateProdStagingReleasePlayResources")
 
         "prodStagingRelease/play/listings/en-US/incremental.txt" generated "new en-US incremental"
         "prodStagingRelease/play/listings/fr-FR/incremental.txt" generated "fr-FR incremental"
         "prodStagingRelease/play/listings/de-DE/incremental.txt" generated "new en-US incremental"
+    }
+
+    @Test
+    fun `Doubly incrementally modifying file across variants and languages succeeds`() {
+        // language=gradle
+        val config = """
+            flavorDimensions 'pricing', 'server'
+            productFlavors {
+                free { dimension 'server' }
+                paid { dimension 'pricing' }
+                staging { dimension 'server' }
+                prod { dimension 'pricing' }
+            }
+        """
+        val stagingUS = File(appDir, "src/staging/play/listings/en-US/incremental.txt")
+        val mainFR = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
+        val releaseDE = File(appDir, "src/release/play/listings/de-DE/incremental.txt")
+        val prodJA = File(appDir, "src/prod/play/listings/ja-JA/incremental.txt")
+
+        stagingUS("en-US incremental")
+        mainFR("fr-FR incremental")
+        releaseDE("de-DE incremental")
+        execute(config, "generateProdStagingReleasePlayResources")
+
+        "prodStagingRelease/play/listings/en-US/incremental.txt" generated "en-US incremental"
+        "prodStagingRelease/play/listings/fr-FR/incremental.txt" generated "fr-FR incremental"
+        "prodStagingRelease/play/listings/de-DE/incremental.txt" generated "de-DE incremental"
+        "prodStagingRelease/play/listings/ja-JA/incremental.txt" generated "en-US incremental"
+
+        mainFR("new fr-FR incremental")
+        execute(config, "generateProdStagingReleasePlayResources")
+
+        "prodStagingRelease/play/listings/en-US/incremental.txt" generated "en-US incremental"
+        "prodStagingRelease/play/listings/fr-FR/incremental.txt" generated "new fr-FR incremental"
+        "prodStagingRelease/play/listings/de-DE/incremental.txt" generated "de-DE incremental"
+        "prodStagingRelease/play/listings/ja-JA/incremental.txt" generated "en-US incremental"
+
+        stagingUS("new en-US incremental")
+        prodJA("ja-JA incremental")
+        execute(config, "generateProdStagingReleasePlayResources")
+
+        "prodStagingRelease/play/listings/en-US/incremental.txt" generated "new en-US incremental"
+        "prodStagingRelease/play/listings/fr-FR/incremental.txt" generated "new fr-FR incremental"
+        "prodStagingRelease/play/listings/de-DE/incremental.txt" generated "de-DE incremental"
+        "prodStagingRelease/play/listings/ja-JA/incremental.txt" generated "ja-JA incremental"
+
+        releaseDE("new de-DE incremental")
+        prodJA("new ja-JA incremental")
+        execute(config, "generateProdStagingReleasePlayResources")
+
+        "prodStagingRelease/play/listings/en-US/incremental.txt" generated "new en-US incremental"
+        "prodStagingRelease/play/listings/fr-FR/incremental.txt" generated "new fr-FR incremental"
+        "prodStagingRelease/play/listings/de-DE/incremental.txt" generated "new de-DE incremental"
+        "prodStagingRelease/play/listings/ja-JA/incremental.txt" generated "new ja-JA incremental"
     }
 
     @Test
@@ -512,11 +645,11 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 prod { dimension 'pricing' }
             }
         """
-        val file = File(appDir, "src/main/play/listings/en-US/incremental.txt")
+        val mainUS = File(appDir, "src/main/play/listings/en-US/incremental.txt")
 
-        file("en-US incremental")
+        mainUS("en-US incremental")
         execute(config, "generateProdStagingReleasePlayResources")
-        file.delete()
+        mainUS.delete()
         execute(config, "generateProdStagingReleasePlayResources")
 
         "prodStagingRelease/play/listings/en-US/incremental.txt".exists(no)
@@ -536,18 +669,118 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 prod { dimension 'pricing' }
             }
         """
-        val file1 = File(appDir, "src/main/play/listings/en-US/incremental.txt")
-        val file2 = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
+        val mainUS = File(appDir, "src/main/play/listings/en-US/incremental.txt")
+        val mainFR = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
 
-        file1("en-US incremental")
-        file2("fr-FR incremental")
+        mainUS("en-US incremental")
+        mainFR("fr-FR incremental")
         execute(config, "generateProdStagingReleasePlayResources")
-        file1.delete()
+        mainUS.delete()
         execute(config, "generateProdStagingReleasePlayResources")
 
         "prodStagingRelease/play/listings/en-US/incremental.txt".exists(no)
         "prodStagingRelease/play/listings/fr-FR/incremental.txt".exists()
         "prodStagingRelease/play/listings/de-DE/incremental.txt".exists(no)
+    }
+
+    @Test
+    fun `Doubly incrementally deleting file across variants and languages succeeds`() {
+        // language=gradle
+        val config = """
+            flavorDimensions 'pricing', 'server'
+            productFlavors {
+                free { dimension 'server' }
+                paid { dimension 'pricing' }
+                staging { dimension 'server' }
+                prod { dimension 'pricing' }
+            }
+        """
+        val stagingUS = File(appDir, "src/staging/play/listings/en-US/incremental.txt")
+        val mainFR = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
+        val releaseDE = File(appDir, "src/release/play/listings/de-DE/incremental.txt")
+
+        stagingUS("en-US incremental")
+        mainFR("fr-FR incremental")
+        releaseDE("de-DE incremental")
+        execute(config, "generateProdStagingReleasePlayResources")
+
+        "prodStagingRelease/play/listings/en-US/incremental.txt" generated "en-US incremental"
+        "prodStagingRelease/play/listings/fr-FR/incremental.txt" generated "fr-FR incremental"
+        "prodStagingRelease/play/listings/de-DE/incremental.txt" generated "de-DE incremental"
+        "prodStagingRelease/play/listings/ja-JA/incremental.txt" generated "en-US incremental"
+
+        stagingUS.delete()
+        execute(config, "generateProdStagingReleasePlayResources")
+
+        "prodStagingRelease/play/listings/en-US/incremental.txt".exists(no)
+        "prodStagingRelease/play/listings/fr-FR/incremental.txt" generated "fr-FR incremental"
+        "prodStagingRelease/play/listings/de-DE/incremental.txt" generated "de-DE incremental"
+        "prodStagingRelease/play/listings/ja-JA/incremental.txt".exists(no)
+
+        mainFR("new fr-FR incremental")
+        releaseDE("new de-DE incremental")
+        execute(config, "generateProdStagingReleasePlayResources")
+
+        "prodStagingRelease/play/listings/en-US/incremental.txt".exists(no)
+        "prodStagingRelease/play/listings/fr-FR/incremental.txt" generated "new fr-FR incremental"
+        "prodStagingRelease/play/listings/de-DE/incremental.txt" generated "new de-DE incremental"
+        "prodStagingRelease/play/listings/ja-JA/incremental.txt".exists(no)
+    }
+
+    @Test
+    fun `Doubly incrementally adding and deleting file across variants and languages succeeds`() {
+        // language=gradle
+        val config = """
+            flavorDimensions 'pricing', 'server'
+            productFlavors {
+                free { dimension 'server' }
+                paid { dimension 'pricing' }
+                staging { dimension 'server' }
+                prod { dimension 'pricing' }
+            }
+        """
+        val stagingUS = File(appDir, "src/staging/play/listings/en-US/incremental.txt")
+        val mainFR = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
+        val releaseDE = File(appDir, "src/release/play/listings/de-DE/incremental.txt")
+        val prodJA = File(appDir, "src/prod/play/listings/ja-JA/incremental.txt")
+
+        stagingUS("en-US incremental")
+        mainFR("fr-FR incremental")
+        releaseDE("de-DE incremental")
+        execute(config, "generateProdStagingReleasePlayResources")
+
+        "prodStagingRelease/play/listings/en-US/incremental.txt" generated "en-US incremental"
+        "prodStagingRelease/play/listings/fr-FR/incremental.txt" generated "fr-FR incremental"
+        "prodStagingRelease/play/listings/de-DE/incremental.txt" generated "de-DE incremental"
+        "prodStagingRelease/play/listings/ja-JA/incremental.txt" generated "en-US incremental"
+
+        mainFR.delete()
+        prodJA("ja-JA incremental")
+        execute(config, "generateProdStagingReleasePlayResources")
+
+        "prodStagingRelease/play/listings/en-US/incremental.txt" generated "en-US incremental"
+        "prodStagingRelease/play/listings/fr-FR/incremental.txt" generated "en-US incremental"
+        "prodStagingRelease/play/listings/de-DE/incremental.txt" generated "de-DE incremental"
+        "prodStagingRelease/play/listings/ja-JA/incremental.txt" generated "ja-JA incremental"
+
+        stagingUS.delete()
+        mainFR("new fr-FR incremental")
+        releaseDE.delete()
+        execute(config, "generateProdStagingReleasePlayResources")
+
+        "prodStagingRelease/play/listings/en-US/incremental.txt".exists(no)
+        "prodStagingRelease/play/listings/fr-FR/incremental.txt" generated "new fr-FR incremental"
+        "prodStagingRelease/play/listings/de-DE/incremental.txt".exists(no)
+        "prodStagingRelease/play/listings/ja-JA/incremental.txt" generated "ja-JA incremental"
+
+        stagingUS("new en-US incremental")
+        mainFR.delete()
+        execute(config, "generateProdStagingReleasePlayResources")
+
+        "prodStagingRelease/play/listings/en-US/incremental.txt" generated "new en-US incremental"
+        "prodStagingRelease/play/listings/fr-FR/incremental.txt" generated "new en-US incremental"
+        "prodStagingRelease/play/listings/de-DE/incremental.txt" generated "new en-US incremental"
+        "prodStagingRelease/play/listings/ja-JA/incremental.txt" generated "ja-JA incremental"
     }
 
     private val yes: (Boolean) -> Unit = { assertThat(it).isTrue() }
@@ -564,7 +797,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
 
     private operator fun File.invoke(text: String) = safeCreateNewFile().writeText(text)
 
-    private fun hashSrc() = File(appDir, "src").walkTopDown().map {
+    private fun File.hashAll() = walkTopDown().map {
         val hashes = mutableListOf<HashCode>()
         if (it.isFile) {
             hashes += Files.asByteSource(it).hash(Hashing.sha256())
