@@ -283,6 +283,27 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Resources aren't merged with no default language`() {
+        // language=gradle
+        val config = """
+            flavorDimensions 'pricing', 'server'
+            productFlavors {
+                free { dimension 'server' }
+                paid { dimension 'pricing' }
+                staging { dimension 'server' }
+                prod { dimension 'pricing' }
+            }
+        """
+        File(appDir, "src/main/play/default-language.txt").delete()
+
+        execute(config, "generateProdStagingReleasePlayResources")
+
+        "prodStagingRelease/play/listings/de-DE/title.txt".exists(no)
+        "prodStagingRelease/play/listings/de-DE/full-description.txt" generated "de-DE"
+        "prodStagingRelease/play/listings/de-DE/short-description.txt".exists(no)
+    }
+
+    @Test
     fun `Hidden files are ignored`() {
         // language=gradle
         val config = """

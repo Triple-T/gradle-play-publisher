@@ -155,7 +155,7 @@ internal abstract class GenerateResources : DefaultTask() {
 
     abstract class Generator : WorkAction<Generator.Params> {
         private val projectDir = parameters.projectDir.get().asFile
-        private val defaultLocale by lazy(::findDefaultLocale)
+        private val defaultLocale = findDefaultLocale()
         private val genOrder = newGenOrder()
 
         override fun execute() {
@@ -176,7 +176,7 @@ internal abstract class GenerateResources : DefaultTask() {
             //   GeneratedFile2
             //   ...
             //
-            // The paths are in unix separators and relative to the project root.
+            // The paths are in unix separators and relative to the project dir.
             //
             // ## Algorithm
             //
@@ -190,7 +190,7 @@ internal abstract class GenerateResources : DefaultTask() {
             // ## Merge algorithm
             //
             // Spec: keep each locale's producers ordered by the $inputDirs. The default locale is
-            // on top, the actual locale on bottom.
+            // on bottom, the actual locale on top.
             //
             // ### ADD
             //
@@ -202,9 +202,9 @@ internal abstract class GenerateResources : DefaultTask() {
             // 1. If for $defaultLocale: collect all locales and add to reverse index.
             // 2. For each GeneratedFile:
             //    1. Take all $defaultLocale changes from partial index node and merge them with the
-            //       top of the node. All $defaultLocale producers should be at the top.
+            //       bottom of the node. All $defaultLocale producers should be at the bottom.
             //    2. Take all non-$defaultLocale changes from partial index node and merge them with
-            //       the bottom.
+            //       the top.
             //
             // ### MODIFY
             //
@@ -217,17 +217,11 @@ internal abstract class GenerateResources : DefaultTask() {
             //
             // ## Writing the generated files
             //
-            // Use the index: the last ProducerFile wins and gets written as the GeneratedFile.
+            // Use the index: the first ProducerFile wins and gets written as the GeneratedFile.
 
-            val locales = mutableSetOf<String>()
-            val prevIndex = mutableMapOf<File, MutableSet<File>>()
-            val prevReverseIndex = mutableMapOf<File, MutableSet<File>>()
-            val index = mutableMapOf<File, MutableSet<File>>()
-            val reverseIndex = mutableMapOf<File, MutableSet<File>>()
-            val prunedResources = mutableSetOf<File>()
+            val (locales, prevIndex, prevReverseIndex) = parseSrcTree()
+            val (index, reverseIndex, prunedResources) = buildIndex()
 
-            parseSrcTree(prevIndex, prevReverseIndex, locales)
-            buildIndex(index, reverseIndex, prunedResources)
             insertNewLocales(index, reverseIndex, locales)
             mergeExistingReferences(prevIndex, index, reverseIndex)
             pruneOutdatedReferences(prevReverseIndex, index, reverseIndex, prunedResources)
@@ -236,11 +230,11 @@ internal abstract class GenerateResources : DefaultTask() {
             generateResources(index)
         }
 
-        private fun parseSrcTree(
-                index: MutableMap<File, MutableSet<File>>,
-                reverseIndex: MutableMap<File, MutableSet<File>>,
-                locales: MutableSet<String>
-        ) {
+        private fun parseSrcTree(): SourceTree {
+            val locales = mutableSetOf<String>()
+            val index = mutableMapOf<File, MutableSet<File>>()
+            val reverseIndex = mutableMapOf<File, MutableSet<File>>()
+
             for (dir in parameters.inputDirs.get()) {
                 dir.asFileTree.visit {
                     if (file.isDirectChildOf(LISTINGS_PATH) && name != defaultLocale) {
@@ -255,6 +249,8 @@ internal abstract class GenerateResources : DefaultTask() {
                     }
                 }
             }
+
+            return SourceTree(locales, index, reverseIndex)
         }
 
         private fun BufferedReader.readIndex(
@@ -278,15 +274,17 @@ internal abstract class GenerateResources : DefaultTask() {
             }
         }
 
-        private fun buildIndex(
-                index: MutableMap<File, MutableSet<File>>,
-                reverseIndex: MutableMap<File, MutableSet<File>>,
-                prunedResources: MutableSet<File>
-        ) {
+        private fun buildIndex(): Index {
+            val index = mutableMapOf<File, MutableSet<File>>()
+            val reverseIndex = mutableMapOf<File, MutableSet<File>>()
+            val prunedResources = mutableSetOf<File>()
+
             for ((type, producer) in parameters.changedFiles.get()) {
                 if (type == ChangeType.REMOVED) prunedResources += producer
                 safeAddValue(index, reverseIndex, producer.findDest(), producer)
             }
+
+            return Index(index, reverseIndex, prunedResources)
         }
 
         private fun insertNewLocales(
@@ -432,6 +430,18 @@ internal abstract class GenerateResources : DefaultTask() {
         private fun findDefaultLocale() = parameters.inputDirs.get().mapNotNull {
             it.file(AppDetail.DEFAULT_LANGUAGE.fileName).asFile.orNull()?.readProcessed()
         }.lastOrNull() // Pick the most specialized option available. E.g. `paidProdRelease`
+
+        data class SourceTree(
+                val locales: Set<String>,
+                val prevIndex: Map<File, Set<File>>,
+                val prevReverseIndex: Map<File, Set<File>>
+        )
+
+        data class Index(
+                val index: MutableMap<File, MutableSet<File>>,
+                val reverseIndex: MutableMap<File, MutableSet<File>>,
+                val prunedResources: Set<File>
+        )
 
         interface Params : WorkParameters {
             val projectDir: DirectoryProperty
