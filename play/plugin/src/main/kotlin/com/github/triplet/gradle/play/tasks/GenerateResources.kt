@@ -293,15 +293,15 @@ internal abstract class GenerateResources : DefaultTask() {
                 locales: Set<String>
         ) {
             for (producer in reverseIndex.keys.toSet()) {
-                if (producer.isDefaultResource()) {
-                    val listings = producer.climbUpTo(LISTINGS_PATH)!!
-                    val pathFromDefault =
-                            producer.toRelativeString(File(listings, defaultLocale!!))
-                    val destListings = listings.findDest()
-                    for (locale in locales) {
-                        val genLocale = File(File(destListings, locale), pathFromDefault)
-                        safeAddValue(index, reverseIndex, genLocale, producer)
-                    }
+                if (!producer.isDefaultResource()) continue
+
+                val listings = producer.climbUpTo(LISTINGS_PATH)!!
+                val pathFromDefault = producer.toRelativeString(File(listings, defaultLocale!!))
+                val destListings = listings.findDest()
+
+                for (locale in locales) {
+                    val genLocale = File(File(destListings, locale), pathFromDefault)
+                    safeAddValue(index, reverseIndex, genLocale, producer)
                 }
             }
         }
@@ -326,11 +326,11 @@ internal abstract class GenerateResources : DefaultTask() {
                 prunedResources: Set<File>
         ) {
             for (prevProducer in prunedResources) {
-                val prevGens = prevReverseIndex[prevProducer] ?: continue
+                val prevGens = prevReverseIndex.getValue(prevProducer)
 
                 reverseIndex -= prevProducer
                 for (prevGenerated in prevGens) {
-                    val producers = index[prevGenerated] ?: continue
+                    val producers = index.getValue(prevGenerated)
                     producers -= prevProducer
                     if (producers.isEmpty()) index -= prevGenerated
                 }
@@ -368,9 +368,9 @@ internal abstract class GenerateResources : DefaultTask() {
                 prunedResources: Set<File>
         ) {
             for (producer in prunedResources) {
-                val prevGens = prevReverseIndex[producer].orEmpty()
+                val prevGens = prevReverseIndex.getValue(producer)
                 for (prevGenerated in prevGens) {
-                    val prevProducers = prevIndex[prevGenerated].orEmpty()
+                    val prevProducers = prevIndex.getValue(prevGenerated)
                     if (prevProducers.first() == producer && index[prevGenerated] == null) {
                         prevGenerated.delete()
                         prevGenerated.marked(INDEX_MARKER).delete()
