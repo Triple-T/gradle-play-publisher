@@ -54,7 +54,6 @@ internal abstract class GenerateResources : DefaultTask() {
     fun generate(changes: InputChanges) {
         val fileChanges = changes.getFileChanges(resSrcTree)
         val validateChanges = fileChanges
-                .filter { it.fileType == FileType.FILE }
                 .filterNot { it.changeType == ChangeType.REMOVED }
                 .map { it.file }
         val generateChanges = fileChanges
@@ -83,13 +82,14 @@ internal abstract class GenerateResources : DefaultTask() {
         }
 
         private fun File.validate() {
-            val areRootsValid = isDirectChildOf(PLAY_PATH)
-                    || isChildOf(LISTINGS_PATH)
-                    || isChildOf(RELEASE_NOTES_PATH)
-                    || isChildOf(RELEASE_NAMES_PATH)
-                    || isChildOf(PRODUCTS_PATH)
+            val areRootsValid = name == PLAY_PATH ||
+                    isDirectChildOf(PLAY_PATH) ||
+                    isChildOf(LISTINGS_PATH) ||
+                    isChildOf(RELEASE_NOTES_PATH) ||
+                    isChildOf(RELEASE_NAMES_PATH) ||
+                    isChildOf(PRODUCTS_PATH)
             check(areRootsValid) { "Unknown Play resource file: $this" }
-            check(extension != "index") { "Resources cannot use the 'index' extension: $this" }
+            check(extension != INDEX_MARKER) { "Resources cannot use the 'index' extension: $this" }
             check(name != PLAY_PATH || !isChildOf(PLAY_PATH)) {
                 "The file name 'play' is illegal: $this"
             }
@@ -105,7 +105,7 @@ internal abstract class GenerateResources : DefaultTask() {
             check(listings.isDirectChildOf(PLAY_PATH)) {
                 "Listings ($listings) must be under the '$PLAY_PATH' directory"
             }
-            validateLocales(listings)
+            if (isChildOf(LISTINGS_PATH)) validateLocales(listings)
         }
 
         private fun File.validateReleaseNotes() {
@@ -113,7 +113,7 @@ internal abstract class GenerateResources : DefaultTask() {
             check(releaseNotes.isDirectChildOf(PLAY_PATH)) {
                 "Release notes ($releaseNotes) must be under the '$PLAY_PATH' directory"
             }
-            validateLocales(releaseNotes)
+            if (isChildOf(RELEASE_NOTES_PATH)) validateLocales(releaseNotes)
         }
 
         private fun File.validateReleaseNames() {
@@ -249,7 +249,7 @@ internal abstract class GenerateResources : DefaultTask() {
                 }
             }
             parameters.outputDir.get().asFileTree.visit {
-                if (file.extension == "index") {
+                if (file.extension == INDEX_MARKER) {
                     open().bufferedReader().use { reader ->
                         reader.readIndex(index, reverseIndex)
                     }
@@ -359,7 +359,7 @@ internal abstract class GenerateResources : DefaultTask() {
                         builder.append(pathFromRootToGenerated).append("\n")
                     }
                 }
-                generated.marked("index").safeCreateNewFile().writeText(builder.toString())
+                generated.marked(INDEX_MARKER).safeCreateNewFile().writeText(builder.toString())
             }
         }
 
@@ -375,7 +375,7 @@ internal abstract class GenerateResources : DefaultTask() {
                     val prevProducers = prevIndex[prevGenerated].orEmpty()
                     if (prevProducers.first() == producer && index[prevGenerated] == null) {
                         prevGenerated.delete()
-                        prevGenerated.marked("index").delete()
+                        prevGenerated.marked(INDEX_MARKER).delete()
                     }
                 }
             }
@@ -439,5 +439,9 @@ internal abstract class GenerateResources : DefaultTask() {
             val inputDirs: ListProperty<Directory>
             val changedFiles: ListProperty<Pair<ChangeType, File>>
         }
+    }
+
+    private companion object {
+        const val INDEX_MARKER = "index"
     }
 }
