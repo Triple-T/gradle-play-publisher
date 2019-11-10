@@ -156,7 +156,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 resSrcDirs.set(dirs)
                 resSrcTree.setFrom(dirs.map { project.fileTree(it).apply { exclude("**/.*") } })
 
-                resDir.set(File(project.buildDir, "$playPath/res"))
+                resDir.set(File(project.buildDir, playPath))
 
                 mustRunAfter(bootstrapTask)
             }.flatMap {

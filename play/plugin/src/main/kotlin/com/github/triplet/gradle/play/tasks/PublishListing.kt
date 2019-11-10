@@ -227,6 +227,7 @@ internal abstract class PublishListing @Inject constructor(
         override fun execute() {
             val typeName = parameters.imageType.get().publishedName
             val files = parameters.imageDir.asFileTree.sorted()
+                    .filterNot { it.extension == "index" }
             check(files.size <= parameters.imageType.get().maxNum) {
                 "You can only upload ${parameters.imageType.get().maxNum} $typeName."
             }

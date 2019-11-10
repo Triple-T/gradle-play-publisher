@@ -31,6 +31,13 @@ abstract class IntegrationTestBase {
             expectFailure: Boolean,
             vararg tasks: String
     ): BuildResult {
+        val buildCacheDir = File(tempDir.root, "gradle").path.replace("\\", "\\\\")
+
+        // language=gradle
+        File(appDir, "settings.gradle").writeText("""
+            buildCache.local.directory = new File('$buildCacheDir')
+        """)
+
         // language=gradle
         File(appDir, "build.gradle").writeText("""
             plugins {
@@ -67,7 +74,7 @@ abstract class IntegrationTestBase {
         val runner = GradleRunner.create()
                 .withPluginClasspath()
                 .withProjectDir(appDir)
-                .withArguments("-S", *tasks)
+                .withArguments("-S", "--build-cache", *tasks)
 
         // We're doing some pretty wack (and disgusting, shameful) shit to run integration tests without
         // actually publishing anything. The idea is have the build file call into the test class to run
@@ -79,6 +86,8 @@ abstract class IntegrationTestBase {
                 File("build/classes/kotlin/test")
         ))
 
-        return if (expectFailure) runner.buildAndFail() else runner.build()
+        val result = if (expectFailure) runner.buildAndFail() else runner.build()
+        println(result.output)
+        return result
     }
 }

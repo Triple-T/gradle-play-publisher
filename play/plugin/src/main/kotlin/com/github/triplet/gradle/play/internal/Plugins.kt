@@ -18,7 +18,7 @@ import java.io.File
 
 internal val BaseVariant.flavorNameOrDefault get() = flavorName.nullOrFull() ?: "main"
 
-internal val BaseVariant.playPath get() = "$RESOURCES_OUTPUT_PATH/$name"
+internal val BaseVariant.playPath get() = "$RESOURCES_OUTPUT_PATH/$name/$PLAY_PATH"
 
 internal fun Project.newTask(
         name: String,

@@ -24,7 +24,7 @@ fun File.climbUpTo(parentName: String): File? =
  * @return true if this file is a child of [parentName], false otherwise
  * @see [climbUpTo], [isDirectChildOf]
  */
-fun File.isChildOf(parentName: String): Boolean = climbUpTo(parentName) != null
+fun File.isChildOf(parentName: String): Boolean = parentFile?.climbUpTo(parentName) != null
 
 /**
  * @return true if this file's direct parent (1 level up) is [parentName], false otherwise
