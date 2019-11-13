@@ -1,7 +1,6 @@
 package com.github.triplet.gradle.androidpublisher
 
 import com.github.triplet.gradle.androidpublisher.internal.DefaultPlayPublisher
-import com.google.common.annotations.VisibleForTesting
 import java.io.File
 
 /**
@@ -87,8 +86,7 @@ interface PlayPublisher {
         private var factory: Factory = DefaultPlayPublisher
 
         /** Overwrites the default [PlayPublisher.Factory] with [factory]. */
-        @VisibleForTesting
-        fun setFactory(factory: Factory) {
+        internal fun setFactory(factory: Factory) {
             Companion.factory = factory
         }
 

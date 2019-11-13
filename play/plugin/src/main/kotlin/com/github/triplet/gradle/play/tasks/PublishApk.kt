@@ -2,6 +2,7 @@ package com.github.triplet.gradle.play.tasks
 
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.common.utils.orNull
+import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.releaseStatusOrDefault
 import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
@@ -108,7 +109,7 @@ internal abstract class PublishApk @Inject constructor(
                     config.retain.patchObb
             ) ?: return
 
-            parameters.uploadResults.get().file(versionCode.toString()).asFile.createNewFile()
+            parameters.uploadResults.get().file(versionCode.toString()).asFile.safeCreateNewFile()
         }
 
         interface Params : ArtifactPublishingParams {

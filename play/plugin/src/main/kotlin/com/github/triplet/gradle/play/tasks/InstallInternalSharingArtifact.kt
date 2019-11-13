@@ -6,14 +6,21 @@ import com.android.builder.testing.ConnectedDeviceProvider
 import com.android.builder.testing.api.DeviceProvider
 import com.android.ddmlib.MultiLineReceiver
 import com.google.api.client.json.jackson2.JacksonFactory
-import com.google.common.annotations.VisibleForTesting
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.logging.Logging
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import org.gradle.kotlin.dsl.submit
+import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.workers.WorkAction
+import org.gradle.workers.WorkParameters
+import org.gradle.workers.WorkerExecutor
+import java.io.File
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -32,19 +39,37 @@ internal abstract class InstallInternalSharingArtifact @Inject constructor(
 
     @TaskAction
     fun install() {
-        val uploads = uploadedArtifacts.get().asFileTree
-        val latestUpload = checkNotNull(uploads.maxBy { it.nameWithoutExtension.toLong() }) {
-            "Failed to find uploaded artifacts in ${uploads.joinToString()}"
+        val uploads = uploadedArtifacts
+        project.serviceOf<WorkerExecutor>().noIsolation().submit(Installer::class) {
+            uploadedArtifacts.set(uploads)
+            adbExecutable.set(extension.adbExecutable)
+            timeOutInMs.set(extension.adbOptions.timeOutInMs)
         }
-        val launchUrl = latestUpload.inputStream().use {
-            JacksonFactory.getDefaultInstance().createJsonParser(it).parse(Map::class.java)
-        }["downloadUrl"] as String
+    }
 
-        val shell = AdbShell(extension)
-        val result = shell.executeShellCommand(
-                "am start -a \"android.intent.action.VIEW\" -d $launchUrl")
-        check(result) {
-            "Failed to install on any devices."
+    abstract class Installer : WorkAction<Installer.Params> {
+        override fun execute() {
+            val uploads = parameters.uploadedArtifacts.get().asFileTree
+            val latestUpload = checkNotNull(
+                    uploads.maxBy { it.nameWithoutExtension.toLong() }
+            ) { "Failed to find uploaded artifacts in ${uploads.joinToString()}" }
+            val launchUrl = latestUpload.inputStream().use {
+                JacksonFactory.getDefaultInstance().createJsonParser(it).parse(Map::class.java)
+            }["downloadUrl"] as String
+
+            val shell = AdbShell(
+                    parameters.adbExecutable.get().asFile, parameters.timeOutInMs.get())
+            val result = shell.executeShellCommand(
+                    "am start -a \"android.intent.action.VIEW\" -d $launchUrl")
+            check(result) {
+                "Failed to install on any devices."
+            }
+        }
+
+        interface Params : WorkParameters {
+            val uploadedArtifacts: DirectoryProperty
+            val adbExecutable: RegularFileProperty
+            val timeOutInMs: Property<Int>
         }
     }
 
@@ -52,20 +77,20 @@ internal abstract class InstallInternalSharingArtifact @Inject constructor(
         fun executeShellCommand(command: String): Boolean
 
         interface Factory {
-            fun create(extension: AppExtension): AdbShell
+            fun create(adbExecutable: File, timeOutInMs: Int): AdbShell
         }
 
         companion object {
             private var factory: Factory = DefaultAdbShell
 
-            @VisibleForTesting
-            fun setFactory(factory: Factory) {
+            internal fun setFactory(factory: Factory) {
                 Companion.factory = factory
             }
 
             operator fun invoke(
-                    extension: AppExtension
-            ): AdbShell = factory.create(extension)
+                    adbExecutable: File,
+                    timeOutInMs: Int
+            ): AdbShell = factory.create(adbExecutable, timeOutInMs)
         }
     }
 
@@ -117,13 +142,13 @@ internal abstract class InstallInternalSharingArtifact @Inject constructor(
         }
 
         companion object : AdbShell.Factory {
-            override fun create(extension: AppExtension): AdbShell {
+            override fun create(adbExecutable: File, timeOutInMs: Int): AdbShell {
                 val deviceProvider = ConnectedDeviceProvider(
-                        extension.adbExecutable,
-                        extension.adbOptions.timeOutInMs,
+                        adbExecutable,
+                        timeOutInMs,
                         LoggerWrapper(Logging.getLogger(InstallInternalSharingArtifact::class.java))
                 )
-                return DefaultAdbShell(deviceProvider, extension.adbOptions.timeOutInMs.toLong())
+                return DefaultAdbShell(deviceProvider, timeOutInMs.toLong())
             }
         }
     }

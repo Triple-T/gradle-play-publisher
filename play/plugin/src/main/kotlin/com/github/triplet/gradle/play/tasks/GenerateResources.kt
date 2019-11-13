@@ -17,7 +17,9 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.FileType
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.InputFiles
@@ -37,6 +39,7 @@ import org.gradle.workers.WorkerExecutor
 import java.io.BufferedReader
 import java.io.File
 import java.util.TreeSet
+import javax.inject.Inject
 
 @CacheableTask
 internal abstract class GenerateResources : DefaultTask() {
@@ -68,7 +71,6 @@ internal abstract class GenerateResources : DefaultTask() {
         }
         if (generateChanges.isNotEmpty()) {
             work.submit(Generator::class) {
-                projectDir.set(project.projectDir)
                 inputDirs.set(resSrcDirs)
                 outputDir.set(resDir)
                 changedFiles.set(generateChanges)
@@ -153,8 +155,10 @@ internal abstract class GenerateResources : DefaultTask() {
         }
     }
 
-    abstract class Generator : WorkAction<Generator.Params> {
-        private val projectDir = parameters.projectDir.get().asFile
+    abstract class Generator @Inject constructor(
+            private val layout: ProjectLayout,
+            private val fileOps: FileSystemOperations
+    ) : WorkAction<Generator.Params> {
         private val defaultLocale = findDefaultLocale()
         private val genOrder = newGenOrder()
 
@@ -265,11 +269,11 @@ internal abstract class GenerateResources : DefaultTask() {
                 if (line == null) break
 
                 if (line == "-") {
-                    producer = File(projectDir, readLine())
+                    producer = layout.projectDirectory.file(readLine()).asFile
                     continue
                 }
 
-                val generated = File(projectDir, line)
+                val generated = layout.projectDirectory.file(line).asFile
                 safeAddValue(index, reverseIndex, generated, producer)
             }
         }
@@ -341,6 +345,7 @@ internal abstract class GenerateResources : DefaultTask() {
                 index: Map<File, Set<File>>,
                 reverseIndex: Map<File, Set<File>>
         ) {
+            val projectDir = layout.projectDirectory.asFile
             for ((generated, producers) in index) {
                 val builder = StringBuilder()
                 for (producer in producers) {
@@ -372,8 +377,9 @@ internal abstract class GenerateResources : DefaultTask() {
                 for (prevGenerated in prevGens) {
                     val prevProducers = prevIndex.getValue(prevGenerated)
                     if (prevProducers.first() == producer && index[prevGenerated] == null) {
-                        prevGenerated.delete()
-                        prevGenerated.marked(INDEX_MARKER).delete()
+                        fileOps.delete {
+                            delete(prevGenerated, prevGenerated.marked(INDEX_MARKER))
+                        }
                     }
                 }
             }
@@ -381,7 +387,10 @@ internal abstract class GenerateResources : DefaultTask() {
 
         private fun generateResources(index: Map<File, Set<File>>) {
             for ((generated, producers) in index) {
-                producers.first().copyTo(generated, overwrite = true)
+                fileOps.copy {
+                    from(producers.first())
+                    into(generated.parentFile)
+                }
             }
         }
 
@@ -444,7 +453,6 @@ internal abstract class GenerateResources : DefaultTask() {
         )
 
         interface Params : WorkParameters {
-            val projectDir: DirectoryProperty
             val outputDir: DirectoryProperty
             val inputDirs: ListProperty<Directory>
             val changedFiles: ListProperty<Pair<ChangeType, File>>

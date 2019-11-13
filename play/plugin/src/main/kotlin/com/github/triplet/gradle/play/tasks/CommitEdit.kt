@@ -4,6 +4,7 @@ import com.github.triplet.gradle.androidpublisher.PlayPublisher
 import com.github.triplet.gradle.common.utils.marked
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.tasks.internal.EditTaskBase
+import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.logging.Logging
 import org.gradle.api.provider.Property
@@ -20,21 +21,22 @@ internal abstract class CommitEdit @Inject constructor(
 ) : EditTaskBase(extension) {
     @TaskAction
     fun commit() {
-        val file = editIdFile.get().asFile
-
         if (project.gradle.taskGraph.allTasks.any { it.state.failure != null }) {
-            println("Build failed, skipping")
-            file.reset()
+            logger.info("Build failed, skipping")
+            project.delete(editIdFile.get().asFile.editIdAndFriends)
             return
         }
 
+        val editId = editIdFile
         project.serviceOf<WorkerExecutor>().noIsolation().submit(Committer::class) {
             config.set(extension.serializableConfig)
-            editIdFile.set(file)
+            editIdFile.set(editId)
         }
     }
 
-    abstract class Committer : WorkAction<Committer.Params> {
+    abstract class Committer @Inject constructor(
+            private val fileOps: FileSystemOperations
+    ) : WorkAction<Committer.Params> {
         private val file = parameters.editIdFile.get().asFile
         private val appId = file.nameWithoutExtension
         private val publisher = PlayPublisher(
@@ -49,7 +51,7 @@ internal abstract class CommitEdit @Inject constructor(
                 try {
                     publisher.commitEdit(file.readText())
                 } finally {
-                    file.reset()
+                    fileOps.delete { delete(file.editIdAndFriends) }
                 }
             } else if (file.marked("skipped").exists()) {
                 println("Changes pending commit")

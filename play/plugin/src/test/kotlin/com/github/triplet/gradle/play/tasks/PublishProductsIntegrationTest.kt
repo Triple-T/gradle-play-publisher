@@ -1,6 +1,7 @@
 package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.androidpublisher.UpdateProductResponse
+import com.github.triplet.gradle.androidpublisher.newUpdateProductResponse
 import com.github.triplet.gradle.play.helpers.FakePlayPublisher
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
@@ -14,7 +15,7 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishProductsIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishProductsIntegrationTest.installFactories()
         """
 
         val result = execute(config, "publishReleaseProducts")
@@ -28,7 +29,7 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishProductsIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishProductsIntegrationTest.installFactories()
 
             android.buildTypes {
                 invalid {}
@@ -46,7 +47,7 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishProductsIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishProductsIntegrationTest.installFactories()
 
             android.buildTypes {
                 hidden {}
@@ -64,7 +65,7 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishProductsIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishProductsIntegrationTest.installFactories()
 
             android.buildTypes {
                 simple {}
@@ -86,7 +87,7 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishProductsIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishProductsIntegrationTest.installFactories()
 
             android.buildTypes {
                 multipleProducts {}
@@ -106,7 +107,7 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishProductsIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishProductsIntegrationTest.installFactories()
 
             android.buildTypes {
                 simple {}
@@ -128,7 +129,7 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishProductsIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishProductsIntegrationTest.installFactories()
 
             android.buildTypes {
                 multipleProducts {}
@@ -142,21 +143,21 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
         assertThat(result.output).contains("sku1")
         assertThat(result.output).contains("sku2")
     }
-}
 
-object PublishProductsIntegrationBridge {
-    @JvmStatic
-    fun installFactories() {
-        val publisher = object : FakePlayPublisher() {
-            override fun insertInAppProduct(productFile: File) {
-                println("insertInAppProduct($productFile)")
-            }
+    companion object {
+        @JvmStatic
+        fun installFactories() {
+            val publisher = object : FakePlayPublisher() {
+                override fun insertInAppProduct(productFile: File) {
+                    println("insertInAppProduct($productFile)")
+                }
 
-            override fun updateInAppProduct(productFile: File): UpdateProductResponse {
-                println("updateInAppProduct($productFile)")
-                return UpdateProductResponse(System.getProperty("NEEDS_CREATING") != null)
+                override fun updateInAppProduct(productFile: File): UpdateProductResponse {
+                    println("updateInAppProduct($productFile)")
+                    return newUpdateProductResponse(System.getProperty("NEEDS_CREATING") != null)
+                }
             }
+            publisher.install()
         }
-        publisher.install()
     }
 }

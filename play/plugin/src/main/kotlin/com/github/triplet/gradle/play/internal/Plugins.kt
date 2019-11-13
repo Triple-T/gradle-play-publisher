@@ -14,7 +14,6 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.register
-import java.io.File
 
 internal val BaseVariant.flavorNameOrDefault get() = flavorName.nullOrFull() ?: "main"
 
@@ -81,7 +80,7 @@ private inline fun <reified T : EditTaskBase> Project.getOrRegisterEditTask(
     return try {
         tasks.register<T>(taskName, extension).apply {
             configure {
-                editIdFile.set(File(buildDir, "$OUTPUT_PATH/$appId.txt"))
+                editIdFile.set(layout.buildDirectory.file("$OUTPUT_PATH/$appId.txt"))
             }
         }
     } catch (e: InvalidUserDataException) {

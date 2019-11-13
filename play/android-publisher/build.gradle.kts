@@ -2,6 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     `kotlin-dsl`
+    `java-test-fixtures`
 }
 
 dependencies {
@@ -18,4 +19,10 @@ tasks.named<KotlinCompile>("compileTestKotlin") {
     kotlinOptions {
         freeCompilerArgs += "-Xno-call-assertions"
     }
+}
+
+// Give testFixtures access to internal symbols
+// TODO(asaveau): remove when https://youtrack.jetbrains.com/issue/KT-34901 gets fixed
+tasks.named<KotlinCompile>("compileTestFixturesKotlin") {
+    withGroovyBuilder { "setFriendTaskName\$kotlin_gradle_plugin"("compileKotlin") }
 }

@@ -1,6 +1,7 @@
 package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.androidpublisher.EditResponse
+import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.androidpublisher.ReleaseStatus
 import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import com.github.triplet.gradle.play.helpers.FakeEditManager
@@ -17,7 +18,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
         """
 
         val result = execute(config, "publishReleaseApk")
@@ -34,7 +35,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
         """
 
         val result1 = execute(config, "publishReleaseApk")
@@ -51,7 +52,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
 
             play {
                 artifactDir = file('${escapedTempDir()}')
@@ -71,7 +72,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
 
             play {
                 artifactDir = file('${escapedTempDir()}')
@@ -93,7 +94,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
 
             play {
                 artifactDir = file('${escapedTempDir()}')
@@ -115,7 +116,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
 
             play {
                 artifactDir = file('${escapedTempDir()}')
@@ -137,7 +138,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
         """
 
         File(tempDir.root, "foo.apk").createNewFile()
@@ -155,7 +156,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
         """
 
         val result = execute(
@@ -184,7 +185,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
         """
 
         val result = execute(config, "publishReleaseApk")
@@ -200,7 +201,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
 
             play.commit = false
         """
@@ -218,14 +219,14 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config1 = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
 
             play.commit = false
         """
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config2 = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
 
             android.defaultConfig.versionCode 2
             play.commit = false
@@ -250,7 +251,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
 
             play.resolutionStrategy = 'auto'
         """
@@ -270,7 +271,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
 
             android.buildTypes.release {
                 shrinkResources true
@@ -293,7 +294,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
 
             System.setProperty("FAIL", "true")
         """
@@ -310,7 +311,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
 
             System.setProperty("SOFT_FAIL", "true")
         """
@@ -329,7 +330,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
 
             android.splits.density {
                 enable true
@@ -367,7 +368,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
 
             android.defaultConfig.versionCode 8
         """
@@ -385,7 +386,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
         """
 
         val result = execute(config, "publishReleaseApk")
@@ -401,7 +402,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
 
             play.track 'myCustomTrack'
         """
@@ -419,7 +420,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
 
             play.releaseStatus 'draft'
         """
@@ -437,7 +438,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
 
             android.buildTypes {
                 consoleNames {}
@@ -458,7 +459,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
 
             android.buildTypes {
                 consoleNames {}
@@ -481,7 +482,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
 
             android.buildTypes {
                 consoleNames {}
@@ -505,7 +506,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
 
             android.buildTypes {
                 releaseNotes {}
@@ -527,7 +528,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
 
             android.buildTypes {
                 releaseNotes {}
@@ -551,7 +552,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
 
             android.buildTypes {
                 releaseNotes {}
@@ -576,7 +577,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
 
             play.userFraction 0.123
         """
@@ -594,7 +595,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
 
             play.retain.artifacts = [1, 2, 3]
         """
@@ -612,7 +613,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
 
             play.retain.mainObb = 123
             play.retain.patchObb = 321
@@ -626,81 +627,81 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         assertThat(result.output).contains("mainObbRetainable=123")
         assertThat(result.output).contains("patchObbRetainable=321")
     }
-}
 
-object PublishApkIntegrationBridge {
-    @JvmStatic
-    fun installFactories() {
-        val publisher = object : FakePlayPublisher() {
-            override fun insertEdit(): EditResponse {
-                println("insertEdit()")
-                return EditResponse.Success("edit-id")
-            }
-
-            override fun getEdit(id: String): EditResponse {
-                println("getEdit($id)")
-                return EditResponse.Success(id)
-            }
-
-            override fun commitEdit(id: String) {
-                println("commitEdit($id)")
-            }
-        }
-        val edits = object : FakeEditManager() {
-            override fun findMaxAppVersionCode(): Long {
-                println("findMaxAppVersionCode()")
-                return 123
-            }
-
-            override fun uploadApk(
-                    apkFile: File,
-                    mappingFile: File?,
-                    strategy: ResolutionStrategy,
-                    versionCode: Long,
-                    variantName: String,
-                    mainObbRetainable: Int?,
-                    patchObbRetainable: Int?
-            ): Long? {
-                println("uploadApk(" +
-                                "apkFile=$apkFile, " +
-                                "mappingFile=$mappingFile, " +
-                                "strategy=$strategy, " +
-                                "versionCode=$versionCode, " +
-                                "variantName=$variantName, " +
-                                "mainObbRetainable=$mainObbRetainable, " +
-                                "patchObbRetainable=$patchObbRetainable)")
-
-                if (System.getProperty("FAIL") != null) error("Upload failed")
-                if (System.getProperty("SOFT_FAIL") != null) {
-                    println("Soft failure")
-                    return null
+    companion object {
+        @JvmStatic
+        fun installFactories() {
+            val publisher = object : FakePlayPublisher() {
+                override fun insertEdit(): EditResponse {
+                    println("insertEdit()")
+                    return newSuccessEditResponse("edit-id")
                 }
-                return versionCode
+
+                override fun getEdit(id: String): EditResponse {
+                    println("getEdit($id)")
+                    return newSuccessEditResponse(id)
+                }
+
+                override fun commitEdit(id: String) {
+                    println("commitEdit($id)")
+                }
+            }
+            val edits = object : FakeEditManager() {
+                override fun findMaxAppVersionCode(): Long {
+                    println("findMaxAppVersionCode()")
+                    return 123
+                }
+
+                override fun uploadApk(
+                        apkFile: File,
+                        mappingFile: File?,
+                        strategy: ResolutionStrategy,
+                        versionCode: Long,
+                        variantName: String,
+                        mainObbRetainable: Int?,
+                        patchObbRetainable: Int?
+                ): Long? {
+                    println("uploadApk(" +
+                                    "apkFile=$apkFile, " +
+                                    "mappingFile=$mappingFile, " +
+                                    "strategy=$strategy, " +
+                                    "versionCode=$versionCode, " +
+                                    "variantName=$variantName, " +
+                                    "mainObbRetainable=$mainObbRetainable, " +
+                                    "patchObbRetainable=$patchObbRetainable)")
+
+                    if (System.getProperty("FAIL") != null) error("Upload failed")
+                    if (System.getProperty("SOFT_FAIL") != null) {
+                        println("Soft failure")
+                        return null
+                    }
+                    return versionCode
+                }
+
+                override fun publishApk(
+                        versionCodes: List<Long>,
+                        didPreviousBuildSkipCommit: Boolean,
+                        trackName: String,
+                        releaseStatus: ReleaseStatus,
+                        releaseName: String?,
+                        releaseNotes: Map<String, String?>?,
+                        userFraction: Double?,
+                        retainableArtifacts: List<Long>?
+                ) {
+                    println("publishApk(" +
+                                    "versionCodes=$versionCodes, " +
+                                    "didPreviousBuildSkipCommit=$didPreviousBuildSkipCommit, " +
+                                    "trackName=$trackName, " +
+                                    "releaseStatus=$releaseStatus, " +
+                                    "releaseName=$releaseName, " +
+                                    "releaseNotes=$releaseNotes, " +
+                                    "userFraction=$userFraction, " +
+                                    "retainableArtifacts=$retainableArtifacts)")
+                }
             }
 
-            override fun publishApk(
-                    versionCodes: List<Long>,
-                    didPreviousBuildSkipCommit: Boolean,
-                    trackName: String,
-                    releaseStatus: ReleaseStatus,
-                    releaseName: String?,
-                    releaseNotes: Map<String, String?>?,
-                    userFraction: Double?,
-                    retainableArtifacts: List<Long>?
-            ) {
-                println("publishApk(" +
-                                "versionCodes=$versionCodes, " +
-                                "didPreviousBuildSkipCommit=$didPreviousBuildSkipCommit, " +
-                                "trackName=$trackName, " +
-                                "releaseStatus=$releaseStatus, " +
-                                "releaseName=$releaseName, " +
-                                "releaseNotes=$releaseNotes, " +
-                                "userFraction=$userFraction, " +
-                                "retainableArtifacts=$retainableArtifacts)")
-            }
+            publisher.install()
+            edits.install()
         }
-
-        publisher.install()
-        edits.install()
     }
 }

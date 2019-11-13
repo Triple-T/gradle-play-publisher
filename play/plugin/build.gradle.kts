@@ -13,8 +13,9 @@ dependencies {
     compileOnly(Config.Libs.All.agp)
     implementation(Config.Libs.All.ap)
 
+    testImplementation(project(":common:utils", "default"))
     testImplementation(project(":common:validation", "default"))
-    testImplementation(project(":play:android-publisher", "default"))
+    testImplementation(testFixtures(project(":play:android-publisher")))
     testImplementation(Config.Libs.All.agp)
 
     testImplementation(Config.Libs.All.junit)
@@ -46,6 +47,15 @@ tasks.withType<PluginUnderTestMetadata>().configureEach {
 
     pluginClasspath.from(configurations.compileClasspath)
     pluginClasspath.from(sourceSets.main.get().runtimeClasspath)
+
+    // Give plugin access to test classpath
+    doLast {
+        val testLibs = configurations.testCompileClasspath.get().elements.get()
+                .joinToString(";") { it.asFile.invariantSeparatorsPath }
+                .replace(":", "\\:")
+        layout.buildDirectory.file("pluginUnderTestMetadata/fake-metadata.properties").get().asFile
+                .writeText("implementation-classpath=$testLibs")
+    }
 }
 
 tasks.withType<ValidatePlugins>().configureEach {
