@@ -25,10 +25,12 @@ jobs:
             mkdir -p $HOME/.gradle
             echo "gradle.publish.key=$PUBLISH_KEY" > $HOME/.gradle/gradle.properties
             echo "gradle.publish.secret=$PUBLISH_SECRET" >> $HOME/.gradle/gradle.properties
-            ./gradlew -Dbootstrap publishToMavenLocal
+            ./gradlew publishToMavenLocal
       - run:
           name: Build
-          command: ./gradlew clean ciBuild --stacktrace
+          command: |
+            ./gradlew clean ciBuild --full-stacktrace
+            (cd testapp && ../gradlew help -PskipValidation)
       - store_test_results:
           path: play/plugin/build/test-results
       - save_cache:

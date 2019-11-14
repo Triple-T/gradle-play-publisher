@@ -53,5 +53,3 @@ allprojects {
         }
     }
 }
-
-apply(from = "testapp-setup.gradle.kts")

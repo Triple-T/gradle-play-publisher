@@ -1,0 +1,5 @@
+plugins {
+    `gradle-enterprise`
+}
+
+includeBuild("..")
