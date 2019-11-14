@@ -2,40 +2,49 @@ package com.github.triplet.gradle.play.tasks.internal.workers
 
 import com.github.triplet.gradle.common.utils.PLUGIN_NAME
 import com.github.triplet.gradle.play.PlayPublisherExtension
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
+import com.google.api.client.http.HttpRequestInitializer
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.AndroidPublisherScopes
+import com.google.auth.http.HttpTransportFactory
+import com.google.auth.oauth2.GoogleCredentials
+import com.google.auth.oauth2.ServiceAccountCredentials
 import java.io.FileInputStream
 import java.security.KeyStore
 
 internal fun PlayPublisherExtension.Config.buildPublisher(): AndroidPublisher {
-    val transport = buildTransport()
+    val httpTransport = buildHttpTransport()
     val creds = checkNotNull(serviceAccountCredentials) { "No creds specified" }
     val serviceAccountEmail = serviceAccountEmail
-    val factory = JacksonFactory.getDefaultInstance()
 
-    val credential = if (serviceAccountEmail == null) {
-        GoogleCredential.fromStream(creds.inputStream(), transport, factory)
-                .createScoped(listOf(AndroidPublisherScopes.ANDROIDPUBLISHER))
+    val credential: GoogleCredentials = if (serviceAccountEmail == null) {
+        GoogleCredentials.fromStream(creds.inputStream(), httpTransport)
+                .createScoped(AndroidPublisherScopes.ANDROIDPUBLISHER)
     } else {
-        GoogleCredential.Builder()
-                .setTransport(transport)
-                .setJsonFactory(factory)
-                .setServiceAccountId(serviceAccountEmail)
-                .setServiceAccountPrivateKeyFromP12File(creds)
-                .setServiceAccountScopes(listOf(AndroidPublisherScopes.ANDROIDPUBLISHER))
+        ServiceAccountCredentials.newBuilder()
+                .apply {
+                    serviceAccountCredentials = creds
+                    clientEmail = serviceAccountEmail
+                    httpTransportFactory = httpTransport
+                    scopes = listOf(AndroidPublisherScopes.ANDROIDPUBLISHER)
+                }
                 .build()
     }
 
-    return AndroidPublisher.Builder(transport, JacksonFactory.getDefaultInstance()) {
-        credential.initialize(it.setReadTimeout(0))
-    }.setApplicationName(PLUGIN_NAME).build()
+    return AndroidPublisher.Builder(
+            buildNetTransport(),
+            JacksonFactory.getDefaultInstance(),
+            HttpRequestInitializer { credential.refresh() }
+    ).setApplicationName(PLUGIN_NAME).build()
 }
 
-private fun buildTransport(): NetHttpTransport {
+private fun buildHttpTransport(): HttpTransportFactory = HttpTransportFactory {
+    buildNetTransport()
+}
+
+private fun buildNetTransport(): NetHttpTransport {
     val trustStore: String? = System.getProperty("javax.net.ssl.trustStore", null)
     val trustStorePassword: String? =
             System.getProperty("javax.net.ssl.trustStorePassword", null)
