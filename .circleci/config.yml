@@ -30,7 +30,7 @@ jobs:
           name: Build
           command: |
             ./gradlew clean ciBuild --full-stacktrace
-            (cd testapp && ../gradlew help)
+            (cd testapp && ../gradlew help -PskipValidation)
       - store_test_results:
           path: play/plugin/build/test-results
       - save_cache:

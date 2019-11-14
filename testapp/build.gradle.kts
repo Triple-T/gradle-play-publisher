@@ -98,6 +98,8 @@ dependencies {
 abstract class BuildReadinessValidator : DefaultTask() {
     @TaskAction
     fun validate() {
+        if (project.hasProperty("skipValidation")) return
+
         val playChecksumFile = project.layout.buildDirectory
                 .file("build-validator/play").get().asFile
         val playPlugin = File(project.rootDir.parentFile, "play/plugin/build/libs")
