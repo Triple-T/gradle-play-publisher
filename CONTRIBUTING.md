@@ -2,6 +2,7 @@
 
 ### Building the plugin
 
+1. Run `./gradlew publishToMavenLocal`
 1. Make your changes
 1. Run the tests with `./gradlew test`
 1. Ensure your changes work in a live environment: `(cd testapp && ../gradlew taskName)`, e.g.
