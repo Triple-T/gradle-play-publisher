@@ -4,7 +4,8 @@
 
 1. Run `./gradlew publishToMavenLocal -Dbootstrap`
 1. Make your changes
-1. Test them live by running `./gradlew t[StandardTaskName]`, e.g. `./gradlew tPublishBundle`
+1. Test them live by running `(cd testapp && ../gradlew taskName)`, e.g.
+   `(cd testapp && ../gradlew publishBundle)`
 
 ### Adding new features
 
