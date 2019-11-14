@@ -1,5 +1,11 @@
 ## Want to contribute? Awesome!
 
+### Building the plugin
+
+1. Run `./gradlew publishToMavenLocal -Dbootstrap`
+1. Make your changes
+1. Test them live by running `./gradlew t[StandardTaskName]`, e.g. `./gradlew tPublishBundle`
+
 ### Adding new features
 
 Before you start working on a larger contribution, you should get in touch with
