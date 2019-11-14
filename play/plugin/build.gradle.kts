@@ -46,16 +46,8 @@ tasks.withType<PluginUnderTestMetadata>().configureEach {
     pluginClasspath.setFrom(/* reset */)
 
     pluginClasspath.from(configurations.compileClasspath)
+    pluginClasspath.from(configurations.testCompileClasspath)
     pluginClasspath.from(sourceSets.main.get().runtimeClasspath)
-
-    // Give plugin access to test classpath
-    doLast {
-        val testLibs = configurations.testCompileClasspath.get().elements.get()
-                .joinToString(";") { it.asFile.invariantSeparatorsPath }
-                .replace(":", "\\:")
-        layout.buildDirectory.file("pluginUnderTestMetadata/fake-metadata.properties").get().asFile
-                .writeText("implementation-classpath=$testLibs")
-    }
 }
 
 tasks.withType<ValidatePlugins>().configureEach {
