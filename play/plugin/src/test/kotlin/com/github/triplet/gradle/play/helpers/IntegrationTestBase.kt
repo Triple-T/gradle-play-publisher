@@ -3,7 +3,6 @@ package com.github.triplet.gradle.play.helpers
 import com.github.triplet.gradle.common.utils.orNull
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
-import org.gradle.testkit.runner.internal.PluginUnderTestMetadataReading
 import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -83,14 +82,8 @@ abstract class IntegrationTestBase {
         // any state due to the same code being run in completely different classpaths (possibly
         // even different processes), but at least we can validate that tasks are trying to publish the
         // correct stuff now.
-        runner.withPluginClasspath(listOf(
-                *runner.pluginClasspath.toTypedArray(),
-                File("build/classes/kotlin/test"),
-                *PluginUnderTestMetadataReading.readImplementationClasspath(
-                        Thread.currentThread().contextClassLoader
-                                .getResource("fake-metadata.properties"))
-                        .toTypedArray()
-        ))
+        runner.withPluginClasspath(
+                runner.pluginClasspath + listOf(File("build/classes/kotlin/test")))
 
         val result = if (expectFailure) runner.buildAndFail() else runner.build()
         println(result.output)
