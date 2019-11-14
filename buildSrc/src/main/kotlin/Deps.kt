@@ -17,6 +17,7 @@ object Config {
             const val agp = "com.android.tools.build:gradle:3.6.0-beta02"
             const val ap =
                     "com.google.apis:google-api-services-androidpublisher:v3-rev20190910-1.30.1"
+            const val gauthlib = "com.google.auth:google-auth-library-oauth2-http:0.18.0"
 
             const val junit = "junit:junit:4.13-rc-1"
             const val truth = "com.google.truth:truth:1.0"
