@@ -8,6 +8,7 @@ import com.github.triplet.gradle.common.utils.orNull
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.tasks.internal.EditTaskBase
+import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.logging.Logging
 import org.gradle.api.provider.Property
@@ -30,14 +31,16 @@ internal abstract class GenerateEdit @Inject constructor(
 
     @TaskAction
     fun generate() {
-        val file = editIdFile.get().asFile
+        val editId = editIdFile
         project.serviceOf<WorkerExecutor>().noIsolation().submit(Generator::class) {
             config.set(extension.serializableConfig)
-            editIdFile.set(file)
+            editIdFile.set(editId)
         }
     }
 
-    abstract class Generator : WorkAction<Generator.Params> {
+    abstract class Generator @Inject constructor(
+            private val fileOps: FileSystemOperations
+    ) : WorkAction<Generator.Params> {
         private val file = parameters.editIdFile.get().asFile
         private val appId = file.nameWithoutExtension
         private val publisher = PlayPublisher(
@@ -54,7 +57,7 @@ internal abstract class GenerateEdit @Inject constructor(
             val editId = file.orNull()?.readText().nullOrFull()?.takeIf {
                 file.marked("skipped").exists()
             }
-            file.reset()
+            fileOps.delete { delete(file.editIdAndFriends) }
 
             val response = if (editId == null) {
                 publisher.insertEdit()

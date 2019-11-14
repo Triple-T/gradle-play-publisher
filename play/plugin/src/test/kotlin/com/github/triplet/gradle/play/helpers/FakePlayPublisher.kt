@@ -4,11 +4,12 @@ import com.github.triplet.gradle.androidpublisher.EditResponse
 import com.github.triplet.gradle.androidpublisher.PlayPublisher
 import com.github.triplet.gradle.androidpublisher.UpdateProductResponse
 import com.github.triplet.gradle.androidpublisher.UploadInternalSharingArtifactResponse
+import com.github.triplet.gradle.androidpublisher.installPlayPublisherFactory
 import java.io.File
 
 abstract class FakePlayPublisher : PlayPublisher {
     fun install() {
-        PlayPublisher.setFactory(object : PlayPublisher.Factory {
+        installPlayPublisherFactory(object : PlayPublisher.Factory {
             override fun create(credentials: File, email: String?, appId: String) =
                     this@FakePlayPublisher
         })

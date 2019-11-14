@@ -1,6 +1,7 @@
 package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.androidpublisher.UploadInternalSharingArtifactResponse
+import com.github.triplet.gradle.androidpublisher.newUploadInternalSharingArtifactResponse
 import com.github.triplet.gradle.play.helpers.FakePlayPublisher
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
@@ -14,7 +15,8 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishInternalSharingBundleBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.
+                    PublishInternalSharingBundleIntegrationTest.installFactories()
         """
 
         val result = execute(config, "uploadReleasePrivateBundle")
@@ -30,7 +32,8 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishInternalSharingBundleBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.
+                    PublishInternalSharingBundleIntegrationTest.installFactories()
         """
 
         val result1 = execute(config, "uploadReleasePrivateBundle")
@@ -47,7 +50,8 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishInternalSharingBundleBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.
+                    PublishInternalSharingBundleIntegrationTest.installFactories()
 
             play {
                 artifactDir = file('${escapedTempDir()}')
@@ -68,7 +72,8 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishInternalSharingBundleBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.
+                    PublishInternalSharingBundleIntegrationTest.installFactories()
 
             play {
                 artifactDir = file('${escapedTempDir()}')
@@ -91,7 +96,8 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishInternalSharingBundleBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.
+                    PublishInternalSharingBundleIntegrationTest.installFactories()
 
             play {
                 artifactDir = file('${escapedTempDir()}')
@@ -114,7 +120,8 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishInternalSharingBundleBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.
+                    PublishInternalSharingBundleIntegrationTest.installFactories()
 
             play {
                 artifactDir = file('${escapedTempDir()}')
@@ -136,7 +143,8 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishInternalSharingBundleBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.
+                    PublishInternalSharingBundleIntegrationTest.installFactories()
         """
 
         File(tempDir.root, "foo.aab").createNewFile()
@@ -155,7 +163,8 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishInternalSharingBundleBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.
+                    PublishInternalSharingBundleIntegrationTest.installFactories()
         """
         val outputDir = File(appDir, "build/outputs/internal-sharing/bundle/release")
 
@@ -176,24 +185,28 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishInternalSharingBundleBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.
+                    PublishInternalSharingBundleIntegrationTest.installFactories()
         """
 
         val result = execute(config, "uploadReleasePrivateBundle")
 
         assertThat(result.output).contains("Upload successful: http")
     }
-}
 
-object PublishInternalSharingBundleBridge {
-    @JvmStatic
-    fun installFactories() {
-        val publisher = object : FakePlayPublisher() {
-            override fun uploadInternalSharingBundle(bundleFile: File): UploadInternalSharingArtifactResponse {
-                println("uploadInternalSharingBundle($bundleFile)")
-                return UploadInternalSharingArtifactResponse("json-payload", "https://google.com")
+    companion object {
+        @JvmStatic
+        fun installFactories() {
+            val publisher = object : FakePlayPublisher() {
+                override fun uploadInternalSharingBundle(
+                        bundleFile: File
+                ): UploadInternalSharingArtifactResponse {
+                    println("uploadInternalSharingBundle($bundleFile)")
+                    return newUploadInternalSharingArtifactResponse(
+                            "json-payload", "https://google.com")
+                }
             }
+            publisher.install()
         }
-        publisher.install()
     }
 }

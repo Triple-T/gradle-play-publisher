@@ -1,7 +1,6 @@
 package com.github.triplet.gradle.androidpublisher
 
 import com.github.triplet.gradle.androidpublisher.internal.DefaultEditManager
-import com.google.common.annotations.VisibleForTesting
 import java.io.File
 
 /**
@@ -81,8 +80,7 @@ interface EditManager {
         private var factory: Factory = DefaultEditManager
 
         /** Overwrites the default [EditManager.Factory] with [factory]. */
-        @VisibleForTesting
-        fun setFactory(factory: Factory) {
+        internal fun setFactory(factory: Factory) {
             Companion.factory = factory
         }
 

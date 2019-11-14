@@ -82,9 +82,8 @@ abstract class IntegrationTestBase {
         // any state due to the same code being run in completely different classpaths (possibly
         // even different processes), but at least we can validate that tasks are trying to publish the
         // correct stuff now.
-        runner.withPluginClasspath(runner.pluginClasspath + listOf(
-                File("build/classes/kotlin/test")
-        ))
+        runner.withPluginClasspath(
+                runner.pluginClasspath + listOf(File("build/classes/kotlin/test")))
 
         val result = if (expectFailure) runner.buildAndFail() else runner.build()
         println(result.output)

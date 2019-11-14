@@ -14,13 +14,7 @@ internal abstract class EditTaskBase @Inject constructor(
     abstract val editIdFile: RegularFileProperty
 
     companion object {
-        fun File.reset() {
-            val commitMarker = marked("commit")
-            val skippedMarker = marked("skipped")
-
-            check(commitMarker.deleteRecursively()) { "Couldn't delete $commitMarker" }
-            check(skippedMarker.deleteRecursively()) { "Couldn't delete $skippedMarker" }
-            check(deleteRecursively()) { "Couldn't delete $this" }
-        }
+        val File.editIdAndFriends
+            get() = listOf(this, marked("commit"), marked("skipped"))
     }
 }

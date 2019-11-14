@@ -13,8 +13,9 @@ dependencies {
     compileOnly(Config.Libs.All.agp)
     implementation(Config.Libs.All.ap)
 
+    testImplementation(project(":common:utils", "default"))
     testImplementation(project(":common:validation", "default"))
-    testImplementation(project(":play:android-publisher", "default"))
+    testImplementation(testFixtures(project(":play:android-publisher")))
     testImplementation(Config.Libs.All.agp)
 
     testImplementation(Config.Libs.All.junit)
@@ -45,6 +46,7 @@ tasks.withType<PluginUnderTestMetadata>().configureEach {
     pluginClasspath.setFrom(/* reset */)
 
     pluginClasspath.from(configurations.compileClasspath)
+    pluginClasspath.from(configurations.testCompileClasspath)
     pluginClasspath.from(sourceSets.main.get().runtimeClasspath)
 }
 

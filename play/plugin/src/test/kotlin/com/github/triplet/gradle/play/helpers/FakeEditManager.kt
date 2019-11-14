@@ -4,11 +4,12 @@ import com.github.triplet.gradle.androidpublisher.EditManager
 import com.github.triplet.gradle.androidpublisher.PlayPublisher
 import com.github.triplet.gradle.androidpublisher.ReleaseStatus
 import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
+import com.github.triplet.gradle.androidpublisher.installEditManagerFactory
 import java.io.File
 
 abstract class FakeEditManager : EditManager {
     fun install() {
-        EditManager.setFactory(object : EditManager.Factory {
+        installEditManagerFactory(object : EditManager.Factory {
             override fun create(publisher: PlayPublisher, editId: String) = this@FakeEditManager
         })
     }

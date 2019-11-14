@@ -1,7 +1,7 @@
 package com.github.triplet.gradle.play.tasks
 
-import com.android.build.gradle.AppExtension
 import com.github.triplet.gradle.androidpublisher.UploadInternalSharingArtifactResponse
+import com.github.triplet.gradle.androidpublisher.newUploadInternalSharingArtifactResponse
 import com.github.triplet.gradle.play.helpers.FakePlayPublisher
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
@@ -15,7 +15,8 @@ class InstallInternalSharingArtifactIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.InstallInternalSharingArtifactBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.
+                    InstallInternalSharingArtifactIntegrationTest.installFactories()
         """
 
         val result = execute(config, "installReleasePrivateArtifact")
@@ -29,7 +30,8 @@ class InstallInternalSharingArtifactIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.InstallInternalSharingArtifactBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.
+                    InstallInternalSharingArtifactIntegrationTest.installFactories()
 
             play.defaultToAppBundles true
         """
@@ -45,7 +47,8 @@ class InstallInternalSharingArtifactIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.InstallInternalSharingArtifactBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.
+                    InstallInternalSharingArtifactIntegrationTest.installFactories()
         """
 
         val result1 = execute(config, "installReleasePrivateArtifact")
@@ -62,7 +65,8 @@ class InstallInternalSharingArtifactIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.InstallInternalSharingArtifactBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.
+                    InstallInternalSharingArtifactIntegrationTest.installFactories()
         """
 
         val result = execute(config, "installReleasePrivateArtifact")
@@ -78,7 +82,8 @@ class InstallInternalSharingArtifactIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.InstallInternalSharingArtifactBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.
+                    InstallInternalSharingArtifactIntegrationTest.installFactories()
 
             System.setProperty("FAIL", "true")
         """
@@ -89,38 +94,44 @@ class InstallInternalSharingArtifactIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":installReleasePrivateArtifact")!!.outcome).isEqualTo(TaskOutcome.FAILED)
         assertThat(result.output).contains("Failed to install")
     }
-}
 
-object InstallInternalSharingArtifactBridge {
-    @JvmStatic
-    fun installFactories() {
-        val publisher = object : FakePlayPublisher() {
-            override fun uploadInternalSharingApk(apkFile: File): UploadInternalSharingArtifactResponse {
-                println("uploadInternalSharingApk($apkFile)")
-                return UploadInternalSharingArtifactResponse("{\"downloadUrl\": \"myDownloadUrl\"}", "")
+    companion object {
+        @JvmStatic
+        fun installFactories() {
+            val publisher = object : FakePlayPublisher() {
+                override fun uploadInternalSharingApk(
+                        apkFile: File
+                ): UploadInternalSharingArtifactResponse {
+                    println("uploadInternalSharingApk($apkFile)")
+                    return newUploadInternalSharingArtifactResponse(
+                            "{\"downloadUrl\": \"myDownloadUrl\"}", "")
+                }
+
+                override fun uploadInternalSharingBundle(
+                        bundleFile: File
+                ): UploadInternalSharingArtifactResponse {
+                    println("uploadInternalSharingBundle($bundleFile)")
+                    return newUploadInternalSharingArtifactResponse(
+                            "{\"downloadUrl\": \"myDownloadUrl\"}", "")
+                }
+            }
+            val shell = object : InstallInternalSharingArtifact.AdbShell {
+                fun install() {
+                    val context = this
+                    InstallInternalSharingArtifact.AdbShell.setFactory(
+                            object : InstallInternalSharingArtifact.AdbShell.Factory {
+                                override fun create(adbExecutable: File, timeOutInMs: Int) = context
+                            })
+                }
+
+                override fun executeShellCommand(command: String): Boolean {
+                    println("executeShellCommand($command)")
+                    return System.getProperty("FAIL") == null
+                }
             }
 
-            override fun uploadInternalSharingBundle(bundleFile: File): UploadInternalSharingArtifactResponse {
-                println("uploadInternalSharingBundle($bundleFile)")
-                return UploadInternalSharingArtifactResponse("{\"downloadUrl\": \"myDownloadUrl\"}", "")
-            }
+            publisher.install()
+            shell.install()
         }
-        val shell = object : InstallInternalSharingArtifact.AdbShell {
-            fun install() {
-                val context = this
-                InstallInternalSharingArtifact.AdbShell.setFactory(
-                        object : InstallInternalSharingArtifact.AdbShell.Factory {
-                            override fun create(extension: AppExtension) = context
-                        })
-            }
-
-            override fun executeShellCommand(command: String): Boolean {
-                println("executeShellCommand($command)")
-                return System.getProperty("FAIL") == null
-            }
-        }
-
-        publisher.install()
-        shell.install()
     }
 }

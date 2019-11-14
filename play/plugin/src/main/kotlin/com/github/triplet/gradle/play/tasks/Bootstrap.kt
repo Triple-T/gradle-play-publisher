@@ -3,7 +3,6 @@ package com.github.triplet.gradle.play.tasks
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.common.utils.nullOrFull
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
-import com.github.triplet.gradle.common.utils.safeMkdirs
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.AppDetail
 import com.github.triplet.gradle.play.internal.GRAPHICS_PATH
@@ -32,7 +31,6 @@ import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkerExecutor
-import java.io.File
 import java.io.FileNotFoundException
 import java.net.URL
 import javax.inject.Inject
@@ -160,12 +158,11 @@ internal abstract class Bootstrap @Inject constructor(
                     .execute()
                     .images ?: return
             val imageDir = parameters.dir.get().dir(parameters.imageType.get().dirName)
-                    .asFile.safeMkdirs()
 
             println("Downloading ${parameters.language.get()} listing graphics for type '$typeName'")
             for ((i, image) in images.withIndex()) {
                 executor.noIsolation().submit(ImageDownloader::class) {
-                    target.set(File(imageDir, "${i + 1}.png"))
+                    target.set(imageDir.file("${i + 1}.png"))
                     url.set(image.url)
                 }
             }

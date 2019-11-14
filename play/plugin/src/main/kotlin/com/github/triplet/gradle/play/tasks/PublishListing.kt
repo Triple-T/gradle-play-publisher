@@ -112,7 +112,7 @@ internal abstract class PublishListing @Inject constructor(
         val changedDetails =
                 changes.getFileChanges(detailFiles).filter { it.fileType == FileType.FILE }
         if (changedDetails.isEmpty()) return null
-        if (AppDetail.values().map { resDir.get().file(it.fileName) }.none { it.asFile.exists() }) {
+        if (AppDetail.values().map { resDir.file(it.fileName) }.none { it.get().asFile.exists() }) {
             return null
         }
 

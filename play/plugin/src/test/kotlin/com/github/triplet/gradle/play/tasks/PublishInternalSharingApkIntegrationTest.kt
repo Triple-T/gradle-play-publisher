@@ -1,6 +1,7 @@
 package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.androidpublisher.UploadInternalSharingArtifactResponse
+import com.github.triplet.gradle.androidpublisher.newUploadInternalSharingArtifactResponse
 import com.github.triplet.gradle.play.helpers.FakePlayPublisher
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
@@ -14,7 +15,8 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishInternalSharingApkBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.
+                    PublishInternalSharingApkIntegrationTest.installFactories()
         """
 
         val result = execute(config, "uploadReleasePrivateApk")
@@ -30,7 +32,8 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishInternalSharingApkBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.
+                    PublishInternalSharingApkIntegrationTest.installFactories()
         """
 
         val result1 = execute(config, "uploadReleasePrivateApk")
@@ -47,7 +50,8 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishInternalSharingApkBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.
+                    PublishInternalSharingApkIntegrationTest.installFactories()
 
             play {
                 artifactDir = file('${escapedTempDir()}')
@@ -67,7 +71,8 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishInternalSharingApkBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.
+                    PublishInternalSharingApkIntegrationTest.installFactories()
 
             play {
                 artifactDir = file('${escapedTempDir()}')
@@ -89,7 +94,8 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishInternalSharingApkBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.
+                    PublishInternalSharingApkIntegrationTest.installFactories()
 
             play {
                 artifactDir = file('${escapedTempDir()}')
@@ -111,7 +117,8 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishInternalSharingApkBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.
+                    PublishInternalSharingApkIntegrationTest.installFactories()
         """
 
         File(tempDir.root, "foo.apk").createNewFile()
@@ -129,7 +136,8 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishInternalSharingApkBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.
+                    PublishInternalSharingApkIntegrationTest.installFactories()
 
             play {
                 artifactDir = file('${escapedTempDir()}')
@@ -151,7 +159,8 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishInternalSharingApkBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.
+                    PublishInternalSharingApkIntegrationTest.installFactories()
         """
         val outputDir = File(appDir, "build/outputs/internal-sharing/apk/release")
 
@@ -172,24 +181,28 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishInternalSharingApkBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.
+                    PublishInternalSharingApkIntegrationTest.installFactories()
         """
 
         val result = execute(config, "uploadReleasePrivateApk")
 
         assertThat(result.output).contains("Upload successful: http")
     }
-}
 
-object PublishInternalSharingApkBridge {
-    @JvmStatic
-    fun installFactories() {
-        val publisher = object : FakePlayPublisher() {
-            override fun uploadInternalSharingApk(apkFile: File): UploadInternalSharingArtifactResponse {
-                println("uploadInternalSharingApk($apkFile)")
-                return UploadInternalSharingArtifactResponse("json-payload", "https://google.com")
+    companion object {
+        @JvmStatic
+        fun installFactories() {
+            val publisher = object : FakePlayPublisher() {
+                override fun uploadInternalSharingApk(
+                        apkFile: File
+                ): UploadInternalSharingArtifactResponse {
+                    println("uploadInternalSharingApk($apkFile)")
+                    return newUploadInternalSharingArtifactResponse(
+                            "json-payload", "https://google.com")
+                }
             }
+            publisher.install()
         }
-        publisher.install()
     }
 }

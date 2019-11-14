@@ -2,6 +2,7 @@ package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.androidpublisher.EditResponse
 import com.github.triplet.gradle.androidpublisher.ReleaseStatus
+import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.play.helpers.FakeEditManager
 import com.github.triplet.gradle.play.helpers.FakePlayPublisher
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
@@ -15,7 +16,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
 
             play.track = 'foobar'
         """
@@ -33,7 +34,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
 
             play.track = 'foobar'
             play.promoteTrack = 'not-foobar'
@@ -52,7 +53,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
         """
 
         val result = execute(config, "promoteReleaseArtifact")
@@ -68,7 +69,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
 
             play.fromTrack = 'foobar'
         """
@@ -86,7 +87,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
         """
 
         val result = execute(
@@ -116,7 +117,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
         """
 
         val result = execute(config, "promoteReleaseArtifact", "--update=myUpdateTrack")
@@ -133,7 +134,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
 
             play.releaseStatus 'draft'
         """
@@ -151,7 +152,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
 
             android.buildTypes {
                 consoleNames {}
@@ -172,7 +173,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
 
             android.buildTypes {
                 consoleNames {}
@@ -195,7 +196,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
 
             android.buildTypes {
                 consoleNames {}
@@ -219,7 +220,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
 
             android.buildTypes {
                 releaseNotes {}
@@ -241,7 +242,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
 
             android.buildTypes {
                 releaseNotes {}
@@ -265,7 +266,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
 
             android.buildTypes {
                 releaseNotes {}
@@ -290,7 +291,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
 
             play.userFraction 0.123
         """
@@ -308,7 +309,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
 
             play.retain.artifacts = [1, 2, 3]
         """
@@ -326,7 +327,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
         """
 
         val result1 = execute(config, "promoteReleaseArtifact")
@@ -345,7 +346,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
         """
 
         val result = execute(config, "promoteReleaseArtifact")
@@ -361,7 +362,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationBridge.installFactories()
+            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
 
             play.commit = false
         """
@@ -373,48 +374,48 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         assertThat(result.output).contains("insertEdit()")
         assertThat(result.output).doesNotContain("commitEdit(")
     }
-}
 
-object PromoteReleaseIntegrationBridge {
-    @JvmStatic
-    fun installFactories() {
-        val publisher = object : FakePlayPublisher() {
-            override fun insertEdit(): EditResponse {
-                println("insertEdit()")
-                return EditResponse.Success("edit-id")
+    companion object {
+        @JvmStatic
+        fun installFactories() {
+            val publisher = object : FakePlayPublisher() {
+                override fun insertEdit(): EditResponse {
+                    println("insertEdit()")
+                    return newSuccessEditResponse("edit-id")
+                }
+
+                override fun getEdit(id: String): EditResponse {
+                    println("getEdit($id)")
+                    return newSuccessEditResponse(id)
+                }
+
+                override fun commitEdit(id: String) {
+                    println("commitEdit($id)")
+                }
+            }
+            val edits = object : FakeEditManager() {
+                override fun promoteRelease(
+                        promoteTrackName: String,
+                        fromTrackName: String?,
+                        releaseStatus: ReleaseStatus?,
+                        releaseName: String?,
+                        releaseNotes: Map<String, String?>?,
+                        userFraction: Double?,
+                        retainableArtifacts: List<Long>?
+                ) {
+                    println("promoteRelease(" +
+                                    "promoteTrackName=$promoteTrackName, " +
+                                    "fromTrackName=$fromTrackName, " +
+                                    "releaseStatus=$releaseStatus, " +
+                                    "releaseName=$releaseName, " +
+                                    "releaseNotes=$releaseNotes, " +
+                                    "userFraction=$userFraction, " +
+                                    "retainableArtifacts=$retainableArtifacts)")
+                }
             }
 
-            override fun getEdit(id: String): EditResponse {
-                println("getEdit($id)")
-                return EditResponse.Success(id)
-            }
-
-            override fun commitEdit(id: String) {
-                println("commitEdit($id)")
-            }
+            publisher.install()
+            edits.install()
         }
-        val edits = object : FakeEditManager() {
-            override fun promoteRelease(
-                    promoteTrackName: String,
-                    fromTrackName: String?,
-                    releaseStatus: ReleaseStatus?,
-                    releaseName: String?,
-                    releaseNotes: Map<String, String?>?,
-                    userFraction: Double?,
-                    retainableArtifacts: List<Long>?
-            ) {
-                println("promoteRelease(" +
-                                "promoteTrackName=$promoteTrackName, " +
-                                "fromTrackName=$fromTrackName, " +
-                                "releaseStatus=$releaseStatus, " +
-                                "releaseName=$releaseName, " +
-                                "releaseNotes=$releaseNotes, " +
-                                "userFraction=$userFraction, " +
-                                "retainableArtifacts=$retainableArtifacts)")
-            }
-        }
-
-        publisher.install()
-        edits.install()
     }
 }

@@ -42,7 +42,6 @@ import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.invoke
 import org.gradle.kotlin.dsl.the
 import org.gradle.kotlin.dsl.withType
-import java.io.File
 
 @Suppress("unused") // Used by Gradle
 internal class PlayPublisherPlugin : Plugin<Project> {
@@ -156,7 +155,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 resSrcDirs.set(dirs)
                 resSrcTree.setFrom(dirs.map { project.fileTree(it).apply { exclude("**/.*") } })
 
-                resDir.set(File(project.buildDir, playPath))
+                resDir.set(project.layout.buildDirectory.dir(playPath))
 
                 mustRunAfter(bootstrapTask)
             }.flatMap {
