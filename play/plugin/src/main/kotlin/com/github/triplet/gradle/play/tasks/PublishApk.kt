@@ -8,10 +8,10 @@ import com.github.triplet.gradle.play.internal.releaseStatusOrDefault
 import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
 import com.github.triplet.gradle.play.internal.trackOrDefault
 import com.github.triplet.gradle.play.internal.userFractionOrDefault
-import com.github.triplet.gradle.play.tasks.internal.PublishArtifactTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PublishableTrackExtensionOptions
+import com.github.triplet.gradle.play.tasks.internal.UploadArtifactTaskBase
 import com.github.triplet.gradle.play.tasks.internal.findApkFiles
-import com.github.triplet.gradle.play.tasks.internal.workers.ArtifactWorkerBase
+import com.github.triplet.gradle.play.tasks.internal.workers.UploadArtifactWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.workers.copy
 import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
 import org.gradle.api.file.DirectoryProperty
@@ -32,7 +32,7 @@ import javax.inject.Inject
 internal abstract class PublishApk @Inject constructor(
         extension: PlayPublisherExtension,
         variant: ApplicationVariant
-) : PublishArtifactTaskBase(extension, variant), PublishableTrackExtensionOptions {
+) : UploadArtifactTaskBase(extension, variant), PublishableTrackExtensionOptions {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
     protected val apks
@@ -59,7 +59,7 @@ internal abstract class PublishApk @Inject constructor(
 
     abstract class Processor @Inject constructor(
             private val executor: WorkerExecutor
-    ) : ArtifactWorkerBase<Processor.Params>() {
+    ) : UploadArtifactWorkerBase<Processor.Params>() {
         override fun upload() {
             for (apk in parameters.apkFiles.get()) {
                 executor.noIsolation().submit(ApkUploader::class) {
@@ -86,13 +86,13 @@ internal abstract class PublishApk @Inject constructor(
             )
         }
 
-        interface Params : ArtifactPublishingParams {
+        interface Params : ArtifactUploadingParams {
             val apkFiles: ListProperty<File>
             val uploadResults: DirectoryProperty
         }
     }
 
-    abstract class ApkUploader : ArtifactWorkerBase<ApkUploader.Params>() {
+    abstract class ApkUploader : UploadArtifactWorkerBase<ApkUploader.Params>() {
         init {
             commit = false
         }
@@ -112,7 +112,7 @@ internal abstract class PublishApk @Inject constructor(
             parameters.uploadResults.get().file(versionCode.toString()).asFile.safeCreateNewFile()
         }
 
-        interface Params : ArtifactPublishingParams {
+        interface Params : ArtifactUploadingParams {
             val apkFile: RegularFileProperty
             val uploadResults: DirectoryProperty
         }

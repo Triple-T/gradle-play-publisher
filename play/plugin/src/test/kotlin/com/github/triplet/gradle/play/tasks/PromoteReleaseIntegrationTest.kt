@@ -130,6 +130,27 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Build succeeds when mapping file is produced but unavailable`() {
+        @Suppress("UnnecessaryQualifiedReference")
+        // language=gradle
+        val config = """
+            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
+
+            android.buildTypes.release {
+                shrinkResources true
+                minifyEnabled true
+                proguardFiles(getDefaultProguardFile("proguard-android.txt"))
+            }
+        """
+
+        val result = execute(config, ":promoteReleaseArtifact")
+
+        assertThat(result.task(":promoteReleaseArtifact")).isNotNull()
+        assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("promoteRelease(")
+    }
+
+    @Test
     fun `Build uses correct release status`() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle

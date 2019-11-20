@@ -4,6 +4,7 @@ import com.github.triplet.gradle.common.utils.marked
 import com.github.triplet.gradle.play.tasks.internal.PublishArtifactTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PublishEditTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
+import com.github.triplet.gradle.play.tasks.internal.UploadArtifactTaskBase
 
 internal fun PublishTaskBase.paramsForBase(params: PlayWorkerBase.PlayPublishingParams) {
     params.config.set(extension.serializableConfig)
@@ -17,14 +18,19 @@ internal fun PublishTaskBase.paramsForBase(params: PlayWorkerBase.PlayPublishing
         params.skippedMarker.set(editIdFile.get().asFile.marked("skipped"))
     }
 
-    if (params is ArtifactWorkerBase.ArtifactPublishingParams) {
+    if (params is PublishArtifactWorkerBase.ArtifactPublishingParams) {
         this as PublishArtifactTaskBase
+
+        params.releaseNotesDir.set(releaseNotesDir)
+        params.consoleNamesDir.set(consoleNamesDir)
+    }
+
+    if (params is UploadArtifactWorkerBase.ArtifactUploadingParams) {
+        this as UploadArtifactTaskBase
 
         params.variantName.set(variant.name)
         params.versionCodes.set(variant.outputs.associate { it.outputFile to it.versionCode })
 
-        params.releaseNotesDir.set(releaseNotesDir)
-        params.consoleNamesDir.set(consoleNamesDir)
         params.mappingFile.set(mappingFile)
     }
 }
@@ -42,15 +48,22 @@ internal fun EditWorkerBase.EditPublishingParams.copy(into: EditWorkerBase.EditP
     into.skippedMarker.set(skippedMarker)
 }
 
-internal fun ArtifactWorkerBase.ArtifactPublishingParams.copy(
-        into: ArtifactWorkerBase.ArtifactPublishingParams
+internal fun PublishArtifactWorkerBase.ArtifactPublishingParams.copy(
+        into: PublishArtifactWorkerBase.ArtifactPublishingParams
 ) {
     (this as EditWorkerBase.EditPublishingParams).copy(into)
+
+    into.releaseNotesDir.set(releaseNotesDir)
+    into.consoleNamesDir.set(consoleNamesDir)
+}
+
+internal fun UploadArtifactWorkerBase.ArtifactUploadingParams.copy(
+        into: UploadArtifactWorkerBase.ArtifactUploadingParams
+) {
+    (this as PublishArtifactWorkerBase.ArtifactPublishingParams).copy(into)
 
     into.variantName.set(variantName)
     into.versionCodes.set(versionCodes.get())
 
-    into.releaseNotesDir.set(releaseNotesDir)
-    into.consoleNamesDir.set(consoleNamesDir)
     into.mappingFile.set(mappingFile)
 }

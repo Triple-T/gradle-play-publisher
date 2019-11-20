@@ -7,10 +7,10 @@ import com.github.triplet.gradle.play.internal.releaseStatusOrDefault
 import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
 import com.github.triplet.gradle.play.internal.trackOrDefault
 import com.github.triplet.gradle.play.internal.userFractionOrDefault
-import com.github.triplet.gradle.play.tasks.internal.PublishArtifactTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PublishableTrackExtensionOptions
+import com.github.triplet.gradle.play.tasks.internal.UploadArtifactTaskBase
 import com.github.triplet.gradle.play.tasks.internal.findBundleFile
-import com.github.triplet.gradle.play.tasks.internal.workers.ArtifactWorkerBase
+import com.github.triplet.gradle.play.tasks.internal.workers.UploadArtifactWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.InputFile
@@ -27,7 +27,7 @@ import javax.inject.Inject
 internal abstract class PublishBundle @Inject constructor(
         extension: PlayPublisherExtension,
         variant: ApplicationVariant
-) : PublishArtifactTaskBase(extension, variant), PublishableTrackExtensionOptions {
+) : UploadArtifactTaskBase(extension, variant), PublishableTrackExtensionOptions {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFile
     protected val bundle
@@ -48,7 +48,7 @@ internal abstract class PublishBundle @Inject constructor(
         }
     }
 
-    abstract class BundleUploader : ArtifactWorkerBase<BundleUploader.Params>() {
+    abstract class BundleUploader : UploadArtifactWorkerBase<BundleUploader.Params>() {
         override fun upload() {
             val bundleFile = parameters.bundleFile.get().asFile
             edits2.uploadBundle(
@@ -67,7 +67,7 @@ internal abstract class PublishBundle @Inject constructor(
             )
         }
 
-        interface Params : ArtifactPublishingParams {
+        interface Params : ArtifactUploadingParams {
             val bundleFile: RegularFileProperty
         }
     }
