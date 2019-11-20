@@ -263,6 +263,18 @@ a custom release name for the alpha track in the `play/release-names/alpha.txt` 
 My custom release name
 ```
 
+If it makes more sense to specify the release name in your build script, the `releaseName` property
+is available:
+
+```kt
+play {
+    // ...
+    releaseName = "My custom release name"
+}
+```
+
+> Note: the `play.releaseName` property takes precedence over the resource files.
+
 There is also a `--release-name` CLI option for quick access. For example,
 `./gradlew publishBundle --release-name "Hello World!"`.
 
