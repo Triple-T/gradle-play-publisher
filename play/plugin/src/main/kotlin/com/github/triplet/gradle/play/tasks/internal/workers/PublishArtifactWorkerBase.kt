@@ -5,12 +5,9 @@ import com.github.triplet.gradle.common.utils.readProcessed
 import com.github.triplet.gradle.play.internal.RELEASE_NAMES_DEFAULT_NAME
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_DEFAULT_NAME
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.provider.MapProperty
-import org.gradle.api.provider.Property
 import java.io.File
 
-internal abstract class ArtifactWorkerBase<T : ArtifactWorkerBase.ArtifactPublishingParams> :
+internal abstract class PublishArtifactWorkerBase<T : PublishArtifactWorkerBase.ArtifactPublishingParams> :
         EditWorkerBase<T>() {
     protected var commit = true
 
@@ -20,17 +17,6 @@ internal abstract class ArtifactWorkerBase<T : ArtifactWorkerBase.ArtifactPublis
     }
 
     abstract fun upload()
-
-    protected fun findBestVersionCode(artifact: File): Long {
-        var onTheFlyBuild = parameters.versionCodes.get()[artifact]?.toLong()
-        if (onTheFlyBuild == null) {
-            // Since we aren't building the supplied artifact, we have no way of knowing its
-            // version code without opening it up. Since we don't want to do that, we instead
-            // pretend like we know the version code even though we really don't.
-            onTheFlyBuild = parameters.versionCodes.get().values.first().toLong()
-        }
-        return onTheFlyBuild
-    }
 
     protected fun findReleaseName(track: String): String? {
         return if (config.releaseName != null) {
@@ -58,11 +44,7 @@ internal abstract class ArtifactWorkerBase<T : ArtifactWorkerBase.ArtifactPublis
     }
 
     internal interface ArtifactPublishingParams : EditPublishingParams {
-        val variantName: Property<String>
-        val versionCodes: MapProperty<File, Int>
-
         val releaseNotesDir: DirectoryProperty // Optional
         val consoleNamesDir: DirectoryProperty // Optional
-        val mappingFile: RegularFileProperty // Optional
     }
 }

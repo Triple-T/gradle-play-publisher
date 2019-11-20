@@ -9,12 +9,10 @@ import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
-import java.io.File
 
 internal abstract class PublishArtifactTaskBase(
         extension: PlayPublisherExtension,
@@ -34,25 +32,6 @@ internal abstract class PublishArtifactTaskBase(
     @get:InputDirectory
     internal val consoleNamesDir
         get() = resDir.dir(RELEASE_NAMES_PATH).optional()
-
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    @get:Optional
-    @get:InputFile
-    internal val mappingFile: File?
-        get() {
-            val customDir = extension.config.artifactDir
-
-            return if (customDir == null) {
-                try {
-                    variant.mappingFileProvider.get().singleOrNull()
-                } catch (e: NoSuchMethodError) {
-                    @Suppress("DEPRECATION") // TODO(#708): remove when 3.6 is the minimum
-                    variant.mappingFile?.orNull()
-                }
-            } else {
-                customDir.listFiles().orEmpty().singleOrNull { it.name == "mapping.txt" }
-            }
-        }
 
     private fun Provider<Directory>.optional() =
             flatMap { project.objects.directoryProperty().apply { set(it.asFile.orNull()) } }
