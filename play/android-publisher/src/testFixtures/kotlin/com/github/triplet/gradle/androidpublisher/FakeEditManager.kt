@@ -1,17 +1,10 @@
-package com.github.triplet.gradle.play.helpers
+package com.github.triplet.gradle.androidpublisher
 
-import com.github.triplet.gradle.androidpublisher.EditManager
-import com.github.triplet.gradle.androidpublisher.PlayPublisher
-import com.github.triplet.gradle.androidpublisher.ReleaseStatus
-import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
-import com.github.triplet.gradle.androidpublisher.installEditManagerFactory
 import java.io.File
 
 abstract class FakeEditManager : EditManager {
     fun install() {
-        installEditManagerFactory(object : EditManager.Factory {
-            override fun create(publisher: PlayPublisher, editId: String) = this@FakeEditManager
-        })
+        manager = this
     }
 
     override fun findMaxAppVersionCode(): Long =
@@ -62,4 +55,12 @@ abstract class FakeEditManager : EditManager {
             userFraction: Double?,
             retainableArtifacts: List<Long>?
     ): Unit = throw IllegalStateException("Test wasn't expecting this method to be called.")
+
+    class Factory : EditManager.Factory {
+        override fun create(publisher: PlayPublisher, editId: String) = manager
+    }
+
+    companion object {
+        lateinit var manager: EditManager
+    }
 }

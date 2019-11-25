@@ -156,10 +156,7 @@ internal class DefaultPlayPublisher(
         return this
     }
 
-    companion object : PlayPublisher.Factory {
-        private const val MIME_TYPE_STREAM = "application/octet-stream"
-        private const val MIME_TYPE_APK = "application/vnd.android.package-archive"
-
+    class Factory : PlayPublisher.Factory {
         override fun create(
                 credentials: File,
                 email: String?,
@@ -168,5 +165,10 @@ internal class DefaultPlayPublisher(
             val publisher = createPublisher(ServiceAccountAuth(credentials, email))
             return DefaultPlayPublisher(publisher, appId)
         }
+    }
+
+    private companion object {
+        const val MIME_TYPE_STREAM = "application/octet-stream"
+        const val MIME_TYPE_APK = "application/vnd.android.package-archive"
     }
 }

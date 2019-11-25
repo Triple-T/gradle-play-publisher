@@ -1,8 +1,8 @@
 package com.github.triplet.gradle.play.tasks
 
+import com.github.triplet.gradle.androidpublisher.FakePlayPublisher
 import com.github.triplet.gradle.androidpublisher.UploadInternalSharingArtifactResponse
 import com.github.triplet.gradle.androidpublisher.newUploadInternalSharingArtifactResponse
-import com.github.triplet.gradle.play.helpers.FakePlayPublisher
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome

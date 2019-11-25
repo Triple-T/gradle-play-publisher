@@ -1,10 +1,10 @@
 package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.androidpublisher.EditResponse
+import com.github.triplet.gradle.androidpublisher.FakeEditManager
+import com.github.triplet.gradle.androidpublisher.FakePlayPublisher
 import com.github.triplet.gradle.androidpublisher.ReleaseStatus
 import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
-import com.github.triplet.gradle.play.helpers.FakeEditManager
-import com.github.triplet.gradle.play.helpers.FakePlayPublisher
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
