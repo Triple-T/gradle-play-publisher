@@ -1,7 +1,7 @@
 package com.github.triplet.gradle.androidpublisher
 
-import com.github.triplet.gradle.androidpublisher.internal.DefaultPlayPublisher
 import java.io.File
+import java.util.ServiceLoader
 
 /**
  * Proxy for the AndroidPublisher API. Separate the build side configuration from API dependencies
@@ -83,18 +83,12 @@ interface PlayPublisher {
     }
 
     companion object {
-        private var factory: Factory = DefaultPlayPublisher
-
-        /** Overwrites the default [PlayPublisher.Factory] with [factory]. */
-        internal fun setFactory(factory: Factory) {
-            Companion.factory = factory
-        }
-
         /** Creates a new [PlayPublisher]. */
         operator fun invoke(
                 credentials: File,
                 email: String?,
                 appId: String
-        ): PlayPublisher = factory.create(credentials, email, appId)
+        ): PlayPublisher = ServiceLoader.load(Factory::class.java).last()
+                .create(credentials, email, appId)
     }
 }

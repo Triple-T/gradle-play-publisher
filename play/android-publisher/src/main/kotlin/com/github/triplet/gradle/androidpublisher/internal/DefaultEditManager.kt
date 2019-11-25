@@ -169,7 +169,7 @@ internal class DefaultEditManager(
         throw e
     }
 
-    companion object : EditManager.Factory {
+    class Factory : EditManager.Factory {
         override fun create(publisher: PlayPublisher, editId: String) = DefaultEditManager(
                 publisher as InternalPlayPublisher,
                 DefaultTrackManager(publisher, editId),

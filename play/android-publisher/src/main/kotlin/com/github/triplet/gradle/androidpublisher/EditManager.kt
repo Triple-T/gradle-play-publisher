@@ -1,7 +1,7 @@
 package com.github.triplet.gradle.androidpublisher
 
-import com.github.triplet.gradle.androidpublisher.internal.DefaultEditManager
 import java.io.File
+import java.util.ServiceLoader
 
 /**
  * Orchestrates all edit based operations.
@@ -77,17 +77,11 @@ interface EditManager {
     }
 
     companion object {
-        private var factory: Factory = DefaultEditManager
-
-        /** Overwrites the default [EditManager.Factory] with [factory]. */
-        internal fun setFactory(factory: Factory) {
-            Companion.factory = factory
-        }
-
         /** Creates a new [EditManager]. */
         operator fun invoke(
                 publisher: PlayPublisher,
                 editId: String
-        ): EditManager = factory.create(publisher, editId)
+        ): EditManager = ServiceLoader.load(Factory::class.java).last()
+                .create(publisher, editId)
     }
 }
