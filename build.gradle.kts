@@ -9,6 +9,7 @@ buildscript {
 }
 
 plugins {
+    `lifecycle-base`
     id("com.github.triplet.gradle.build")
     id("com.github.ben-manes.versions") version "0.27.0"
 }
@@ -20,10 +21,6 @@ buildScan {
 
 tasks.wrapper {
     distributionType = Wrapper.DistributionType.ALL
-}
-
-tasks.register<Delete>("clean") {
-    delete("build", "testapp/build")
 }
 
 allprojects {
