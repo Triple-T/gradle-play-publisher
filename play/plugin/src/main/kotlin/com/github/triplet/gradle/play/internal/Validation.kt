@@ -9,9 +9,10 @@ import org.gradle.util.DeprecationLogger
 
 internal fun PlayPublisherExtension.validateCreds() {
     val creds = checkNotNull(config.serviceAccountCredentials) {
-        "No credentials specified. Please read our docs for more details:\n" +
-                "https://github.com/Triple-T/gradle-play-publisher" +
-                "#authenticating-gradle-play-publisher"
+        """
+        |No credentials specified. Please read our docs for more details:
+        |https://github.com/Triple-T/gradle-play-publisher#authenticating-gradle-play-publisher
+        """.trimMargin()
     }
 
     // TODO(#710): remove once support for PKCS12 creds is gone

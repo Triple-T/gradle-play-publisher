@@ -75,19 +75,19 @@ internal abstract class GenerateEdit @Inject constructor(
         private fun handleFailure(response: EditResponse.Failure): String {
             if (response.isNewApp()) {
                 // Rethrow for clarity
-                response.rethrow(
-                        "No application found for the package name $appId. " +
-                                "The first version of your app must be uploaded via the " +
-                                "Play Store console.")
+                response.rethrow("""
+                    |No application found for the package name '$appId'. The first version of your
+                    |app must be uploaded via the Play Console.
+                """.trimMargin())
             } else if (response.isInvalidEdit()) {
                 Logging.getLogger(GenerateEdit::class.java)
                         .error("Failed to retrieve saved edit, regenerating.")
                 return getOrCreateEditId()
             } else if (response.isUnauthorized()) {
-                response.rethrow(
-                        "Service account not authenticated. See the README for instructions: " +
-                                "https://github.com/Triple-T/gradle-play-publisher/" +
-                                "blob/master/README.md#service-account")
+                response.rethrow("""
+                    |Service account not authenticated. See the README for instructions:
+                    |https://github.com/Triple-T/gradle-play-publisher#service-account
+                """.trimMargin())
             } else {
                 response.rethrow()
             }
