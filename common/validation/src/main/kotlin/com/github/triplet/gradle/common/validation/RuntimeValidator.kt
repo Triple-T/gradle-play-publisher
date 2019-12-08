@@ -17,19 +17,22 @@ internal class RuntimeValidator(
 
     private fun validateGradle() {
         check(currentGradleVersion >= minGradleVersion) {
-            "Gradle Play Publisher's minimum Gradle version is at least $minGradleVersion and " +
-                    "yours is $currentGradleVersion. Find the latest version at " +
-                    "https://github.com/gradle/gradle/releases, then run " +
-                    "'./gradlew wrapper --gradle-version=\$LATEST --distribution-type=ALL'."
+            """
+            |Gradle Play Publisher's minimum Gradle version is at least $minGradleVersion and yours
+            |is $currentGradleVersion. Find the latest version at
+            |https://github.com/gradle/gradle/releases/latest, then run
+            |$ ./gradlew wrapper --gradle-version=${"$"}LATEST --distribution-type=ALL
+            """.trimMargin()
         }
     }
 
     private fun validateAgp() {
         check(currentAgpVersion >= minAgpVersion) {
-            "Gradle Play Publisher's minimum Android Gradle Plugin version is at least " +
-                    "$minAgpVersion and yours is $currentAgpVersion. Find the latest version " +
-                    "and upgrade instructions at " +
-                    "https://developer.android.com/studio/releases/gradle-plugin."
+            """
+            |Gradle Play Publisher's minimum Android Gradle Plugin version is at least
+            |$minAgpVersion and yours is $currentAgpVersion. Find the latest version and upgrade
+            |instructions at https://developer.android.com/studio/releases/gradle-plugin.
+            """.trimMargin()
         }
         // TODO(#708): remove when 3.6 is the minimum
         check(currentAgpVersion < VersionNumber.parse("3.6.0-alpha01") ||
