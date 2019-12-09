@@ -11,7 +11,10 @@ import com.google.api.client.testing.http.HttpTesting
 import com.google.api.client.testing.http.MockHttpTransport.Builder
 import com.google.api.client.testing.http.MockLowLevelHttpResponse
 import com.google.api.services.androidpublisher.model.Apk
+import com.google.api.services.androidpublisher.model.AppDetails
 import com.google.api.services.androidpublisher.model.Bundle
+import com.google.api.services.androidpublisher.model.Image
+import com.google.api.services.androidpublisher.model.Listing
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertThrows
 import org.junit.Test
@@ -416,6 +419,52 @@ class DefaultEditManagerTest {
         edits.findMaxAppVersionCode()
 
         verify(mockTracks).findMaxAppVersionCode()
+    }
+
+    @Test
+    fun `fetchImageHashes returns hashes from publisher`() {
+        `when`(mockPublisher.getImages(any(), any(), any())).thenReturn(listOf(
+                Image().apply { sha256 = "a" },
+                Image().apply { sha256 = "b" },
+                Image().apply { sha256 = "c" }
+        ))
+
+        val result = edits.fetchImageHashes("en-US", "phoneScreenshots")
+
+        assertThat(result).containsExactly("a", "b", "c")
+    }
+
+    @Test
+    fun `publishAppDetails forwards data to publisher`() {
+        edits.publishAppDetails("lang", "email", "phone", "website")
+
+        verify(mockPublisher).updateDetails(eq("edit-id"), eq(AppDetails().apply {
+            defaultLanguage = "lang"
+            contactEmail = "email"
+            contactPhone = "phone"
+            contactWebsite = "website"
+        }))
+    }
+
+    @Test
+    fun `publishListing forwards data to publisher`() {
+        edits.publishListing("lang", "title", "short", "full", "url")
+
+        verify(mockPublisher).updateListing(eq("edit-id"), eq("lang"), eq(Listing().apply {
+            title = "title"
+            shortDescription = "short"
+            fullDescription = "full"
+            video = "url"
+        }))
+    }
+
+    @Test
+    fun `publishImages forwards data to publisher`() {
+        edits.publishImages("lang", "phoneScreenshots", listOf(mockFile))
+
+        verify(mockPublisher).deleteImages(eq("edit-id"), eq("lang"), eq("phoneScreenshots"))
+        verify(mockPublisher).uploadImage(
+                eq("edit-id"), eq("lang"), eq("phoneScreenshots"), eq(mockFile))
     }
 
     // TODO(asaveau): remove once https://github.com/googleapis/google-api-java-client/pull/1395

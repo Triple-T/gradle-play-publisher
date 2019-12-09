@@ -6,8 +6,11 @@ import java.io.File
 /** @return this file if it exists, null otherwise */
 fun File.orNull(): File? = takeIf { exists() }
 
+/** @return a new file on the same level as this file named [name]. */
+fun File.sibling(name: String): File = File(parentFile, name)
+
 /** @return a new file marked with the [marker] for bookkeeping of the original file. */
-fun File.marked(marker: String): File = File(parentFile, "$nameWithoutExtension.$marker")
+fun File.marked(marker: String): File = sibling("$nameWithoutExtension.$marker")
 
 /**
  * Returns a new parent file named [parentName] if found, null otherwise.

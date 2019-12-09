@@ -12,6 +12,34 @@ interface EditManager {
     /** Retrieves the highest version code available for this app. */
     fun findMaxAppVersionCode(): Long
 
+    /** Retrieves the SHA256 hashes of the app's graphics for the given [locale] and [type]. */
+    fun fetchImageHashes(locale: String, type: String): List<String>
+
+    /** Publish app details, overwriting any existing values. */
+    fun publishAppDetails(
+            defaultLanguage: String?,
+            contactEmail: String?,
+            contactPhone: String?,
+            contactWebsite: String?
+    )
+
+    /**
+     * Publish an app listing for the given [locale], overwriting any existing values.
+     *
+     * Note: valid locales may be found
+     * [here](https://support.google.com/googleplay/android-developer/table/4419860?hl=en).
+     */
+    fun publishListing(
+            locale: String,
+            title: String?,
+            shortDescription: String?,
+            fullDescription: String?,
+            video: String?
+    )
+
+    /** Publish images for a given [locale] and [type], overwriting any existing values. */
+    fun publishImages(locale: String, type: String, images: List<File>)
+
     /**
      * Promote a release from [fromTrackName] to [promoteTrackName] with the specified update
      * params.

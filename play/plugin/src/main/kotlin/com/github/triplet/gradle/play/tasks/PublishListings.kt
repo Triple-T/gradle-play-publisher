@@ -14,9 +14,6 @@ import com.github.triplet.gradle.play.tasks.internal.WriteTrackExtensionOptions
 import com.github.triplet.gradle.play.tasks.internal.workers.EditWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.workers.copy
 import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
-import com.google.api.client.http.FileContent
-import com.google.api.services.androidpublisher.model.AppDetails
-import com.google.api.services.androidpublisher.model.Listing
 import com.google.common.hash.Hashing
 import com.google.common.io.Files
 import org.gradle.api.file.Directory
@@ -42,7 +39,7 @@ import java.io.File
 import java.io.Serializable
 import javax.inject.Inject
 
-internal abstract class PublishListing @Inject constructor(
+internal abstract class PublishListings @Inject constructor(
         extension: PlayPublisherExtension,
         variant: ApplicationVariant
 ) : PublishEditTaskBase(extension, variant), WriteTrackExtensionOptions {
@@ -59,6 +56,7 @@ internal abstract class PublishListing @Inject constructor(
             for (detail in AppDetail.values()) include("/${detail.fileName}")
         }
     }
+
     @get:Incremental
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
@@ -67,6 +65,7 @@ internal abstract class PublishListing @Inject constructor(
             for (detail in ListingDetail.values()) include("/$LISTINGS_PATH/*/${detail.fileName}")
         }
     }
+
     @get:Incremental
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
@@ -181,15 +180,13 @@ internal abstract class PublishListing @Inject constructor(
 
     internal abstract class DetailsUploader : EditWorkerBase<DetailsUploader.Params>() {
         override fun execute() {
-            val details = AppDetails().apply {
-                defaultLanguage = AppDetail.DEFAULT_LANGUAGE.read()
-                contactEmail = AppDetail.CONTACT_EMAIL.read()
-                contactPhone = AppDetail.CONTACT_PHONE.read()
-                contactWebsite = AppDetail.CONTACT_WEBSITE.read()
-            }
+            val defaultLanguage = AppDetail.DEFAULT_LANGUAGE.read()
+            val contactEmail = AppDetail.CONTACT_EMAIL.read()
+            val contactPhone = AppDetail.CONTACT_PHONE.read()
+            val contactWebsite = AppDetail.CONTACT_WEBSITE.read()
 
             println("Uploading app details")
-            edits.details().update(appId, editId, details).execute()
+            edits2.publishAppDetails(defaultLanguage, contactEmail, contactPhone, contactWebsite)
         }
 
         private fun AppDetail.read() =
@@ -203,16 +200,19 @@ internal abstract class PublishListing @Inject constructor(
     internal abstract class ListingUploader : EditWorkerBase<ListingUploader.Params>() {
         override fun execute() {
             val locale = parameters.listingDir.get().asFile.name
-            val listing = Listing().apply {
-                title = ListingDetail.TITLE.read()
-                shortDescription = ListingDetail.SHORT_DESCRIPTION.read()
-                fullDescription = ListingDetail.FULL_DESCRIPTION.read()
-                video = ListingDetail.VIDEO.read()
+            val title = ListingDetail.TITLE.read()
+            val shortDescription = ListingDetail.SHORT_DESCRIPTION.read()
+            val fullDescription = ListingDetail.FULL_DESCRIPTION.read()
+            val video = ListingDetail.VIDEO.read()
+            if (title == null &&
+                    shortDescription == null &&
+                    fullDescription == null &&
+                    video == null) {
+                return
             }
-            if (listing.toPrettyString() == "{}") return
 
             println("Uploading $locale listing")
-            edits.listings().update(appId, editId, locale, listing).execute()
+            edits2.publishListing(locale, title, shortDescription, fullDescription, video)
         }
 
         private fun ListingDetail.read() =
@@ -236,35 +236,18 @@ internal abstract class PublishListing @Inject constructor(
                     .parentFile // graphics
                     .parentFile // en-US
                     .name
-            val remoteHashes = edits.images().list(appId, editId, locale, typeName).execute()
-                    .images.orEmpty()
-                    .map { it.sha256 }
+            val remoteHashes = edits2.fetchImageHashes(locale, typeName)
             val localHashes = files.map {
                 Files.asByteSource(it).hash(Hashing.sha256()).toString()
             }
             if (remoteHashes == localHashes) return
 
-            edits.images().deleteall(appId, editId, locale, typeName).execute()
-            for (file in files) {
-                println("Uploading $locale listing graphic for type '$typeName': ${file.name}")
-                // These can't be uploaded in parallel because order matters
-                edits.images().upload(
-                        appId,
-                        editId,
-                        locale,
-                        typeName,
-                        FileContent(MIME_TYPE_IMAGE, file)
-                ).execute()
-            }
+            edits2.publishImages(locale, typeName, files)
         }
 
         interface Params : EditPublishingParams {
             val imageDir: DirectoryProperty
             val imageType: Property<ImageType>
-        }
-
-        private companion object {
-            const val MIME_TYPE_IMAGE = "image/*"
         }
     }
 }

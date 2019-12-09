@@ -10,6 +10,18 @@ abstract class FakeEditManager : EditManager {
     override fun findMaxAppVersionCode(): Long =
             throw IllegalStateException("Test wasn't expecting this method to be called.")
 
+    override fun fetchImageHashes(locale: String, type: String): List<String> =
+            throw IllegalStateException("Test wasn't expecting this method to be called.")
+
+    override fun publishAppDetails(defaultLanguage: String?, contactEmail: String?, contactPhone: String?, contactWebsite: String?): Unit =
+            throw IllegalStateException("Test wasn't expecting this method to be called.")
+
+    override fun publishListing(locale: String, title: String?, shortDescription: String?, fullDescription: String?, video: String?): Unit =
+            throw IllegalStateException("Test wasn't expecting this method to be called.")
+
+    override fun publishImages(locale: String, type: String, images: List<File>): Unit =
+            throw IllegalStateException("Test wasn't expecting this method to be called.")
+
     override fun promoteRelease(
             promoteTrackName: String,
             fromTrackName: String?,

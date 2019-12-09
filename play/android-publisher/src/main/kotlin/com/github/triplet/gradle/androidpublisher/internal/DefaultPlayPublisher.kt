@@ -11,10 +11,13 @@ import com.google.api.client.http.FileContent
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.Apk
+import com.google.api.services.androidpublisher.model.AppDetails
 import com.google.api.services.androidpublisher.model.Bundle
 import com.google.api.services.androidpublisher.model.DeobfuscationFilesUploadResponse
 import com.google.api.services.androidpublisher.model.ExpansionFile
+import com.google.api.services.androidpublisher.model.Image
 import com.google.api.services.androidpublisher.model.InAppProduct
+import com.google.api.services.androidpublisher.model.Listing
 import com.google.api.services.androidpublisher.model.Track
 import java.io.File
 import kotlin.math.roundToInt
@@ -41,6 +44,27 @@ internal class DefaultPlayPublisher(
 
     override fun commitEdit(id: String) {
         publisher.edits().commit(appId, id).execute()
+    }
+
+    override fun getImages(editId: String, locale: String, type: String): List<Image> {
+        return publisher.edits().images().list(appId, editId, locale, type).execute().images.orEmpty()
+    }
+
+    override fun updateDetails(editId: String, details: AppDetails) {
+        publisher.edits().details().update(appId, editId, details).execute()
+    }
+
+    override fun updateListing(editId: String, locale: String, listing: Listing) {
+        publisher.edits().listings().update(appId, editId, locale, listing).execute()
+    }
+
+    override fun deleteImages(editId: String, locale: String, type: String) {
+        publisher.edits().images().deleteall(appId, editId, locale, type).execute()
+    }
+
+    override fun uploadImage(editId: String, locale: String, type: String, image: File) {
+        val content = FileContent(MIME_TYPE_IMAGE, image)
+        publisher.edits().images().upload(appId, editId, locale, type, content).execute()
     }
 
     override fun getTrack(editId: String, track: String): Track {
@@ -170,5 +194,6 @@ internal class DefaultPlayPublisher(
     private companion object {
         const val MIME_TYPE_STREAM = "application/octet-stream"
         const val MIME_TYPE_APK = "application/vnd.android.package-archive"
+        const val MIME_TYPE_IMAGE = "image/*"
     }
 }

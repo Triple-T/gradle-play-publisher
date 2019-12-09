@@ -5,6 +5,8 @@ import com.github.triplet.gradle.androidpublisher.PlayPublisher
 import com.github.triplet.gradle.androidpublisher.ReleaseStatus
 import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
+import com.google.api.services.androidpublisher.model.AppDetails
+import com.google.api.services.androidpublisher.model.Listing
 import org.gradle.api.logging.Logging
 import java.io.File
 
@@ -15,6 +17,48 @@ internal class DefaultEditManager(
 ) : EditManager {
     override fun findMaxAppVersionCode(): Long {
         return tracks.findMaxAppVersionCode()
+    }
+
+    override fun fetchImageHashes(locale: String, type: String): List<String> {
+        return publisher.getImages(editId, locale, type).map { it.sha256 }
+    }
+
+    override fun publishAppDetails(
+            defaultLanguage: String?,
+            contactEmail: String?,
+            contactPhone: String?,
+            contactWebsite: String?
+    ) {
+        publisher.updateDetails(editId, AppDetails().apply {
+            this.defaultLanguage = defaultLanguage
+            this.contactEmail = contactEmail
+            this.contactPhone = contactPhone
+            this.contactWebsite = contactWebsite
+        })
+    }
+
+    override fun publishListing(
+            locale: String,
+            title: String?,
+            shortDescription: String?,
+            fullDescription: String?,
+            video: String?
+    ) {
+        publisher.updateListing(editId, locale, Listing().apply {
+            this.title = title
+            this.shortDescription = shortDescription
+            this.fullDescription = fullDescription
+            this.video = video
+        })
+    }
+
+    override fun publishImages(locale: String, type: String, images: List<File>) {
+        publisher.deleteImages(editId, locale, type)
+        for (image in images) {
+            println("Uploading $locale listing graphic for type '$type': ${image.name}")
+            // These can't be uploaded in parallel because order matters
+            publisher.uploadImage(editId, locale, type, image)
+        }
     }
 
     override fun promoteRelease(

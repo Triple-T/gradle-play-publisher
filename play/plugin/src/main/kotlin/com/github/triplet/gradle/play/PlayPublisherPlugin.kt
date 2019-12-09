@@ -26,7 +26,7 @@ import com.github.triplet.gradle.play.tasks.PublishApk
 import com.github.triplet.gradle.play.tasks.PublishBundle
 import com.github.triplet.gradle.play.tasks.PublishInternalSharingApk
 import com.github.triplet.gradle.play.tasks.PublishInternalSharingBundle
-import com.github.triplet.gradle.play.tasks.PublishListing
+import com.github.triplet.gradle.play.tasks.PublishListings
 import com.github.triplet.gradle.play.tasks.PublishProducts
 import com.github.triplet.gradle.play.tasks.internal.BootstrapLifecycleTask
 import com.github.triplet.gradle.play.tasks.internal.BootstrapOptions
@@ -188,7 +188,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 it.resDir
             }
 
-            val publishListingTask = project.newTask<PublishListing>(
+            val publishListingTask = project.newTask<PublishListings>(
                     "publish${variantName}Listing",
                     """
                     |Uploads all Play Store metadata for variant '$name'.
