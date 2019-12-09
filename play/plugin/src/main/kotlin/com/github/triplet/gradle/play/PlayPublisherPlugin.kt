@@ -39,6 +39,8 @@ import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.kotlin.dsl.container
 import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.findPlugin
+import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.invoke
 import org.gradle.kotlin.dsl.the
 import org.gradle.kotlin.dsl.withType
@@ -48,13 +50,21 @@ internal class PlayPublisherPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         validateRuntime()
 
+        project.extensions.create<PlayPublisherExtension>(PLAY_PATH)
         project.plugins.withType<AppPlugin> {
             applyInternal(project)
+        }
+        project.afterEvaluate {
+            if (project.plugins.findPlugin(AppPlugin::class) == null) {
+                project.logger.warn(
+                        "The Android Gradle Plugin was not applied. Gradle Play Publisher " +
+                                "will not be configured.")
+            }
         }
     }
 
     private fun applyInternal(project: Project) {
-        val baseExtension = project.extensions.create<PlayPublisherExtension>(PLAY_PATH)
+        val baseExtension = project.extensions.getByType<PlayPublisherExtension>()
         val extensionContainer = project.container<PlayPublisherExtension>()
         val bootstrapOptionsHolder = BootstrapOptions.Holder()
 
