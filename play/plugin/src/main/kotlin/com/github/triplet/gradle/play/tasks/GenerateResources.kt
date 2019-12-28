@@ -19,7 +19,6 @@ import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.FileType
-import org.gradle.api.file.ProjectLayout
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.InputFiles
@@ -71,6 +70,7 @@ internal abstract class GenerateResources : DefaultTask() {
         }
         if (generateChanges.isNotEmpty()) {
             work.submit(Generator::class) {
+                projectDirectory.set(project.layout.projectDirectory)
                 inputDirs.set(resSrcDirs)
                 outputDir.set(resDir)
                 changedFiles.set(generateChanges)
@@ -156,7 +156,6 @@ internal abstract class GenerateResources : DefaultTask() {
     }
 
     abstract class Generator @Inject constructor(
-            private val layout: ProjectLayout,
             private val fileOps: FileSystemOperations
     ) : WorkAction<Generator.Params> {
         private val defaultLocale = findDefaultLocale()
@@ -269,11 +268,11 @@ internal abstract class GenerateResources : DefaultTask() {
                 if (line == null) break
 
                 if (line == "-") {
-                    producer = layout.projectDirectory.file(readLine()).asFile
+                    producer = parameters.projectDirectory.get().file(readLine()).asFile
                     continue
                 }
 
-                val generated = layout.projectDirectory.file(line).asFile
+                val generated = parameters.projectDirectory.get().file(line).asFile
                 safeAddValue(index, reverseIndex, generated, producer)
             }
         }
@@ -345,7 +344,7 @@ internal abstract class GenerateResources : DefaultTask() {
                 index: Map<File, Set<File>>,
                 reverseIndex: Map<File, Set<File>>
         ) {
-            val projectDir = layout.projectDirectory.asFile
+            val projectDir = parameters.projectDirectory.get().asFile
             for ((generated, producers) in index) {
                 val builder = StringBuilder()
                 for (producer in producers) {
@@ -453,6 +452,7 @@ internal abstract class GenerateResources : DefaultTask() {
         )
 
         interface Params : WorkParameters {
+            val projectDirectory: DirectoryProperty
             val outputDir: DirectoryProperty
             val inputDirs: ListProperty<Directory>
             val changedFiles: ListProperty<Pair<ChangeType, File>>

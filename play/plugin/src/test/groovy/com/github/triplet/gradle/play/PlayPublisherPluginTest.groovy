@@ -55,8 +55,12 @@ class PlayPublisherPluginTest {
         assertNotNull(project.tasks.publishPaidRelease)
         assertNotNull(project.tasks.publishFreeRelease)
 
-        assertEquals(var(project.tasks.publishFreeReleaseApk), project.android.applicationVariants[3])
-        assertEquals(var(project.tasks.publishPaidReleaseApk), project.android.applicationVariants[1])
+        assertEquals(
+                var(project.tasks.publishFreeReleaseApk),
+                project.android.applicationVariants.find { it.name == 'freeRelease' })
+        assertEquals(
+                var(project.tasks.publishPaidReleaseApk),
+                project.android.applicationVariants.find { it.name == 'paidRelease' })
     }
 
     @Test
