@@ -23,6 +23,8 @@ tasks.named<KotlinCompile>("compileTestKotlin") {
 
 // Give testFixtures access to internal symbols
 // TODO(asaveau): remove when https://youtrack.jetbrains.com/issue/KT-34901 gets fixed
-tasks.named<KotlinCompile>("compileTestFixturesKotlin") {
-    withGroovyBuilder { "setFriendTaskName\$kotlin_gradle_plugin"("compileKotlin") }
+kotlin.target.compilations {
+    named("testFixtures") {
+        associateWith(named("main").get())
+    }
 }
