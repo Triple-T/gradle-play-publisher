@@ -3,13 +3,8 @@ package com.github.triplet.gradle.androidpublisher.internal
 import com.github.triplet.gradle.androidpublisher.EditManager
 import com.github.triplet.gradle.androidpublisher.ReleaseStatus
 import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
-import com.google.api.client.googleapis.json.GoogleJsonResponseException
-import com.google.api.client.json.Json
-import com.google.api.client.json.JsonFactory
+import com.google.api.client.googleapis.testing.json.GoogleJsonResponseExceptionFactoryTesting
 import com.google.api.client.json.jackson2.JacksonFactory
-import com.google.api.client.testing.http.HttpTesting
-import com.google.api.client.testing.http.MockHttpTransport.Builder
-import com.google.api.client.testing.http.MockLowLevelHttpResponse
 import com.google.api.services.androidpublisher.model.Apk
 import com.google.api.services.androidpublisher.model.AppDetails
 import com.google.api.services.androidpublisher.model.Bundle
@@ -146,8 +141,9 @@ class DefaultEditManagerTest {
 
     @Test
     fun `uploadBundle fails silently when conflict occurs with ignore strategy`() {
-        `when`(mockPublisher.uploadBundle(any(), any())).thenThrow(newExceptionMock(
-                JacksonFactory.getDefaultInstance(), 400, "apkUpgradeVersionConflict"))
+        `when`(mockPublisher.uploadBundle(any(), any())).thenThrow(
+                GoogleJsonResponseExceptionFactoryTesting.newMock(
+                        JacksonFactory.getDefaultInstance(), 400, "apkUpgradeVersionConflict"))
 
         edits.uploadBundle(
                 bundleFile = mockFile,
@@ -169,8 +165,9 @@ class DefaultEditManagerTest {
 
     @Test
     fun `uploadBundle fails when conflict occurs with fail strategy`() {
-        `when`(mockPublisher.uploadBundle(any(), any())).thenThrow(newExceptionMock(
-                JacksonFactory.getDefaultInstance(), 400, "apkUpgradeVersionConflict"))
+        `when`(mockPublisher.uploadBundle(any(), any())).thenThrow(
+                GoogleJsonResponseExceptionFactoryTesting.newMock(
+                        JacksonFactory.getDefaultInstance(), 400, "apkUpgradeVersionConflict"))
 
         assertThrows(IllegalStateException::class.java) {
             edits.uploadBundle(
@@ -271,8 +268,9 @@ class DefaultEditManagerTest {
 
     @Test
     fun `uploadApk fails silently when conflict occurs with ignore strategy`() {
-        `when`(mockPublisher.uploadApk(any(), any())).thenThrow(newExceptionMock(
-                JacksonFactory.getDefaultInstance(), 400, "apkUpgradeVersionConflict"))
+        `when`(mockPublisher.uploadApk(any(), any())).thenThrow(
+                GoogleJsonResponseExceptionFactoryTesting.newMock(
+                        JacksonFactory.getDefaultInstance(), 400, "apkUpgradeVersionConflict"))
 
         edits.uploadApk(
                 apkFile = mockFile,
@@ -289,8 +287,9 @@ class DefaultEditManagerTest {
 
     @Test
     fun `uploadApk fails when conflict occurs with fail strategy`() {
-        `when`(mockPublisher.uploadApk(any(), any())).thenThrow(newExceptionMock(
-                JacksonFactory.getDefaultInstance(), 400, "apkUpgradeVersionConflict"))
+        `when`(mockPublisher.uploadApk(any(), any())).thenThrow(
+                GoogleJsonResponseExceptionFactoryTesting.newMock(
+                        JacksonFactory.getDefaultInstance(), 400, "apkUpgradeVersionConflict"))
 
         assertThrows(IllegalStateException::class.java) {
             edits.uploadApk(
@@ -465,28 +464,5 @@ class DefaultEditManagerTest {
         verify(mockPublisher).deleteImages(eq("edit-id"), eq("lang"), eq("phoneScreenshots"))
         verify(mockPublisher).uploadImage(
                 eq("edit-id"), eq("lang"), eq("phoneScreenshots"), eq(mockFile))
-    }
-
-    // TODO(asaveau): remove once https://github.com/googleapis/google-api-java-client/pull/1395
-    //  goes through
-    private fun newExceptionMock(
-            jsonFactory: JsonFactory,
-            httpCode: Int,
-            reasonPhrase: String
-    ): GoogleJsonResponseException {
-        val otherServiceUnavaiableLowLevelResponse = MockLowLevelHttpResponse()
-                .setStatusCode(httpCode)
-                .setReasonPhrase(reasonPhrase)
-                .setContentType(Json.MEDIA_TYPE)
-                .setContent("{ \"error\": { \"errors\": [ { \"reason\": \"$reasonPhrase\" } ], " +
-                                    "\"code\": $httpCode } }")
-        val otherTransport = Builder()
-                .setLowLevelHttpResponse(otherServiceUnavaiableLowLevelResponse)
-                .build()
-        val otherRequest = otherTransport
-                .createRequestFactory().buildGetRequest(HttpTesting.SIMPLE_GENERIC_URL)
-        otherRequest.throwExceptionOnExecuteError = false
-        val otherServiceUnavailableResponse = otherRequest.execute()
-        return GoogleJsonResponseException.from(jsonFactory, otherServiceUnavailableResponse)
     }
 }

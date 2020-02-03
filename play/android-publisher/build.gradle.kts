@@ -8,6 +8,7 @@ plugins {
 dependencies {
     implementation(project(":common:utils", "default"))
     implementation(Config.Libs.All.ap)
+    implementation(Config.Libs.All.googleClient)
 
     testImplementation(Config.Libs.All.junit)
     testImplementation(Config.Libs.All.truth)
