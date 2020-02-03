@@ -12,6 +12,7 @@ dependencies {
 
     compileOnly(Config.Libs.All.agp)
     implementation(Config.Libs.All.ap)
+    implementation(Config.Libs.All.guava)
 
     testImplementation(project(":common:utils", "default"))
     testImplementation(project(":common:validation", "default"))
