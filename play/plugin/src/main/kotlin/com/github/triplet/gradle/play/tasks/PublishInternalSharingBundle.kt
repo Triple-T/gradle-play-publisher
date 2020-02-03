@@ -47,7 +47,7 @@ internal abstract class PublishInternalSharingBundle @Inject constructor(
     abstract class BundleUploader : PlayWorkerBase<BundleUploader.Params>() {
         override fun execute() {
             val bundleFile = parameters.bundleFile.get().asFile
-            val response = publisher2.uploadInternalSharingBundle(bundleFile)
+            val response = publisher.uploadInternalSharingBundle(bundleFile)
 
             println("Upload successful: ${response.downloadUrl}")
             parameters.outputDir.get().file("${System.currentTimeMillis()}.json").asFile

@@ -8,6 +8,8 @@ import com.google.api.services.androidpublisher.model.TrackRelease
 internal interface TrackManager {
     fun findMaxAppVersionCode(): Long
 
+    fun getReleaseNotes(): Map<String, List<LocalizedText>>
+
     fun update(config: UpdateConfig)
 
     fun promote(config: PromoteConfig)
@@ -44,6 +46,21 @@ internal class DefaultTrackManager(
                 .flatMap { it.releases.orEmpty() }
                 .flatMap { it.versionCodes.orEmpty() }
                 .max() ?: 1
+    }
+
+    override fun getReleaseNotes(): Map<String, List<LocalizedText>> {
+        val releaseNotes = mutableMapOf<String, List<LocalizedText>>()
+
+        val tracks = publisher.listTracks(editId)
+        for (track in tracks) {
+            val notes = track.releases?.maxBy {
+                it.versionCodes?.max() ?: Long.MIN_VALUE
+            }?.releaseNotes.orEmpty()
+
+            releaseNotes[track.track] = notes
+        }
+
+        return releaseNotes
     }
 
     override fun update(config: TrackManager.UpdateConfig) {

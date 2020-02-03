@@ -1,6 +1,7 @@
 package com.github.triplet.gradle.play.tasks
 
 import com.android.build.gradle.api.ApplicationVariant
+import com.github.triplet.gradle.androidpublisher.GppListing
 import com.github.triplet.gradle.common.utils.nullOrFull
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.PlayPublisherExtension
@@ -16,9 +17,6 @@ import com.github.triplet.gradle.play.tasks.internal.PublishEditTaskBase
 import com.github.triplet.gradle.play.tasks.internal.workers.EditWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.workers.copy
 import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
-import com.google.api.client.json.jackson2.JacksonFactory
-import com.google.api.services.androidpublisher.AndroidPublisher
-import com.google.api.services.androidpublisher.model.Listing
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFile
@@ -31,7 +29,6 @@ import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkerExecutor
-import java.io.FileNotFoundException
 import java.net.URL
 import javax.inject.Inject
 
@@ -90,12 +87,12 @@ internal abstract class Bootstrap @Inject constructor(
     abstract class DetailsDownloader : EditWorkerBase<DetailsDownloader.Params>() {
         override fun execute() {
             println("Downloading app details")
-            val details = edits.details().get(appId, editId).execute()
+            val details = edits.getAppDetails()
 
+            details.defaultLocale.nullOrFull()?.write(AppDetail.DEFAULT_LANGUAGE)
             details.contactEmail.nullOrFull()?.write(AppDetail.CONTACT_EMAIL)
             details.contactPhone.nullOrFull()?.write(AppDetail.CONTACT_PHONE)
             details.contactWebsite.nullOrFull()?.write(AppDetail.CONTACT_WEBSITE)
-            details.defaultLanguage.nullOrFull()?.write(AppDetail.DEFAULT_LANGUAGE)
         }
 
         private fun String.write(detail: AppDetail) =
@@ -111,33 +108,33 @@ internal abstract class Bootstrap @Inject constructor(
     ) : EditWorkerBase<ListingsDownloader.Params>() {
         override fun execute() {
             println("Downloading listings")
-            val listings = edits.listings().list(appId, editId).execute().listings ?: return
+            val listings = edits.getListings()
 
             for (listing in listings) {
-                val rootDir = parameters.dir.get().dir(listing.language)
+                val rootDir = parameters.dir.get().dir(listing.locale)
 
                 listing.writeMetadata(rootDir)
                 listing.fetchImages(rootDir)
             }
         }
 
-        private fun Listing.writeMetadata(rootDir: Directory) {
+        private fun GppListing.writeMetadata(rootDir: Directory) {
             fun String.write(detail: ListingDetail) = rootDir.file(detail.fileName).write(this)
 
-            println("Downloading $language listing")
+            println("Downloading $locale listing")
             fullDescription.nullOrFull()?.write(ListingDetail.FULL_DESCRIPTION)
             shortDescription.nullOrFull()?.write(ListingDetail.SHORT_DESCRIPTION)
             title.nullOrFull()?.write(ListingDetail.TITLE)
             video.nullOrFull()?.write(ListingDetail.VIDEO)
         }
 
-        private fun Listing.fetchImages(rootDir: Directory) {
+        private fun GppListing.fetchImages(rootDir: Directory) {
             for (type in ImageType.values()) {
                 executor.noIsolation().submit(ImageFetcher::class) {
                     parameters.copy(this)
 
                     dir.set(rootDir.dir(GRAPHICS_PATH))
-                    language.set(this@fetchImages.language)
+                    language.set(locale)
                     imageType.set(type)
                 }
             }
@@ -153,11 +150,10 @@ internal abstract class Bootstrap @Inject constructor(
     ) : EditWorkerBase<ImageFetcher.Params>() {
         override fun execute() {
             val typeName = parameters.imageType.get().publishedName
-            val images = edits.images()
-                    .list(appId, editId, parameters.language.get(), typeName)
-                    .execute()
-                    .images ?: return
+            val images = edits.getImages(parameters.language.get(), typeName)
             val imageDir = parameters.dir.get().dir(parameters.imageType.get().dirName)
+
+            if (images.isEmpty()) return
 
             println("Downloading ${parameters.language.get()} listing graphics for type '$typeName'")
             for ((i, image) in images.withIndex()) {
@@ -180,23 +176,13 @@ internal abstract class Bootstrap @Inject constructor(
             parameters.target.get().asFile.safeCreateNewFile()
                     .outputStream()
                     .use { local ->
-                        val remote = try {
-                            URL(parameters.url.get() + HIGH_RES_IMAGE_REQUEST).openStream()
-                        } catch (e: FileNotFoundException) {
-                            URL(parameters.url.get()).openStream()
-                        }
-
-                        remote.use { it.copyTo(local) }
+                        URL(parameters.url.get()).openStream().use { it.copyTo(local) }
                     }
         }
 
         interface Params : WorkParameters {
             val target: RegularFileProperty
             val url: Property<String>
-        }
-
-        private companion object {
-            const val HIGH_RES_IMAGE_REQUEST = "=h16383" // Max res: 2^14 - 1
         }
     }
 
@@ -205,16 +191,10 @@ internal abstract class Bootstrap @Inject constructor(
         override fun execute() {
             println("Downloading release notes")
 
-            val tracks = edits.tracks().list(appId, editId).execute().tracks.orEmpty()
-            for (track in tracks) {
-                val notes = track.releases?.maxBy {
-                    it.versionCodes?.max() ?: Long.MIN_VALUE
-                }?.releaseNotes.orEmpty()
-
-                for (note in notes) {
-                    parameters.dir.get().file("${note.language}/${track.track}.txt")
-                            .write(note.text)
-                }
+            val notes = edits.getReleaseNotes()
+            for (note in notes) {
+                parameters.dir.get().file("${note.locale}/${note.track}.txt")
+                        .write(note.contents)
             }
         }
 
@@ -227,19 +207,10 @@ internal abstract class Bootstrap @Inject constructor(
         override fun execute() {
             println("Downloading in-app products")
 
-            var token: String? = null
-            do {
-                val response = publisher.inappproducts().list(appId).withToken(token).execute()
-                response.inappproduct?.forEach {
-                    parameters.dir.get().file("${it.sku}.json")
-                            .write(JacksonFactory.getDefaultInstance().toPrettyString(it))
-                }
-                token = response.tokenPagination?.nextPageToken
-            } while (token != null)
-        }
-
-        private fun AndroidPublisher.Inappproducts.List.withToken(token: String?) = apply {
-            this.token = token
+            val products = publisher.getInAppProducts()
+            for (product in products) {
+                parameters.dir.get().file("${product.sku}.json").write(product.json)
+            }
         }
 
         interface Params : EditPublishingParams {

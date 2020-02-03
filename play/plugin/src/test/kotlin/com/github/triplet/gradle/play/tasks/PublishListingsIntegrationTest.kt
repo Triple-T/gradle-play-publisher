@@ -3,6 +3,8 @@ package com.github.triplet.gradle.play.tasks
 import com.github.triplet.gradle.androidpublisher.EditResponse
 import com.github.triplet.gradle.androidpublisher.FakeEditManager
 import com.github.triplet.gradle.androidpublisher.FakePlayPublisher
+import com.github.triplet.gradle.androidpublisher.GppImage
+import com.github.triplet.gradle.androidpublisher.newImage
 import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
@@ -80,7 +82,7 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
         assertThat(result.output).doesNotContain("publishListing")
         assertThat(result.output).doesNotContain("publishImages")
         assertThat(result.output).contains("publishAppDetails(")
-        assertThat(result.output).contains("defaultLanguage=en-US")
+        assertThat(result.output).contains("defaultLocale=en-US")
         assertThat(result.output).contains("contactEmail=email")
         assertThat(result.output).contains("contactPhone=phone")
         assertThat(result.output).contains("contactWebsite=https://alexsaveau.dev")
@@ -263,7 +265,7 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":publishEverythingListing")!!.outcome)
                 .isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("publishAppDetails(")
-        assertThat(result.output).contains("defaultLanguage=en-US")
+        assertThat(result.output).contains("defaultLocale=en-US")
 
         assertThat(result.output).contains("publishListing(")
         assertThat(result.output).contains("locale=en-US")
@@ -297,18 +299,20 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
                 }
             }
             val edits = object : FakeEditManager() {
-                override fun fetchImageHashes(locale: String, type: String): List<String> {
-                    println("fetchImageHashes(locale=$locale, type=$type)")
-                    return System.getProperty("HASHES")?.split(",") ?: emptyList()
+                override fun getImages(locale: String, type: String): List<GppImage> {
+                    println("getImages(locale=$locale, type=$type)")
+                    return System.getProperty("HASHES")?.split(",").orEmpty().map {
+                        newImage("url", it)
+                    }
                 }
 
                 override fun publishAppDetails(
-                        defaultLanguage: String?,
+                        defaultLocale: String?,
                         contactEmail: String?,
                         contactPhone: String?,
                         contactWebsite: String?
                 ) {
-                    println("publishAppDetails(defaultLanguage=$defaultLanguage, " +
+                    println("publishAppDetails(defaultLocale=$defaultLocale, " +
                                     "contactEmail=$contactEmail, " +
                                     "contactPhone=$contactPhone, " +
                                     "contactWebsite=$contactWebsite)")

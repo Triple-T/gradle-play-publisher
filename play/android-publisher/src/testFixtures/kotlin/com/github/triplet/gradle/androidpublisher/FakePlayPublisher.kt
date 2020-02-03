@@ -22,6 +22,9 @@ abstract class FakePlayPublisher : PlayPublisher {
     override fun uploadInternalSharingApk(apkFile: File): UploadInternalSharingArtifactResponse =
             throw IllegalStateException("Test wasn't expecting this method to be called.")
 
+    override fun getInAppProducts(): List<GppProduct> =
+            throw IllegalStateException("Test wasn't expecting this method to be called.")
+
     override fun insertInAppProduct(productFile: File): Unit =
             throw IllegalStateException("Test wasn't expecting this method to be called.")
 

@@ -74,7 +74,7 @@ internal abstract class PublishApk @Inject constructor(
             val versions = parameters.uploadResults.asFileTree.map {
                 it.name.toLong()
             }.sorted()
-            edits2.publishApk(
+            edits.publishApk(
                     versions,
                     parameters.skippedMarker.get().asFile.exists(),
                     config.trackOrDefault,
@@ -99,7 +99,7 @@ internal abstract class PublishApk @Inject constructor(
 
         override fun upload() {
             val apkFile = parameters.apkFile.get().asFile
-            val versionCode = edits2.uploadApk(
+            val versionCode = edits.uploadApk(
                     apkFile,
                     parameters.mappingFile.orNull?.asFile,
                     config.resolutionStrategyOrDefault,

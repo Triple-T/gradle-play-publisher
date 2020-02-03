@@ -9,15 +9,24 @@ import java.util.ServiceLoader
  * For more information on edits, see [here](https://developers.google.com/android-publisher/edits).
  */
 interface EditManager {
+    /** Retrieves the current app details. */
+    fun getAppDetails(): GppAppDetails
+
+    /** Retrieves the current app listings for all languages. */
+    fun getListings(): List<GppListing>
+
+    /** Retrieves the app's graphics for the given [locale] and [type]. */
+    fun getImages(locale: String, type: String): List<GppImage>
+
     /** Retrieves the highest version code available for this app. */
     fun findMaxAppVersionCode(): Long
 
-    /** Retrieves the SHA256 hashes of the app's graphics for the given [locale] and [type]. */
-    fun fetchImageHashes(locale: String, type: String): List<String>
+    /** Retrieves the release notes across all tracks for this app. */
+    fun getReleaseNotes(): List<ReleaseNote>
 
     /** Publish app details, overwriting any existing values. */
     fun publishAppDetails(
-            defaultLanguage: String?,
+            defaultLocale: String?,
             contactEmail: String?,
             contactPhone: String?,
             contactWebsite: String?

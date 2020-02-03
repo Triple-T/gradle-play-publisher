@@ -7,11 +7,14 @@ plugins {
 }
 
 dependencies {
-    compileOnly(project(":common:validation", "default"))
     compileOnly(project(":play:android-publisher", "default"))
+    // START transitive deps
+    compileOnly(project(":common:validation", "default"))
+    runtimeOnly(Config.Libs.All.ap)
+    runtimeOnly(Config.Libs.All.googleClient)
+    // END
 
     compileOnly(Config.Libs.All.agp)
-    implementation(Config.Libs.All.ap)
     implementation(Config.Libs.All.guava)
 
     testImplementation(project(":common:utils", "default"))

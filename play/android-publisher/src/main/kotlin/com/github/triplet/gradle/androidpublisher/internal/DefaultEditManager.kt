@@ -1,7 +1,11 @@
 package com.github.triplet.gradle.androidpublisher.internal
 
 import com.github.triplet.gradle.androidpublisher.EditManager
+import com.github.triplet.gradle.androidpublisher.GppAppDetails
+import com.github.triplet.gradle.androidpublisher.GppImage
+import com.github.triplet.gradle.androidpublisher.GppListing
 import com.github.triplet.gradle.androidpublisher.PlayPublisher
+import com.github.triplet.gradle.androidpublisher.ReleaseNote
 import com.github.triplet.gradle.androidpublisher.ReleaseStatus
 import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
@@ -15,22 +19,52 @@ internal class DefaultEditManager(
         private val tracks: TrackManager,
         private val editId: String
 ) : EditManager {
+    override fun getAppDetails(): GppAppDetails {
+        val details = publisher.getAppDetails(editId)
+        return GppAppDetails(
+                details.defaultLanguage,
+                details.contactEmail,
+                details.contactPhone,
+                details.contactWebsite
+        )
+    }
+
+    override fun getListings(): List<GppListing> {
+        return publisher.getListings(editId).map {
+            GppListing(
+                    it.language,
+                    it.fullDescription,
+                    it.shortDescription,
+                    it.title,
+                    it.video
+            )
+        }
+    }
+
+    override fun getImages(locale: String, type: String): List<GppImage> {
+        return publisher.getImages(editId, locale, type).map {
+            GppImage(it.url + HIGH_RES_IMAGE_REQUEST, it.sha256)
+        }
+    }
+
     override fun findMaxAppVersionCode(): Long {
         return tracks.findMaxAppVersionCode()
     }
 
-    override fun fetchImageHashes(locale: String, type: String): List<String> {
-        return publisher.getImages(editId, locale, type).map { it.sha256 }
+    override fun getReleaseNotes(): List<ReleaseNote> {
+        return tracks.getReleaseNotes().map { (track, notes) ->
+            notes.map { ReleaseNote(track, it.language, it.text) }
+        }.flatten()
     }
 
     override fun publishAppDetails(
-            defaultLanguage: String?,
+            defaultLocale: String?,
             contactEmail: String?,
             contactPhone: String?,
             contactWebsite: String?
     ) {
         publisher.updateDetails(editId, AppDetails().apply {
-            this.defaultLanguage = defaultLanguage
+            this.defaultLanguage = defaultLocale
             this.contactEmail = contactEmail
             this.contactPhone = contactPhone
             this.contactWebsite = contactWebsite
@@ -219,5 +253,9 @@ internal class DefaultEditManager(
                 DefaultTrackManager(publisher, editId),
                 editId
         )
+    }
+
+    private companion object {
+        const val HIGH_RES_IMAGE_REQUEST = "=h16383" // Max res: 2^14 - 1
     }
 }

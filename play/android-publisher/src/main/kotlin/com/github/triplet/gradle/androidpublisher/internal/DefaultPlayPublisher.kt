@@ -1,6 +1,7 @@
 package com.github.triplet.gradle.androidpublisher.internal
 
 import com.github.triplet.gradle.androidpublisher.EditResponse
+import com.github.triplet.gradle.androidpublisher.GppProduct
 import com.github.triplet.gradle.androidpublisher.PlayPublisher
 import com.github.triplet.gradle.androidpublisher.UpdateProductResponse
 import com.github.triplet.gradle.androidpublisher.UploadInternalSharingArtifactResponse
@@ -44,6 +45,14 @@ internal class DefaultPlayPublisher(
 
     override fun commitEdit(id: String) {
         publisher.edits().commit(appId, id).execute()
+    }
+
+    override fun getAppDetails(editId: String): AppDetails {
+        return publisher.edits().details().get(appId, editId).execute()
+    }
+
+    override fun getListings(editId: String): List<Listing> {
+        return publisher.edits().listings().list(appId, editId).execute().listings.orEmpty()
     }
 
     override fun getImages(editId: String, locale: String, type: String): List<Image> {
@@ -131,6 +140,25 @@ internal class DefaultPlayPublisher(
                 .execute()
 
         return UploadInternalSharingArtifactResponse(apk.toPrettyString(), apk.downloadUrl)
+    }
+
+    override fun getInAppProducts(): List<GppProduct> {
+        fun AndroidPublisher.Inappproducts.List.withToken(token: String?) = apply {
+            this.token = token
+        }
+
+        val products = mutableListOf<InAppProduct>()
+
+        var token: String? = null
+        do {
+            val response = publisher.inappproducts().list(appId).withToken(token).execute()
+            products += response.inappproduct.orEmpty()
+            token = response.tokenPagination?.nextPageToken
+        } while (token != null)
+
+        return products.map {
+            GppProduct(it.sku, JacksonFactory.getDefaultInstance().toPrettyString(it))
+        }
     }
 
     override fun insertInAppProduct(productFile: File) {

@@ -70,7 +70,7 @@ internal abstract class PublishInternalSharingApk @Inject constructor(
     abstract class ApkUploader : PlayWorkerBase<ApkUploader.Params>() {
         override fun execute() {
             val apkFile = parameters.apkFile.get().asFile
-            val response = publisher2.uploadInternalSharingApk(apkFile)
+            val response = publisher.uploadInternalSharingApk(apkFile)
 
             println("Upload successful: ${response.downloadUrl}")
             parameters.outputDir.get().file("${System.currentTimeMillis()}.json").asFile

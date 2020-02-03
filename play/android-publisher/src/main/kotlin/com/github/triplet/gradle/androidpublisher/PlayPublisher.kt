@@ -51,6 +51,14 @@ interface PlayPublisher {
     fun uploadInternalSharingApk(apkFile: File): UploadInternalSharingArtifactResponse
 
     /**
+     * Get all current products.
+     *
+     * More docs are available
+     * [here](https://developers.google.com/android-publisher/api-ref/inappproducts/list).
+     */
+    fun getInAppProducts(): List<GppProduct>
+
+    /**
      * Creates a new product from the given [productFile].
      *
      * More docs are available

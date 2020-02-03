@@ -1,6 +1,7 @@
 package com.github.triplet.gradle.androidpublisher.internal
 
 import com.github.triplet.gradle.androidpublisher.EditManager
+import com.github.triplet.gradle.androidpublisher.ReleaseNote
 import com.github.triplet.gradle.androidpublisher.ReleaseStatus
 import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import com.google.api.client.googleapis.testing.json.GoogleJsonResponseExceptionFactoryTesting
@@ -10,6 +11,7 @@ import com.google.api.services.androidpublisher.model.AppDetails
 import com.google.api.services.androidpublisher.model.Bundle
 import com.google.api.services.androidpublisher.model.Image
 import com.google.api.services.androidpublisher.model.Listing
+import com.google.api.services.androidpublisher.model.LocalizedText
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertThrows
 import org.junit.Test
@@ -421,16 +423,45 @@ class DefaultEditManagerTest {
     }
 
     @Test
-    fun `fetchImageHashes returns hashes from publisher`() {
-        `when`(mockPublisher.getImages(any(), any(), any())).thenReturn(listOf(
-                Image().apply { sha256 = "a" },
-                Image().apply { sha256 = "b" },
-                Image().apply { sha256 = "c" }
+    fun `getReleaseNotes returns data from publisher`() {
+        `when`(mockTracks.getReleaseNotes()).thenReturn(mapOf(
+                "alpha" to listOf(LocalizedText().apply {
+                    language = "en-US"
+                    text = "foobar"
+                }),
+                "production" to listOf(
+                        LocalizedText().apply {
+                            language = "en-US"
+                            text = "prod foobar"
+                        },
+                        LocalizedText().apply {
+                            language = "fr-FR"
+                            text = "french foobar"
+                        }
+                )
         ))
 
-        val result = edits.fetchImageHashes("en-US", "phoneScreenshots")
+        val notes = edits.getReleaseNotes()
 
-        assertThat(result).containsExactly("a", "b", "c")
+        assertThat(notes).containsExactly(
+                ReleaseNote("alpha", "en-US", "foobar"),
+                ReleaseNote("production", "en-US", "prod foobar"),
+                ReleaseNote("production", "fr-FR", "french foobar")
+        )
+    }
+
+    @Test
+    fun `getImages returns data from publisher`() {
+        `when`(mockPublisher.getImages(any(), any(), any())).thenReturn(listOf(
+                Image().setSha256("a").setUrl("ha"),
+                Image().setSha256("b").setUrl("hb"),
+                Image().setSha256("c").setUrl("hc")
+        ))
+
+        val result = edits.getImages("en-US", "phoneScreenshots")
+
+        assertThat(result.map { it.sha256 }).containsExactly("a", "b", "c")
+        assertThat(result.map { it.url }).containsExactly("ha=h16383", "hb=h16383", "hc=h16383")
     }
 
     @Test

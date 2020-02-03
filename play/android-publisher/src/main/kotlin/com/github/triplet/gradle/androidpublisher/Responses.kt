@@ -3,6 +3,50 @@ package com.github.triplet.gradle.androidpublisher
 import com.github.triplet.gradle.androidpublisher.internal.has
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 
+/** Response for an app details request. */
+data class GppAppDetails internal constructor(
+        /** The default language. */
+        val defaultLocale: String?,
+        /** Developer contact email. */
+        val contactEmail: String?,
+        /** Developer contact phone. */
+        val contactPhone: String?,
+        /** Developer contact website. */
+        val contactWebsite: String?
+)
+
+/** Response for an app listing request. */
+data class GppListing internal constructor(
+        /** The listing's language. */
+        val locale: String,
+        /** The app description. */
+        val fullDescription: String?,
+        /** The app tagline. */
+        val shortDescription: String?,
+        /** The app title. */
+        val title: String?,
+        /** The app promo url. */
+        val video: String?
+)
+
+/** Response for an app graphic request. */
+data class GppImage internal constructor(
+        /** The image's download URL. */
+        val url: String,
+        /** The image's SHA256 hash. */
+        val sha256: String
+)
+
+/** Response for a track release note request. */
+data class ReleaseNote internal constructor(
+        /** The release note's track. */
+        val track: String,
+        /** The release note's language. */
+        val locale: String,
+        /** The release note. */
+        val contents: String
+)
+
 /** Response for an edit request. */
 sealed class EditResponse {
     /** Response for a successful edit request. */
@@ -40,6 +84,14 @@ data class UploadInternalSharingArtifactResponse internal constructor(
 
         /** The download URL of the uploaded artifact. */
         val downloadUrl: String
+)
+
+/** Response for a product request. */
+data class GppProduct internal constructor(
+        /** The product ID. */
+        val sku: String,
+        /** The response's full JSON payload. */
+        val json: String
 )
 
 /** Response for a product update request. */

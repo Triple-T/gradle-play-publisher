@@ -476,6 +476,83 @@ class DefaultTrackManagerTest {
     }
 
     @Test
+    fun `getReleaseNotes returns empty notes on empty tracks`() {
+        `when`(mockPublisher.listTracks(any())).thenReturn(emptyList())
+
+        val notes = tracks.getReleaseNotes()
+
+        assertThat(notes).isEmpty()
+    }
+
+    @Test
+    fun `getReleaseNotes returns empty notes on null release notes`() {
+        `when`(mockPublisher.listTracks(any())).thenReturn(listOf(
+                Track().setTrack("alpha"), Track().setTrack("production")))
+
+        val notes = tracks.getReleaseNotes()
+
+        assertThat(notes).containsExactly(
+                "alpha", emptyList<LocalizedText>(),
+                "production", emptyList<LocalizedText>()
+        )
+    }
+
+    @Test
+    fun `getReleaseNotes returns note on single track`() {
+        `when`(mockPublisher.listTracks(any())).thenReturn(listOf(Track().apply {
+            track = "alpha"
+            releases = listOf(
+                    TrackRelease().apply {
+                        releaseNotes = listOf(
+                                LocalizedText().setLanguage("en-US").setText("foobar"))
+                    }
+            )
+        }))
+
+        val notes = tracks.getReleaseNotes()
+
+        assertThat(notes).containsExactly(
+                "alpha", listOf(LocalizedText().setLanguage("en-US").setText("foobar"))
+        )
+    }
+
+    @Test
+    fun `getReleaseNotes returns notes on multiple tracks`() {
+        `when`(mockPublisher.listTracks(any())).thenReturn(listOf(Track().apply {
+            track = "alpha"
+            releases = listOf(
+                    TrackRelease().apply {
+                        releaseNotes = listOf(
+                                LocalizedText().setLanguage("en-US").setText("foobar"))
+                    }
+            )
+        }, Track().apply {
+            track = "production"
+            releases = listOf(
+                    TrackRelease().apply {
+                        versionCodes = listOf(123)
+                        releaseNotes = listOf(
+                                LocalizedText().setLanguage("en-US").setText("foobar old"),
+                                LocalizedText().setLanguage("fr-FR").setText("foobar french")
+                        )
+                    },
+                    TrackRelease().apply {
+                        versionCodes = listOf(321)
+                        releaseNotes = listOf(
+                                LocalizedText().setLanguage("en-US").setText("foobar new"))
+                    }
+            )
+        }))
+
+        val notes = tracks.getReleaseNotes()
+
+        assertThat(notes).containsExactly(
+                "alpha", listOf(LocalizedText().setLanguage("en-US").setText("foobar")),
+                "production", listOf(LocalizedText().setLanguage("en-US").setText("foobar new"))
+        )
+    }
+
+    @Test
     fun `Promoting tracks with no active releases fails`() {
         val config = TrackManager.PromoteConfig(
                 promoteTrackName = "alpha",

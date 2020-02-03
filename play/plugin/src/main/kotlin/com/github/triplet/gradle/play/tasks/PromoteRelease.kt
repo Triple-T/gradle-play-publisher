@@ -31,7 +31,7 @@ internal abstract class PromoteRelease @Inject constructor(
 
     abstract class Promoter : PublishArtifactWorkerBase<PublishArtifactWorkerBase.ArtifactPublishingParams>() {
         override fun upload() {
-            edits2.promoteRelease(
+            edits.promoteRelease(
                     config.promoteTrackOrDefault,
                     config.fromTrack,
                     config.releaseStatus,

@@ -186,7 +186,7 @@ internal abstract class PublishListings @Inject constructor(
             val contactWebsite = AppDetail.CONTACT_WEBSITE.read()
 
             println("Uploading app details")
-            edits2.publishAppDetails(defaultLanguage, contactEmail, contactPhone, contactWebsite)
+            edits.publishAppDetails(defaultLanguage, contactEmail, contactPhone, contactWebsite)
         }
 
         private fun AppDetail.read() =
@@ -212,7 +212,7 @@ internal abstract class PublishListings @Inject constructor(
             }
 
             println("Uploading $locale listing")
-            edits2.publishListing(locale, title, shortDescription, fullDescription, video)
+            edits.publishListing(locale, title, shortDescription, fullDescription, video)
         }
 
         private fun ListingDetail.read() =
@@ -236,13 +236,13 @@ internal abstract class PublishListings @Inject constructor(
                     .parentFile // graphics
                     .parentFile // en-US
                     .name
-            val remoteHashes = edits2.fetchImageHashes(locale, typeName)
+            val remoteHashes = edits.getImages(locale, typeName).map { it.sha256 }
             val localHashes = files.map {
                 Files.asByteSource(it).hash(Hashing.sha256()).toString()
             }
             if (remoteHashes == localHashes) return
 
-            edits2.publishImages(locale, typeName, files)
+            edits.publishImages(locale, typeName, files)
         }
 
         interface Params : EditPublishingParams {

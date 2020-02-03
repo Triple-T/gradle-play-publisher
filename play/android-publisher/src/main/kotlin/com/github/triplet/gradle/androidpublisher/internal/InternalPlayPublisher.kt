@@ -12,6 +12,10 @@ import java.io.File
 import java.io.IOException
 
 internal interface InternalPlayPublisher : PlayPublisher {
+    fun getAppDetails(editId: String): AppDetails
+
+    fun getListings(editId: String): List<Listing>
+
     fun getImages(editId: String, locale: String, type: String): List<Image>
 
     fun updateDetails(editId: String, details: AppDetails)
