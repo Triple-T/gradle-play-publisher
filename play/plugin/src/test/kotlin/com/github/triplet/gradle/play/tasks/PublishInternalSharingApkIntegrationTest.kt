@@ -6,12 +6,13 @@ import com.github.triplet.gradle.androidpublisher.newUploadInternalSharingArtifa
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
+import org.junit.Before
 import org.junit.Test
 import java.io.File
 
 class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
-    @Test
-    fun `Builds apk on-the-fly by default`() {
+    @Before
+    fun executeFactoryInstallation() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
@@ -19,7 +20,12 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
                     PublishInternalSharingApkIntegrationTest.installFactories()
         """
 
-        val result = execute(config, "uploadReleasePrivateApk")
+        execute(config, "help")
+    }
+
+    @Test
+    fun `Builds apk on-the-fly by default`() {
+        val result = execute("", "uploadReleasePrivateApk")
 
         assertThat(result.task(":assembleRelease")).isNotNull()
         assertThat(result.task(":assembleRelease")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
@@ -29,15 +35,8 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Rebuilding apk on-the-fly uses cached build`() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.
-                    PublishInternalSharingApkIntegrationTest.installFactories()
-        """
-
-        val result1 = execute(config, "uploadReleasePrivateApk")
-        val result2 = execute(config, "uploadReleasePrivateApk")
+        val result1 = execute("", "uploadReleasePrivateApk")
+        val result2 = execute("", "uploadReleasePrivateApk")
 
         assertThat(result1.task(":uploadReleasePrivateApk")).isNotNull()
         assertThat(result1.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
@@ -47,12 +46,8 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Using non-existent custom artifact fails build with warning`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.
-                    PublishInternalSharingApkIntegrationTest.installFactories()
-
             play {
                 artifactDir = file('${escapedTempDir()}')
             }
@@ -68,12 +63,8 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Using custom artifact skips on-the-fly apk build`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.
-                    PublishInternalSharingApkIntegrationTest.installFactories()
-
             play {
                 artifactDir = file('${escapedTempDir()}')
             }
@@ -91,12 +82,8 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Reusing custom artifact uses cached build`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.
-                    PublishInternalSharingApkIntegrationTest.installFactories()
-
             play {
                 artifactDir = file('${escapedTempDir()}')
             }
@@ -114,15 +101,8 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Using custom artifact CLI arg skips on-the-fly apk build`() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.
-                    PublishInternalSharingApkIntegrationTest.installFactories()
-        """
-
         File(tempDir.root, "foo.apk").createNewFile()
-        val result = execute(config, "uploadReleasePrivateApk", "--artifact-dir=${tempDir.root}")
+        val result = execute("", "uploadReleasePrivateApk", "--artifact-dir=${tempDir.root}")
 
         assertThat(result.task(":assembleRelease")).isNull()
         assertThat(result.task(":uploadReleasePrivateApk")).isNotNull()
@@ -133,12 +113,8 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Using custom artifact with multiple APKs uploads each one`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.
-                    PublishInternalSharingApkIntegrationTest.installFactories()
-
             play {
                 artifactDir = file('${escapedTempDir()}')
             }
@@ -156,16 +132,10 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Task outputs file with API response`() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.
-                    PublishInternalSharingApkIntegrationTest.installFactories()
-        """
         val outputDir = File(appDir, "build/outputs/internal-sharing/apk/release")
 
         val minimumTime = System.currentTimeMillis()
-        execute(config, "uploadReleasePrivateApk")
+        execute("", "uploadReleasePrivateApk")
         val maximumTime = System.currentTimeMillis()
 
         assertThat(outputDir.listFiles()).isNotNull()
@@ -178,14 +148,7 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Task logs download url to console`() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.
-                    PublishInternalSharingApkIntegrationTest.installFactories()
-        """
-
-        val result = execute(config, "uploadReleasePrivateApk")
+        val result = execute("", "uploadReleasePrivateApk")
 
         assertThat(result.output).contains("Upload successful: http")
     }

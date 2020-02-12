@@ -8,16 +8,25 @@ import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
+import org.junit.Before
 import org.junit.Test
 
 class PromoteReleaseIntegrationTest : IntegrationTestBase() {
-    @Test
-    fun `Promote uses standard track by default`() {
+    @Before
+    fun executeFactoryInstallation() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
             com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
+        """
 
+        execute(config, "help")
+    }
+
+    @Test
+    fun `Promote uses standard track by default`() {
+        // language=gradle
+        val config = """
             play.track = 'foobar'
         """
 
@@ -31,11 +40,8 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Promote uses promote track when specified`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
-
             play.track = 'foobar'
             play.promoteTrack = 'not-foobar'
         """
@@ -50,13 +56,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Promote finds from track dynamically by default`() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
-        """
-
-        val result = execute(config, "promoteReleaseArtifact")
+        val result = execute("", "promoteReleaseArtifact")
 
         assertThat(result.task(":promoteReleaseArtifact")).isNotNull()
         assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
@@ -66,11 +66,8 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Promote uses from track when specified`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
-
             play.fromTrack = 'foobar'
         """
 
@@ -84,14 +81,8 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `CLI params can be used to configure task`() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
-        """
-
         val result = execute(
-                config,
+                "",
                 "promoteReleaseArtifact",
                 "--no-commit",
                 "--from-track=myFromTrack",
@@ -114,13 +105,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `CLI params can be used to update track`() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
-        """
-
-        val result = execute(config, "promoteReleaseArtifact", "--update=myUpdateTrack")
+        val result = execute("", "promoteReleaseArtifact", "--update=myUpdateTrack")
 
         assertThat(result.task(":promoteReleaseArtifact")).isNotNull()
         assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
@@ -131,11 +116,8 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build succeeds when mapping file is produced but unavailable`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
-
             android.buildTypes.release {
                 shrinkResources true
                 minifyEnabled true
@@ -152,11 +134,8 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build uses correct release status`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
-
             play.releaseStatus 'draft'
         """
 
@@ -170,11 +149,8 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build picks default release name when no track specific ones are available`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
-
             android.buildTypes {
                 consoleNames {}
             }
@@ -191,11 +167,8 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build picks track specific release name when available`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
-
             android.buildTypes {
                 consoleNames {}
             }
@@ -214,11 +187,8 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build picks promote track specific release name when available`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
-
             android.buildTypes {
                 consoleNames {}
             }
@@ -238,11 +208,8 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build picks default release notes when no track specific ones are available`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
-
             android.buildTypes {
                 releaseNotes {}
             }
@@ -260,11 +227,8 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build picks track specific release notes when available`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
-
             android.buildTypes {
                 releaseNotes {}
             }
@@ -284,11 +248,8 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build picks promote track specific release notes when available`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
-
             android.buildTypes {
                 releaseNotes {}
             }
@@ -309,11 +270,8 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build uses correct user fraction`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
-
             play.userFraction 0.123
         """
 
@@ -327,11 +285,8 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build uses correct retained artifacts`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
-
             play.retain.artifacts = [1, 2, 3]
         """
 
@@ -345,14 +300,8 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build is not cacheable`() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
-        """
-
-        val result1 = execute(config, "promoteReleaseArtifact")
-        val result2 = execute(config, "promoteReleaseArtifact")
+        val result1 = execute("", "promoteReleaseArtifact")
+        val result2 = execute("", "promoteReleaseArtifact")
 
         assertThat(result1.task(":promoteReleaseArtifact")).isNotNull()
         assertThat(result1.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
@@ -364,13 +313,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build generates and commits edit by default`() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
-        """
-
-        val result = execute(config, "promoteReleaseArtifact")
+        val result = execute("", "promoteReleaseArtifact")
 
         assertThat(result.task(":promoteReleaseArtifact")).isNotNull()
         assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
@@ -380,11 +323,8 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build skips commit when no-commit flag is passed`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PromoteReleaseIntegrationTest.installFactories()
-
             play.commit = false
         """
 

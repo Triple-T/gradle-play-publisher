@@ -6,19 +6,25 @@ import com.github.triplet.gradle.androidpublisher.newUpdateProductResponse
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
+import org.junit.Before
 import org.junit.Test
 import java.io.File
 
 class PublishProductsIntegrationTest : IntegrationTestBase() {
-    @Test
-    fun `Empty dir of products skips task`() {
+    @Before
+    fun executeFactoryInstallation() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
             com.github.triplet.gradle.play.tasks.PublishProductsIntegrationTest.installFactories()
         """
 
-        val result = execute(config, "publishReleaseProducts")
+        execute(config, "help")
+    }
+
+    @Test
+    fun `Empty dir of products skips task`() {
+        val result = execute("", "publishReleaseProducts")
 
         assertThat(result.task(":publishReleaseProducts")).isNotNull()
         assertThat(result.task(":publishReleaseProducts")!!.outcome).isEqualTo(TaskOutcome.NO_SOURCE)
@@ -26,11 +32,8 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Invalid file is ignored and task is skipped`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishProductsIntegrationTest.installFactories()
-
             android.buildTypes {
                 invalid {}
             }
@@ -44,11 +47,8 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Hidden file is ignored and task is skipped`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishProductsIntegrationTest.installFactories()
-
             android.buildTypes {
                 hidden {}
             }
@@ -62,11 +62,8 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Basic product publishes`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishProductsIntegrationTest.installFactories()
-
             android.buildTypes {
                 simple {}
             }
@@ -84,11 +81,8 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Multiple products are all published`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishProductsIntegrationTest.installFactories()
-
             android.buildTypes {
                 multipleProducts {}
             }
@@ -104,11 +98,8 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Non-existent product tries updating then inserts`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishProductsIntegrationTest.installFactories()
-
             android.buildTypes {
                 simple {}
             }
@@ -126,11 +117,8 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Republishing products uses cached build`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishProductsIntegrationTest.installFactories()
-
             android.buildTypes {
                 multipleProducts {}
             }

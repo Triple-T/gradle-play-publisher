@@ -17,20 +17,27 @@ import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
+import org.junit.Before
 import org.junit.Test
 import java.io.File
 
 class BootstrapIntegrationTest : IntegrationTestBase() {
-    @Test
-    fun `Existing contents get deleted`() {
+    @Before
+    fun executeFactoryInstallation() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
             com.github.triplet.gradle.play.tasks.BootstrapIntegrationTest.installFactories()
         """
+
+        execute(config, "help")
+    }
+
+    @Test
+    fun `Existing contents get deleted`() {
         File(appDir, "foobar.txt").safeCreateNewFile().writeText("yo")
 
-        val result = execute(config, "bootstrapRelease")
+        val result = execute("", "bootstrapRelease")
 
         assertThat(result.task(":bootstrapRelease")).isNotNull()
         assertThat(result.task(":bootstrapRelease")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
@@ -40,13 +47,7 @@ class BootstrapIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `App details can be bootstrapped`() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.BootstrapIntegrationTest.installFactories()
-        """
-
-        val result = execute(config, "bootstrapRelease", "--app-details")
+        val result = execute("", "bootstrapRelease", "--app-details")
 
         assertThat(result.task(":bootstrapRelease")).isNotNull()
         assertThat(result.task(":bootstrapRelease")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
@@ -63,13 +64,7 @@ class BootstrapIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Listings can be bootstrapped`() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.BootstrapIntegrationTest.installFactories()
-        """
-
-        val result = execute(config, "bootstrapRelease", "--listings")
+        val result = execute("", "bootstrapRelease", "--listings")
 
         assertThat(result.task(":bootstrapRelease")).isNotNull()
         assertThat(result.task(":bootstrapRelease")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
@@ -86,13 +81,7 @@ class BootstrapIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Release notes can be bootstrapped`() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.BootstrapIntegrationTest.installFactories()
-        """
-
-        val result = execute(config, "bootstrapRelease", "--release-notes")
+        val result = execute("", "bootstrapRelease", "--release-notes")
 
         assertThat(result.task(":bootstrapRelease")).isNotNull()
         assertThat(result.task(":bootstrapRelease")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
@@ -107,13 +96,7 @@ class BootstrapIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Products can be bootstrapped`() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.BootstrapIntegrationTest.installFactories()
-        """
-
-        val result = execute(config, "bootstrapRelease", "--products")
+        val result = execute("", "bootstrapRelease", "--products")
 
         assertThat(result.task(":bootstrapRelease")).isNotNull()
         assertThat(result.task(":bootstrapRelease")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)

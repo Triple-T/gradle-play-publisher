@@ -6,12 +6,13 @@ import com.github.triplet.gradle.androidpublisher.newUploadInternalSharingArtifa
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
+import org.junit.Before
 import org.junit.Test
 import java.io.File
 
 class InstallInternalSharingArtifactIntegrationTest : IntegrationTestBase() {
-    @Test
-    fun `Build depends on uploading apk artifact by default`() {
+    @Before
+    fun executeFactoryInstallation() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
@@ -19,7 +20,12 @@ class InstallInternalSharingArtifactIntegrationTest : IntegrationTestBase() {
                     InstallInternalSharingArtifactIntegrationTest.installFactories()
         """
 
-        val result = execute(config, "installReleasePrivateArtifact")
+        execute(config, "help")
+    }
+
+    @Test
+    fun `Build depends on uploading apk artifact by default`() {
+        val result = execute("", "installReleasePrivateArtifact")
 
         assertThat(result.task(":uploadReleasePrivateApk")).isNotNull()
         assertThat(result.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
@@ -27,12 +33,8 @@ class InstallInternalSharingArtifactIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build depends on uploading bundle artifact when specified`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.
-                    InstallInternalSharingArtifactIntegrationTest.installFactories()
-
             play.defaultToAppBundles true
         """
 
@@ -44,15 +46,8 @@ class InstallInternalSharingArtifactIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Task is not cacheable`() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.
-                    InstallInternalSharingArtifactIntegrationTest.installFactories()
-        """
-
-        val result1 = execute(config, "installReleasePrivateArtifact")
-        val result2 = execute(config, "installReleasePrivateArtifact")
+        val result1 = execute("", "installReleasePrivateArtifact")
+        val result2 = execute("", "installReleasePrivateArtifact")
 
         assertThat(result1.task(":installReleasePrivateArtifact")).isNotNull()
         assertThat(result1.task(":installReleasePrivateArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
@@ -62,14 +57,7 @@ class InstallInternalSharingArtifactIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Task launches view intent with artifact URL`() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.
-                    InstallInternalSharingArtifactIntegrationTest.installFactories()
-        """
-
-        val result = execute(config, "installReleasePrivateArtifact")
+        val result = execute("", "installReleasePrivateArtifact")
 
         assertThat(result.task(":installReleasePrivateArtifact")).isNotNull()
         assertThat(result.task(":installReleasePrivateArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
@@ -79,12 +67,8 @@ class InstallInternalSharingArtifactIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Task fails when shell connection fails`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.
-                    InstallInternalSharingArtifactIntegrationTest.installFactories()
-
             System.setProperty("FAIL", "true")
         """
 

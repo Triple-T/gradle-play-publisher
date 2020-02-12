@@ -7,11 +7,12 @@ import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
+import org.junit.Before
 import org.junit.Test
 
 class ProcessArtifactMetadataIntegrationTest : IntegrationTestBase() {
-    @Test
-    fun `Task only runs on release`() {
+    @Before
+    fun executeFactoryInstallation() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
@@ -19,21 +20,19 @@ class ProcessArtifactMetadataIntegrationTest : IntegrationTestBase() {
                     ProcessArtifactMetadataIntegrationTest.installFactories()
         """
 
-        val result = execute(config, "assembleDebug")
+        execute(config, "help")
+    }
+
+    @Test
+    fun `Task only runs on release`() {
+        val result = execute("", "assembleDebug")
 
         assertThat(result.task(":processDebugMetadata")).isNull()
     }
 
     @Test
     fun `Task doesn't run by default`() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.
-                    ProcessArtifactMetadataIntegrationTest.installFactories()
-        """
-
-        val result = execute(config, "assembleRelease")
+        val result = execute("", "assembleRelease")
 
         assertThat(result.task(":processReleaseMetadata")).isNotNull()
         assertThat(result.task(":processReleaseMetadata")!!.outcome).isEqualTo(TaskOutcome.SKIPPED)
@@ -41,12 +40,8 @@ class ProcessArtifactMetadataIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Version code is incremented and output processor is run with updated version code`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.
-                    ProcessArtifactMetadataIntegrationTest.installFactories()
-
             play.resolutionStrategy = 'auto'
             play.outputProcessor { output ->
                 println("versionCode=" + output.versionCode)

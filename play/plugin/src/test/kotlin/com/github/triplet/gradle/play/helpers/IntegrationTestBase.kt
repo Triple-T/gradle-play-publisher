@@ -26,6 +26,31 @@ abstract class IntegrationTestBase {
     protected fun executeExpectingFailure(config: String, vararg tasks: String) =
             execute(config, true, *tasks)
 
+    protected fun executeGradle(
+            expectFailure: Boolean,
+            block: GradleRunner.() -> GradleRunner
+    ): BuildResult {
+        val runner = GradleRunner.create()
+                .withPluginClasspath()
+                .withProjectDir(appDir)
+                .let(block)
+
+        // We're doing some pretty wack (and disgusting, shameful) shit to run integration tests without
+        // actually publishing anything. The idea is have the build file call into the test class to run
+        // some code. Unfortunately, it'll mostly be limited to printlns since we can't actually share
+        // any state due to the same code being run in completely different classpaths (possibly
+        // even different processes), but at least we can validate that tasks are trying to publish the
+        // correct stuff now.
+        runner.withPluginClasspath(runner.pluginClasspath + listOf(
+                File("build/classes/kotlin/test"),
+                File("../android-publisher/build/resources/testFixtures")
+        ))
+
+        val result = if (expectFailure) runner.buildAndFail() else runner.build()
+        println(result.output)
+        return result
+    }
+
     private fun execute(
             config: String,
             expectFailure: Boolean,
@@ -71,22 +96,8 @@ abstract class IntegrationTestBase {
             }
         """)
 
-        val runner = GradleRunner.create()
-                .withPluginClasspath()
-                .withProjectDir(appDir)
-                .withArguments("-S", "--build-cache", *tasks)
-
-        // We're doing some pretty wack (and disgusting, shameful) shit to run integration tests without
-        // actually publishing anything. The idea is have the build file call into the test class to run
-        // some code. Unfortunately, it'll mostly be limited to printlns since we can't actually share
-        // any state due to the same code being run in completely different classpaths (possibly
-        // even different processes), but at least we can validate that tasks are trying to publish the
-        // correct stuff now.
-        runner.withPluginClasspath(
-                runner.pluginClasspath + listOf(File("build/classes/kotlin/test")))
-
-        val result = if (expectFailure) runner.buildAndFail() else runner.build()
-        println(result.output)
-        return result
+        return executeGradle(expectFailure) {
+            withArguments("-S", "--build-cache", *tasks)
+        }
     }
 }

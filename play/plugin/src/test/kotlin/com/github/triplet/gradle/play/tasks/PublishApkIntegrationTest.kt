@@ -9,19 +9,25 @@ import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
+import org.junit.Before
 import org.junit.Test
 import java.io.File
 
 class PublishApkIntegrationTest : IntegrationTestBase() {
-    @Test
-    fun `Builds apk on-the-fly by default`() {
+    @Before
+    fun executeFactoryInstallation() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
             com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
         """
 
-        val result = execute(config, "publishReleaseApk")
+        execute(config, "help")
+    }
+
+    @Test
+    fun `Builds apk on-the-fly by default`() {
+        val result = execute("", "publishReleaseApk")
 
         assertThat(result.task(":assembleRelease")).isNotNull()
         assertThat(result.task(":assembleRelease")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
@@ -32,14 +38,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Rebuilding apk on-the-fly uses cached build`() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-        """
-
-        val result1 = execute(config, "publishReleaseApk")
-        val result2 = execute(config, "publishReleaseApk")
+        val result1 = execute("", "publishReleaseApk")
+        val result2 = execute("", "publishReleaseApk")
 
         assertThat(result1.task(":publishReleaseApk")).isNotNull()
         assertThat(result1.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
@@ -49,11 +49,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Using non-existent custom artifact fails build with warning`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-
             play {
                 artifactDir = file('${escapedTempDir()}')
             }
@@ -69,11 +66,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Using custom artifact with multiple APKs uploads each one`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-
             play {
                 artifactDir = file('${escapedTempDir()}')
             }
@@ -91,11 +85,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Using custom artifact skips on-the-fly apk build`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-
             play {
                 artifactDir = file('${escapedTempDir()}')
             }
@@ -113,11 +104,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Reusing custom artifact uses cached build`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-
             play {
                 artifactDir = file('${escapedTempDir()}')
             }
@@ -135,14 +123,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Using custom artifact CLI arg skips on-the-fly APK build`() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-        """
-
         File(tempDir.root, "foo.apk").createNewFile()
-        val result = execute(config, "publishReleaseApk", "--artifact-dir=${tempDir.root}")
+        val result = execute("", "publishReleaseApk", "--artifact-dir=${tempDir.root}")
 
         assertThat(result.task(":assembleRelease")).isNull()
         assertThat(result.task(":publishReleaseApk")).isNotNull()
@@ -153,14 +135,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `CLI params can be used to configure task`() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-        """
-
         val result = execute(
-                config,
+                "",
                 "publishReleaseApk",
                 "--no-commit",
                 "--release-name=myRelName",
@@ -182,13 +158,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build generates and commits edit by default`() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-        """
-
-        val result = execute(config, "publishReleaseApk")
+        val result = execute("", "publishReleaseApk")
 
         assertThat(result.task(":publishReleaseApk")).isNotNull()
         assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
@@ -198,11 +168,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build skips commit when no-commit flag is passed`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-
             play.commit = false
         """
 
@@ -216,18 +183,13 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build properly assigns didSkipCommit param when no-commit flag is passed`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config1 = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-
             play.commit = false
         """
-        @Suppress("UnnecessaryQualifiedReference")
+
         // language=gradle
         val config2 = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-
             android.defaultConfig.versionCode 2
             play.commit = false
         """
@@ -248,11 +210,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build processes manifest when resolution strategy is set to auto`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-
             play.resolutionStrategy = 'auto'
         """
 
@@ -268,11 +227,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build uploads mapping file when available`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-
             android.buildTypes.release {
                 shrinkResources true
                 minifyEnabled true
@@ -291,11 +247,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build fails by default when upload fails`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-
             System.setProperty("FAIL", "true")
         """
 
@@ -308,11 +261,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build doesn't publish APKs when no uploads succeeded`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-
             System.setProperty("SOFT_FAIL", "true")
         """
 
@@ -327,11 +277,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build uploads multiple APKs when splits are used`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-
             android.splits.density {
                 enable true
                 reset()
@@ -365,11 +312,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build uses correct version code`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-
             android.defaultConfig.versionCode 8
         """
 
@@ -383,13 +327,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build uses correct variant name`() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-        """
-
-        val result = execute(config, "publishReleaseApk")
+        val result = execute("", "publishReleaseApk")
 
         assertThat(result.task(":publishReleaseApk")).isNotNull()
         assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
@@ -399,11 +337,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build uses correct track`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-
             play.track 'myCustomTrack'
         """
 
@@ -417,11 +352,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build uses correct release status`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-
             play.releaseStatus 'draft'
         """
 
@@ -435,11 +367,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build picks default release name when no track specific ones are available`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-
             android.buildTypes {
                 consoleNames {}
             }
@@ -456,11 +385,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build picks track specific release name when available`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-
             android.buildTypes {
                 consoleNames {}
             }
@@ -479,11 +405,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build ignores promote track specific release name when available`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-
             android.buildTypes {
                 consoleNames {}
             }
@@ -503,11 +426,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build picks default release notes when no track specific ones are available`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-
             android.buildTypes {
                 releaseNotes {}
             }
@@ -525,11 +445,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build picks track specific release notes when available`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-
             android.buildTypes {
                 releaseNotes {}
             }
@@ -549,11 +466,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build ignores promote track specific release notes when available`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-
             android.buildTypes {
                 releaseNotes {}
             }
@@ -574,11 +488,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build uses correct user fraction`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-
             play.userFraction 0.123
         """
 
@@ -592,11 +503,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build uses correct retained artifacts`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-
             play.retain.artifacts = [1, 2, 3]
         """
 
@@ -610,11 +518,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Build uses correct retained OBBs`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-
             play.retain.mainObb = 123
             play.retain.patchObb = 321
         """

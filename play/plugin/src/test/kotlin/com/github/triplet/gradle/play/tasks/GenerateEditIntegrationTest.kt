@@ -9,20 +9,27 @@ import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
+import org.junit.Before
 import org.junit.Test
 import java.io.File
 
 class GenerateEditIntegrationTest : IntegrationTestBase() {
-    @Test
-    fun `Fresh edit is created by default`() {
+    @Before
+    fun executeFactoryInstallation() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
             com.github.triplet.gradle.play.tasks.GenerateEditIntegrationTest.installFactories()
         """
+
+        execute(config, "help")
+    }
+
+    @Test
+    fun `Fresh edit is created by default`() {
         val editFile = File(appDir, "build/gpp/com.example.publisher.txt")
 
-        val result = execute(config, "generateEditForComDotExampleDotPublisher")
+        val result = execute("", "generateEditForComDotExampleDotPublisher")
 
         assertThat(result.task(":generateEditForComDotExampleDotPublisher")).isNotNull()
         assertThat(result.task(":generateEditForComDotExampleDotPublisher")!!.outcome)
@@ -34,16 +41,11 @@ class GenerateEditIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Skipped edit is read by default`() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.GenerateEditIntegrationTest.installFactories()
-        """
         val editFile = File(appDir, "build/gpp/com.example.publisher.txt")
         editFile.safeCreateNewFile().writeText("foobar")
         editFile.marked("skipped").safeCreateNewFile()
 
-        val result = execute(config, "generateEditForComDotExampleDotPublisher")
+        val result = execute("", "generateEditForComDotExampleDotPublisher")
 
         assertThat(result.task(":generateEditForComDotExampleDotPublisher")).isNotNull()
         assertThat(result.task(":generateEditForComDotExampleDotPublisher")!!.outcome)
@@ -55,11 +57,8 @@ class GenerateEditIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `New edit is created if skipped edit is invalid`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.GenerateEditIntegrationTest.installFactories()
-
             System.setProperty("FAIL", "true")
         """
         val editFile = File(appDir, "build/gpp/com.example.publisher.txt")

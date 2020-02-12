@@ -9,19 +9,25 @@ import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
+import org.junit.Before
 import org.junit.Test
 import java.io.File
 
 class PublishListingsIntegrationTest : IntegrationTestBase() {
-    @Test
-    fun `Empty dir of listings skips task`() {
+    @Before
+    fun executeFactoryInstallation() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
             com.github.triplet.gradle.play.tasks.PublishListingsIntegrationTest.installFactories()
         """
 
-        val result = execute(config, "publishReleaseListing")
+        execute(config, "help")
+    }
+
+    @Test
+    fun `Empty dir of listings skips task`() {
+        val result = execute("", "publishReleaseListing")
 
         assertThat(result.task(":publishReleaseListing")).isNotNull()
         assertThat(result.task(":publishReleaseListing")!!.outcome).isEqualTo(TaskOutcome.NO_SOURCE)
@@ -29,11 +35,8 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Invalid file is ignored and task is skipped`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishListingsIntegrationTest.installFactories()
-
             android.buildTypes {
                 invalid {}
             }
@@ -47,11 +50,8 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Hidden file is ignored and task is skipped`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishListingsIntegrationTest.installFactories()
-
             android.buildTypes {
                 hidden {}
             }
@@ -65,11 +65,8 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Publishing app details succeeds`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishListingsIntegrationTest.installFactories()
-
             android.buildTypes {
                 details {}
             }
@@ -90,11 +87,8 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Publishing single listing succeeds`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishListingsIntegrationTest.installFactories()
-
             android.buildTypes {
                 singleListing {}
             }
@@ -117,11 +111,8 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Publishing multiple listing locales succeeds`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishListingsIntegrationTest.installFactories()
-
             android.buildTypes {
                 multiLangListing {}
             }
@@ -142,11 +133,8 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Publishing single graphic succeeds`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishListingsIntegrationTest.installFactories()
-
             android.buildTypes {
                 singleGraphics {}
             }
@@ -167,11 +155,8 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Publishing ignores graphics already on server`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishListingsIntegrationTest.installFactories()
-
             android.buildTypes {
                 singleGraphics {}
             }
@@ -192,11 +177,8 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Publishing multiple graphics succeeds`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishListingsIntegrationTest.installFactories()
-
             android.buildTypes {
                 multiGraphics {}
             }
@@ -221,11 +203,8 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Publishing multiple graphic locales succeeds`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishListingsIntegrationTest.installFactories()
-
             android.buildTypes {
                 multiLangGraphics {}
             }
@@ -249,11 +228,8 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Publishing all metadata succeeds`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.PublishListingsIntegrationTest.installFactories()
-
             android.buildTypes {
                 everything {}
             }

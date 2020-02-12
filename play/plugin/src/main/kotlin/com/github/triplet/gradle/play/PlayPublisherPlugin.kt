@@ -56,9 +56,9 @@ internal class PlayPublisherPlugin : Plugin<Project> {
         }
         project.afterEvaluate {
             if (project.plugins.findPlugin(AppPlugin::class) == null) {
-                project.logger.warn(
+                throw IllegalStateException(
                         "The Android Gradle Plugin was not applied. Gradle Play Publisher " +
-                                "will not be configured.")
+                                "cannot be configured.")
             }
         }
     }
@@ -124,15 +124,12 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 """.trimMargin()
         )
 
-        // TODO(#709): add tests for validateDebuggability
-        // TODO(#709): add tests for buildExtension
-        // TODO(#709): add tests for validateCreds
-        // TODO(#709): add tests for GoogleJsonResponseException.has
         val android = project.the<AppExtension>()
         (android as ExtensionAware).extensions.add(PLAY_CONFIGS_PATH, extensionContainer)
         android.applicationVariants.whenObjectAdded {
             if (!validateDebuggability()) return@whenObjectAdded
             val extension = buildExtension(extensionContainer, baseExtension)
+            project.logger.debug("Extension computed for variant '$name': $extension")
 
             if (!extension.isEnabled) {
                 project.logger.info("Gradle Play Publisher is disabled for variant '$name'.")

@@ -6,12 +6,13 @@ import com.github.triplet.gradle.androidpublisher.newUploadInternalSharingArtifa
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
+import org.junit.Before
 import org.junit.Test
 import java.io.File
 
 class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
-    @Test
-    fun `Builds bundle on-the-fly by default`() {
+    @Before
+    fun executeFactoryInstallation() {
         @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
@@ -19,7 +20,12 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
                     PublishInternalSharingBundleIntegrationTest.installFactories()
         """
 
-        val result = execute(config, "uploadReleasePrivateBundle")
+        execute(config, "help")
+    }
+
+    @Test
+    fun `Builds bundle on-the-fly by default`() {
+        val result = execute("", "uploadReleasePrivateBundle")
 
         assertThat(result.task(":bundleRelease")).isNotNull()
         assertThat(result.task(":bundleRelease")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
@@ -29,15 +35,8 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Rebuilding bundle on-the-fly uses cached build`() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.
-                    PublishInternalSharingBundleIntegrationTest.installFactories()
-        """
-
-        val result1 = execute(config, "uploadReleasePrivateBundle")
-        val result2 = execute(config, "uploadReleasePrivateBundle")
+        val result1 = execute("", "uploadReleasePrivateBundle")
+        val result2 = execute("", "uploadReleasePrivateBundle")
 
         assertThat(result1.task(":uploadReleasePrivateBundle")).isNotNull()
         assertThat(result1.task(":uploadReleasePrivateBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
@@ -47,12 +46,8 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Using non-existent custom artifact fails build with warning`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.
-                    PublishInternalSharingBundleIntegrationTest.installFactories()
-
             play {
                 artifactDir = file('${escapedTempDir()}')
             }
@@ -69,12 +64,8 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Using custom artifact with multiple bundles fails build with warning`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.
-                    PublishInternalSharingBundleIntegrationTest.installFactories()
-
             play {
                 artifactDir = file('${escapedTempDir()}')
             }
@@ -93,12 +84,8 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Using custom artifact skips on-the-fly bundle build`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.
-                    PublishInternalSharingBundleIntegrationTest.installFactories()
-
             play {
                 artifactDir = file('${escapedTempDir()}')
             }
@@ -117,12 +104,8 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Reusing custom artifact uses cached build`() {
-        @Suppress("UnnecessaryQualifiedReference")
         // language=gradle
         val config = """
-            com.github.triplet.gradle.play.tasks.
-                    PublishInternalSharingBundleIntegrationTest.installFactories()
-
             play {
                 artifactDir = file('${escapedTempDir()}')
             }
@@ -140,15 +123,8 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Using custom artifact CLI arg skips on-the-fly bundle build`() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.
-                    PublishInternalSharingBundleIntegrationTest.installFactories()
-        """
-
         File(tempDir.root, "foo.aab").createNewFile()
-        val result = execute(config, "uploadReleasePrivateBundle", "--artifact-dir=${tempDir.root}")
+        val result = execute("", "uploadReleasePrivateBundle", "--artifact-dir=${tempDir.root}")
 
         assertThat(result.task(":bundleRelease")).isNull()
         assertThat(result.task(":uploadReleasePrivateBundle")).isNotNull()
@@ -160,16 +136,10 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Task outputs file with API response`() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.
-                    PublishInternalSharingBundleIntegrationTest.installFactories()
-        """
         val outputDir = File(appDir, "build/outputs/internal-sharing/bundle/release")
 
         val minimumTime = System.currentTimeMillis()
-        execute(config, "uploadReleasePrivateBundle")
+        execute("", "uploadReleasePrivateBundle")
         val maximumTime = System.currentTimeMillis()
 
         assertThat(outputDir.listFiles()).isNotNull()
@@ -182,14 +152,7 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Task logs download url to console`() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.
-                    PublishInternalSharingBundleIntegrationTest.installFactories()
-        """
-
-        val result = execute(config, "uploadReleasePrivateBundle")
+        val result = execute("", "uploadReleasePrivateBundle")
 
         assertThat(result.output).contains("Upload successful: http")
     }
