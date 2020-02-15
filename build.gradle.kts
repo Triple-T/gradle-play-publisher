@@ -10,7 +10,6 @@ buildscript {
 
 plugins {
     `lifecycle-base`
-    id("com.github.triplet.gradle.build")
     id("com.github.ben-manes.versions") version "0.27.0"
 }
 
@@ -37,16 +36,13 @@ allprojects {
         }
     }
 
-    if (System.getenv("CI") == null) {
-        tasks.withType<Test> {
-            maxParallelForks = 3
-        }
-    } else {
-        tasks.withType<Test> {
-            testLogging {
-                events("passed", "failed", "skipped")
-                showStandardStreams = true
-            }
+    tasks.withType<Test> {
+        maxParallelForks = 8
+
+        testLogging {
+            events("passed", "failed", "skipped")
+            showStandardStreams = true
+            setExceptionFormat("full")
         }
     }
 }

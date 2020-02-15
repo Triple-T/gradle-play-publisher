@@ -9,21 +9,12 @@ import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.Before
 import org.junit.Test
 import java.io.File
 
 class PublishApkIntegrationTest : IntegrationTestBase() {
-    @Before
-    fun executeFactoryInstallation() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.PublishApkIntegrationTest.installFactories()
-        """
-
-        execute(config, "help")
-    }
+    override val factoryInstallerStatement = "com.github.triplet.gradle.play.tasks." +
+            "PublishApkIntegrationTest.installFactories()"
 
     @Test
     fun `Builds apk on-the-fly by default`() {

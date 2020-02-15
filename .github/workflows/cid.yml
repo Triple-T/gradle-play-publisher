@@ -1,0 +1,108 @@
+name: CI/CD
+
+on: [push, pull_request]
+env:
+  GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Dkotlin.incremental=false -Dkotlin.compiler.execution.strategy=in-process
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Gradle Cache
+        uses: actions/cache@v1
+        with:
+          path: ~/.gradle
+          key: ${{ runner.os }}-v2-gradle-${{ hashFiles('**/*') }}
+          restore-keys: |
+            ${{ runner.os }}-v2-gradle-
+      - name: Setup environment
+        run: ./gradlew publishToMavenLocal
+      - name: Build project
+        run: |
+          ./gradlew assemble -S
+          cd testapp && ../gradlew help -PskipValidation
+      - name: Upload libs
+        uses: actions/upload-artifact@v1
+        with:
+          name: libs
+          path: play/plugin/build/libs
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Cache Gradle
+        uses: actions/cache@v1
+        with:
+          path: ~/.gradle
+          key: ${{ runner.os }}-v2-gradle-${{ hashFiles('**/*') }}
+          restore-keys: |
+            ${{ runner.os }}-v2-gradle-
+      - name: Setup environment
+        run: ./gradlew publishToMavenLocal
+      - name: Run tests
+        run: ./gradlew check test -S
+
+  deploy_snapshot:
+    needs: [build, test]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    env:
+      SONATYPE_NEXUS_USERNAME: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
+      SONATYPE_NEXUS_PASSWORD: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Gradle Cache
+        uses: actions/cache@v1
+        with:
+          path: ~/.gradle
+          key: ${{ runner.os }}-v2-gradle-${{ hashFiles('**/*') }}
+          restore-keys: |
+            ${{ runner.os }}-v2-gradle-
+      - name: Publish snapshot
+        run: ./gradlew publish
+
+  deploy_release:
+    needs: [build, test]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Gradle Cache
+        uses: actions/cache@v1
+        with:
+          path: ~/.gradle
+          key: ${{ runner.os }}-v2-gradle-${{ hashFiles('**/*') }}
+          restore-keys: |
+            ${{ runner.os }}-v2-gradle-
+      - name: Install creds
+        run: |
+          mkdir -p $HOME/.gradle
+          echo "gradle.publish.key=$PUBLISH_KEY" > $HOME/.gradle/gradle.properties
+          echo "gradle.publish.secret=$PUBLISH_SECRET" >> $HOME/.gradle/gradle.properties
+        env:
+          PUBLISH_KEY: ${{ secrets.PUBLISH_KEY }}
+          PUBLISH_SECRET: ${{ secrets.PUBLISH_SECRET }}
+      - name: Publish release
+        run: ./gradlew publishPlugins

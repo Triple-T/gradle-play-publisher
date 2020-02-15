@@ -7,8 +7,8 @@
 </h1>
 
 <p align="center">
-    <a href="https://circleci.com/gh/Triple-T/gradle-play-publisher">
-        <img src="https://circleci.com/gh/Triple-T/gradle-play-publisher.svg?style=svg" />
+    <a href="https://github.com/Triple-T/gradle-play-publisher/actions">
+        <img src="https://github.com/Triple-T/gradle-play-publisher/workflows/CI/CD/badge.svg" />
     </a>
     <a href="https://plugins.gradle.org/plugin/com.github.triplet.play">
         <img src="https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/com/github/triplet/play/com.github.triplet.play.gradle.plugin/maven-metadata.xml.svg?label=Gradle%20Plugins%20Portal" />

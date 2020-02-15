@@ -7,21 +7,11 @@ import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.Before
 import org.junit.Test
 
 class ProcessArtifactMetadataIntegrationTest : IntegrationTestBase() {
-    @Before
-    fun executeFactoryInstallation() {
-        @Suppress("UnnecessaryQualifiedReference")
-        // language=gradle
-        val config = """
-            com.github.triplet.gradle.play.tasks.
-                    ProcessArtifactMetadataIntegrationTest.installFactories()
-        """
-
-        execute(config, "help")
-    }
+    override val factoryInstallerStatement = "com.github.triplet.gradle.play.tasks." +
+            "ProcessArtifactMetadataIntegrationTest.installFactories()"
 
     @Test
     fun `Task only runs on release`() {

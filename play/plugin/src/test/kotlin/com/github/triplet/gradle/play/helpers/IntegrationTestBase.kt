@@ -13,6 +13,8 @@ abstract class IntegrationTestBase {
     val tempDir = TemporaryFolder()
     protected val appDir by lazy { File(tempDir.root, "app") }
 
+    protected open val factoryInstallerStatement: String? = null
+
     @Before
     fun initTestResources() {
         File("src/test/fixtures/app").copyRecursively(appDir)
@@ -94,6 +96,8 @@ abstract class IntegrationTestBase {
             play {
                 serviceAccountCredentials = file('creds.json')
             }
+
+            ${factoryInstallerStatement ?: ""}
         """)
 
         return executeGradle(expectFailure) {
