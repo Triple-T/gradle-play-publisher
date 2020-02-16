@@ -377,6 +377,63 @@ class DefaultTrackManagerTest {
     }
 
     @Test
+    fun `Track update `() {
+        val config = TrackManager.UpdateConfig(
+                trackName = "alpha",
+                versionCodes = listOf(888),
+                releaseStatus = ReleaseStatus.COMPLETED,
+                didPreviousBuildSkipCommit = false,
+                base = TrackManager.BaseConfig(
+                        releaseStatus = ReleaseStatus.COMPLETED,
+                        userFraction = null,
+                        releaseNotes = null,
+                        retainableArtifacts = null,
+                        releaseName = null
+                )
+        )
+        `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().apply {
+            releases = listOf(TrackRelease().apply {
+                status = "completed"
+                versionCodes = listOf(1, 2)
+                releaseNotes = listOf(
+                        LocalizedText().apply {
+                            language = "lang1-1"
+                            text = "notes1-1"
+                        }
+                )
+            }, TrackRelease().apply {
+                status = "inProgress"
+                versionCodes = listOf(3)
+                releaseNotes = listOf(
+                        LocalizedText().apply {
+                            language = "lang1-2"
+                            text = "notes1-2"
+                        },
+                        LocalizedText().apply {
+                            language = "lang2"
+                            text = "notes2"
+                        }
+                )
+            })
+        })
+
+        tracks.update(config)
+
+        val trackCaptor = ArgumentCaptor.forClass(Track::class.java)
+        verify(mockPublisher).updateTrack(eq("edit-id"), trackCaptor.capture())
+        assertThat(trackCaptor.value.releases).hasSize(1)
+        assertThat(trackCaptor.value.releases.single().releaseNotes).hasSize(2)
+        assertThat(trackCaptor.value.releases.single().releaseNotes.first().language)
+                .isEqualTo("lang1-2")
+        assertThat(trackCaptor.value.releases.single().releaseNotes.first().text)
+                .isEqualTo("notes1-2")
+        assertThat(trackCaptor.value.releases.single().releaseNotes.last().language)
+                .isEqualTo("lang2")
+        assertThat(trackCaptor.value.releases.single().releaseNotes.last().text)
+                .isEqualTo("notes2")
+    }
+
+    @Test
     fun `findMaxAppVersionCode returns 1 on empty tracks`() {
         `when`(mockPublisher.listTracks(any())).thenReturn(emptyList())
 

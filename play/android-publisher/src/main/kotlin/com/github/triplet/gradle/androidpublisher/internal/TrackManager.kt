@@ -72,6 +72,8 @@ internal class DefaultTrackManager(
             createDefaultTrack(config)
         }
 
+        track.maybeCopyChangelogFromPreviousRelease(config.trackName)
+
         publisher.updateTrack(editId, track)
     }
 
@@ -149,6 +151,16 @@ internal class DefaultTrackManager(
     private fun createDefaultTrack(config: TrackManager.UpdateConfig) = Track().apply {
         track = config.trackName
         releases = listOf(TrackRelease().mergeChanges(config.versionCodes, config.base))
+    }
+
+    private fun Track.maybeCopyChangelogFromPreviousRelease(trackName: String) {
+        val release = releases.singleOrNull { track == trackName } ?: return
+        if (!release.releaseNotes.isNullOrEmpty()) return
+
+        val previousRelease = publisher.getTrack(editId, trackName)
+                .releases.orEmpty()
+                .maxBy { it.versionCodes.orEmpty().max() ?: 1 }
+        release.releaseNotes = previousRelease?.releaseNotes
     }
 
     private fun TrackRelease.mergeChanges(
