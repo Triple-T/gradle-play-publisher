@@ -37,13 +37,16 @@ fun File.isDirectChildOf(parentName: String): Boolean = parentFile?.name == pare
 
 /** @return this directory after ensuring that it either already exists or was created */
 fun File.safeMkdirs(): File = apply {
-    check(exists() || mkdirs()) { "Unable to create $this" }
+    val create = { exists() || mkdirs() }
+    check(create() || create()) { "Unable to create $this" }
 }
 
 /** @return this file after ensuring that it either already exists or was created */
 fun File.safeCreateNewFile(): File = apply {
     parentFile.safeMkdirs()
-    check(exists() || createNewFile()) { "Unable to create $this" }
+
+    val create = { exists() || createNewFile() }
+    check(create() || create()) { "Unable to create $this" }
 }
 
 /**
