@@ -8,12 +8,10 @@ import org.gradle.workers.WorkParameters
 
 internal abstract class PlayWorkerBase<T : PlayWorkerBase.PlayPublishingParams> : WorkAction<T> {
     protected val config = parameters.config.get()
-    protected val appId = parameters.appId.get()
-
     protected val publisher = PlayPublisher(
             config.serviceAccountCredentials!!,
             config.serviceAccountEmail,
-            appId
+            parameters.appId.get()
     )
 
     internal interface PlayPublishingParams : WorkParameters {

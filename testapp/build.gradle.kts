@@ -49,7 +49,7 @@ configure<BaseExtension> {
     }
 
     signingConfigs {
-        create("release") {
+        register("release") {
             val keystorePropertiesFile = file("keystore.properties")
             val keystoreProperties = Properties()
             keystoreProperties.load(FileInputStream(keystorePropertiesFile))
@@ -62,11 +62,28 @@ configure<BaseExtension> {
     }
 
     buildTypes {
-        getByName("release") {
+        named("debug") {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-DEBUG"
+        }
+
+        register("debugPlay") {
+            initWith(named("debug").get())
+            applicationIdSuffix = null
+        }
+
+        named("release") {
             signingConfig = signingConfigs.getByName("release")
             isShrinkResources = true
             isMinifyEnabled = true
-            proguardFiles(getDefaultProguardFile("proguard-android.txt"))
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
+        }
+    }
+
+    (this as ExtensionAware).extensions.configure<
+            NamedDomainObjectContainer<PlayPublisherExtension>>("playConfigs") {
+        register("debug") {
+            isEnabled = false
         }
     }
 

@@ -127,7 +127,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
         val android = project.the<AppExtension>()
         (android as ExtensionAware).extensions.add(PLAY_CONFIGS_PATH, extensionContainer)
         android.applicationVariants.whenObjectAdded {
-            if (!validateDebuggability()) return@whenObjectAdded
+            val variantName = name.capitalize()
             val extension = buildExtension(extensionContainer, baseExtension)
             project.logger.debug("Extension computed for variant '$name': $extension")
 
@@ -143,7 +143,79 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                                 "Be sure to specify a signingConfig for variant '$name'.")
             }
 
-            val variantName = name.capitalize()
+
+            val publishApkTaskDependenciesHack = project.newTask(
+                    "publish${variantName}ApkWrapper"
+            ) {
+                if (extension.config.artifactDir == null) {
+                    assembleProvider?.let {
+                        dependsOn(it)
+                    } ?: logger.warn("Assemble task not found. Publishing APKs may not work.")
+                }
+            }
+
+            val publishBundleTaskDependenciesHack = project.newTask(
+                    "publish${variantName}BundleWrapper"
+            ) {
+                if (extension.config.artifactDir == null) {
+                    // TODO blocked by https://issuetracker.google.com/issues/109918868
+                    project.tasks.findByName(
+                            (this@whenObjectAdded as InstallableVariantImpl).variantData
+                                    .getTaskName("bundle", "")
+                    )?.let {
+                        dependsOn(it)
+                    } ?: logger.warn("Bundle task not found, make sure to use " +
+                                             "'com.android.tools.build:gradle' v3.2+. " +
+                                             "Publishing App Bundles may not work.")
+                }
+            }
+
+            val publishInternalSharingApkTask = project.newTask<PublishInternalSharingApk>(
+                    "upload${variantName}PrivateApk",
+                    """
+                    |Uploads Internal Sharing APK for variant '$name'.
+                    |   See https://github.com/Triple-T/gradle-play-publisher#uploading-an-internal-sharing-artifact
+                    """.trimMargin(),
+                    arrayOf(extension, this)
+            ) {
+                outputDirectory.set(project.layout.buildDirectory.dir(
+                        "outputs/internal-sharing/apk/${variant.name}"))
+
+                dependsOn(publishApkTaskDependenciesHack)
+            }
+
+            val publishInternalSharingBundleTask = project.newTask<PublishInternalSharingBundle>(
+                    "upload${variantName}PrivateBundle",
+                    """
+                    |Uploads Internal Sharing App Bundle for variant '$name'.
+                    |   See https://github.com/Triple-T/gradle-play-publisher#uploading-an-internal-sharing-artifact
+                    """.trimMargin(),
+                    arrayOf(extension, this)
+            ) {
+                outputDirectory.set(project.layout.buildDirectory.dir(
+                        "outputs/internal-sharing/bundle/${variant.name}"))
+
+                dependsOn(publishBundleTaskDependenciesHack)
+            }
+
+            project.newTask<InstallInternalSharingArtifact>(
+                    "install${variantName}PrivateArtifact",
+                    """
+                    |Launches an intent to install an Internal Sharing artifact for variant '$name'.
+                    |   See https://github.com/Triple-T/gradle-play-publisher#installing-internal-sharing-artifacts
+                    """.trimMargin(),
+                    arrayOf(android)
+            ) {
+                uploadedArtifacts.set(if (extension.defaultToAppBundles) {
+                    publishInternalSharingBundleTask.flatMap { it.outputDirectory }
+                } else {
+                    publishInternalSharingApkTask.flatMap { it.outputDirectory }
+                })
+            }
+
+
+            if (!validateDebuggability()) return@whenObjectAdded
+
             val genEditTask = project.getGenEditTask(applicationId, extension)
             val commitEditTask = project.getCommitEditTask(applicationId, extension)
             val editFile = genEditTask.flatMap { it.editIdFile }
@@ -232,17 +304,9 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 if (shouldRun) dependsOn(genEditTask)
             }
             preBuildProvider { dependsOn(processArtifactMetadata) }
+            publishApkTaskDependenciesHack { dependsOn(processArtifactMetadata) }
+            publishBundleTaskDependenciesHack { dependsOn(processArtifactMetadata) }
 
-            val publishApkTaskDependenciesHack = project.newTask(
-                    "publish${variantName}ApkWrapper"
-            ) {
-                if (extension.config.artifactDir == null) {
-                    dependsOn(processArtifactMetadata)
-                    assembleProvider?.let {
-                        dependsOn(it)
-                    } ?: logger.warn("Assemble task not found. Publishing APKs may not work.")
-                }
-            }
             val publishApkTask = project.newTask<PublishApk>(
                     "publish${variantName}Apk",
                     """
@@ -266,36 +330,6 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 doFirst { logger.warn("$name is deprecated, use ${publishApkTask.get().name} instead") }
             }
 
-            val publishInternalSharingApkTask = project.newTask<PublishInternalSharingApk>(
-                    "upload${variantName}PrivateApk",
-                    """
-                    |Uploads Internal Sharing APK for variant '$name'.
-                    |   See https://github.com/Triple-T/gradle-play-publisher#uploading-an-internal-sharing-artifact
-                    """.trimMargin(),
-                    arrayOf(extension, this)
-            ) {
-                outputDirectory.set(project.layout.buildDirectory.dir(
-                        "outputs/internal-sharing/apk/${variant.name}"))
-
-                dependsOn(publishApkTaskDependenciesHack)
-            }
-
-            val publishBundleTaskDependenciesHack = project.newTask(
-                    "publish${variantName}BundleWrapper"
-            ) {
-                if (extension.config.artifactDir == null) {
-                    dependsOn(processArtifactMetadata)
-                    // TODO blocked by https://issuetracker.google.com/issues/109918868
-                    project.tasks.findByName(
-                            (this@whenObjectAdded as InstallableVariantImpl).variantData
-                                    .getTaskName("bundle", "")
-                    )?.let {
-                        dependsOn(it)
-                    } ?: logger.warn("Bundle task not found, make sure to use " +
-                                             "'com.android.tools.build:gradle' v3.2+. " +
-                                             "Publishing App Bundles may not work.")
-                }
-            }
             val publishBundleTask = project.newTask<PublishBundle>(
                     "publish${variantName}Bundle",
                     """
@@ -313,20 +347,6 @@ internal class PlayPublisherPlugin : Plugin<Project> {
             }
             commitEditTask { mustRunAfter(publishBundleTask) }
             publishBundleAllTask { dependsOn(publishBundleTask) }
-
-            val publishInternalSharingBundleTask = project.newTask<PublishInternalSharingBundle>(
-                    "upload${variantName}PrivateBundle",
-                    """
-                    |Uploads Internal Sharing App Bundle for variant '$name'.
-                    |   See https://github.com/Triple-T/gradle-play-publisher#uploading-an-internal-sharing-artifact
-                    """.trimMargin(),
-                    arrayOf(extension, this)
-            ) {
-                outputDirectory.set(project.layout.buildDirectory.dir(
-                        "outputs/internal-sharing/bundle/${variant.name}"))
-
-                dependsOn(publishBundleTaskDependenciesHack)
-            }
 
             val promoteReleaseTask = project.newTask<PromoteRelease>(
                     "promote${variantName}Artifact",
@@ -361,21 +381,6 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 dependsOn(publishProductsTask)
             }
             publishAllTask { dependsOn(publishTask) }
-
-            project.newTask<InstallInternalSharingArtifact>(
-                    "install${variantName}PrivateArtifact",
-                    """
-                    |Launches an intent to install an Internal Sharing artifact for variant '$name'.
-                    |   See https://github.com/Triple-T/gradle-play-publisher#installing-internal-sharing-artifacts
-                    """.trimMargin(),
-                    arrayOf(android)
-            ) {
-                uploadedArtifacts.set(if (extension.defaultToAppBundles) {
-                    publishInternalSharingBundleTask.flatMap { it.outputDirectory }
-                } else {
-                    publishInternalSharingApkTask.flatMap { it.outputDirectory }
-                })
-            }
         }
 
         project.afterEvaluate {

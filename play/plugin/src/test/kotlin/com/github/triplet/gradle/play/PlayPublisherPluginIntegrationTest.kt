@@ -79,6 +79,18 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Internal sharing tasks are available for debug build types`() {
+        val result = execute("", "tasks", "--group", "publishing")
+
+        assertThat(result.output).contains("publishRelease")
+        assertThat(result.output).doesNotContain("publishDebug")
+        assertThat(result.output).contains("uploadRelease")
+        assertThat(result.output).contains("uploadDebug")
+        assertThat(result.output).contains("installRelease")
+        assertThat(result.output).contains("installDebug")
+    }
+
+    @Test
     fun `No creds fails`() {
         // language=gradle
         File(appDir, "build.gradle").writeText("""
