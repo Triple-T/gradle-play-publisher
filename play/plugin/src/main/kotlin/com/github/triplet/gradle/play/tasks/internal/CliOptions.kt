@@ -51,17 +51,6 @@ internal interface WriteTrackExtensionOptions : ExtensionOptionsBase {
 internal interface TrackExtensionOptions : WriteTrackExtensionOptions {
     @get:Internal
     @set:Option(
-            option = "track",
-            description = "Set the track in which to upload your app."
-    )
-    var trackOption: String
-        get() = throw UnsupportedOperationException()
-        set(value) {
-            extension.track = value
-        }
-
-    @get:Internal
-    @set:Option(
             option = "user-fraction",
             description = "Set the user fraction intended to receive an 'inProgress' release. " +
                     "Ex: 0.1 == 10%"
@@ -75,6 +64,7 @@ internal interface TrackExtensionOptions : WriteTrackExtensionOptions {
     @get:OptionValues("release-status")
     val releaseStatusOptions
         get() = ReleaseStatus.values().map { it.publishedName }
+
     @get:Internal
     @set:Option(
             option = "release-status",
@@ -111,6 +101,7 @@ internal interface UpdatableTrackExtensionOptions : TrackExtensionOptions {
         set(value) {
             extension.fromTrack = value
         }
+
     @get:Internal
     @set:Option(
             option = "promote-track",
@@ -121,6 +112,7 @@ internal interface UpdatableTrackExtensionOptions : TrackExtensionOptions {
         set(value) {
             extension.promoteTrack = value
         }
+
     @get:Internal
     @set:Option(
             option = "update",
@@ -137,9 +129,21 @@ internal interface UpdatableTrackExtensionOptions : TrackExtensionOptions {
 
 internal interface PublishableTrackExtensionOptions : TrackExtensionOptions,
         ArtifactExtensionOptions {
+    @get:Internal
+    @set:Option(
+            option = "track",
+            description = "Set the track in which to upload your app."
+    )
+    var trackOption: String
+        get() = throw UnsupportedOperationException()
+        set(value) {
+            extension.track = value
+        }
+
     @get:OptionValues("resolution-strategy")
     val resolutionStrategyOptions
         get() = ResolutionStrategy.values().map { it.publishedName }
+
     @get:Internal
     @set:Option(
             option = "resolution-strategy",

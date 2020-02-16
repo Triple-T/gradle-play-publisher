@@ -78,7 +78,6 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
                 "--no-commit",
                 "--from-track=myFromTrack",
                 "--promote-track=myPromoteTrack",
-                "--track=myDefaultTrack",
                 "--release-name=myRelName",
                 "--release-status=draft",
                 "--user-fraction=.88"
