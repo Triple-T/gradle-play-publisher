@@ -218,6 +218,53 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Publishing top-level graphic succeeds`() {
+        // language=gradle
+        val config = """
+            android.buildTypes {
+                topLevelGraphics {}
+            }
+        """
+
+        val result = execute(config, "publishTopLevelGraphicsListing")
+
+        assertThat(result.task(":publishTopLevelGraphicsListing")).isNotNull()
+        assertThat(result.task(":publishTopLevelGraphicsListing")!!.outcome)
+                .isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).doesNotContain("publishAppDetails")
+        assertThat(result.output).doesNotContain("publishListing")
+        assertThat(result.output).contains("publishImages(")
+        assertThat(result.output).contains("locale=en-US")
+        assertThat(result.output).contains("type=icon")
+        assertThat(result.output).contains("icon.png")
+    }
+
+    @Test
+    fun `Publishing mixed top-level and filed graphics succeeds`() {
+        // language=gradle
+        val config = """
+            android.buildTypes {
+                mixedLevelGraphics {}
+            }
+        """
+
+        val result = execute(config, "publishMixedLevelGraphicsListing")
+
+        assertThat(result.task(":publishMixedLevelGraphicsListing")).isNotNull()
+        assertThat(result.task(":publishMixedLevelGraphicsListing")!!.outcome)
+                .isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).doesNotContain("publishAppDetails")
+        assertThat(result.output).doesNotContain("publishListing")
+        assertThat(result.output).contains("publishImages(")
+        assertThat(result.output).contains("locale=en-US")
+        assertThat(result.output).contains("type=icon")
+        assertThat(result.output).contains("icon.png")
+        assertThat(result.output).contains("type=phoneScreenshots")
+        assertThat(result.output).contains("phone-screenshots.png")
+        assertThat(result.output).contains("b.jpeg")
+    }
+
+    @Test
     fun `Publishing all metadata succeeds`() {
         // language=gradle
         val config = """

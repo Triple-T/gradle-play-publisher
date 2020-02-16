@@ -7,7 +7,10 @@ import com.github.triplet.gradle.common.utils.marked
 import com.github.triplet.gradle.common.utils.orNull
 import com.github.triplet.gradle.common.utils.readProcessed
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
+import com.github.triplet.gradle.common.utils.sibling
 import com.github.triplet.gradle.play.internal.AppDetail
+import com.github.triplet.gradle.play.internal.GRAPHICS_PATH
+import com.github.triplet.gradle.play.internal.ImageType
 import com.github.triplet.gradle.play.internal.LISTINGS_PATH
 import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
@@ -44,6 +47,7 @@ import javax.inject.Inject
 internal abstract class GenerateResources : DefaultTask() {
     @get:Internal
     abstract val resSrcDirs: ListProperty<Directory>
+
     @get:SkipWhenEmpty
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
@@ -416,8 +420,17 @@ internal abstract class GenerateResources : DefaultTask() {
                     isDirectChildOf(defaultLocale)
         }
 
-        private fun File.findDest() =
-                File(parameters.outputDir.get().asFile, toRelativeString(findOwner()))
+        private fun File.findDest(): File {
+            val default = File(parameters.outputDir.get().asFile, toRelativeString(findOwner()))
+            val isTopLevelGraphic = default.isDirectChildOf(GRAPHICS_PATH) &&
+                    ImageType.values().any { default.nameWithoutExtension == it.dirName }
+
+            return if (isTopLevelGraphic) {
+                default.sibling(default.nameWithoutExtension + "/" + default.name)
+            } else {
+                default
+            }
+        }
 
         private fun File.findOwner() =
                 parameters.inputDirs.get().single { startsWith(it.asFile) }.asFile

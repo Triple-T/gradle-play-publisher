@@ -283,6 +283,45 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Top-level graphics are filed into their respective folders`() {
+        // language=gradle
+        val config = """
+            android.buildTypes {
+                topLevelGraphics {}
+            }
+        """
+
+        execute(config, "generateTopLevelGraphicsPlayResources")
+
+        "topLevelGraphics/play/listings/en-US/graphics/icon.png".exists(no)
+        "topLevelGraphics/play/listings/en-US/graphics/icon/icon.png".exists()
+        "topLevelGraphics/play/listings/en-US/graphics/phone-screenshots.png".exists(no)
+        "topLevelGraphics/play/listings/en-US/graphics/phone-screenshots/phone-screenshots.png".exists()
+        "topLevelGraphics/play/listings/en-US/graphics/phone-screenshots/b.jpeg".exists()
+        "topLevelGraphics/play/listings/en-US/graphics/phone-screenshots/foo.jpg".exists()
+        "topLevelGraphics/play/listings/en-US/graphics/tablet-screenshots/baz.jpg".exists()
+    }
+
+    @Test
+    fun `Top-level graphic wins on conflict with filed graphic`() {
+        // language=gradle
+        val config = """
+            android.buildTypes {
+                topLevelGraphicsConflict {}
+            }
+        """
+
+        execute(config, "generateTopLevelGraphicsConflictPlayResources")
+
+        "topLevelGraphicsConflict/play/listings/en-US/graphics/phone-screenshots.png".exists(no)
+        "topLevelGraphicsConflict/play/listings/en-US/graphics/phone-screenshots/phone-screenshots.png".exists()
+        "topLevelGraphicsConflict/play/listings/en-US/graphics/phone-screenshots/foo.jpg".exists()
+        "topLevelGraphicsConflict/play/listings/en-US/graphics/tablet-screenshots/baz.jpg".exists()
+
+        "topLevelGraphicsConflict/play/listings/en-US/graphics/phone-screenshots/phone-screenshots.png" generated "top"
+    }
+
+    @Test
     fun `Resources aren't merged with no default language`() {
         // language=gradle
         val config = """
