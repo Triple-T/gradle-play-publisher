@@ -21,11 +21,9 @@ jobs:
           key: ${{ runner.os }}-v2-gradle-${{ hashFiles('**/*') }}
           restore-keys: |
             ${{ runner.os }}-v2-gradle-
-      - name: Setup environment
-        run: ./gradlew publishToMavenLocal
       - name: Build project
         run: |
-          ./gradlew assemble -S
+          ./gradlew assemble publishToMavenLocal -S
           cd testapp && ../gradlew help -PskipValidation
       - name: Upload libs
         uses: actions/upload-artifact@v1

@@ -6,7 +6,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":common:utils", "default"))
+    implementation(project(":common:utils"))
     implementation(Config.Libs.All.ap)
     implementation(Config.Libs.All.googleClient)
 

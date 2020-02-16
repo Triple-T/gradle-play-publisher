@@ -28,6 +28,10 @@ allprojects {
     repositories.deps()
 
     afterEvaluate {
+        convention.findByType<JavaPluginExtension>()?.apply {
+            sourceCompatibility = JavaVersion.VERSION_1_8
+        }
+
         convention.findByType<KotlinProjectExtension>()?.apply {
             sourceSets.configureEach {
                 languageSettings.progressiveMode = true

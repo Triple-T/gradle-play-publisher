@@ -6,18 +6,22 @@ plugins {
 }
 
 dependencies {
-    compileOnly(project(":play:android-publisher", "default"))
-    // START transitive deps
-    compileOnly(project(":common:validation", "default"))
+    // Implementation dependencies, but compile-only so we don't add a POM dependency to those
+    // internal projects. The libs are manually injected in the Jar task below.
+    compileOnly(project(":play:android-publisher"))
+    compileOnly(project(":common:utils"))
+    compileOnly(project(":common:validation"))
+    // START transitive deps - these get added to the POM
     runtimeOnly(Config.Libs.All.ap)
     runtimeOnly(Config.Libs.All.googleClient)
     // END
 
-    compileOnly(Config.Libs.All.agp)
+    compileOnly(Config.Libs.All.agp) // Compile only to not force a specific AGP version
     implementation(Config.Libs.All.guava)
+    implementation(Config.Libs.All.jackson)
 
-    testImplementation(project(":common:utils", "default"))
-    testImplementation(project(":common:validation", "default"))
+    testImplementation(project(":common:utils"))
+    testImplementation(project(":common:validation"))
     testImplementation(testFixtures(project(":play:android-publisher")))
     testImplementation(Config.Libs.All.agp)
 
@@ -26,9 +30,6 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-
     withJavadocJar()
     withSourcesJar()
 }
@@ -42,7 +43,15 @@ tasks.withType<Jar>().configureEach {
         it.path.contains(rootProject.layout.projectDirectory.asFile.path)
     }
 
-    from(projectLibs.elements.map { it.map { zipTree(it) } })
+    from(projectLibs.elements.map {
+        it.flatMap {
+            val f = it.asFile
+            val variant = f.name
+            val buildDir = f.parentFile.parentFile.parentFile
+
+            listOf(it, File(buildDir, "resources/$variant"))
+        }
+    })
 }
 
 tasks.withType<PluginUnderTestMetadata>().configureEach {
