@@ -22,7 +22,6 @@ import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkerExecutor
 import java.io.File
-import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -100,16 +99,8 @@ internal abstract class InstallInternalSharingArtifact @Inject constructor(
             private val timeOutInMs: Long
     ) : AdbShell {
         override fun executeShellCommand(command: String): Boolean {
-            // TODO(#708): employ the #use method instead when AGP 3.6 is the minimum
-            deviceProvider.init()
-            return try {
-                try {
-                    launchIntents(deviceProvider, command)
-                } catch (e: Exception) {
-                    throw ExecutionException(e)
-                }
-            } finally {
-                deviceProvider.terminate()
+            return deviceProvider.use {
+                launchIntents(deviceProvider, command)
             }
         }
 

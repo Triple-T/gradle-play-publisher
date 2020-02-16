@@ -7,19 +7,14 @@ import org.gradle.util.GradleVersion
 import org.gradle.util.VersionNumber
 
 private val MIN_GRADLE_VERSION = GradleVersion.version("6.0")
-private val MIN_AGP_VERSION = VersionNumber.parse("3.5.0")
+private val MIN_AGP_VERSION = VersionNumber.parse("3.6.0-rc03")
 
 /**
  * Validates required dependencies. If GPP can't run in the current context, an error will be
  * thrown.
  */
 fun validateRuntime() {
-    val agpVersion = VersionNumber.parse(try {
-        Version.ANDROID_GRADLE_PLUGIN_VERSION
-    } catch (e: NoClassDefFoundError) {
-        @Suppress("DEPRECATION") // TODO(#708): remove when 3.6 is the minimum
-        com.android.builder.model.Version.ANDROID_GRADLE_PLUGIN_VERSION
-    })
+    val agpVersion = VersionNumber.parse(Version.ANDROID_GRADLE_PLUGIN_VERSION)
     val validator = RuntimeValidator(
             GradleVersion.current(), MIN_GRADLE_VERSION, agpVersion, MIN_AGP_VERSION)
 

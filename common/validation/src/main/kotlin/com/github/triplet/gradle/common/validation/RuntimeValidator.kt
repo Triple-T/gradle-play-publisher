@@ -34,9 +34,5 @@ internal class RuntimeValidator(
             |instructions at https://developer.android.com/studio/releases/gradle-plugin.
             """.trimMargin()
         }
-        // TODO(#708): remove when 3.6 is the minimum
-        check(currentAgpVersion < VersionNumber.parse("3.6.0-alpha01") ||
-                      currentAgpVersion >= VersionNumber.parse("3.6.0-alpha11")
-        ) { "GPP is only known to be compatible with AGP 3.6 alpha 11. Please upgrade." }
     }
 }
