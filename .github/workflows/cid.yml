@@ -2,7 +2,7 @@ name: CI/CD
 
 on: [push, pull_request]
 env:
-  GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Dkotlin.incremental=false -Dkotlin.compiler.execution.strategy=in-process
+  GRADLE_OPTS: -Dorg.gradle.daemon=false -Dkotlin.incremental=false -Dkotlin.compiler.execution.strategy=in-process
 
 jobs:
   build:
