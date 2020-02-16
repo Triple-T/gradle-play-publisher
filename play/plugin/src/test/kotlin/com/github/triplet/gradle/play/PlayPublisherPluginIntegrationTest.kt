@@ -262,6 +262,54 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
         assertThat(result.output).contains("track=root")
     }
 
+    @Test
+    fun `No warnings are logged on valid playConfigs`() {
+        // language=gradle
+        val config = """
+            flavorDimensions 'pricing'
+            productFlavors {
+                free { dimension 'pricing' }
+                paid { dimension 'pricing' }
+            }
+
+            play {
+                track 'root'
+            }
+
+            playConfigs {
+                paidRelease {}
+                paid {}
+                freeRelease {}
+                free {}
+                release {}
+            }
+        """
+
+        val result = execute(config, "help")
+
+        assertThat(result.output).doesNotContain("does not match")
+    }
+
+    @Test
+    fun `Warning is logged on invalid playConfigs`() {
+        // language=gradle
+        val config = """
+            flavorDimensions 'pricing'
+            productFlavors {
+                free { dimension 'pricing' }
+                paid { dimension 'pricing' }
+            }
+
+            playConfigs {
+                foo {}
+            }
+        """
+
+        val result = execute(config, "help")
+
+        assertThat(result.output).contains("does not match")
+    }
+
     companion object {
         @JvmStatic
         fun installFactories() {

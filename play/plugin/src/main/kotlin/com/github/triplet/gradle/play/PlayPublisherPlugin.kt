@@ -377,5 +377,21 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 })
             }
         }
+
+        project.afterEvaluate {
+            val allPossiblePlayConfigNames: Set<String> by lazy {
+                android.applicationVariants.flatMapTo(mutableSetOf()) {
+                    listOf(it.name, it.buildType.name) + it.productFlavors.map { it.name }
+                }
+            }
+
+            for (configName in extensionContainer.names) {
+                if (configName !in allPossiblePlayConfigNames) {
+                    project.logger.warn(
+                            "Warning: Gradle Play Publisher playConfigs object '$configName' " +
+                                    "does not match a variant, flavor, or build type.")
+                }
+            }
+        }
     }
 }
