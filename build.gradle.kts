@@ -39,7 +39,7 @@ allprojects {
     }
 
     tasks.withType<Test> {
-        maxParallelForks = 8
+        maxParallelForks = Runtime.getRuntime().availableProcessors()
 
         testLogging {
             events("passed", "failed", "skipped")
