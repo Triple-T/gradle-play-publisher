@@ -22,6 +22,7 @@ import org.gradle.api.tasks.PathSensitivity
 import java.io.File
 import java.util.Collections
 import java.util.IdentityHashMap
+import kotlin.reflect.KMutableProperty1
 
 /** The entry point for all GPP related configuration. */
 open class PlayPublisherExtension @JvmOverloads constructor(
@@ -33,6 +34,13 @@ open class PlayPublisherExtension @JvmOverloads constructor(
     @get:Internal
     internal val _children: MutableSet<PlayPublisherExtension> =
             Collections.newSetFromMap(IdentityHashMap())
+
+    @get:Internal
+    internal val _callbacks = mutableListOf(
+            { property: KMutableProperty1<PlayExtensionConfig, Any?>, value: Any? ->
+                property.set(_config, value)
+            }
+    )
 
     /**
      * Enables or disables GPP.

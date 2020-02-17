@@ -125,6 +125,30 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Using custom artifact CLI arg with eager evaluation skips on-the-fly bundle build`() {
+        // language=gradle
+        val config = """
+            playConfigs {
+                release {
+                    track = 'hello'
+                }
+            }
+
+            tasks.all {}
+        """
+
+        File(tempDir.root, "foo.aab").createNewFile()
+        val result = execute(config, "uploadReleasePrivateBundle", "--artifact-dir=${tempDir.root}")
+
+        assertThat(result.task(":bundleRelease")).isNull()
+        assertThat(result.task(":uploadReleasePrivateBundle")).isNotNull()
+        assertThat(result.task(":uploadReleasePrivateBundle")!!.outcome)
+                .isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("uploadInternalSharingBundle(")
+        assertThat(result.output).contains(tempDir.root.name)
+    }
+
+    @Test
     fun `Task outputs file with API response`() {
         val outputDir = File(appDir, "build/outputs/internal-sharing/bundle/release")
 

@@ -8,6 +8,7 @@ import com.github.triplet.gradle.common.validation.validateRuntime
 import com.github.triplet.gradle.play.internal.PLAY_CONFIGS_PATH
 import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
+import com.github.triplet.gradle.play.internal.PlayExtensionConfig
 import com.github.triplet.gradle.play.internal.buildExtension
 import com.github.triplet.gradle.play.internal.config
 import com.github.triplet.gradle.play.internal.flavorNameOrDefault
@@ -45,6 +46,7 @@ import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.invoke
 import org.gradle.kotlin.dsl.the
 import org.gradle.kotlin.dsl.withType
+import kotlin.reflect.KMutableProperty1
 
 @Suppress("unused") // Used by Gradle
 internal class PlayPublisherPlugin : Plugin<Project> {
@@ -148,26 +150,48 @@ internal class PlayPublisherPlugin : Plugin<Project> {
             val publishApkTaskDependenciesHack = project.newTask(
                     "publish${variantName}ApkWrapper"
             ) {
-                if (extension.config.artifactDir == null) {
-                    assembleProvider?.let {
-                        dependsOn(it)
-                    } ?: logger.warn("Assemble task not found. Publishing APKs may not work.")
+                val addDependencies = {
+                    if (extension.config.artifactDir == null) {
+                        assembleProvider?.let {
+                            dependsOn(it)
+                        } ?: logger.warn("Assemble task not found. Publishing APKs may not work.")
+                    }
+                }
+                addDependencies()
+
+                extension._callbacks += { property: KMutableProperty1<PlayExtensionConfig, Any?>,
+                                          value: Any? ->
+                    if (property.name == PlayExtensionConfig::artifactDir.name) {
+                        setDependsOn(emptyList<Any>())
+                        addDependencies()
+                    }
                 }
             }
 
             val publishBundleTaskDependenciesHack = project.newTask(
                     "publish${variantName}BundleWrapper"
             ) {
-                if (extension.config.artifactDir == null) {
-                    // TODO blocked by https://issuetracker.google.com/issues/109918868
-                    project.tasks.findByName(
-                            (this@whenObjectAdded as InstallableVariantImpl).variantData
-                                    .getTaskName("bundle", "")
-                    )?.let {
-                        dependsOn(it)
-                    } ?: logger.warn("Bundle task not found, make sure to use " +
-                                             "'com.android.tools.build:gradle' v3.2+. " +
-                                             "Publishing App Bundles may not work.")
+                val addDependencies = {
+                    if (extension.config.artifactDir == null) {
+                        // TODO blocked by https://issuetracker.google.com/issues/109918868
+                        project.tasks.findByName(
+                                (this@whenObjectAdded as InstallableVariantImpl).variantData
+                                        .getTaskName("bundle", "")
+                        )?.let {
+                            dependsOn(it)
+                        } ?: logger.warn("Bundle task not found, make sure to use " +
+                                                 "'com.android.tools.build:gradle' v3.2+. " +
+                                                 "Publishing App Bundles may not work.")
+                    }
+                }
+                addDependencies()
+
+                extension._callbacks += { property: KMutableProperty1<PlayExtensionConfig, Any?>,
+                                          value: Any? ->
+                    if (property.name == PlayExtensionConfig::artifactDir.name) {
+                        setDependsOn(emptyList<Any>())
+                        addDependencies()
+                    }
                 }
             }
 

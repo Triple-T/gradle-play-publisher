@@ -179,6 +179,34 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Eagerly evaluated global CLI artifact-dir param skips on-the-fly bundle build`() {
+        // language=gradle
+        val config = """
+            playConfigs {
+                release {
+                    track = 'hello'
+                }
+            }
+
+            tasks.all {}
+        """
+        File(tempDir.root, "foo.aab").createNewFile()
+
+        val result = execute(
+                config,
+                "publishBundle",
+                "--artifact-dir=${tempDir.root}"
+        )
+
+        assertThat(result.task(":bundleRelease")).isNull()
+        assertThat(result.task(":publishReleaseBundle")).isNotNull()
+        assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("uploadBundle(")
+        assertThat(result.output).contains("trackName=hello")
+        assertThat(result.output).contains(tempDir.root.name)
+    }
+
+    @Test
     fun `Build generates and commits edit by default`() {
         val result = execute("", "publishReleaseBundle")
 

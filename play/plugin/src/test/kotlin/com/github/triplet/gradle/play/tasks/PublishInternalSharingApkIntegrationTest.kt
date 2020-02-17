@@ -102,6 +102,29 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Using custom artifact CLI arg with eager evaluation skips on-the-fly apk build`() {
+        // language=gradle
+        val config = """
+            playConfigs {
+                release {
+                    track = 'hello'
+                }
+            }
+
+            tasks.all {}
+        """
+
+        File(tempDir.root, "foo.apk").createNewFile()
+        val result = execute(config, "uploadReleasePrivateApk", "--artifact-dir=${tempDir.root}")
+
+        assertThat(result.task(":assembleRelease")).isNull()
+        assertThat(result.task(":uploadReleasePrivateApk")).isNotNull()
+        assertThat(result.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("uploadInternalSharingApk(")
+        assertThat(result.output).contains(tempDir.root.name)
+    }
+
+    @Test
     fun `Using custom artifact with multiple APKs uploads each one`() {
         // language=gradle
         val config = """

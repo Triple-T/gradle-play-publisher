@@ -48,10 +48,13 @@ internal fun <T> PlayPublisherExtension.updateProperty(
         value: T,
         force: Boolean = false
 ) {
-    property.set(_config, value)
+    for (callback in _callbacks) {
+        @Suppress("UNCHECKED_CAST")
+        callback(property as KMutableProperty1<PlayExtensionConfig, Any?>, value)
+    }
+
     for (child in _children) {
         if (force || property.get(child._config) == null) {
-            property.set(child._config, value)
             child.updateProperty(property, value, force)
         }
     }

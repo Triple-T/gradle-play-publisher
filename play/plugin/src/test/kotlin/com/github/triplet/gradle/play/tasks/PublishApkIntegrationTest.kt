@@ -180,6 +180,34 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Eagerly evaluated global CLI artifact-dir param skips on-the-fly APK build`() {
+        // language=gradle
+        val config = """
+            playConfigs {
+                release {
+                    track = 'hello'
+                }
+            }
+
+            tasks.all {}
+        """
+        File(tempDir.root, "foo.apk").createNewFile()
+
+        val result = execute(
+                config,
+                "publishApk",
+                "--artifact-dir=${tempDir.root}"
+        )
+
+        assertThat(result.task(":assembleRelease")).isNull()
+        assertThat(result.task(":publishReleaseApk")).isNotNull()
+        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("publishApk(")
+        assertThat(result.output).contains("trackName=hello")
+        assertThat(result.output).contains(tempDir.root.name)
+    }
+
+    @Test
     fun `Build generates and commits edit by default`() {
         val result = execute("", "publishReleaseApk")
 
