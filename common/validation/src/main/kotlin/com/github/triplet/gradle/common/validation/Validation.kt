@@ -6,7 +6,7 @@ import org.gradle.api.logging.Logger
 import org.gradle.util.GradleVersion
 import org.gradle.util.VersionNumber
 
-private val MIN_GRADLE_VERSION = GradleVersion.version("6.0")
+private val MIN_GRADLE_VERSION = GradleVersion.version("6.2")
 private val MIN_AGP_VERSION = VersionNumber.parse("3.6.0-rc03")
 
 /**
