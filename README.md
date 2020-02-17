@@ -80,23 +80,33 @@ sure you have
 To use GPP, you must create a service account with access to the Play Developer API:
 
 1. If you don't already have one, create a GCP project for your app(s)
+1. [Link your Google Play developer account](https://play.google.com/apps/publish#ApiAccessPlace)
+   to your GCP project
 1. Create a
-   [service account key](https://console.cloud.google.com/apis/credentials/serviceaccountkey)
+   [service account and key](https://console.cloud.google.com/apis/credentials/serviceaccountkey)
+   1. Make sure you're in the GCP project you used above (check the `project` query param in the
+      URL)
    1. Select `New service account`
-   1. Give it a name, but don't select any roles
+   1. Give it a name and the Project Owner role (don't worry, we'll remove this later)
    1. Leave JSON checked
-   1. If it asks for roles, continue without selecting any
 1. Move the downloaded JSON credentials into your project and
    [tell GPP about it](#authenticating-gradle-play-publisher)
-1. [Link your developer account](https://play.google.com/apps/publish#ApiAccessPlace) to the GCP
-   project in which you created the service account
 1. Give your service account
    [permissions to publish apps](https://play.google.com/apps/publish#AdminPlace) on your behalf
    1. Click `Invite new user`
    1. Copypasta the service account email (you can find it in the JSON credentials)
    1. Don't touch the roles
-   1. Specify which apps the service account should have access to:
+   1. Specify which apps the service account should have access to. In this example, GPP has full
+      access to testing tracks and app listings, but will be unable to make production releases:
       <img alt="Minimum Service Account permissions" src="assets/min-perms.png" width="66%" />
+1. Run `./gradlew bootstrap` or some other GPP task to validate your setup
+1. Now that you've successfully created the connection between GCP and Google Play, you can remove
+   the Project Owner persmissions
+   1. Go to your [IAM settings](https://console.cloud.google.com/iam-admin/iam)
+   1. Search for the service account you created
+   1. Click the edit icon (found at the end of the row)
+   1. In the permission selection panel that opens, click the trash icon to remove the owner role
+   1. Click save
 
 ## Basic setup
 
