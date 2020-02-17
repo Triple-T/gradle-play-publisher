@@ -148,6 +148,38 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Global CLI params can be used to configure task`() {
+        // language=gradle
+        val config = """
+            playConfigs {
+                release {
+                    track = 'unused'
+                }
+            }
+        """
+
+        val result = execute(
+                config,
+                "publishApk",
+                "--no-commit",
+                "--release-name=myRelName",
+                "--release-status=draft",
+                "--resolution-strategy=ignore",
+                "--track=myCustomTrack",
+                "--user-fraction=.88"
+        )
+
+        assertThat(result.task(":publishReleaseApk")).isNotNull()
+        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("publishApk(")
+        assertThat(result.output).contains("releaseName=myRelName")
+        assertThat(result.output).contains("releaseStatus=DRAFT")
+        assertThat(result.output).contains("strategy=IGNORE")
+        assertThat(result.output).contains("trackName=myCustomTrack")
+        assertThat(result.output).contains("userFraction=0.88")
+    }
+
+    @Test
     fun `Build generates and commits edit by default`() {
         val result = execute("", "publishReleaseApk")
 
@@ -511,8 +543,10 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
     fun `Build uses correct retained OBBs`() {
         // language=gradle
         val config = """
-            play.retain.mainObb = 123
-            play.retain.patchObb = 321
+            play.retain {
+                mainObb = 123
+                patchObb = 321
+            }
         """
 
         val result = execute(config, "publishReleaseApk")

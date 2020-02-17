@@ -4,6 +4,7 @@ import com.android.build.VariantOutput.OutputType
 import com.android.build.gradle.api.ApkVariantOutput
 import com.android.build.gradle.internal.api.InstallableVariantImpl
 import com.android.build.gradle.internal.scope.InternalArtifactType
+import com.github.triplet.gradle.play.internal.config
 import java.io.File
 
 internal fun PublishTaskBase.findBundleFile(): File? {

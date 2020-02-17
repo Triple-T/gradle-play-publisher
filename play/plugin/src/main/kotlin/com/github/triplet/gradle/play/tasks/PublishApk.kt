@@ -82,7 +82,7 @@ internal abstract class PublishApk @Inject constructor(
                     findReleaseName(config.trackOrDefault),
                     findReleaseNotes(config.trackOrDefault),
                     config.userFractionOrDefault,
-                    config.retain.artifacts
+                    config.retainArtifacts
             )
         }
 
@@ -105,8 +105,8 @@ internal abstract class PublishApk @Inject constructor(
                     config.resolutionStrategyOrDefault,
                     findBestVersionCode(apkFile),
                     parameters.variantName.get(),
-                    config.retain.mainObb,
-                    config.retain.patchObb
+                    config.retainMainObb,
+                    config.retainPatchObb
             ) ?: return
 
             parameters.uploadResults.get().file(versionCode.toString()).asFile.safeCreateNewFile()

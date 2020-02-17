@@ -94,6 +94,38 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Global CLI params can be used to configure task`() {
+        // language=gradle
+        val config = """
+            playConfigs {
+                release {
+                    track = 'unused'
+                }
+            }
+        """
+
+        val result = execute(
+                config,
+                "promoteArtifact",
+                "--no-commit",
+                "--from-track=myFromTrack",
+                "--promote-track=myPromoteTrack",
+                "--release-name=myRelName",
+                "--release-status=draft",
+                "--user-fraction=.88"
+        )
+
+        assertThat(result.task(":promoteReleaseArtifact")).isNotNull()
+        assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("promoteRelease(")
+        assertThat(result.output).contains("fromTrackName=myFromTrack")
+        assertThat(result.output).contains("promoteTrackName=myPromoteTrack")
+        assertThat(result.output).contains("releaseName=myRelName")
+        assertThat(result.output).contains("releaseStatus=DRAFT")
+        assertThat(result.output).contains("userFraction=0.88")
+    }
+
+    @Test
     fun `CLI params can be used to update track`() {
         val result = execute("", "promoteReleaseArtifact", "--update=myUpdateTrack")
 

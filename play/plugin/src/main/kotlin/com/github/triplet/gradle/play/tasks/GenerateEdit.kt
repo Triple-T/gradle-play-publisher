@@ -7,6 +7,8 @@ import com.github.triplet.gradle.common.utils.nullOrFull
 import com.github.triplet.gradle.common.utils.orNull
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.PlayPublisherExtension
+import com.github.triplet.gradle.play.internal.PlayExtensionConfig
+import com.github.triplet.gradle.play.internal.serializableConfig
 import com.github.triplet.gradle.play.tasks.internal.EditTaskBase
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.RegularFileProperty
@@ -94,7 +96,7 @@ internal abstract class GenerateEdit @Inject constructor(
         }
 
         interface Params : WorkParameters {
-            val config: Property<PlayPublisherExtension.Config>
+            val config: Property<PlayExtensionConfig>
             val editIdFile: RegularFileProperty
         }
     }

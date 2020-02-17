@@ -67,8 +67,18 @@ private fun buildExtensionInternal(
     }.singleOrNull()
     val buildTypeExtension = extensionContainer.findByName(variant.buildType.name)
 
-    return mergeExtensions(
-            listOfNotNull(variantExtension, flavorExtension, buildTypeExtension, baseExtension))
+    val extensions = listOfNotNull(
+            variantExtension,
+            flavorExtension,
+            buildTypeExtension,
+            baseExtension
+    ).distinctBy {
+        it.name
+    }
+
+    val merged = mergeExtensions(extensions)
+    baseExtension.evaluate()
+    return merged
 }
 
 private inline fun <reified T : EditTaskBase> Project.getOrRegisterEditTask(

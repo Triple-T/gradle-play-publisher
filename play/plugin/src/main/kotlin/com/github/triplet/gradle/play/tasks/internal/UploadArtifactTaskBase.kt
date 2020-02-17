@@ -2,6 +2,7 @@ package com.github.triplet.gradle.play.tasks.internal
 
 import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.PlayPublisherExtension
+import com.github.triplet.gradle.play.internal.config
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive

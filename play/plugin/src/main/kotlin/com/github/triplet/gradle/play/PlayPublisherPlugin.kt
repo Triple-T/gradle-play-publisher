@@ -9,6 +9,7 @@ import com.github.triplet.gradle.play.internal.PLAY_CONFIGS_PATH
 import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.buildExtension
+import com.github.triplet.gradle.play.internal.config
 import com.github.triplet.gradle.play.internal.flavorNameOrDefault
 import com.github.triplet.gradle.play.internal.getCommitEditTask
 import com.github.triplet.gradle.play.internal.getGenEditTask

@@ -275,6 +275,47 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Combination of extensions merges`() {
+        // language=gradle
+        val config = """
+            flavorDimensions 'pricing'
+            productFlavors {
+                free { dimension 'pricing' }
+                paid { dimension 'pricing' }
+            }
+
+            play {
+                track 'root'
+                releaseName 'hello'
+            }
+
+            playConfigs {
+                paidRelease {
+                    track = 'variant'
+                }
+
+                paid {
+                    fromTrack = 'flavor'
+                    defaultToAppBundles = true
+                }
+
+                release {
+                    fromTrack = 'build type'
+                    promoteTrack = 'build type'
+                }
+            }
+        """
+
+        val result = execute(config, "help", "--debug")
+
+        assertThat(result.output).contains("defaultToAppBundles=true")
+        assertThat(result.output).contains("track=variant")
+        assertThat(result.output).contains("fromTrack=flavor")
+        assertThat(result.output).contains("promoteTrack=build type")
+        assertThat(result.output).contains("releaseName=hello")
+    }
+
+    @Test
     fun `No warnings are logged on valid playConfigs`() {
         // language=gradle
         val config = """

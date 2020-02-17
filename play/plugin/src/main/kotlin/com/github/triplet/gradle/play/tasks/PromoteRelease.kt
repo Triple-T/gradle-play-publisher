@@ -38,7 +38,7 @@ internal abstract class PromoteRelease @Inject constructor(
                     findReleaseName(config.promoteTrackOrDefault),
                     findReleaseNotes(config.promoteTrackOrDefault),
                     config.userFraction,
-                    config.retain.artifacts
+                    config.retainArtifacts
             )
         }
     }

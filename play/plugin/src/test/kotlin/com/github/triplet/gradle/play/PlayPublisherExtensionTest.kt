@@ -2,6 +2,8 @@ package com.github.triplet.gradle.play
 
 import com.github.triplet.gradle.androidpublisher.ReleaseStatus
 import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
+import com.github.triplet.gradle.play.internal.config
+import com.github.triplet.gradle.play.internal.evaluate
 import com.github.triplet.gradle.play.internal.mergeExtensions
 import com.github.triplet.gradle.play.internal.mergeWith
 import com.google.common.truth.Truth.assertThat
@@ -25,7 +27,7 @@ class PlayPublisherExtensionTest {
 
         val merged = ext.mergeWith(null)
 
-        assert(ext === merged)
+        assertThat(merged).isSameInstanceAs(ext)
     }
 
     @Test
@@ -57,7 +59,7 @@ class PlayPublisherExtensionTest {
         val merged = ext.mergeWith(other)
 
         assertThat(merged.config.track).isEqualTo("test")
-        assertThat(merged.config.retain.mainObb).isEqualTo(8)
+        assertThat(merged.config.retainMainObb).isEqualTo(8)
     }
 
     @Test
@@ -74,7 +76,7 @@ class PlayPublisherExtensionTest {
 
         val merged = mergeExtensions(exts)
 
-        assert(merged === p0)
+        assertThat(merged).isSameInstanceAs(p0)
     }
 
     @Test
@@ -84,6 +86,7 @@ class PlayPublisherExtensionTest {
         val exts = listOf(p0, p1)
 
         val merged = mergeExtensions(exts)
+        p1.evaluate()
 
         assertThat(merged.config.track).isEqualTo("test")
         assertThat(merged.config.releaseStatus).isEqualTo(ReleaseStatus.IN_PROGRESS)
@@ -96,9 +99,10 @@ class PlayPublisherExtensionTest {
         val exts = listOf(p0, p1)
 
         val merged = mergeExtensions(exts)
+        p1.evaluate()
 
         assertThat(merged.config.track).isEqualTo("test")
-        assertThat(merged.config.retain.mainObb).isEqualTo(8)
+        assertThat(merged.config.retainMainObb).isEqualTo(8)
     }
 
     @Test
@@ -120,6 +124,7 @@ class PlayPublisherExtensionTest {
         val exts = listOf(p0, p1, p3, p4)
 
         val merged = mergeExtensions(exts)
+        p4.evaluate()
 
         assertThat(merged.config.track).isEqualTo("test")
         assertThat(merged.config.releaseStatus).isEqualTo(ReleaseStatus.IN_PROGRESS)
@@ -139,9 +144,58 @@ class PlayPublisherExtensionTest {
         val exts = listOf(p0, p1, p3)
 
         val merged = mergeExtensions(exts)
+        p3.evaluate()
 
         assertThat(merged.config.track).isEqualTo("test")
-        assertThat(merged.config.retain.mainObb).isEqualTo(8)
-        assertThat(merged.config.retain.patchObb).isEqualTo(16)
+        assertThat(merged.config.retainMainObb).isEqualTo(8)
+        assertThat(merged.config.retainPatchObb).isEqualTo(16)
+    }
+
+    @Test
+    fun `Merging extension assigns children correctly`() {
+        val p0 = PlayPublisherExtension().apply { track = "a" }
+        val p1 = PlayPublisherExtension().apply { track = "b" }
+        val p1dash1 = PlayPublisherExtension().apply { track = "c" }
+        val p2 = PlayPublisherExtension().apply { track = "d" }
+        val exts1 = listOf(p0, p1, p2)
+        val exts2 = listOf(p0, p1dash1)
+
+        mergeExtensions(exts1)
+        mergeExtensions(exts2)
+
+        assertThat(p2._children).containsExactly(p1)
+        assertThat(p1._children).containsExactly(p0)
+        assertThat(p1dash1._children).containsExactly(p0)
+        assertThat(p0._children).isEmpty()
+    }
+
+    @Test
+    fun `Updating parent extension propagates changes`() {
+        val p0 = PlayPublisherExtension().apply { releaseName = "Hello" }
+        val p1 = PlayPublisherExtension().apply { fromTrack = "test" }
+        val p2 = PlayPublisherExtension().apply { track = "root" }
+        val exts = listOf(p0, p1, p2)
+
+        mergeExtensions(exts)
+
+        p2.track = "new"
+
+        assertThat(p2.track).isEqualTo("new")
+        assertThat(p1.track).isEqualTo("new")
+        assertThat(p0.track).isEqualTo("new")
+    }
+
+    @Test
+    fun `Updating parent extension doesn't overwrite existing properties`() {
+        val p0 = PlayPublisherExtension().apply { track = "child" }
+        val p1 = PlayPublisherExtension().apply { track = "parent" }
+        val exts = listOf(p0, p1)
+
+        mergeExtensions(exts)
+
+        p1.track = "new parent"
+
+        assertThat(p1.track).isEqualTo("new parent")
+        assertThat(p0.track).isEqualTo("child")
     }
 }

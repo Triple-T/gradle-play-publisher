@@ -5,6 +5,7 @@ import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.androidpublisher.EditManager
 import com.github.triplet.gradle.androidpublisher.PlayPublisher
 import com.github.triplet.gradle.play.PlayPublisherExtension
+import com.github.triplet.gradle.play.internal.config
 import com.github.triplet.gradle.play.tasks.internal.PublishEditTaskBase
 import org.gradle.api.tasks.TaskAction
 import javax.inject.Inject

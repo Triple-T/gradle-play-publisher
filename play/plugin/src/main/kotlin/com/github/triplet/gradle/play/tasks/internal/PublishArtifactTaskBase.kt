@@ -17,7 +17,7 @@ import org.gradle.api.tasks.PathSensitivity
 internal abstract class PublishArtifactTaskBase(
         extension: PlayPublisherExtension,
         variant: ApplicationVariant
-) : PublishEditTaskBase(extension, variant), TransientTrackOptions {
+) : PublishEditTaskBase(extension, variant) {
     @get:Internal
     internal abstract val resDir: DirectoryProperty
 
