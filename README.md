@@ -154,7 +154,7 @@ buildscript {
 
     dependencies {
         // ...
-        classpath("com.github.triplet.gradle:play-publisher:2.7.0-SNAPSHOT")
+        classpath("com.github.triplet.gradle:play-publisher:2.8.0-SNAPSHOT")
     }
 }
 ```
@@ -172,7 +172,7 @@ buildscript {
 
     dependencies {
         // ...
-        classpath 'com.github.triplet.gradle:play-publisher:2.7.0-SNAPSHOT'
+        classpath 'com.github.triplet.gradle:play-publisher:2.8.0-SNAPSHOT'
     }
 }
 ```
