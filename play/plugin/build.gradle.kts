@@ -70,8 +70,13 @@ tasks.named("test") {
     inputs.files(fileTree("src/test/fixtures"))
 }
 
+val versionName = rootProject.file("version.txt").readText().trim()
 group = "com.github.triplet.gradle"
-version = rootProject.file("version.txt").readText().trim()
+version = versionName
+
+tasks.withType<PublishToMavenRepository>().configureEach {
+    isEnabled = versionName.contains("snapshot", true)
+}
 
 gradlePlugin {
     plugins.create("play") {
