@@ -51,7 +51,7 @@ import kotlin.reflect.KMutableProperty1
 @Suppress("unused") // Used by Gradle
 internal class PlayPublisherPlugin : Plugin<Project> {
     override fun apply(project: Project) {
-        validateRuntime()
+        project.validateRuntime()
 
         project.extensions.create<PlayPublisherExtension>(PLAY_PATH)
         project.plugins.withType<AppPlugin> {

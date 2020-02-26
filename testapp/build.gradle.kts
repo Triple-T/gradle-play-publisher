@@ -16,7 +16,7 @@ buildscript {
 
     dependencies {
         classpath(kotlin("gradle-plugin", embeddedKotlinVersion))
-        classpath("com.android.tools.build:gradle:3.6.0-rc03")
+        classpath("com.android.tools.build:gradle:3.6.0")
         classpath("com.github.triplet.gradle:play-publisher:" +
                           file("../version.txt").readText().trim())
     }
