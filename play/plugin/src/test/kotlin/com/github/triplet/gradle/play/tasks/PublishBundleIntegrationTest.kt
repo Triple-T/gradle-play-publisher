@@ -296,6 +296,32 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Build uploads bundle when mapping file does not exist`() {
+        // language=gradle
+        val config = """
+            android.buildTypes.release {
+                shrinkResources true
+                minifyEnabled true
+                proguardFiles(getDefaultProguardFile("proguard-android.txt"))
+            }
+        """
+        val bundle = File(appDir, "build/outputs/bundle/release/app-release.aab")
+        val bundleCopy = File(tempDir.root, "app-release.aab")
+
+        execute(config, "bundleRelease")
+        bundle.copyTo(bundleCopy)
+        execute(config, "clean")
+        bundleCopy.copyTo(bundle)
+        val result = execute(config, "publishReleaseBundle", "-x", "bundleRelease")
+
+        assertThat(result.task(":publishReleaseBundle")).isNotNull()
+        assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("uploadBundle(")
+        assertThat(result.output).contains(".aab")
+        assertThat(result.output).contains("mappingFile=null")
+    }
+
+    @Test
     fun `Build fails by default when upload fails`() {
         // language=gradle
         val config = """

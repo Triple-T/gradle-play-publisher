@@ -21,7 +21,7 @@ internal abstract class UploadArtifactTaskBase(
             val customDir = extension.config.artifactDir
 
             return if (customDir == null) {
-                variant.mappingFileProvider.get().singleOrNull()
+                variant.mappingFileProvider.get().singleOrNull()?.takeIf { it.exists() }
             } else {
                 customDir.listFiles().orEmpty().singleOrNull { it.name == "mapping.txt" }
             }
