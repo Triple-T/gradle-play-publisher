@@ -63,9 +63,9 @@ private fun buildExtensionInternal(
 ): PlayPublisherExtension {
     val variantExtension = extensionContainer.findByName(variant.name)
     val flavorExtension = variant.productFlavors.mapNotNull {
-        extensionContainer.findByName(it.name)
+        extensionContainer.findByName(it.getName())
     }.singleOrNull()
-    val buildTypeExtension = extensionContainer.findByName(variant.buildType.name)
+    val buildTypeExtension = extensionContainer.findByName(variant.buildType.getName())
 
     val extensions = listOfNotNull(
             variantExtension,

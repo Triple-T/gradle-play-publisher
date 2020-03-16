@@ -160,7 +160,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 addDependencies()
 
                 extension._callbacks += { property: KMutableProperty1<PlayExtensionConfig, Any?>,
-                                          value: Any? ->
+                                          _: Any? ->
                     if (property.name == PlayExtensionConfig::artifactDir.name) {
                         setDependsOn(emptyList<Any>())
                         addDependencies()
@@ -174,20 +174,21 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 val addDependencies = {
                     if (extension.config.artifactDir == null) {
                         // TODO blocked by https://issuetracker.google.com/issues/109918868
-                        project.tasks.findByName(
-                                (this@whenObjectAdded as InstallableVariantImpl).variantData
-                                        .getTaskName("bundle", "")
-                        )?.let {
+                        val bundleTask = project.tasks.findByName("bundle$variantName")?.let {
                             dependsOn(it)
-                        } ?: logger.warn("Bundle task not found, make sure to use " +
-                                                 "'com.android.tools.build:gradle' v3.2+. " +
-                                                 "Publishing App Bundles may not work.")
+                        }
+
+                        if (bundleTask == null) {
+                            logger.warn("Bundle task not found, make sure to use " +
+                                                "'com.android.tools.build:gradle' v3.2+. " +
+                                                "Publishing App Bundles may not work.")
+                        }
                     }
                 }
                 addDependencies()
 
                 extension._callbacks += { property: KMutableProperty1<PlayExtensionConfig, Any?>,
-                                          value: Any? ->
+                                          _: Any? ->
                     if (property.name == PlayExtensionConfig::artifactDir.name) {
                         setDependsOn(emptyList<Any>())
                         addDependencies()
@@ -411,7 +412,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
         project.afterEvaluate {
             val allPossiblePlayConfigNames: Set<String> by lazy {
                 android.applicationVariants.flatMapTo(mutableSetOf()) {
-                    listOf(it.name, it.buildType.name) + it.productFlavors.map { it.name }
+                    listOf(it.name, it.buildType.getName()) + it.productFlavors.map { it.getName() }
                 }
             }
 

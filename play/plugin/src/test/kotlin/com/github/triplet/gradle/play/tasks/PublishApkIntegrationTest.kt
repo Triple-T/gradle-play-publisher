@@ -9,6 +9,7 @@ import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
+import org.junit.Ignore
 import org.junit.Test
 import java.io.File
 
@@ -259,6 +260,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         assertThat(result2.output).contains("didPreviousBuildSkipCommit=true")
     }
 
+    @Ignore("https://github.com/Triple-T/gradle-play-publisher/issues/790") // TODO
     @Test
     fun `Build processes manifest when resolution strategy is set to auto`() {
         // language=gradle

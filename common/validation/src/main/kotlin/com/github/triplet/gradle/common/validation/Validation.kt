@@ -18,7 +18,7 @@ fun validateDebuggability(variant: ApplicationVariant, logger: Logger): Boolean 
     val isValid = !variant.buildType.isDebuggable
 
     if (!isValid) {
-        val typeName = variant.buildType.name
+        val typeName = variant.buildType.getName()
         if (typeName.equals("release", true)) {
             logger.error("GPP cannot configure variant '${variant.name}' because it is debuggable")
         } else {
