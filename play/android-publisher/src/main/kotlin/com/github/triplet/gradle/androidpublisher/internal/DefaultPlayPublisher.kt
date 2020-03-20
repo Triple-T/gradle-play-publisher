@@ -52,11 +52,12 @@ internal class DefaultPlayPublisher(
     }
 
     override fun getListings(editId: String): List<Listing> {
-        return publisher.edits().listings().list(appId, editId).execute().listings.orEmpty()
+        return publisher.edits().listings().list(appId, editId).execute()?.listings.orEmpty()
     }
 
     override fun getImages(editId: String, locale: String, type: String): List<Image> {
-        return publisher.edits().images().list(appId, editId, locale, type).execute().images.orEmpty()
+        val response = publisher.edits().images().list(appId, editId, locale, type).execute()
+        return response?.images.orEmpty()
     }
 
     override fun updateDetails(editId: String, details: AppDetails) {
@@ -81,7 +82,7 @@ internal class DefaultPlayPublisher(
     }
 
     override fun listTracks(editId: String): List<Track> {
-        return publisher.edits().tracks().list(appId, editId).execute().tracks.orEmpty()
+        return publisher.edits().tracks().list(appId, editId).execute()?.tracks.orEmpty()
     }
 
     override fun updateTrack(editId: String, track: Track) {
