@@ -38,6 +38,8 @@ java {
 // publishing each one as a maven artifact. To get around this, we manually inject all locally
 // produced libs into the final JAR.
 tasks.withType<Jar>().configureEach {
+    dependsOn(":play:android-publisher:processResources")
+
     val config = configurations.compileClasspath.get()
     val projectLibs = config.filter {
         it.path.contains(rootProject.layout.projectDirectory.asFile.path)
