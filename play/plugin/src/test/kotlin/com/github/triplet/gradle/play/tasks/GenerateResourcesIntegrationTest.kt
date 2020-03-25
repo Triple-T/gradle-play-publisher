@@ -359,6 +359,39 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Flavor named 'play' is allowed`() {
+        // language=gradle
+        val config = """
+            flavorDimensions 'pricing'
+            productFlavors {
+                play { dimension 'pricing' }
+            }
+        """
+
+        val result = execute(config, "generatePlayReleasePlayResources")
+
+        assertThat(result.task(":generatePlayReleasePlayResources")!!.outcome)
+                .isEqualTo(TaskOutcome.SUCCESS)
+    }
+
+    @Test
+    fun `'play' file name is not allowed`() {
+        // language=gradle
+        val config = """
+            flavorDimensions 'pricing'
+            productFlavors {
+                illegalPlay { dimension 'pricing' }
+            }
+        """
+
+        val result = executeExpectingFailure(
+                config, "generateIllegalPlayReleasePlayResources")
+
+        assertThat(result.task(":generateIllegalPlayReleasePlayResources")!!.outcome)
+                .isEqualTo(TaskOutcome.FAILED)
+    }
+
+    @Test
     fun `Non-existent locale throws`() {
         // language=gradle
         val config = """

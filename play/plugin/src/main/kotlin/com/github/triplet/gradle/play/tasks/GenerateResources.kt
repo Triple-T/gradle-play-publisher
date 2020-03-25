@@ -70,6 +70,7 @@ internal abstract class GenerateResources : DefaultTask() {
         if (validateChanges.isNotEmpty()) {
             work.submit(Validator::class) {
                 files.set(validateChanges)
+                inputDirs.set(resSrcDirs)
             }
         }
         if (generateChanges.isNotEmpty()) {
@@ -95,11 +96,15 @@ internal abstract class GenerateResources : DefaultTask() {
                     isChildOf(RELEASE_NAMES_PATH) ||
                     isChildOf(PRODUCTS_PATH)
             check(areRootsValid) { "Unknown Play resource file: $this" }
-            check(extension != INDEX_MARKER) { "Resources cannot use the 'index' extension: $this" }
-            check(name != PLAY_PATH || !isChildOf(PLAY_PATH)) {
+
+            val isPlayKeywordReserved = name != PLAY_PATH || parameters.inputDirs.get().any {
+                it.asFile == this
+            }
+            check(isPlayKeywordReserved) {
                 "The file name 'play' is illegal: $this"
             }
 
+            check(extension != INDEX_MARKER) { "Resources cannot use the 'index' extension: $this" }
             validateListings()
             validateReleaseNotes()
             validateReleaseNames()
@@ -156,6 +161,7 @@ internal abstract class GenerateResources : DefaultTask() {
 
         interface Params : WorkParameters {
             val files: ListProperty<File>
+            val inputDirs: ListProperty<Directory>
         }
     }
 
