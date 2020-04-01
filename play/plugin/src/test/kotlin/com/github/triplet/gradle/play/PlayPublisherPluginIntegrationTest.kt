@@ -150,7 +150,7 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
             withArguments("help", "--warning-mode", "all")
         }
 
-        assertThat(result.output).contains("PKCS12 based authentication has been deprecated")
+        assertThat(result.output).contains("PKCS12 based authentication is deprecated")
     }
 
     @Test
