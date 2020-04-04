@@ -377,7 +377,7 @@ class DefaultTrackManagerTest {
     }
 
     @Test
-    fun `Track update `() {
+    fun `Track update uses existing release notes when no local ones are available`() {
         val config = TrackManager.UpdateConfig(
                 trackName = "alpha",
                 versionCodes = listOf(888),
@@ -714,6 +714,7 @@ class DefaultTrackManagerTest {
         )
         `when`(mockPublisher.listTracks(any())).thenReturn(listOf(
                 Track().apply {
+                    track = "alpha"
                     releases = listOf(
                             TrackRelease().apply {
                                 name = "old"
@@ -722,6 +723,7 @@ class DefaultTrackManagerTest {
                     )
                 },
                 Track().apply {
+                    track = "internal"
                     releases = listOf(
                             TrackRelease().apply {
                                 name = "new"
@@ -753,6 +755,7 @@ class DefaultTrackManagerTest {
                 )
         )
         `when`(mockPublisher.listTracks(any())).thenReturn(listOf(Track().apply {
+            track = "internal"
             releases = listOf(
                     TrackRelease().apply {
                         versionCodes = listOf(3)
@@ -790,6 +793,7 @@ class DefaultTrackManagerTest {
                 )
         )
         `when`(mockPublisher.listTracks(any())).thenReturn(listOf(Track().apply {
+            track = "internal"
             releases = listOf(
                     TrackRelease().apply {
                         status = "completed"
@@ -829,6 +833,7 @@ class DefaultTrackManagerTest {
                 )
         )
         `when`(mockPublisher.listTracks(any())).thenReturn(listOf(Track().apply {
+            track = "internal"
             releases = listOf(TrackRelease().apply {
                 status = "completed"
                 name = "foobar"
@@ -890,5 +895,61 @@ class DefaultTrackManagerTest {
         assertThat(trackCaptor.value.track).isEqualTo("alpha")
         assertThat(trackCaptor.value.releases).hasSize(1)
         assertThat(trackCaptor.value.releases.single().versionCodes).containsExactly(2L)
+    }
+
+    @Test
+    fun `Promoting track uses existing release notes when no local ones are available`() {
+        val config = TrackManager.PromoteConfig(
+                promoteTrackName = "alpha",
+                fromTrackName = null,
+                base = TrackManager.BaseConfig(
+                        releaseStatus = ReleaseStatus.COMPLETED,
+                        userFraction = null,
+                        releaseNotes = null,
+                        retainableArtifacts = null,
+                        releaseName = null
+                )
+        )
+        `when`(mockPublisher.listTracks(any())).thenReturn(listOf(Track().apply {
+            track = "internal"
+            releases = listOf(TrackRelease().apply {
+                status = "completed"
+                versionCodes = listOf(1, 2)
+                releaseNotes = listOf(
+                        LocalizedText().apply {
+                            language = "lang1-1"
+                            text = "notes1-1"
+                        }
+                )
+            }, TrackRelease().apply {
+                status = "inProgress"
+                versionCodes = listOf(3)
+                releaseNotes = listOf(
+                        LocalizedText().apply {
+                            language = "lang1-2"
+                            text = "notes1-2"
+                        },
+                        LocalizedText().apply {
+                            language = "lang2"
+                            text = "notes2"
+                        }
+                )
+            })
+        }))
+
+        tracks.promote(config)
+
+        val trackCaptor = ArgumentCaptor.forClass(Track::class.java)
+        verify(mockPublisher).updateTrack(eq("edit-id"), trackCaptor.capture())
+        assertThat(trackCaptor.value.releases).hasSize(1)
+        assertThat(trackCaptor.value.releases.single().releaseNotes).hasSize(2)
+        assertThat(trackCaptor.value.releases.single().releaseNotes.first().language)
+                .isEqualTo("lang1-2")
+        assertThat(trackCaptor.value.releases.single().releaseNotes.first().text)
+                .isEqualTo("notes1-2")
+        assertThat(trackCaptor.value.releases.single().releaseNotes.last().language)
+                .isEqualTo("lang2")
+        assertThat(trackCaptor.value.releases.single().releaseNotes.last().text)
+                .isEqualTo("notes2")
     }
 }
