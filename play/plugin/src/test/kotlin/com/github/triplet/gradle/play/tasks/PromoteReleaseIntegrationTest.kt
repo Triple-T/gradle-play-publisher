@@ -52,7 +52,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":promoteReleaseArtifact")).isNotNull()
         assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("promoteRelease(")
-        assertThat(result.output).contains("fromTrackName=null")
+        assertThat(result.output).contains("fromTrackName=auto-track")
     }
 
     @Test
@@ -235,6 +235,8 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
             android.buildTypes {
                 releaseNotes {}
             }
+
+            System.setProperty("AUTOTRACK", "other")
         """
 
         val result = execute(config, "promoteReleaseNotesArtifact")
@@ -255,7 +257,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
                 releaseNotes {}
             }
 
-            play.track 'custom-track'
+            play.fromTrack 'custom-track'
         """
 
         val result = execute(config, "promoteReleaseNotesArtifact")
@@ -269,15 +271,12 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `Build picks promote track specific release notes when available`() {
+    fun `Build picks remote track specific release notes when available`() {
         // language=gradle
         val config = """
             android.buildTypes {
                 releaseNotes {}
             }
-
-            play.track 'custom-track'
-            play.promoteTrack 'promote-track'
         """
 
         val result = execute(config, "promoteReleaseNotesArtifact")
@@ -286,7 +285,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":promoteReleaseNotesArtifact")!!.outcome)
                 .isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("promoteRelease(")
-        assertThat(result.output).contains("releaseNotes={en-US=Promote track release notes, " +
+        assertThat(result.output).contains("releaseNotes={en-US=Auto track release notes, " +
                                                    "fr-FR=Mes notes de mise à jour}")
     }
 
@@ -377,9 +376,14 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
                 }
             }
             val edits = object : FakeEditManager() {
+                override fun findLeastStableTrackName(): String? {
+                    println("findLeastStableTrackName()")
+                    return System.getProperty("AUTOTRACK") ?: "auto-track"
+                }
+
                 override fun promoteRelease(
                         promoteTrackName: String,
-                        fromTrackName: String?,
+                        fromTrackName: String,
                         releaseStatus: ReleaseStatus?,
                         releaseName: String?,
                         releaseNotes: Map<String, String?>?,

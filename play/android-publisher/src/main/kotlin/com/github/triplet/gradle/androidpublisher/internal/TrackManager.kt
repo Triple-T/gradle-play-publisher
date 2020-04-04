@@ -6,7 +6,7 @@ import com.google.api.services.androidpublisher.model.Track
 import com.google.api.services.androidpublisher.model.TrackRelease
 
 internal interface TrackManager {
-    fun findMaxAppVersionCode(): Long
+    fun findHighestTrack(): Track?
 
     fun getReleaseNotes(): Map<String, List<LocalizedText>>
 
@@ -32,7 +32,7 @@ internal interface TrackManager {
 
     data class PromoteConfig(
             val promoteTrackName: String,
-            val fromTrackName: String?,
+            val fromTrackName: String,
             val base: BaseConfig
     )
 }
@@ -41,11 +41,10 @@ internal class DefaultTrackManager(
         private val publisher: InternalPlayPublisher,
         private val editId: String
 ) : TrackManager {
-    override fun findMaxAppVersionCode(): Long {
-        return publisher.listTracks(editId)
-                .flatMap { it.releases.orEmpty() }
-                .flatMap { it.versionCodes.orEmpty() }
-                .max() ?: 1
+    override fun findHighestTrack(): Track? {
+        return publisher.listTracks(editId).maxBy {
+            it.releases.orEmpty().flatMap { it.versionCodes.orEmpty() }.max() ?: 0
+        }
     }
 
     override fun getReleaseNotes(): Map<String, List<LocalizedText>> {
@@ -78,21 +77,9 @@ internal class DefaultTrackManager(
     }
 
     override fun promote(config: TrackManager.PromoteConfig) {
-        val activeTracks = publisher.listTracks(editId).filter {
-            it.releases.orEmpty().flatMap { it.versionCodes.orEmpty() }.isNotEmpty()
-        }
-        check(activeTracks.isNotEmpty()) { "Nothing to promote. Did you mean to run publish?" }
-
-        // Find the target track
-        val track = if (config.fromTrackName == null) {
-            // Get the track with the highest version code
-            activeTracks.sortedByDescending {
-                it.releases.flatMap { it.versionCodes.orEmpty() }.max()
-            }.first()
-        } else {
-            checkNotNull(activeTracks.find { it.track.equals(config.fromTrackName, true) }) {
-                "${config.fromTrackName.capitalize()} track has no active artifacts"
-            }
+        val track = publisher.getTrack(editId, config.fromTrackName)
+        check(track.releases.orEmpty().flatMap { it.versionCodes.orEmpty() }.isNotEmpty()) {
+            "Track '${config.fromTrackName}' has no releases. Did you mean to run publish?"
         }
 
         // Update the track

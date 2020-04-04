@@ -31,12 +31,15 @@ internal abstract class PromoteRelease @Inject constructor(
 
     abstract class Promoter : PublishArtifactWorkerBase<PublishArtifactWorkerBase.ArtifactPublishingParams>() {
         override fun upload() {
+            val fromTrack = config.fromTrack ?: edits.findLeastStableTrackName()
+            checkNotNull(fromTrack) { "No tracks to promote. Did you mean to run publish?" }
+
             edits.promoteRelease(
                     config.promoteTrackOrDefault,
-                    config.fromTrack,
+                    fromTrack,
                     config.releaseStatus,
                     findReleaseName(config.promoteTrackOrDefault),
-                    findReleaseNotes(config.promoteTrackOrDefault),
+                    findReleaseNotes(fromTrack),
                     config.userFraction,
                     config.retainArtifacts
             )

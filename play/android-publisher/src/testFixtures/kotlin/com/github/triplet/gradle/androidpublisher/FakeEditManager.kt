@@ -19,6 +19,9 @@ abstract class FakeEditManager : EditManager {
     override fun findMaxAppVersionCode(): Long =
             throw IllegalStateException("Test wasn't expecting this method to be called.")
 
+    override fun findLeastStableTrackName(): String? =
+            throw IllegalStateException("Test wasn't expecting this method to be called.")
+
     override fun getReleaseNotes(): List<ReleaseNote> =
             throw IllegalStateException("Test wasn't expecting this method to be called.")
 
@@ -42,7 +45,7 @@ abstract class FakeEditManager : EditManager {
 
     override fun promoteRelease(
             promoteTrackName: String,
-            fromTrackName: String?,
+            fromTrackName: String,
             releaseStatus: ReleaseStatus?,
             releaseName: String?,
             releaseNotes: Map<String, String?>?,

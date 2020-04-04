@@ -48,7 +48,13 @@ internal class DefaultEditManager(
     }
 
     override fun findMaxAppVersionCode(): Long {
-        return tracks.findMaxAppVersionCode()
+        return tracks.findHighestTrack()?.releases.orEmpty()
+                .flatMap { it.versionCodes.orEmpty() }
+                .max() ?: 1
+    }
+
+    override fun findLeastStableTrackName(): String? {
+        return tracks.findHighestTrack()?.track
     }
 
     override fun getReleaseNotes(): List<ReleaseNote> {
@@ -97,7 +103,7 @@ internal class DefaultEditManager(
 
     override fun promoteRelease(
             promoteTrackName: String,
-            fromTrackName: String?,
+            fromTrackName: String,
             releaseStatus: ReleaseStatus?,
             releaseName: String?,
             releaseNotes: Map<String, String?>?,

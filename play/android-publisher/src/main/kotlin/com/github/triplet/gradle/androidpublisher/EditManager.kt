@@ -21,6 +21,9 @@ interface EditManager {
     /** Retrieves the highest version code available for this app. */
     fun findMaxAppVersionCode(): Long
 
+    /** Retrieves the track with the highest version code available for this app. */
+    fun findLeastStableTrackName(): String?
+
     /** Retrieves the release notes across all tracks for this app. */
     fun getReleaseNotes(): List<ReleaseNote>
 
@@ -55,7 +58,7 @@ interface EditManager {
      */
     fun promoteRelease(
             promoteTrackName: String,
-            fromTrackName: String?,
+            fromTrackName: String,
             releaseStatus: ReleaseStatus?,
             releaseName: String?,
             releaseNotes: Map</* locale= */String, /* text= */String?>?,

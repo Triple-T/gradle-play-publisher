@@ -12,6 +12,8 @@ import com.google.api.services.androidpublisher.model.Bundle
 import com.google.api.services.androidpublisher.model.Image
 import com.google.api.services.androidpublisher.model.Listing
 import com.google.api.services.androidpublisher.model.LocalizedText
+import com.google.api.services.androidpublisher.model.Track
+import com.google.api.services.androidpublisher.model.TrackRelease
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertThrows
 import org.junit.Test
@@ -416,10 +418,87 @@ class DefaultEditManagerTest {
     }
 
     @Test
-    fun `findMaxAppVersionCode forwards config to track manager`() {
-        edits.findMaxAppVersionCode()
+    fun `findMaxAppVersionCode returns 1 on empty tracks`() {
+        `when`(mockTracks.findHighestTrack()).thenReturn(null)
 
-        verify(mockTracks).findMaxAppVersionCode()
+        val max = edits.findMaxAppVersionCode()
+
+        assertThat(max).isEqualTo(1)
+    }
+
+    @Test
+    fun `findMaxAppVersionCode returns 1 on null releases`() {
+        `when`(mockTracks.findHighestTrack()).thenReturn(Track())
+
+        val max = edits.findMaxAppVersionCode()
+
+        assertThat(max).isEqualTo(1)
+    }
+
+    @Test
+    fun `findMaxAppVersionCode succeeds with single track, single release, singe version code`() {
+        `when`(mockTracks.findHighestTrack()).thenReturn(Track().apply {
+            releases = listOf(
+                    TrackRelease().apply {
+                        versionCodes = listOf(5)
+                    }
+            )
+        })
+
+        val max = edits.findMaxAppVersionCode()
+
+        assertThat(max).isEqualTo(5)
+    }
+
+    @Test
+    fun `findMaxAppVersionCode succeeds with single track, single release, multi version code`() {
+        `when`(mockTracks.findHighestTrack()).thenReturn(Track().apply {
+            releases = listOf(
+                    TrackRelease().apply {
+                        versionCodes = listOf(5, 4, 8, 7)
+                    }
+            )
+        })
+
+        val max = edits.findMaxAppVersionCode()
+
+        assertThat(max).isEqualTo(8)
+    }
+
+    @Test
+    fun `findMaxAppVersionCode succeeds with single track, multi release, multi version code`() {
+        `when`(mockTracks.findHighestTrack()).thenReturn(Track().apply {
+            releases = listOf(
+                    TrackRelease().apply {
+                        versionCodes = listOf(5, 4, 8, 7)
+                    },
+                    TrackRelease().apply {
+                        versionCodes = listOf(85, 7, 36, 5)
+                    }
+            )
+        })
+
+        val max = edits.findMaxAppVersionCode()
+
+        assertThat(max).isEqualTo(85)
+    }
+
+    @Test
+    fun `findLeastStableTrackName returns null on null track`() {
+        `when`(mockTracks.findHighestTrack()).thenReturn(null)
+
+        val highest = edits.findLeastStableTrackName()
+
+        assertThat(highest).isNull()
+    }
+
+    @Test
+    fun `findLeastStableTrackName returns track name`() {
+        `when`(mockTracks.findHighestTrack()).thenReturn(Track().apply { track = "internal" })
+
+        val highest = edits.findLeastStableTrackName()
+
+        assertThat(highest).isEqualTo("internal")
     }
 
     @Test

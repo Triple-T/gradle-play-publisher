@@ -434,75 +434,28 @@ class DefaultTrackManagerTest {
     }
 
     @Test
-    fun `findMaxAppVersionCode returns 1 on empty tracks`() {
+    fun `findHighestTrack returns null on empty tracks`() {
         `when`(mockPublisher.listTracks(any())).thenReturn(emptyList())
 
-        val max = tracks.findMaxAppVersionCode()
+        val max = tracks.findHighestTrack()
 
-        assertThat(max).isEqualTo(1)
+        assertThat(max).isNull()
     }
 
     @Test
-    fun `findMaxAppVersionCode returns 1 on null releases`() {
+    fun `findHighestTrack returns first track on null releases`() {
         `when`(mockPublisher.listTracks(any())).thenReturn(listOf(Track(), Track()))
 
-        val max = tracks.findMaxAppVersionCode()
+        val max = tracks.findHighestTrack()
 
-        assertThat(max).isEqualTo(1)
+        assertThat(max).isEqualTo(Track())
     }
 
     @Test
-    fun `findMaxAppVersionCode succeeds with single track, single release, singe version code`() {
-        `when`(mockPublisher.listTracks(any())).thenReturn(listOf(Track().apply {
-            releases = listOf(
-                    TrackRelease().apply {
-                        versionCodes = listOf(5)
-                    }
-            )
-        }))
-
-        val max = tracks.findMaxAppVersionCode()
-
-        assertThat(max).isEqualTo(5)
-    }
-
-    @Test
-    fun `findMaxAppVersionCode succeeds with single track, single release, multi version code`() {
-        `when`(mockPublisher.listTracks(any())).thenReturn(listOf(Track().apply {
-            releases = listOf(
-                    TrackRelease().apply {
-                        versionCodes = listOf(5, 4, 8, 7)
-                    }
-            )
-        }))
-
-        val max = tracks.findMaxAppVersionCode()
-
-        assertThat(max).isEqualTo(8)
-    }
-
-    @Test
-    fun `findMaxAppVersionCode succeeds with single track, multi release, multi version code`() {
-        `when`(mockPublisher.listTracks(any())).thenReturn(listOf(Track().apply {
-            releases = listOf(
-                    TrackRelease().apply {
-                        versionCodes = listOf(5, 4, 8, 7)
-                    },
-                    TrackRelease().apply {
-                        versionCodes = listOf(85, 7, 36, 5)
-                    }
-            )
-        }))
-
-        val max = tracks.findMaxAppVersionCode()
-
-        assertThat(max).isEqualTo(85)
-    }
-
-    @Test
-    fun `findMaxAppVersionCode succeeds with multi track, multi release, multi version code`() {
+    fun `findHighestTrack succeeds with multi track, multi release, multi version code`() {
         `when`(mockPublisher.listTracks(any())).thenReturn(listOf(
                 Track().apply {
+                    track = "a"
                     releases = listOf(
                             TrackRelease().apply {
                                 versionCodes = listOf(5, 4, 8, 7)
@@ -513,6 +466,7 @@ class DefaultTrackManagerTest {
                     )
                 },
                 Track().apply {
+                    track = "b"
                     releases = listOf(
                             TrackRelease().apply {
                                 versionCodes = listOf(49, 5875, 385, 9, 73, 294, 867)
@@ -527,9 +481,10 @@ class DefaultTrackManagerTest {
                 }
         ))
 
-        val max = tracks.findMaxAppVersionCode()
+        val max = tracks.findHighestTrack()
 
-        assertThat(max).isEqualTo(5875)
+        assertThat(max).isNotNull()
+        assertThat(max!!.track).isEqualTo("b")
     }
 
     @Test
@@ -613,7 +568,7 @@ class DefaultTrackManagerTest {
     fun `Promoting tracks with no active releases fails`() {
         val config = TrackManager.PromoteConfig(
                 promoteTrackName = "alpha",
-                fromTrackName = null,
+                fromTrackName = "internal",
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         userFraction = .88,
@@ -622,130 +577,22 @@ class DefaultTrackManagerTest {
                         releaseName = "relname"
                 )
         )
-        `when`(mockPublisher.listTracks(any())).thenReturn(listOf(
-                Track(),
-                Track().apply {
-                    releases = listOf(TrackRelease())
-                }
-        ))
+        `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().apply {
+            releases = listOf(TrackRelease())
+        })
 
         assertThrows(IllegalStateException::class.java) {
             tracks.promote(config)
         }
 
         verify(mockPublisher, never()).updateTrack(any(), any())
-    }
-
-    @Test
-    fun `Promoting from specific track with no active releases fails`() {
-        val config = TrackManager.PromoteConfig(
-                promoteTrackName = "alpha",
-                fromTrackName = "foobar",
-                base = TrackManager.BaseConfig(
-                        releaseStatus = ReleaseStatus.COMPLETED,
-                        userFraction = .88,
-                        releaseNotes = mapOf("lang1" to "notes1"),
-                        retainableArtifacts = listOf(777),
-                        releaseName = "relname"
-                )
-        )
-        `when`(mockPublisher.listTracks(any())).thenReturn(listOf(
-                Track().apply {
-                    releases = listOf(
-                            TrackRelease().apply {
-                                versionCodes = listOf(1)
-                            }
-                    )
-                },
-                Track().apply {
-                    track = "foobar"
-                    releases = listOf(TrackRelease())
-                }
-        ))
-
-        assertThrows(IllegalStateException::class.java) {
-            tracks.promote(config)
-        }
-
-        verify(mockPublisher, never()).updateTrack(any(), any())
-    }
-
-    @Test
-    fun `Promoting from non-existent specific track fails`() {
-        val config = TrackManager.PromoteConfig(
-                promoteTrackName = "alpha",
-                fromTrackName = "foobar",
-                base = TrackManager.BaseConfig(
-                        releaseStatus = ReleaseStatus.COMPLETED,
-                        userFraction = .88,
-                        releaseNotes = mapOf("lang1" to "notes1"),
-                        retainableArtifacts = listOf(777),
-                        releaseName = "relname"
-                )
-        )
-        `when`(mockPublisher.listTracks(any())).thenReturn(listOf(Track().apply {
-            track = "abcd"
-            releases = listOf(
-                    TrackRelease().apply {
-                        versionCodes = listOf(1)
-                    }
-            )
-        }))
-
-        assertThrows(IllegalStateException::class.java) {
-            tracks.promote(config)
-        }
-
-        verify(mockPublisher, never()).updateTrack(any(), any())
-    }
-
-    @Test
-    fun `Promoting from dynamic track chooses highest available`() {
-        val config = TrackManager.PromoteConfig(
-                promoteTrackName = "alpha",
-                fromTrackName = null,
-                base = TrackManager.BaseConfig(
-                        releaseStatus = ReleaseStatus.COMPLETED,
-                        userFraction = .88,
-                        releaseNotes = mapOf("lang1" to "notes1"),
-                        retainableArtifacts = listOf(777),
-                        releaseName = null
-                )
-        )
-        `when`(mockPublisher.listTracks(any())).thenReturn(listOf(
-                Track().apply {
-                    track = "alpha"
-                    releases = listOf(
-                            TrackRelease().apply {
-                                name = "old"
-                                versionCodes = listOf(3)
-                            }
-                    )
-                },
-                Track().apply {
-                    track = "internal"
-                    releases = listOf(
-                            TrackRelease().apply {
-                                name = "new"
-                                versionCodes = listOf(4)
-                            }
-                    )
-                }
-        ))
-
-        tracks.promote(config)
-
-        val trackCaptor = ArgumentCaptor.forClass(Track::class.java)
-        verify(mockPublisher).updateTrack(eq("edit-id"), trackCaptor.capture())
-        assertThat(trackCaptor.value.releases).hasSize(1)
-        assertThat(trackCaptor.value.releases.single().name).isEqualTo("new")
     }
 
     @Test
     fun `Promoting track applies updates from params`() {
         val config = TrackManager.PromoteConfig(
                 promoteTrackName = "alpha",
-                fromTrackName = null,
+                fromTrackName = "internal",
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.IN_PROGRESS,
                         userFraction = .88,
@@ -754,14 +601,14 @@ class DefaultTrackManagerTest {
                         releaseName = "relname"
                 )
         )
-        `when`(mockPublisher.listTracks(any())).thenReturn(listOf(Track().apply {
+        `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().apply {
             track = "internal"
             releases = listOf(
                     TrackRelease().apply {
                         versionCodes = listOf(3)
                     }
             )
-        }))
+        })
 
         tracks.promote(config)
 
@@ -783,7 +630,7 @@ class DefaultTrackManagerTest {
     fun `Promoting track with conflicting releases keeps newest one`() {
         val config = TrackManager.PromoteConfig(
                 promoteTrackName = "alpha",
-                fromTrackName = null,
+                fromTrackName = "internal",
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         userFraction = null,
@@ -792,7 +639,7 @@ class DefaultTrackManagerTest {
                         releaseName = null
                 )
         )
-        `when`(mockPublisher.listTracks(any())).thenReturn(listOf(Track().apply {
+        `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().apply {
             track = "internal"
             releases = listOf(
                     TrackRelease().apply {
@@ -808,7 +655,7 @@ class DefaultTrackManagerTest {
                         versionCodes = listOf(3)
                     }
             )
-        }))
+        })
 
         tracks.promote(config)
 
@@ -823,7 +670,7 @@ class DefaultTrackManagerTest {
     fun `Promoting track keeps existing values if params aren't specified`() {
         val config = TrackManager.PromoteConfig(
                 promoteTrackName = "alpha",
-                fromTrackName = null,
+                fromTrackName = "internal",
                 base = TrackManager.BaseConfig(
                         releaseStatus = null,
                         userFraction = null,
@@ -832,7 +679,7 @@ class DefaultTrackManagerTest {
                         releaseName = null
                 )
         )
-        `when`(mockPublisher.listTracks(any())).thenReturn(listOf(Track().apply {
+        `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().apply {
             track = "internal"
             releases = listOf(TrackRelease().apply {
                 status = "completed"
@@ -846,7 +693,7 @@ class DefaultTrackManagerTest {
                         }
                 )
             })
-        }))
+        })
 
         tracks.promote(config)
 
@@ -877,16 +724,10 @@ class DefaultTrackManagerTest {
                         releaseName = null
                 )
         )
-        `when`(mockPublisher.listTracks(any())).thenReturn(listOf(
-                Track().apply {
-                    track = "alpha"
-                    releases = listOf(TrackRelease().apply { versionCodes = listOf(1) })
-                },
-                Track().apply {
-                    track = "internal"
-                    releases = listOf(TrackRelease().apply { versionCodes = listOf(2) })
-                }
-        ))
+        `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().apply {
+            track = "internal"
+            releases = listOf(TrackRelease().apply { versionCodes = listOf(2) })
+        })
 
         tracks.promote(config)
 
@@ -901,7 +742,7 @@ class DefaultTrackManagerTest {
     fun `Promoting track uses existing release notes when no local ones are available`() {
         val config = TrackManager.PromoteConfig(
                 promoteTrackName = "alpha",
-                fromTrackName = null,
+                fromTrackName = "internal",
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         userFraction = null,
@@ -910,7 +751,7 @@ class DefaultTrackManagerTest {
                         releaseName = null
                 )
         )
-        `when`(mockPublisher.listTracks(any())).thenReturn(listOf(Track().apply {
+        `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().apply {
             track = "internal"
             releases = listOf(TrackRelease().apply {
                 status = "completed"
@@ -935,7 +776,7 @@ class DefaultTrackManagerTest {
                         }
                 )
             })
-        }))
+        })
 
         tracks.promote(config)
 
