@@ -27,6 +27,10 @@ buildScan {
     termsOfServiceAgree = "yes"
 }
 
+tasks.wrapper {
+    distributionType = Wrapper.DistributionType.ALL
+}
+
 allprojects {
     repositories {
         google()
