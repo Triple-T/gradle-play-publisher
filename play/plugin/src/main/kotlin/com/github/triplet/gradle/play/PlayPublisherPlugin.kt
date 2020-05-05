@@ -2,7 +2,6 @@ package com.github.triplet.gradle.play
 
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.AppPlugin
-import com.android.build.gradle.internal.api.InstallableVariantImpl
 import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import com.github.triplet.gradle.common.validation.validateRuntime
 import com.github.triplet.gradle.play.internal.PLAY_CONFIGS_PATH
@@ -139,12 +138,6 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 return@whenObjectAdded
             }
             extension.validateCreds()
-
-            if (!isSigningReady && !outputsAreSigned) {
-                project.logger.error(
-                        "Signing not ready for Gradle Play Publisher. " +
-                                "Be sure to specify a signingConfig for variant '$name'.")
-            }
 
 
             val publishApkTaskDependenciesHack = project.newTask(
