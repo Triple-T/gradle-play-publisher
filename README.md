@@ -80,6 +80,9 @@ sure you have
 To use GPP, you must create a service account with access to the Play Developer API:
 
 1. If you don't already have one, create a GCP project for your app(s)
+1. Enable the
+   [AndroidPublisher API](https://console.cloud.google.com/apis/library/androidpublisher.googleapis.com)
+   for that GCP project
 1. [Link your Google Play developer account](https://play.google.com/apps/publish#ApiAccessPlace)
    to your GCP project
 1. Create a
