@@ -78,7 +78,15 @@ internal class DefaultPlayPublisher(
     }
 
     override fun getTrack(editId: String, track: String): Track {
-        return publisher.edits().tracks().get(appId, editId, track).execute()
+        return try {
+            publisher.edits().tracks().get(appId, editId, track).execute()
+        } catch (e: GoogleJsonResponseException) {
+            if (e has "notFound") {
+                Track().setTrack(track)
+            } else {
+                throw e
+            }
+        }
     }
 
     override fun listTracks(editId: String): List<Track> {
