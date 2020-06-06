@@ -7,6 +7,8 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      is_snapshot: ${{ steps.setup.outputs.is_snapshot }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -24,15 +26,13 @@ jobs:
             ${{ runner.os }}-v2-gradle-
       - name: Validate Gradle integrity
         uses: gradle/wrapper-validation-action@v1
+      - name: Setup environment
+        id: setup
+        run: ./gradlew configureGithubActions
       - name: Build project
         run: |
           ./gradlew assemble publishToMavenLocal -S
           cd testapp && ../gradlew help -PskipValidation
-      - name: Upload libs
-        uses: actions/upload-artifact@v1
-        with:
-          name: libs
-          path: play/plugin/build/libs
 
   test:
     runs-on: ubuntu-latest
@@ -59,10 +59,7 @@ jobs:
   deploy_snapshot:
     needs: [build, test]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
-    env:
-      SONATYPE_NEXUS_USERNAME: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
-      SONATYPE_NEXUS_PASSWORD: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
+    if: github.ref == 'refs/heads/master' && needs.build.outputs.is_snapshot == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -83,6 +80,9 @@ jobs:
         run: ./gradlew assemble
       - name: Publish snapshot
         run: ./gradlew publish
+        env:
+          SONATYPE_NEXUS_USERNAME: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
+          SONATYPE_NEXUS_PASSWORD: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
 
   deploy_release:
     needs: [build, test]
@@ -104,15 +104,17 @@ jobs:
             ${{ runner.os }}-v2-gradle-deploy-release-
             ${{ runner.os }}-v2-gradle-deploy-
             ${{ runner.os }}-v2-gradle-
-      - name: Install creds
-        run: |
-          mkdir -p $HOME/.gradle
-          echo "gradle.publish.key=$PUBLISH_KEY" > $HOME/.gradle/gradle.properties
-          echo "gradle.publish.secret=$PUBLISH_SECRET" >> $HOME/.gradle/gradle.properties
-        env:
-          PUBLISH_KEY: ${{ secrets.PUBLISH_KEY }}
-          PUBLISH_SECRET: ${{ secrets.PUBLISH_SECRET }}
       - name: Build project
         run: ./gradlew assemble
       - name: Publish release
-        run: ./gradlew publishPlugins
+        run: |
+          ./gradlew publishToSonatype closeAndReleaseRepository
+          ./gradlew publishPlugins \
+            -Pgradle.publish.key=$PUBLISH_KEY -Pgradle.publish.secret=$PUBLISH_SECRET
+        env:
+          PUBLISH_KEY: ${{ secrets.PUBLISH_KEY }}
+          PUBLISH_SECRET: ${{ secrets.PUBLISH_SECRET }}
+          SONATYPE_NEXUS_USERNAME: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
+          SONATYPE_NEXUS_PASSWORD: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}

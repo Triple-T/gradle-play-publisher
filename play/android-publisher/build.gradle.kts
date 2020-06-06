@@ -3,6 +3,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     `kotlin-dsl`
     `java-test-fixtures`
+    `maven-publish`
+    signing
+    id("de.marcphilipp.nexus-publish")
 }
 
 dependencies {
@@ -27,5 +30,13 @@ tasks.named<KotlinCompile>("compileTestKotlin") {
 kotlin.target.compilations {
     named("testFixtures") {
         associateWith(named("main").get())
+    }
+}
+
+afterEvaluate {
+    publishing.publications.named<MavenPublication>("pluginMaven") {
+        artifactId = "android-publisher"
+        configurePom()
+        signing.sign(this)
     }
 }

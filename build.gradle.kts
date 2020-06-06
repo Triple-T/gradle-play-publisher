@@ -1,3 +1,5 @@
+import de.marcphilipp.gradle.nexus.NexusPublishExtension
+import io.codearte.gradle.nexus.CloseRepositoryTask
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 
 buildscript {
@@ -11,6 +13,11 @@ buildscript {
 plugins {
     `lifecycle-base`
     id("com.github.ben-manes.versions") version "0.28.0"
+
+    // Needed to support publishing all modules atomically
+    id("de.marcphilipp.nexus-publish") version "0.4.0" apply false
+    // Needed to deploy library releases
+    id("io.codearte.nexus-staging") version "0.21.2"
 }
 
 buildScan {
@@ -24,12 +31,39 @@ tasks.wrapper {
     distributionType = Wrapper.DistributionType.ALL
 }
 
+tasks.register("configureGithubActions") {
+    doLast {
+        println("::set-output name=is_snapshot::$isSnapshotBuild")
+    }
+}
+
+nexusStaging {
+    packageGroup = "com.github.triplet"
+    delayBetweenRetriesInMillis = 9000
+    username = System.getenv("SONATYPE_NEXUS_USERNAME")
+    password = System.getenv("SONATYPE_NEXUS_PASSWORD")
+}
+
+tasks.withType<CloseRepositoryTask> {
+    mustRunAfter(allprojects.map {
+        it.tasks.matching { task ->
+            task.name.contains("publishToSonatype")
+        }
+    })
+}
+
+val versionName = rootProject.file("version.txt").readText().trim()
 allprojects {
     repositories.deps()
+
+    version = versionName
+    group = "com.github.triplet.gradle"
 
     afterEvaluate {
         convention.findByType<JavaPluginExtension>()?.apply {
             sourceCompatibility = JavaVersion.VERSION_1_8
+            withJavadocJar()
+            withSourcesJar()
         }
 
         convention.findByType<KotlinProjectExtension>()?.apply {
@@ -37,6 +71,25 @@ allprojects {
                 languageSettings.progressiveMode = true
                 languageSettings.enableLanguageFeature("NewInference")
             }
+        }
+
+        convention.findByType<PublishingExtension>()?.apply {
+            configureMaven(repositories)
+        }
+
+        convention.findByType<NexusPublishExtension>()?.apply {
+            repositories {
+                sonatype {
+                    username.set(System.getenv("SONATYPE_NEXUS_USERNAME"))
+                    password.set(System.getenv("SONATYPE_NEXUS_PASSWORD"))
+                }
+            }
+        }
+
+        convention.findByType<SigningExtension>()?.apply {
+            isRequired = false
+
+            useInMemoryPgpKeys(System.getenv("SIGNING_KEY"), System.getenv("SIGNING_PASSWORD"))
         }
     }
 
@@ -48,5 +101,9 @@ allprojects {
             showStandardStreams = true
             setExceptionFormat("full")
         }
+    }
+
+    tasks.withType<ValidatePlugins>().configureEach {
+        enableStricterValidation.set(true)
     }
 }
