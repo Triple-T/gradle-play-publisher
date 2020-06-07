@@ -3,7 +3,7 @@ plugins {
     `kotlin-dsl`
     `maven-publish`
     signing
-    id("com.gradle.plugin-publish") version "0.11.0"
+    id("com.gradle.plugin-publish") version "0.12.0"
     id("de.marcphilipp.nexus-publish")
 }
 
