@@ -113,6 +113,7 @@ internal data class PlayExtensionConfig(
         var track: String? = null,
         var promoteTrack: String? = null,
         var userFraction: Double? = null,
+        var updatePriority: Int? = null,
         var resolutionStrategy: ResolutionStrategy? = null,
         var outputProcessor: Action<ApkVariantOutput>? = null,
         var releaseStatus: ReleaseStatus? = null,

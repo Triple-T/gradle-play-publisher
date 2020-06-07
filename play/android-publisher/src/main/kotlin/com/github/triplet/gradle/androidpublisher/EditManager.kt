@@ -63,6 +63,7 @@ interface EditManager {
             releaseName: String?,
             releaseNotes: Map</* locale= */String, /* text= */String?>?,
             userFraction: Double?,
+            updatePriority: Int?,
             retainableArtifacts: List<Long>?
     )
 
@@ -79,6 +80,7 @@ interface EditManager {
             releaseName: String?,
             releaseNotes: Map</* locale= */String, /* text= */String?>?,
             userFraction: Double?,
+            updatePriority: Int?,
             retainableArtifacts: List<Long>?
     )
 
@@ -107,6 +109,7 @@ interface EditManager {
             releaseName: String?,
             releaseNotes: Map</* locale= */String, /* text= */String?>?,
             userFraction: Double?,
+            updatePriority: Int?,
             retainableArtifacts: List<Long>?
     )
 

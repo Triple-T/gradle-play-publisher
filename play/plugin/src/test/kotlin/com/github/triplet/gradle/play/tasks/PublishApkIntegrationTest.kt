@@ -135,7 +135,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
                 "--release-status=draft",
                 "--resolution-strategy=ignore",
                 "--track=myCustomTrack",
-                "--user-fraction=.88"
+                "--user-fraction=.88",
+                "--update-priority=3"
         )
 
         assertThat(result.task(":publishReleaseApk")).isNotNull()
@@ -146,6 +147,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         assertThat(result.output).contains("strategy=IGNORE")
         assertThat(result.output).contains("trackName=myCustomTrack")
         assertThat(result.output).contains("userFraction=0.88")
+        assertThat(result.output).contains("updatePriority=3")
     }
 
     @Test
@@ -167,7 +169,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
                 "--release-status=draft",
                 "--resolution-strategy=ignore",
                 "--track=myCustomTrack",
-                "--user-fraction=.88"
+                "--user-fraction=.88",
+                "--update-priority=3"
         )
 
         assertThat(result.task(":publishReleaseApk")).isNotNull()
@@ -178,6 +181,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         assertThat(result.output).contains("strategy=IGNORE")
         assertThat(result.output).contains("trackName=myCustomTrack")
         assertThat(result.output).contains("userFraction=0.88")
+        assertThat(result.output).contains("updatePriority=3")
     }
 
     @Test
@@ -555,6 +559,21 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Build uses correct update priority`() {
+        // language=gradle
+        val config = """
+            play.updatePriority 5
+        """
+
+        val result = execute(config, "publishReleaseApk")
+
+        assertThat(result.task(":publishReleaseApk")).isNotNull()
+        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("publishApk(")
+        assertThat(result.output).contains("updatePriority=5")
+    }
+
+    @Test
     fun `Build uses correct retained artifacts`() {
         // language=gradle
         val config = """
@@ -646,6 +665,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
                         releaseName: String?,
                         releaseNotes: Map<String, String?>?,
                         userFraction: Double?,
+                        updatePriority: Int?,
                         retainableArtifacts: List<Long>?
                 ) {
                     println("publishApk(" +
@@ -656,6 +676,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
                                     "releaseName=$releaseName, " +
                                     "releaseNotes=$releaseNotes, " +
                                     "userFraction=$userFraction, " +
+                                    "updatePriority=$updatePriority, " +
                                     "retainableArtifacts=$retainableArtifacts)")
                 }
             }

@@ -108,6 +108,7 @@ internal class DefaultEditManager(
             releaseName: String?,
             releaseNotes: Map<String, String?>?,
             userFraction: Double?,
+            updatePriority: Int?,
             retainableArtifacts: List<Long>?
     ) {
         tracks.promote(TrackManager.PromoteConfig(
@@ -116,6 +117,7 @@ internal class DefaultEditManager(
                 TrackManager.BaseConfig(
                         releaseStatus,
                         userFraction,
+                        updatePriority,
                         releaseNotes,
                         retainableArtifacts,
                         releaseName
@@ -135,6 +137,7 @@ internal class DefaultEditManager(
             releaseName: String?,
             releaseNotes: Map<String, String?>?,
             userFraction: Double?,
+            updatePriority: Int?,
             retainableArtifacts: List<Long>?
     ) {
         val bundle = try {
@@ -152,6 +155,7 @@ internal class DefaultEditManager(
                 TrackManager.BaseConfig(
                         releaseStatus,
                         userFraction,
+                        updatePriority,
                         releaseNotes,
                         retainableArtifacts,
                         releaseName
@@ -191,6 +195,7 @@ internal class DefaultEditManager(
             releaseName: String?,
             releaseNotes: Map<String, String?>?,
             userFraction: Double?,
+            updatePriority: Int?,
             retainableArtifacts: List<Long>?
     ) {
         if (versionCodes.isEmpty()) return
@@ -203,6 +208,7 @@ internal class DefaultEditManager(
                 TrackManager.BaseConfig(
                         releaseStatus,
                         userFraction,
+                        updatePriority,
                         releaseNotes,
                         retainableArtifacts,
                         releaseName

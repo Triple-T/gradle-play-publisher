@@ -67,6 +67,18 @@ internal interface TrackExtensionOptions : WriteTrackExtensionOptions {
                     PlayExtensionConfig::userFraction, value.toDouble(), force = true)
         }
 
+    @get:Internal
+    @set:Option(
+            option = "update-priority",
+            description = "Set the update priority for your release."
+    )
+    var updatePriorityOption: String
+        get() = throw UnsupportedOperationException()
+        set(value) {
+            extension.updateProperty(
+                    PlayExtensionConfig::updatePriority, value.toInt(), force = true)
+        }
+
     @get:OptionValues("release-status")
     val releaseStatusOptions
         get() = ReleaseStatus.values().map { it.publishedName }

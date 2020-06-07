@@ -17,6 +17,7 @@ internal interface TrackManager {
     data class BaseConfig(
             val releaseStatus: ReleaseStatus?,
             val userFraction: Double?,
+            val updatePriority: Int?,
             val releaseNotes: Map<String, String?>?,
             val retainableArtifacts: List<Long>?,
             val releaseName: String?
@@ -159,6 +160,7 @@ internal class DefaultTrackManager(
         updateConsoleName(config.releaseName)
         updateReleaseNotes(config.releaseNotes)
         updateUserFraction(config.userFraction)
+        updateupdatePriority(config.updatePriority)
     }
 
     private fun TrackRelease.updateVersionCodes(versionCodes: List<Long>?, retainableArtifacts: List<Long>?) {
@@ -199,6 +201,12 @@ internal class DefaultTrackManager(
     private fun TrackRelease.updateUserFraction(userFraction: Double?) {
         if (userFraction != null) {
             this.userFraction = userFraction.takeIf { isRollout() }
+        }
+    }
+
+    private fun TrackRelease.updateupdatePriority(updatePriority: Int?) {
+        if (updatePriority != null) {
+            inAppUpdatePriority = updatePriority
         }
     }
 

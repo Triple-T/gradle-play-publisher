@@ -232,6 +232,10 @@ Several options are available to customize how your artifacts are published:
 * `userFraction` is the percentage of users who will receive a staged release
   * Defaults to `0.1` aka 10%
   * **Note:** the `userFraction` is only applicable where `releaseStatus=[inProgress/halted]`
+* `updatePriority` sets the update priority for a new release. See
+  [Google's documentation](https://developer.android.com/guide/playcore/in-app-updates) on consuming
+  this value.
+  * Defaults to the API value
 
 Example configuration:
 
@@ -240,6 +244,7 @@ play {
     // Overrides defaults
     track = "production"
     userFraction = 0.5
+    updatePriority = 0.5
     releaseStatus = "inProgress"
 
     // ...

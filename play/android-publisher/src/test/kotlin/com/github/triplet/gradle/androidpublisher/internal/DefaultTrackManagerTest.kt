@@ -29,6 +29,7 @@ class DefaultTrackManagerTest {
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         userFraction = .88,
+                        updatePriority = 3,
                         releaseNotes = mapOf("lang1" to "notes1"),
                         retainableArtifacts = listOf(777),
                         releaseName = "relname"
@@ -45,6 +46,7 @@ class DefaultTrackManagerTest {
         assertThat(trackCaptor.value.releases.single().status).isEqualTo("completed")
         assertThat(trackCaptor.value.releases.single().versionCodes).containsExactly(888L, 777L)
         assertThat(trackCaptor.value.releases.single().userFraction).isNull()
+        assertThat(trackCaptor.value.releases.single().inAppUpdatePriority).isEqualTo(3)
         assertThat(trackCaptor.value.releases.single().releaseNotes).hasSize(1)
         assertThat(trackCaptor.value.releases.single().releaseNotes.single().language)
                 .isEqualTo("lang1")
@@ -62,6 +64,7 @@ class DefaultTrackManagerTest {
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.IN_PROGRESS,
                         userFraction = .88,
+                        updatePriority = 3,
                         releaseNotes = mapOf("lang1" to "notes1"),
                         retainableArtifacts = listOf(777),
                         releaseName = "relname"
@@ -89,6 +92,7 @@ class DefaultTrackManagerTest {
         assertThat(trackCaptor.value.releases.last().status).isEqualTo("inProgress")
         assertThat(trackCaptor.value.releases.last().versionCodes).containsExactly(888L, 777L)
         assertThat(trackCaptor.value.releases.last().userFraction).isEqualTo(.88)
+        assertThat(trackCaptor.value.releases.last().inAppUpdatePriority).isEqualTo(3)
         assertThat(trackCaptor.value.releases.last().releaseNotes).hasSize(1)
         assertThat(trackCaptor.value.releases.last().releaseNotes.single().language)
                 .isEqualTo("lang1")
@@ -106,6 +110,7 @@ class DefaultTrackManagerTest {
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.IN_PROGRESS,
                         userFraction = .88,
+                        updatePriority = 3,
                         releaseNotes = mapOf("lang1" to "notes1"),
                         retainableArtifacts = listOf(777),
                         releaseName = "relname"
@@ -139,6 +144,7 @@ class DefaultTrackManagerTest {
         assertThat(trackCaptor.value.releases.last().status).isEqualTo("inProgress")
         assertThat(trackCaptor.value.releases.last().versionCodes).containsExactly(888L, 777L)
         assertThat(trackCaptor.value.releases.last().userFraction).isEqualTo(.88)
+        assertThat(trackCaptor.value.releases.last().inAppUpdatePriority).isEqualTo(3)
         assertThat(trackCaptor.value.releases.last().releaseNotes).hasSize(1)
         assertThat(trackCaptor.value.releases.last().releaseNotes.single().language)
                 .isEqualTo("lang1")
@@ -156,6 +162,7 @@ class DefaultTrackManagerTest {
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         userFraction = .88,
+                        updatePriority = 3,
                         releaseNotes = mapOf("lang1" to "notes1"),
                         retainableArtifacts = listOf(777),
                         releaseName = "relname"
@@ -174,6 +181,7 @@ class DefaultTrackManagerTest {
         assertThat(trackCaptor.value.releases.single().name).isEqualTo("relname")
         assertThat(trackCaptor.value.releases.single().status).isEqualTo("completed")
         assertThat(trackCaptor.value.releases.single().userFraction).isNull()
+        assertThat(trackCaptor.value.releases.single().inAppUpdatePriority).isEqualTo(3)
         assertThat(trackCaptor.value.releases.single().releaseNotes).hasSize(1)
         assertThat(trackCaptor.value.releases.single().releaseNotes.single().language)
                 .isEqualTo("lang1")
@@ -191,6 +199,7 @@ class DefaultTrackManagerTest {
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         userFraction = .88,
+                        updatePriority = 3,
                         releaseNotes = mapOf("lang1" to "notes1"),
                         retainableArtifacts = listOf(777),
                         releaseName = "relname"
@@ -219,6 +228,7 @@ class DefaultTrackManagerTest {
         assertThat(trackCaptor.value.releases.single().name).isEqualTo("relname")
         assertThat(trackCaptor.value.releases.single().status).isEqualTo("completed")
         assertThat(trackCaptor.value.releases.single().userFraction).isNull()
+        assertThat(trackCaptor.value.releases.single().inAppUpdatePriority).isEqualTo(3)
         assertThat(trackCaptor.value.releases.single().releaseNotes).hasSize(2)
         assertThat(trackCaptor.value.releases.single().releaseNotes.first().language)
                 .isEqualTo("lang1")
@@ -240,6 +250,7 @@ class DefaultTrackManagerTest {
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         userFraction = .88,
+                        updatePriority = 3,
                         releaseNotes = mapOf("lang1" to "notes1-2"),
                         retainableArtifacts = listOf(777),
                         releaseName = "relname"
@@ -287,6 +298,7 @@ class DefaultTrackManagerTest {
                 base = TrackManager.BaseConfig(
                         releaseStatus = null,
                         userFraction = null,
+                        updatePriority = null,
                         releaseNotes = null,
                         retainableArtifacts = null,
                         releaseName = null
@@ -297,6 +309,7 @@ class DefaultTrackManagerTest {
                 status = "draft"
                 name = "foobar"
                 userFraction = 789.0
+                inAppUpdatePriority = 599
                 versionCodes = listOf(3, 4, 5)
                 releaseNotes = listOf(
                         LocalizedText().apply {
@@ -315,6 +328,7 @@ class DefaultTrackManagerTest {
         assertThat(trackCaptor.value.releases.single().name).isEqualTo("foobar")
         assertThat(trackCaptor.value.releases.single().status).isEqualTo("draft")
         assertThat(trackCaptor.value.releases.single().userFraction).isEqualTo(789.0)
+        assertThat(trackCaptor.value.releases.single().inAppUpdatePriority).isEqualTo(599)
         assertThat(trackCaptor.value.releases.single().versionCodes).containsExactly(3L, 4L, 5L, 888L)
         assertThat(trackCaptor.value.releases.single().releaseNotes).hasSize(1)
         assertThat(trackCaptor.value.releases.single().releaseNotes.single().language)
@@ -333,6 +347,7 @@ class DefaultTrackManagerTest {
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.DRAFT,
                         userFraction = .88,
+                        updatePriority = 3,
                         releaseNotes = mapOf("lang1" to "notes1"),
                         retainableArtifacts = listOf(777),
                         releaseName = "relname"
@@ -369,6 +384,7 @@ class DefaultTrackManagerTest {
         assertThat(trackCaptor.value.releases.last().name).isEqualTo("relname")
         assertThat(trackCaptor.value.releases.last().status).isEqualTo("draft")
         assertThat(trackCaptor.value.releases.last().userFraction).isNull()
+        assertThat(trackCaptor.value.releases.last().inAppUpdatePriority).isEqualTo(3)
         assertThat(trackCaptor.value.releases.last().releaseNotes).hasSize(1)
         assertThat(trackCaptor.value.releases.last().releaseNotes.single().language)
                 .isEqualTo("lang1")
@@ -386,6 +402,7 @@ class DefaultTrackManagerTest {
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         userFraction = null,
+                        updatePriority = null,
                         releaseNotes = null,
                         retainableArtifacts = null,
                         releaseName = null
@@ -572,6 +589,7 @@ class DefaultTrackManagerTest {
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         userFraction = .88,
+                        updatePriority = 3,
                         releaseNotes = mapOf("lang1" to "notes1"),
                         retainableArtifacts = listOf(777),
                         releaseName = "relname"
@@ -596,6 +614,7 @@ class DefaultTrackManagerTest {
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.IN_PROGRESS,
                         userFraction = .88,
+                        updatePriority = 3,
                         releaseNotes = mapOf("lang1" to "notes1"),
                         retainableArtifacts = listOf(777),
                         releaseName = "relname"
@@ -619,6 +638,7 @@ class DefaultTrackManagerTest {
         assertThat(trackCaptor.value.releases.single().name).isEqualTo("relname")
         assertThat(trackCaptor.value.releases.single().status).isEqualTo("inProgress")
         assertThat(trackCaptor.value.releases.single().userFraction).isEqualTo(.88)
+        assertThat(trackCaptor.value.releases.single().inAppUpdatePriority).isEqualTo(3)
         assertThat(trackCaptor.value.releases.single().releaseNotes).hasSize(1)
         assertThat(trackCaptor.value.releases.single().releaseNotes.single().language)
                 .isEqualTo("lang1")
@@ -634,6 +654,7 @@ class DefaultTrackManagerTest {
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         userFraction = null,
+                        updatePriority = null,
                         releaseNotes = null,
                         retainableArtifacts = null,
                         releaseName = null
@@ -674,6 +695,7 @@ class DefaultTrackManagerTest {
                 base = TrackManager.BaseConfig(
                         releaseStatus = null,
                         userFraction = null,
+                        updatePriority = null,
                         releaseNotes = null,
                         retainableArtifacts = null,
                         releaseName = null
@@ -685,6 +707,7 @@ class DefaultTrackManagerTest {
                 status = "completed"
                 name = "foobar"
                 userFraction = 789.0
+                inAppUpdatePriority = 599
                 versionCodes = listOf(3, 4, 5)
                 releaseNotes = listOf(
                         LocalizedText().apply {
@@ -703,6 +726,7 @@ class DefaultTrackManagerTest {
         assertThat(trackCaptor.value.releases.single().name).isEqualTo("foobar")
         assertThat(trackCaptor.value.releases.single().status).isEqualTo("completed")
         assertThat(trackCaptor.value.releases.single().userFraction).isEqualTo(789.0)
+        assertThat(trackCaptor.value.releases.single().inAppUpdatePriority).isEqualTo(599)
         assertThat(trackCaptor.value.releases.single().versionCodes).containsExactly(3L, 4L, 5L)
         assertThat(trackCaptor.value.releases.single().releaseNotes).hasSize(1)
         assertThat(trackCaptor.value.releases.single().releaseNotes.single().language)
@@ -719,6 +743,7 @@ class DefaultTrackManagerTest {
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         userFraction = null,
+                        updatePriority = null,
                         releaseNotes = null,
                         retainableArtifacts = null,
                         releaseName = null
@@ -746,6 +771,7 @@ class DefaultTrackManagerTest {
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         userFraction = null,
+                        updatePriority = null,
                         releaseNotes = null,
                         retainableArtifacts = null,
                         releaseName = null

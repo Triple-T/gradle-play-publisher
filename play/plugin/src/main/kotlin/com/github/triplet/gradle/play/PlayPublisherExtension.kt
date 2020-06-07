@@ -156,6 +156,20 @@ open class PlayPublisherExtension @JvmOverloads constructor(
         }
 
     /**
+     * Specify the update priority for your release. For information on consuming this value, take
+     * a look at
+     * [Google's documentation](https://developer.android.com/guide/playcore/in-app-updates).
+     * Defaults to API value.
+     */
+    @get:Optional
+    @get:Input
+    var updatePriority: Int?
+        get() = _config.updatePriority
+        set(value) {
+            updateProperty(PlayExtensionConfig::updatePriority, value)
+        }
+
+    /**
      * Specify the resolution strategy to employ when a version conflict occurs.
      *
      * May be one of `auto`, `fail`, or `ignore`. Defaults to `fail`.

@@ -51,6 +51,7 @@ class DefaultEditManagerTest {
                 releaseName = "relname",
                 releaseNotes = mapOf("locale" to "notes"),
                 userFraction = .88,
+                updatePriority = 3,
                 retainableArtifacts = listOf(777)
         )
 
@@ -64,6 +65,7 @@ class DefaultEditManagerTest {
                         releaseName = "relname",
                         releaseNotes = mapOf("locale" to "notes"),
                         userFraction = .88,
+                        updatePriority = 3,
                         retainableArtifacts = listOf(777)
                 )
         ))
@@ -87,6 +89,7 @@ class DefaultEditManagerTest {
                 releaseName = "relname",
                 releaseNotes = mapOf("locale" to "notes"),
                 userFraction = .88,
+                updatePriority = 3,
                 retainableArtifacts = listOf(777)
         )
 
@@ -112,6 +115,7 @@ class DefaultEditManagerTest {
                 releaseName = "relname",
                 releaseNotes = mapOf("locale" to "notes"),
                 userFraction = .88,
+                updatePriority = 3,
                 retainableArtifacts = listOf(777)
         )
 
@@ -137,6 +141,7 @@ class DefaultEditManagerTest {
                 releaseName = "relname",
                 releaseNotes = mapOf("locale" to "notes"),
                 userFraction = .88,
+                updatePriority = 3,
                 retainableArtifacts = listOf(777)
         )
 
@@ -161,6 +166,7 @@ class DefaultEditManagerTest {
                 releaseName = "relname",
                 releaseNotes = mapOf("locale" to "notes"),
                 userFraction = .88,
+                updatePriority = 3,
                 retainableArtifacts = listOf(777)
         )
 
@@ -186,6 +192,7 @@ class DefaultEditManagerTest {
                     releaseName = "relname",
                     releaseNotes = mapOf("locale" to "notes"),
                     userFraction = .88,
+                    updatePriority = 3,
                     retainableArtifacts = listOf(777)
             )
         }
@@ -358,6 +365,7 @@ class DefaultEditManagerTest {
                 releaseName = "relname",
                 releaseNotes = mapOf("locale" to "notes"),
                 userFraction = .88,
+                updatePriority = 3,
                 retainableArtifacts = listOf(777)
         )
 
@@ -374,6 +382,7 @@ class DefaultEditManagerTest {
                 releaseName = "relname",
                 releaseNotes = mapOf("locale" to "notes"),
                 userFraction = .88,
+                updatePriority = 3,
                 retainableArtifacts = listOf(777)
         )
 
@@ -387,6 +396,7 @@ class DefaultEditManagerTest {
                         releaseName = "relname",
                         releaseNotes = mapOf("locale" to "notes"),
                         userFraction = .88,
+                        updatePriority = 3,
                         retainableArtifacts = listOf(777)
                 )
         ))
@@ -401,6 +411,7 @@ class DefaultEditManagerTest {
                 releaseName = "relname",
                 releaseNotes = mapOf("locale" to "notes"),
                 userFraction = .88,
+                updatePriority = 3,
                 retainableArtifacts = listOf(777)
         )
 
@@ -412,6 +423,7 @@ class DefaultEditManagerTest {
                         releaseName = "relname",
                         releaseNotes = mapOf("locale" to "notes"),
                         userFraction = .88,
+                        updatePriority = 3,
                         retainableArtifacts = listOf(777)
                 )
         ))

@@ -63,6 +63,7 @@ internal abstract class PublishBundle @Inject constructor(
                     findReleaseName(config.trackOrDefault),
                     findReleaseNotes(config.trackOrDefault),
                     config.userFractionOrDefault,
+                    config.updatePriority,
                     config.retainArtifacts
             )
         }

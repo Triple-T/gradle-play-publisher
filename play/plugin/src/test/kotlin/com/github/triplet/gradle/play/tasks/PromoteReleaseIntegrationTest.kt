@@ -80,7 +80,8 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
                 "--promote-track=myPromoteTrack",
                 "--release-name=myRelName",
                 "--release-status=draft",
-                "--user-fraction=.88"
+                "--user-fraction=.88",
+                "--update-priority=3"
         )
 
         assertThat(result.task(":promoteReleaseArtifact")).isNotNull()
@@ -91,6 +92,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         assertThat(result.output).contains("releaseName=myRelName")
         assertThat(result.output).contains("releaseStatus=DRAFT")
         assertThat(result.output).contains("userFraction=0.88")
+        assertThat(result.output).contains("updatePriority=3")
     }
 
     @Test
@@ -112,7 +114,8 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
                 "--promote-track=myPromoteTrack",
                 "--release-name=myRelName",
                 "--release-status=draft",
-                "--user-fraction=.88"
+                "--user-fraction=.88",
+                "--update-priority=3"
         )
 
         assertThat(result.task(":promoteReleaseArtifact")).isNotNull()
@@ -123,6 +126,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         assertThat(result.output).contains("releaseName=myRelName")
         assertThat(result.output).contains("releaseStatus=DRAFT")
         assertThat(result.output).contains("userFraction=0.88")
+        assertThat(result.output).contains("updatePriority=3")
     }
 
     @Test
@@ -305,6 +309,21 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Build uses correct update priority`() {
+        // language=gradle
+        val config = """
+            play.updatePriority 5
+        """
+
+        val result = execute(config, "promoteReleaseArtifact")
+
+        assertThat(result.task(":promoteReleaseArtifact")).isNotNull()
+        assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("promoteRelease(")
+        assertThat(result.output).contains("updatePriority=5")
+    }
+
+    @Test
     fun `Build uses correct retained artifacts`() {
         // language=gradle
         val config = """
@@ -388,6 +407,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
                         releaseName: String?,
                         releaseNotes: Map<String, String?>?,
                         userFraction: Double?,
+                        updatePriority: Int?,
                         retainableArtifacts: List<Long>?
                 ) {
                     println("promoteRelease(" +
@@ -397,6 +417,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
                                     "releaseName=$releaseName, " +
                                     "releaseNotes=$releaseNotes, " +
                                     "userFraction=$userFraction, " +
+                                    "updatePriority=$updatePriority, " +
                                     "retainableArtifacts=$retainableArtifacts)")
                 }
             }

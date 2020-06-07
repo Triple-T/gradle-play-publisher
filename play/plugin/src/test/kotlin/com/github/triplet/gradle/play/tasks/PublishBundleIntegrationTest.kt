@@ -134,7 +134,8 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
                 "--release-status=draft",
                 "--resolution-strategy=ignore",
                 "--track=myCustomTrack",
-                "--user-fraction=.88"
+                "--user-fraction=.88",
+                "--update-priority=3"
         )
 
         assertThat(result.task(":publishReleaseBundle")).isNotNull()
@@ -145,6 +146,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
         assertThat(result.output).contains("strategy=IGNORE")
         assertThat(result.output).contains("trackName=myCustomTrack")
         assertThat(result.output).contains("userFraction=0.88")
+        assertThat(result.output).contains("updatePriority=3")
     }
 
     @Test
@@ -166,7 +168,8 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
                 "--release-status=draft",
                 "--resolution-strategy=ignore",
                 "--track=myCustomTrack",
-                "--user-fraction=.88"
+                "--user-fraction=.88",
+                "--update-priority=3"
         )
 
         assertThat(result.task(":publishReleaseBundle")).isNotNull()
@@ -177,6 +180,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
         assertThat(result.output).contains("strategy=IGNORE")
         assertThat(result.output).contains("trackName=myCustomTrack")
         assertThat(result.output).contains("userFraction=0.88")
+        assertThat(result.output).contains("updatePriority=3")
     }
 
     @Test
@@ -529,6 +533,21 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Build uses correct update priority`() {
+        // language=gradle
+        val config = """
+            play.updatePriority 5
+        """
+
+        val result = execute(config, "publishReleaseBundle")
+
+        assertThat(result.task(":publishReleaseBundle")).isNotNull()
+        assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("uploadBundle(")
+        assertThat(result.output).contains("updatePriority=5")
+    }
+
+    @Test
     fun `Build uses correct retained artifacts`() {
         // language=gradle
         val config = """
@@ -579,6 +598,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
                         releaseName: String?,
                         releaseNotes: Map<String, String?>?,
                         userFraction: Double?,
+                        updatePriority: Int?,
                         retainableArtifacts: List<Long>?
                 ) {
                     println("uploadBundle(" +
@@ -593,6 +613,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
                                     "releaseName=$releaseName, " +
                                     "releaseNotes=$releaseNotes, " +
                                     "userFraction=$userFraction, " +
+                                    "updatePriority=$updatePriority, " +
                                     "retainableArtifacts=$retainableArtifacts)")
 
                     if (System.getProperty("FAIL") != null) error("Upload failed")

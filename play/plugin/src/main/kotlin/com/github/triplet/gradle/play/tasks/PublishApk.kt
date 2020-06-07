@@ -82,6 +82,7 @@ internal abstract class PublishApk @Inject constructor(
                     findReleaseName(config.trackOrDefault),
                     findReleaseNotes(config.trackOrDefault),
                     config.userFractionOrDefault,
+                    config.updatePriority,
                     config.retainArtifacts
             )
         }
