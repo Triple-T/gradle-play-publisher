@@ -59,6 +59,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      * PKCS12 to work, the [serviceAccountEmail] must be specified.
      */
     @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:Optional
     @get:InputFile
     var serviceAccountCredentials: File?
         get() = _config.serviceAccountCredentials

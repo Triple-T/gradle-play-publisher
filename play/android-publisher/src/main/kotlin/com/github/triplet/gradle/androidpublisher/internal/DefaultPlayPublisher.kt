@@ -21,6 +21,7 @@ import com.google.api.services.androidpublisher.model.InAppProduct
 import com.google.api.services.androidpublisher.model.Listing
 import com.google.api.services.androidpublisher.model.Track
 import java.io.File
+import java.io.InputStream
 import kotlin.math.roundToInt
 
 internal class DefaultPlayPublisher(
@@ -219,7 +220,7 @@ internal class DefaultPlayPublisher(
 
     class Factory : PlayPublisher.Factory {
         override fun create(
-                credentials: File,
+                credentials: InputStream,
                 email: String?,
                 appId: String
         ): PlayPublisher {

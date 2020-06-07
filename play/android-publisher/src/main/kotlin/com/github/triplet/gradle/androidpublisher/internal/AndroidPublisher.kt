@@ -10,10 +10,11 @@ import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.AndroidPublisherScopes
 import java.io.File
 import java.io.FileInputStream
+import java.io.InputStream
 import java.security.KeyStore
 
 internal data class ServiceAccountAuth(
-        val credentials: File,
+        val credentials: InputStream,
         val email: String?
 )
 
@@ -22,7 +23,7 @@ internal fun createPublisher(auth: ServiceAccountAuth): AndroidPublisher {
     val factory = JacksonFactory.getDefaultInstance()
 
     val credential = if (auth.email == null) {
-        GoogleCredential.fromStream(auth.credentials.inputStream(), transport, factory)
+        GoogleCredential.fromStream(auth.credentials, transport, factory)
                 .createScoped(listOf(AndroidPublisherScopes.ANDROIDPUBLISHER))
     } else {
         GoogleCredential.Builder()

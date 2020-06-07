@@ -1,6 +1,7 @@
 package com.github.triplet.gradle.androidpublisher
 
 import java.io.File
+import java.io.InputStream
 
 abstract class FakePlayPublisher : PlayPublisher {
     fun install() {
@@ -32,7 +33,7 @@ abstract class FakePlayPublisher : PlayPublisher {
             throw IllegalStateException("Test wasn't expecting this method to be called.")
 
     class Factory : PlayPublisher.Factory {
-        override fun create(credentials: File, email: String?, appId: String) = publisher
+        override fun create(credentials: InputStream, email: String?, appId: String) = publisher
     }
 
     companion object {

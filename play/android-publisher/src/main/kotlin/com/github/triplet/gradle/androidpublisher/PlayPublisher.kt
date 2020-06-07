@@ -1,6 +1,7 @@
 package com.github.triplet.gradle.androidpublisher
 
 import java.io.File
+import java.io.InputStream
 import java.util.ServiceLoader
 
 /**
@@ -84,16 +85,18 @@ interface PlayPublisher {
          * @param appId the app's package name
          */
         fun create(
-                credentials: File,
+                credentials: InputStream,
                 email: String?,
                 appId: String
         ): PlayPublisher
     }
 
     companion object {
+        const val CREDENTIAL_ENV_VAR = "ANDROID_PUBLISHER_CREDENTIALS"
+
         /** Creates a new [PlayPublisher]. */
         operator fun invoke(
-                credentials: File,
+                credentials: InputStream,
                 email: String?,
                 appId: String
         ): PlayPublisher = ServiceLoader.load(Factory::class.java).last()

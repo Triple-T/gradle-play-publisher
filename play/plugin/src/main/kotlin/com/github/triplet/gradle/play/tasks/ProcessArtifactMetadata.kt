@@ -6,6 +6,7 @@ import com.github.triplet.gradle.androidpublisher.EditManager
 import com.github.triplet.gradle.androidpublisher.PlayPublisher
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.config
+import com.github.triplet.gradle.play.internal.serviceAccountCredentialsOrDefault
 import com.github.triplet.gradle.play.tasks.internal.PublishEditTaskBase
 import org.gradle.api.tasks.TaskAction
 import javax.inject.Inject
@@ -22,7 +23,7 @@ internal abstract class ProcessArtifactMetadata @Inject constructor(
     @TaskAction
     fun process() {
         val publisher = PlayPublisher(
-                extension.config.serviceAccountCredentials!!,
+                extension.config.serviceAccountCredentialsOrDefault,
                 extension.config.serviceAccountEmail,
                 variant.applicationId
         )

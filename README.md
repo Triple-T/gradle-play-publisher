@@ -48,7 +48,6 @@ other metadata.
    1. [Using multiple Service Accounts](#using-multiple-service-accounts)
 1. [Advanced topics](#advanced-topics)
    1. [Using CLI options](#using-cli-options)
-   1. [Encrypting Service Account keys](#encrypting-service-account-keys)
    1. [Using HTTPS proxies](#using-https-proxies)
 
 ## Quickstart guide
@@ -194,6 +193,11 @@ play {
     serviceAccountCredentials = file("your-key.json")
 }
 ```
+
+> Note: If you commit unencrypted Service Account keys to source, you run the risk of letting anyone
+> access your Google Play account. To circumvent this issue, put the contents of your JSON file in
+> the `ANDROID_PUBLISHER_CREDENTIALS` environment variable and don't specify the
+> `serviceAccountCredentials` property.
 
 ## Task organization
 
@@ -795,18 +799,6 @@ don't have to update your build file when making one-time changes. For example, 
 
 To get a list of options and their quick documentation, use `./gradlew help --task [task]` where
 `task` is something like `publishBundle`.
-
-### Encrypting Service Account keys
-
-If you commit unencrypted Service Account keys to source, you run the risk of letting anyone access
-your Google Play account. To circumvent this issue, many CI servers support encrypting files while
-keeping fake versions in public source control. Here is a set of
-[common fake files](https://github.com/SUPERCILEX/Robot-Scouter/tree/38407b3d6db74edb6c9de33b862655dfbd010a70/ci-dummies)
-you might need and ways to encrypt your real keys for a few common CI servers:
-
-- [Travis CI](https://docs.travis-ci.com/user/encrypting-files/)
-- [CircleCI](https://github.com/circleci/encrypted-files)
-- [Jenkins](https://github.com/samrocketman/jervis/wiki/Secure-secrets-in-repositories)
 
 ### Using HTTPS proxies
 

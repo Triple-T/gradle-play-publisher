@@ -1,14 +1,22 @@
 package com.github.triplet.gradle.play.internal
 
 import com.android.build.gradle.api.ApkVariantOutput
+import com.github.triplet.gradle.androidpublisher.PlayPublisher
 import com.github.triplet.gradle.androidpublisher.ReleaseStatus
 import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import org.gradle.api.Action
+import java.io.ByteArrayInputStream
 import java.io.File
+import java.io.InputStream
 import java.io.Serializable
 import kotlin.reflect.KMutableProperty1
 
+internal val PlayExtensionConfig.serviceAccountCredentialsOrDefault: InputStream
+    get() {
+        return serviceAccountCredentials?.inputStream() ?: ByteArrayInputStream(
+                System.getenv(PlayPublisher.CREDENTIAL_ENV_VAR).toByteArray())
+    }
 internal val PlayExtensionConfig.commitOrDefault get() = commit ?: true
 internal val PlayExtensionConfig.trackOrDefault get() = track ?: "internal"
 internal val PlayExtensionConfig.promoteTrackOrDefault

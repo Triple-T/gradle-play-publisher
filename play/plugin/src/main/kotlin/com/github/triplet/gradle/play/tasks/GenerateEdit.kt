@@ -9,6 +9,7 @@ import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.internal.PlayExtensionConfig
 import com.github.triplet.gradle.play.internal.serializableConfig
+import com.github.triplet.gradle.play.internal.serviceAccountCredentialsOrDefault
 import com.github.triplet.gradle.play.tasks.internal.EditTaskBase
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.RegularFileProperty
@@ -46,7 +47,7 @@ internal abstract class GenerateEdit @Inject constructor(
         private val file = parameters.editIdFile.get().asFile
         private val appId = file.nameWithoutExtension
         private val publisher = PlayPublisher(
-                parameters.config.get().serviceAccountCredentials!!,
+                parameters.config.get().serviceAccountCredentialsOrDefault,
                 parameters.config.get().serviceAccountEmail,
                 appId
         )
