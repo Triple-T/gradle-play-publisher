@@ -11,7 +11,6 @@ internal abstract class PlayWorkerBase<T : PlayWorkerBase.PlayPublishingParams> 
     protected val config = parameters.config.get()
     protected val publisher = PlayPublisher(
             config.serviceAccountCredentialsOrDefault,
-            config.serviceAccountEmail,
             parameters.appId.get()
     )
 

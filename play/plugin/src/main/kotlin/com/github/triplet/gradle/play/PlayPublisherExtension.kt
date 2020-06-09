@@ -55,8 +55,8 @@ open class PlayPublisherExtension @JvmOverloads constructor(
         }
 
     /**
-     * Service Account authentication file. Json is preferred, but PKCS12 is also supported. For
-     * PKCS12 to work, the [serviceAccountEmail] must be specified.
+     * JSON Service Account authentication file. You can also specify credentials through the
+     * `ANDROID_PUBLISHER_CREDENTIALS` environment variable.
      */
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:Optional
@@ -65,18 +65,6 @@ open class PlayPublisherExtension @JvmOverloads constructor(
         get() = _config.serviceAccountCredentials
         set(value) {
             updateProperty(PlayExtensionConfig::serviceAccountCredentials, value)
-        }
-
-    // TODO(#710): remove once support for PKCS12 creds is gone
-    /** Service Account email. Only needed if PKCS12 credentials are used. */
-    @get:Optional
-    @get:Input
-    @get:Deprecated("Use JSON credentials instead.")
-    @set:Deprecated("Use JSON credentials instead.")
-    var serviceAccountEmail: String?
-        get() = _config.serviceAccountEmail
-        set(value) {
-            updateProperty(PlayExtensionConfig::serviceAccountEmail, value)
         }
 
     /**

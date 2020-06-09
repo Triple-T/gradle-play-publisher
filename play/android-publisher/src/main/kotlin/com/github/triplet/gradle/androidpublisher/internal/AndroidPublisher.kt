@@ -8,32 +8,16 @@ import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.AndroidPublisherScopes
-import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
 import java.security.KeyStore
 
-internal data class ServiceAccountAuth(
-        val credentials: InputStream,
-        val email: String?
-)
-
-internal fun createPublisher(auth: ServiceAccountAuth): AndroidPublisher {
+internal fun createPublisher(credentials: InputStream): AndroidPublisher {
     val transport = buildTransport()
     val factory = JacksonFactory.getDefaultInstance()
 
-    val credential = if (auth.email == null) {
-        GoogleCredential.fromStream(auth.credentials, transport, factory)
-                .createScoped(listOf(AndroidPublisherScopes.ANDROIDPUBLISHER))
-    } else {
-        GoogleCredential.Builder()
-                .setTransport(transport)
-                .setJsonFactory(factory)
-                .setServiceAccountId(auth.email)
-                .setServiceAccountPrivateKeyFromP12File(auth.credentials)
-                .setServiceAccountScopes(listOf(AndroidPublisherScopes.ANDROIDPUBLISHER))
-                .build()
-    }
+    val credential = GoogleCredential.fromStream(credentials, transport, factory)
+            .createScoped(listOf(AndroidPublisherScopes.ANDROIDPUBLISHER))
 
     return AndroidPublisher.Builder(transport, JacksonFactory.getDefaultInstance()) {
         credential.initialize(it.setReadTimeout(0))

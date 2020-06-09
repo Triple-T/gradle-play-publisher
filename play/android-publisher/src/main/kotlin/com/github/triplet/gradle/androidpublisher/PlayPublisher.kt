@@ -81,25 +81,23 @@ interface PlayPublisher {
          * Creates a new [PlayPublisher].
          *
          * @param credentials the creds to be converted to a GoogleCredential
-         * @param email if the creds are of type PKCS, the service account email
          * @param appId the app's package name
          */
         fun create(
                 credentials: InputStream,
-                email: String?,
                 appId: String
         ): PlayPublisher
     }
 
     companion object {
-        const val CREDENTIAL_ENV_VAR = "ANDROID_PUBLISHER_CREDENTIALS"
+        /** The suggested environment variable name in which to store credentials. */
+        const val CREDENTIAL_ENV_VAR: String = "ANDROID_PUBLISHER_CREDENTIALS"
 
         /** Creates a new [PlayPublisher]. */
         operator fun invoke(
                 credentials: InputStream,
-                email: String?,
                 appId: String
         ): PlayPublisher = ServiceLoader.load(Factory::class.java).last()
-                .create(credentials, email, appId)
+                .create(credentials, appId)
     }
 }

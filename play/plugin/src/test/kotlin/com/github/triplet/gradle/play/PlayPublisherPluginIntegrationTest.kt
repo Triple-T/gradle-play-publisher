@@ -121,40 +121,6 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `PKCS creds logs warning`() {
-        // language=gradle
-        File(appDir, "build.gradle").writeText("""
-            plugins {
-                id 'com.android.application'
-                id 'com.github.triplet.play'
-            }
-
-            android {
-                compileSdkVersion 28
-
-                defaultConfig {
-                    applicationId "com.example.publisher"
-                    minSdkVersion 21
-                    targetSdkVersion 28
-                    versionCode 1
-                    versionName "1.0"
-                }
-            }
-
-            play {
-                serviceAccountCredentials = file('name')
-                serviceAccountEmail = 'email'
-            }
-        """)
-
-        val result = executeGradle(false) {
-            withArguments("help", "--warning-mode", "all")
-        }
-
-        assertThat(result.output).contains("PKCS12 based authentication is deprecated")
-    }
-
-    @Test
     fun `Credentials can be specified from environment variable`() {
         // language=gradle
         File(appDir, "build.gradle").writeText("""

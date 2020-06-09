@@ -44,7 +44,6 @@ internal abstract class CommitEdit @Inject constructor(
         private val appId = file.nameWithoutExtension
         private val publisher = PlayPublisher(
                 parameters.config.get().serviceAccountCredentialsOrDefault,
-                parameters.config.get().serviceAccountEmail,
                 appId
         )
 

@@ -33,7 +33,7 @@ abstract class FakePlayPublisher : PlayPublisher {
             throw IllegalStateException("Test wasn't expecting this method to be called.")
 
     class Factory : PlayPublisher.Factory {
-        override fun create(credentials: InputStream, email: String?, appId: String) = publisher
+        override fun create(credentials: InputStream, appId: String) = publisher
     }
 
     companion object {

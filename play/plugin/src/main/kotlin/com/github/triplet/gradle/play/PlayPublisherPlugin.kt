@@ -254,11 +254,6 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 dependsOn(genEditTask)
             }
             bootstrapAllTask { dependsOn(bootstrapTask) }
-            // TODO(#710): Remove in v3.0
-            project.newTask("bootstrap${variantName}PlayResources") {
-                dependsOn(bootstrapTask)
-                doFirst { logger.warn("$name is deprecated, use ${bootstrapTask.get().name} instead") }
-            }
 
             val resourceDir = project.newTask<GenerateResources>(
                     "generate${variantName}PlayResources"
@@ -291,11 +286,6 @@ internal class PlayPublisherPlugin : Plugin<Project> {
             }
             commitEditTask { mustRunAfter(publishListingTask) }
             publishListingAllTask { dependsOn(publishListingTask) }
-            // TODO(#710): Remove in v3.0
-            project.newTask("publishListing$variantName") {
-                dependsOn(publishListingTask)
-                doFirst { logger.warn("$name is deprecated, use ${publishListingTask.get().name} instead") }
-            }
 
             val publishProductsTask = project.newTask<PublishProducts>(
                     "publish${variantName}Products",
@@ -343,11 +333,6 @@ internal class PlayPublisherPlugin : Plugin<Project> {
             }
             commitEditTask { mustRunAfter(publishApkTask) }
             publishApkAllTask { dependsOn(publishApkTask) }
-            // TODO(#710): Remove in v3.0
-            project.newTask("publishApk$variantName") {
-                dependsOn(publishApkTask)
-                doFirst { logger.warn("$name is deprecated, use ${publishApkTask.get().name} instead") }
-            }
 
             val publishBundleTask = project.newTask<PublishBundle>(
                     "publish${variantName}Bundle",
@@ -405,7 +390,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
         project.afterEvaluate {
             val allPossiblePlayConfigNames: Set<String> by lazy {
                 android.applicationVariants.flatMapTo(mutableSetOf()) {
-                    listOf(it.name, it.buildType.getName()) + it.productFlavors.map { it.getName() }
+                    listOf(it.name, it.buildType.name) + it.productFlavors.map { it.name }
                 }
             }
 

@@ -24,7 +24,6 @@ internal abstract class ProcessArtifactMetadata @Inject constructor(
     fun process() {
         val publisher = PlayPublisher(
                 extension.config.serviceAccountCredentialsOrDefault,
-                extension.config.serviceAccountEmail,
                 variant.applicationId
         )
         val edits = EditManager(publisher, editId)

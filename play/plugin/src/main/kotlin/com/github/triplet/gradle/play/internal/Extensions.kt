@@ -106,7 +106,6 @@ internal fun PlayPublisherExtension.mergeWith(
 internal data class PlayExtensionConfig(
         var enabled: Boolean? = null,
         var serviceAccountCredentials: File? = null,
-        var serviceAccountEmail: String? = null,
         var defaultToAppBundles: Boolean? = null,
         var commit: Boolean? = null,
         var fromTrack: String? = null,

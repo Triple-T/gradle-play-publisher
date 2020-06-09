@@ -221,10 +221,9 @@ internal class DefaultPlayPublisher(
     class Factory : PlayPublisher.Factory {
         override fun create(
                 credentials: InputStream,
-                email: String?,
                 appId: String
         ): PlayPublisher {
-            val publisher = createPublisher(ServiceAccountAuth(credentials, email))
+            val publisher = createPublisher(credentials)
             return DefaultPlayPublisher(publisher, appId)
         }
     }
