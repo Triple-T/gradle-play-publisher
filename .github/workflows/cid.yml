@@ -79,7 +79,7 @@ jobs:
       - name: Build project
         run: ./gradlew assemble
       - name: Publish snapshot
-        run: ./gradlew publish
+        run: ./gradlew publishToSonatype
         env:
           SONATYPE_NEXUS_USERNAME: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
           SONATYPE_NEXUS_PASSWORD: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
