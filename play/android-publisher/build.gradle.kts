@@ -12,6 +12,7 @@ dependencies {
     implementation(project(":common:utils"))
     implementation(Config.Libs.All.ap)
     implementation(Config.Libs.All.googleClient)
+    implementation(Config.Libs.All.auth)
 
     testImplementation(Config.Libs.All.junit)
     testImplementation(Config.Libs.All.truth)
