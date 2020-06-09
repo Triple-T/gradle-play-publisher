@@ -39,9 +39,12 @@ tasks.register("configureGithubActions") {
 
 nexusStaging {
     packageGroup = "com.github.triplet"
-    delayBetweenRetriesInMillis = 9000
     username = System.getenv("SONATYPE_NEXUS_USERNAME")
     password = System.getenv("SONATYPE_NEXUS_PASSWORD")
+
+    // 15 minutes
+    delayBetweenRetriesInMillis = 5_000
+    numberOfRetries = 180
 }
 
 tasks.withType<CloseRepositoryTask> {
