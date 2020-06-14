@@ -1,78 +1,39 @@
 package com.github.triplet.gradle.play.internal
 
-import com.android.build.gradle.api.ApkVariantOutput
 import com.github.triplet.gradle.androidpublisher.PlayPublisher
 import com.github.triplet.gradle.androidpublisher.ReleaseStatus
 import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import com.github.triplet.gradle.play.PlayPublisherExtension
-import org.gradle.api.Action
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.InputStream
 import java.io.Serializable
-import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.KProperty1
+import kotlin.reflect.full.declaredMemberProperties
 
-internal val PlayExtensionConfig.serviceAccountCredentialsOrDefault: InputStream
-    get() {
-        return serviceAccountCredentials?.inputStream() ?: ByteArrayInputStream(
-                System.getenv(PlayPublisher.CREDENTIAL_ENV_VAR).toByteArray())
-    }
-internal val PlayExtensionConfig.commitOrDefault get() = commit ?: true
-internal val PlayExtensionConfig.trackOrDefault get() = track ?: "internal"
-internal val PlayExtensionConfig.promoteTrackOrDefault
-    get() = promoteTrack ?: trackOrDefault
-internal val PlayExtensionConfig.releaseStatusOrDefault
-    get() = releaseStatus ?: ReleaseStatus.COMPLETED
-internal val PlayExtensionConfig.userFractionOrDefault
-    get() = userFraction ?: 0.1
-internal val PlayExtensionConfig.resolutionStrategyOrDefault
-    get() = resolutionStrategy ?: ResolutionStrategy.FAIL
+internal fun PlayPublisherExtension.toConfig() = PlayExtensionConfig(
+        enabled.get(),
+        serviceAccountCredentials.orNull?.asFile,
+        defaultToAppBundles.get(),
+        commit.get(),
+        fromTrack.orNull,
+        track.get(),
+        promoteTrack.orNull,
+        userFraction.orNull,
+        updatePriority.orNull,
+        releaseStatus.orNull,
+        releaseName.orNull,
+        resolutionStrategy.get(),
+        retain.artifacts.orNull,
+        retain.mainObb.orNull,
+        retain.patchObb.orNull
+)
 
-internal val PlayPublisherExtension.config
-    get() = _config.copy()
-internal val PlayPublisherExtension.serializableConfig
-    get() = _config.copy(outputProcessor = null)
-
-internal fun textToResolutionStrategy(input: String): ResolutionStrategy {
-    return requireNotNull(
-            ResolutionStrategy.values().find { it.publishedName == input }
-    ) {
-        "Resolution strategy must be one of " +
-                ResolutionStrategy.values().joinToString { "'${it.publishedName}'" }
-    }
-}
-
-internal fun textToReleaseStatus(input: String): ReleaseStatus {
-    return requireNotNull(
-            ReleaseStatus.values().find { it.publishedName == input }
-    ) {
-        "Release Status must be one of " +
-                ReleaseStatus.values().joinToString { "'${it.publishedName}'" }
-    }
-}
-
-internal fun <T> PlayPublisherExtension.updateProperty(
-        property: KMutableProperty1<PlayExtensionConfig, T>,
-        value: T,
-        force: Boolean = false
-) {
-    for (callback in _callbacks) {
-        @Suppress("UNCHECKED_CAST")
-        callback(property as KMutableProperty1<PlayExtensionConfig, Any?>, value)
-    }
-
-    for (child in _children) {
-        if (force || property.get(child._config) == null) {
-            child.updateProperty(property, value, force)
-        }
-    }
-}
-
-internal fun PlayPublisherExtension.evaluate() {
-    for (child in _children) {
-        child.mergeWith(this)
-        child.evaluate()
-    }
+internal fun PlayExtensionConfig.credentialStream(): InputStream {
+    return serviceAccountCredentials?.inputStream() ?: ByteArrayInputStream(
+            System.getenv(PlayPublisher.CREDENTIAL_ENV_VAR).toByteArray())
 }
 
 internal fun mergeExtensions(extensions: List<PlayPublisherExtension>): PlayPublisherExtension {
@@ -80,45 +41,47 @@ internal fun mergeExtensions(extensions: List<PlayPublisherExtension>): PlayPubl
     if (extensions.size == 1) return extensions.single()
 
     for (i in 1 until extensions.size) {
-        extensions[i]._children += extensions[i - 1]
+        val parent = extensions[i]
+        val child = extensions[i - 1]
+
+        PlayPublisherExtension::class.declaredMemberProperties.linkProperties(parent, child)
+        PlayPublisherExtension.Retain::class.declaredMemberProperties
+                .linkProperties(parent.retain, child.retain)
     }
 
     return extensions.first()
 }
 
-internal fun PlayPublisherExtension.mergeWith(
-        default: PlayPublisherExtension?
-): PlayPublisherExtension {
-    if (default == null) return this
+private fun <T> Collection<KProperty1<T, *>>.linkProperties(parent: T, child: T) {
+    for (property in this) {
+        if (property.name == "name") continue
 
-    val baseConfig = default._config
-    val mergeableConfig = _config
-    for (field in PlayExtensionConfig::class.java.declaredFields) {
-        field.isAccessible = true
-        if (field[mergeableConfig] == null) {
-            field[mergeableConfig] = field[baseConfig]
+        val value = property.get(child)
+        @Suppress("UNCHECKED_CAST")
+        if (value is Property<*>) {
+            value.convention(property.get(parent) as Property<Nothing>)
+        } else if (value is ListProperty<*>) {
+            value.convention(property.get(parent) as ListProperty<Nothing>)
         }
     }
-
-    return this
 }
 
+internal abstract class CliPlayPublisherExtension : PlayPublisherExtension("cliOptions")
+
 internal data class PlayExtensionConfig(
-        var enabled: Boolean? = null,
-        var serviceAccountCredentials: File? = null,
-        var defaultToAppBundles: Boolean? = null,
-        var commit: Boolean? = null,
-        var fromTrack: String? = null,
-        var track: String? = null,
-        var promoteTrack: String? = null,
-        var userFraction: Double? = null,
-        var updatePriority: Int? = null,
-        var resolutionStrategy: ResolutionStrategy? = null,
-        var outputProcessor: Action<ApkVariantOutput>? = null,
-        var releaseStatus: ReleaseStatus? = null,
-        var releaseName: String? = null,
-        var artifactDir: File? = null,
-        var retainArtifacts: List<Long>? = null,
-        var retainMainObb: Int? = null,
-        var retainPatchObb: Int? = null
+        val enabled: Boolean,
+        val serviceAccountCredentials: File?,
+        val defaultToAppBundles: Boolean,
+        val commit: Boolean,
+        val fromTrack: String?,
+        val track: String,
+        val promoteTrack: String?,
+        val userFraction: Double?,
+        val updatePriority: Int?,
+        val releaseStatus: ReleaseStatus?,
+        val releaseName: String?,
+        val resolutionStrategy: ResolutionStrategy,
+        val retainArtifacts: List<Long>?,
+        val retainMainObb: Int?,
+        val retainPatchObb: Int?
 ) : Serializable

@@ -53,21 +53,29 @@ internal fun Project.getCommitEditTask(
 
 internal fun ApplicationVariant.buildExtension(
         extensionContainer: NamedDomainObjectContainer<PlayPublisherExtension>,
-        baseExtension: PlayPublisherExtension
-): PlayPublisherExtension = buildExtensionInternal(this, extensionContainer, baseExtension)
+        baseExtension: PlayPublisherExtension,
+        cliOptionsExtension: PlayPublisherExtension
+): PlayPublisherExtension = buildExtensionInternal(
+        this,
+        extensionContainer,
+        baseExtension,
+        cliOptionsExtension
+)
 
 private fun buildExtensionInternal(
         variant: ApplicationVariant,
         extensionContainer: NamedDomainObjectContainer<PlayPublisherExtension>,
-        baseExtension: PlayPublisherExtension
+        baseExtension: PlayPublisherExtension,
+        cliOptionsExtension: PlayPublisherExtension
 ): PlayPublisherExtension {
     val variantExtension = extensionContainer.findByName(variant.name)
     val flavorExtension = variant.productFlavors.mapNotNull {
-        extensionContainer.findByName(it.getName())
+        extensionContainer.findByName(it.name)
     }.singleOrNull()
-    val buildTypeExtension = extensionContainer.findByName(variant.buildType.getName())
+    val buildTypeExtension = extensionContainer.findByName(variant.buildType.name)
 
     val extensions = listOfNotNull(
+            cliOptionsExtension,
             variantExtension,
             flavorExtension,
             buildTypeExtension,
@@ -76,9 +84,7 @@ private fun buildExtensionInternal(
         it.name
     }
 
-    val merged = mergeExtensions(extensions)
-    baseExtension.evaluate()
-    return merged
+    return mergeExtensions(extensions)
 }
 
 private inline fun <reified T : EditTaskBase> Project.getOrRegisterEditTask(

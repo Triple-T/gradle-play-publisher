@@ -12,7 +12,7 @@ internal fun PlayPublisherExtension.validateCreds() {
         return
     }
 
-    checkNotNull(config.serviceAccountCredentials) {
+    check(serviceAccountCredentials.isPresent) {
         """
         |No credentials specified. Please read our docs for more details:
         |https://github.com/Triple-T/gradle-play-publisher#authenticating-gradle-play-publisher

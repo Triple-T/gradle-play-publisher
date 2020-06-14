@@ -25,7 +25,7 @@ class InstallInternalSharingArtifactIntegrationTest : IntegrationTestBase() {
     fun `Build depends on uploading bundle artifact when specified`() {
         // language=gradle
         val config = """
-            play.defaultToAppBundles true
+            play.defaultToAppBundles = true
         """
 
         val result = execute(config, "installReleasePrivateArtifact")

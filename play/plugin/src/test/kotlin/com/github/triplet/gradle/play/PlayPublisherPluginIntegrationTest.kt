@@ -64,12 +64,94 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Groovy configuration options`() {
+        // language=gradle
+        val config = """
+            play {
+                enabled = true
+                serviceAccountCredentials = file('creds.json')
+                defaultToAppBundles = false
+                commit = true
+                fromTrack = 'from'
+                track = 'track'
+                promoteTrack = 'promote'
+                userFraction = 0.5d
+                updatePriority = 3
+                releaseStatus = ReleaseStatus.COMPLETED
+                releaseName = 'name'
+                resolutionStrategy = ResolutionStrategy.AUTO
+                artifactDir = file('.')
+
+                retain {
+                    artifacts = [1l, 2l, 3l]
+                    mainObb = 8
+                    patchObb = 8
+                }
+            }
+        """
+
+        execute(config, "help")
+    }
+
+    @Test
+    fun `Kotlin configuration options`() {
+        // language=gradle
+        File(appDir, "build.gradle.kts").writeText("""
+            import com.github.triplet.gradle.androidpublisher.ReleaseStatus
+            import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
+
+            plugins {
+                id("android")
+                id("com.github.triplet.play")
+            }
+
+            android {
+                compileSdkVersion(28)
+
+                defaultConfig {
+                    applicationId = "com.example.publisher"
+                    minSdkVersion(21)
+                    targetSdkVersion(28)
+                    versionCode = 1
+                    versionName = "1.0"
+                }
+            }
+
+            play {
+                enabled.set(true)
+                serviceAccountCredentials.set(file("creds.json"))
+                defaultToAppBundles.set(false)
+                commit.set(true)
+                fromTrack.set("from")
+                track.set("track")
+                promoteTrack.set("promote")
+                userFraction.set(0.5)
+                updatePriority.set(3)
+                releaseStatus.set(ReleaseStatus.COMPLETED)
+                releaseName.set("name")
+                resolutionStrategy.set(ResolutionStrategy.AUTO)
+                artifactDir.set(file("."))
+
+                retain {
+                    artifacts.set(listOf(1, 2, 3))
+                    mainObb.set(8)
+                    patchObb.set(8)
+                }
+            }
+        """)
+
+        executeGradle(false) {
+            withArguments("help")
+        }
+    }
+
+    @Test
     fun `Disabled GPP variant is ignored`() {
         // language=gradle
         val config = """
             android.playConfigs {
                 release {
-                    setEnabled false
+                    enabled.set(false)
                 }
             }
         """
@@ -161,7 +243,7 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
         // language=gradle
         val config = """
             play {
-                defaultToAppBundles true
+                defaultToAppBundles = true
             }
         """
 
@@ -182,12 +264,12 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
             }
 
             play {
-                track 'root'
+                track = 'root'
             }
 
             playConfigs {
                 paidRelease {
-                    track = 'variant'
+                    track.set('variant')
                 }
             }
         """
@@ -208,12 +290,12 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
             }
 
             play {
-                track 'root'
+                track = 'root'
             }
 
             playConfigs {
                 paid {
-                    track = 'flavor'
+                    track.set('flavor')
                 }
             }
         """
@@ -234,12 +316,12 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
             }
 
             play {
-                track 'root'
+                track = 'root'
             }
 
             playConfigs {
                 release {
-                    track = 'build type'
+                    track.set('build type')
                 }
             }
         """
@@ -260,7 +342,7 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
             }
 
             play {
-                track 'root'
+                track = 'root'
             }
         """
 
@@ -280,23 +362,23 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
             }
 
             play {
-                track 'root'
-                releaseName 'hello'
+                track = 'root'
+                releaseName = 'hello'
             }
 
             playConfigs {
                 paidRelease {
-                    track = 'variant'
+                    track.set('variant')
                 }
 
                 paid {
-                    fromTrack = 'flavor'
-                    defaultToAppBundles = true
+                    fromTrack.set('flavor')
+                    defaultToAppBundles.set(true)
                 }
 
                 release {
-                    fromTrack = 'build type'
-                    promoteTrack = 'build type'
+                    fromTrack.set('build type')
+                    promoteTrack.set('build type')
                 }
             }
         """
@@ -321,7 +403,7 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
             }
 
             play {
-                track 'root'
+                track = 'root'
             }
 
             playConfigs {

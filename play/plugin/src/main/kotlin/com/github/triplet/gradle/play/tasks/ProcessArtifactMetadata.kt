@@ -5,8 +5,8 @@ import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.androidpublisher.EditManager
 import com.github.triplet.gradle.androidpublisher.PlayPublisher
 import com.github.triplet.gradle.play.PlayPublisherExtension
-import com.github.triplet.gradle.play.internal.config
-import com.github.triplet.gradle.play.internal.serviceAccountCredentialsOrDefault
+import com.github.triplet.gradle.play.internal.credentialStream
+import com.github.triplet.gradle.play.internal.toConfig
 import com.github.triplet.gradle.play.tasks.internal.PublishEditTaskBase
 import org.gradle.api.tasks.TaskAction
 import javax.inject.Inject
@@ -22,7 +22,7 @@ internal abstract class ProcessArtifactMetadata @Inject constructor(
 
     @TaskAction
     fun process() {
-        val publisher = extension.config.serviceAccountCredentialsOrDefault.use {
+        val publisher = extension.toConfig().credentialStream().use {
             PlayPublisher(it, variant.applicationId)
         }
         val edits = EditManager(publisher, editId)
@@ -34,7 +34,6 @@ internal abstract class ProcessArtifactMetadata @Inject constructor(
         val patch = maxVersionCode - smallestVersionCode + 1
         for ((i, output) in outputs.withIndex()) {
             if (patch > 0) output.versionCodeOverride = output.versionCode + patch.toInt() + i
-            extension.config.outputProcessor?.execute(output)
         }
     }
 }

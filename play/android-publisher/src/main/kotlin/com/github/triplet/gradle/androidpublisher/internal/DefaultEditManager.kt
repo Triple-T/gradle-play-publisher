@@ -133,7 +133,7 @@ internal class DefaultEditManager(
             variantName: String,
             didPreviousBuildSkipCommit: Boolean,
             trackName: String,
-            releaseStatus: ReleaseStatus,
+            releaseStatus: ReleaseStatus?,
             releaseName: String?,
             releaseNotes: Map<String, String?>?,
             userFraction: Double?,
@@ -150,7 +150,6 @@ internal class DefaultEditManager(
         tracks.update(TrackManager.UpdateConfig(
                 trackName,
                 listOf(bundle.versionCode.toLong()),
-                releaseStatus,
                 didPreviousBuildSkipCommit,
                 TrackManager.BaseConfig(
                         releaseStatus,
@@ -191,7 +190,7 @@ internal class DefaultEditManager(
             versionCodes: List<Long>,
             didPreviousBuildSkipCommit: Boolean,
             trackName: String,
-            releaseStatus: ReleaseStatus,
+            releaseStatus: ReleaseStatus?,
             releaseName: String?,
             releaseNotes: Map<String, String?>?,
             userFraction: Double?,
@@ -203,7 +202,6 @@ internal class DefaultEditManager(
         tracks.update(TrackManager.UpdateConfig(
                 trackName,
                 versionCodes,
-                releaseStatus,
                 didPreviousBuildSkipCommit,
                 TrackManager.BaseConfig(
                         releaseStatus,

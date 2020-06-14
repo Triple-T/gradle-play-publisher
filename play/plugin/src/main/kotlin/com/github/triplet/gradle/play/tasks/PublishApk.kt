@@ -4,10 +4,6 @@ import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.common.utils.orNull
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.PlayPublisherExtension
-import com.github.triplet.gradle.play.internal.releaseStatusOrDefault
-import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
-import com.github.triplet.gradle.play.internal.trackOrDefault
-import com.github.triplet.gradle.play.internal.userFractionOrDefault
 import com.github.triplet.gradle.play.tasks.internal.PublishableTrackExtensionOptions
 import com.github.triplet.gradle.play.tasks.internal.UploadArtifactTaskBase
 import com.github.triplet.gradle.play.tasks.internal.findApkFiles
@@ -77,11 +73,11 @@ internal abstract class PublishApk @Inject constructor(
             edits.publishApk(
                     versions,
                     parameters.skippedMarker.get().asFile.exists(),
-                    config.trackOrDefault,
-                    config.releaseStatusOrDefault,
-                    findReleaseName(config.trackOrDefault),
-                    findReleaseNotes(config.trackOrDefault),
-                    config.userFractionOrDefault,
+                    config.track,
+                    config.releaseStatus,
+                    findReleaseName(config.track),
+                    findReleaseNotes(config.track),
+                    config.userFraction,
                     config.updatePriority,
                     config.retainArtifacts
             )
@@ -103,7 +99,7 @@ internal abstract class PublishApk @Inject constructor(
             val versionCode = edits.uploadApk(
                     apkFile,
                     parameters.mappingFile.orNull?.asFile,
-                    config.resolutionStrategyOrDefault,
+                    config.resolutionStrategy,
                     findBestVersionCode(apkFile),
                     parameters.variantName.get(),
                     config.retainMainObb,

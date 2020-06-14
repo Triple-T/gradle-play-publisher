@@ -2,7 +2,6 @@ package com.github.triplet.gradle.play.tasks.internal.workers
 
 import com.github.triplet.gradle.androidpublisher.EditManager
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
-import com.github.triplet.gradle.play.internal.commitOrDefault
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 
@@ -12,7 +11,7 @@ internal abstract class EditWorkerBase<T : EditWorkerBase.EditPublishingParams> 
     protected val edits = EditManager(publisher, editId)
 
     protected fun commit() {
-        if (config.commitOrDefault) {
+        if (config.commit) {
             parameters.commitMarker.get().asFile.safeCreateNewFile()
         } else {
             parameters.skippedMarker.get().asFile.safeCreateNewFile()

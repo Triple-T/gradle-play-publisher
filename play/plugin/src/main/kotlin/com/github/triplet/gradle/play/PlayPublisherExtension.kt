@@ -1,17 +1,13 @@
 package com.github.triplet.gradle.play
 
-import com.android.build.gradle.api.ApkVariantOutput
-import com.github.triplet.gradle.play.internal.PlayExtensionConfig
-import com.github.triplet.gradle.play.internal.commitOrDefault
-import com.github.triplet.gradle.play.internal.promoteTrackOrDefault
-import com.github.triplet.gradle.play.internal.releaseStatusOrDefault
-import com.github.triplet.gradle.play.internal.resolutionStrategyOrDefault
-import com.github.triplet.gradle.play.internal.textToReleaseStatus
-import com.github.triplet.gradle.play.internal.textToResolutionStrategy
-import com.github.triplet.gradle.play.internal.trackOrDefault
-import com.github.triplet.gradle.play.internal.updateProperty
-import com.github.triplet.gradle.play.internal.userFractionOrDefault
+import com.github.triplet.gradle.androidpublisher.ReleaseStatus
+import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import org.gradle.api.Action
+import org.gradle.api.Named
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
@@ -19,28 +15,13 @@ import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
-import java.io.File
-import java.util.Collections
-import java.util.IdentityHashMap
-import kotlin.reflect.KMutableProperty1
 
 /** The entry point for all GPP related configuration. */
-open class PlayPublisherExtension @JvmOverloads constructor(
-        @get:Internal internal val name: String = "default" // Needed for Gradle
-) {
-    @get:Internal
-    internal val _config = PlayExtensionConfig()
-
-    @get:Internal
-    internal val _children: MutableSet<PlayPublisherExtension> =
-            Collections.newSetFromMap(IdentityHashMap())
-
-    @get:Internal
-    internal val _callbacks = mutableListOf(
-            { property: KMutableProperty1<PlayExtensionConfig, Any?>, value: Any? ->
-                property.set(_config, value)
-            }
-    )
+abstract class PlayPublisherExtension @JvmOverloads constructor(
+        private val name: String = "default"
+) : Named {
+    @Internal
+    override fun getName(): String = name
 
     /**
      * Enables or disables GPP.
@@ -48,11 +29,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      * Defaults to `true`.
      */
     @get:Input
-    var isEnabled: Boolean
-        get() = _config.enabled ?: true
-        set(value) {
-            updateProperty(PlayExtensionConfig::enabled, value)
-        }
+    abstract val enabled: Property<Boolean>
 
     /**
      * JSON Service Account authentication file. You can also specify credentials through the
@@ -61,11 +38,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:Optional
     @get:InputFile
-    var serviceAccountCredentials: File?
-        get() = _config.serviceAccountCredentials
-        set(value) {
-            updateProperty(PlayExtensionConfig::serviceAccountCredentials, value)
-        }
+    abstract val serviceAccountCredentials: RegularFileProperty
 
     /**
      * Choose the default packaging method. Either App Bundles or APKs. Affects tasks like
@@ -74,21 +47,13 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      * Defaults to `false` because App Bundles require Google Play App Signing to be configured.
      */
     @get:Input
-    var defaultToAppBundles: Boolean
-        get() = _config.defaultToAppBundles ?: false
-        set(value) {
-            updateProperty(PlayExtensionConfig::defaultToAppBundles, value)
-        }
+    abstract val defaultToAppBundles: Property<Boolean>
 
     /**
      * Choose whether or not to apply the changes from this build. Defaults to true.
      */
     @get:Input
-    var commit: Boolean
-        get() = _config.commitOrDefault
-        set(value) {
-            updateProperty(PlayExtensionConfig::commit, value)
-        }
+    abstract val commit: Property<Boolean>
 
     /**
      * Specify the track from which to promote a release. That is, the specified track will be
@@ -98,12 +63,9 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      * release available for promotion. That is, if there is a stable release and an alpha release,
      * the alpha will be chosen.
      */
+    @get:Optional
     @get:Input
-    var fromTrack: String
-        get() = _config.fromTrack ?: track
-        set(value) {
-            updateProperty(PlayExtensionConfig::fromTrack, value)
-        }
+    abstract val fromTrack: Property<String>
 
     /**
      * Specify the track in which to upload your app.
@@ -112,23 +74,16 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      * `internal`.
      */
     @get:Input
-    var track: String
-        get() = _config.trackOrDefault
-        set(value) {
-            updateProperty(PlayExtensionConfig::track, value)
-        }
+    abstract val track: Property<String>
 
     /**
      * Specify the track to promote a release to.
      *
      * See [track] for valid values. If no promote track is specified, [track] is used instead.
      */
+    @get:Optional
     @get:Input
-    var promoteTrack: String
-        get() = _config.promoteTrackOrDefault
-        set(value) {
-            updateProperty(PlayExtensionConfig::promoteTrack, value)
-        }
+    abstract val promoteTrack: Property<String>
 
     /**
      * Specify the initial user fraction intended to receive an `inProgress` release. Defaults to
@@ -136,12 +91,9 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      *
      * @see releaseStatus
      */
+    @get:Optional
     @get:Input
-    var userFraction: Double
-        get() = _config.userFractionOrDefault
-        set(value) {
-            updateProperty(PlayExtensionConfig::userFraction, value)
-        }
+    abstract val userFraction: Property<Double>
 
     /**
      * Specify the update priority for your release. For information on consuming this value, take
@@ -151,58 +103,29 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      */
     @get:Optional
     @get:Input
-    var updatePriority: Int?
-        get() = _config.updatePriority
-        set(value) {
-            updateProperty(PlayExtensionConfig::updatePriority, value)
-        }
-
-    /**
-     * Specify the resolution strategy to employ when a version conflict occurs.
-     *
-     * May be one of `auto`, `fail`, or `ignore`. Defaults to `fail`.
-     */
-    @get:Input
-    var resolutionStrategy: String
-        get() = _config.resolutionStrategyOrDefault.publishedName
-        set(value) {
-            updateProperty(PlayExtensionConfig::resolutionStrategy, textToResolutionStrategy(value))
-        }
-
-    /**
-     * If the [resolutionStrategy] is auto, provide extra processing on top of what this plugin
-     * already does. For example, you could update each output's version name using the newly
-     * mutated version codes.
-     *
-     * Note: by the time the output is received, its version code will have been linearly shifted
-     * such that the smallest output's version code is 1 unit greater than the maximum version code
-     * found in the Play Store.
-     */
-    @Suppress("unused") // Public API
-    fun outputProcessor(processor: Action<ApkVariantOutput>) {
-        updateProperty(PlayExtensionConfig::outputProcessor, processor)
-    }
+    abstract val updatePriority: Property<Int>
 
     /**
      * Specify the status to apply to the uploaded app release.
      *
-     * May be one of `completed`, `draft`, `halted`, or `inProgress`. Defaults to `completed`.
+     * Defaults to [ReleaseStatus.COMPLETED].
      */
+    @get:Optional
     @get:Input
-    var releaseStatus: String
-        get() = _config.releaseStatusOrDefault.publishedName
-        set(value) {
-            updateProperty(PlayExtensionConfig::releaseStatus, textToReleaseStatus(value))
-        }
+    abstract val releaseStatus: Property<ReleaseStatus>
 
     /** Specify the Play Console developer facing release name. */
     @get:Optional
     @get:Input
-    var releaseName: String?
-        get() = _config.releaseName
-        set(value) {
-            updateProperty(PlayExtensionConfig::releaseName, value)
-        }
+    abstract val releaseName: Property<String>
+
+    /**
+     * Specify the resolution strategy to employ when a version conflict occurs.
+     *
+     * Defaults to [ResolutionStrategy.FAIL].
+     */
+    @get:Input
+    abstract val resolutionStrategy: Property<ResolutionStrategy>
 
     /**
      * Specify a directory where prebuilt artifacts such as APKs or App Bundles may be found. The
@@ -212,18 +135,14 @@ open class PlayPublisherExtension @JvmOverloads constructor(
      * Defaults to null (i.e. your app will be built pre-publish).
      */
     @get:Internal("Directory mapped to a useful set of files later")
-    var artifactDir: File?
-        get() = _config.artifactDir
-        set(value) {
-            updateProperty(PlayExtensionConfig::artifactDir, value)
-        }
+    abstract val artifactDir: DirectoryProperty
 
     /**
      * @return the configuration for your app's retainable objects such as previous artifacts and
      * OBB files.
      */
     @get:Nested
-    val retain: Retain = Retain()
+    abstract val retain: Retain
 
     /** Configure your app's retainable objects such as previous artifacts and OBB files. */
     @Suppress("unused") // Public API
@@ -231,18 +150,12 @@ open class PlayPublisherExtension @JvmOverloads constructor(
         action.execute(retain)
     }
 
-    override fun toString(): String = "PlayPublisherExtension(name=$name, config=$_config)"
-
     /** Entry point for retainable artifact configuration. */
-    inner class Retain {
+    abstract class Retain {
         /** Specify the version code(s) of an APK or App Bundle to retain. Defaults to none. */
         @get:Optional
         @get:Input
-        var artifacts: List<Long>?
-            get() = _config.retainArtifacts
-            set(value) {
-                updateProperty(PlayExtensionConfig::retainArtifacts, value)
-            }
+        abstract val artifacts: ListProperty<Long>
 
         /**
          * Specify the reference version of the main OBB file to attach to an APK.
@@ -252,11 +165,7 @@ open class PlayPublisherExtension @JvmOverloads constructor(
          */
         @get:Optional
         @get:Input
-        var mainObb: Int?
-            get() = _config.retainMainObb
-            set(value) {
-                updateProperty(PlayExtensionConfig::retainMainObb, value)
-            }
+        abstract val mainObb: Property<Int>
 
         /**
          * Specify the reference version of the patch OBB file to attach to an APK.
@@ -266,10 +175,6 @@ open class PlayPublisherExtension @JvmOverloads constructor(
          */
         @get:Optional
         @get:Input
-        var patchObb: Int?
-            get() = _config.retainPatchObb
-            set(value) {
-                updateProperty(PlayExtensionConfig::retainPatchObb, value)
-            }
+        abstract val patchObb: Property<Int>
     }
 }

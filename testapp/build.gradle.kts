@@ -1,9 +1,11 @@
 import com.android.build.gradle.BaseExtension
+import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import com.github.triplet.gradle.common.utils.orNull
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.google.common.hash.Hashing
 import com.google.common.io.Files
+import com.supercilex.gradle.versions.VersionMasterExtension
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -12,11 +14,13 @@ buildscript {
         google()
         jcenter()
         mavenLocal()
+        maven("https://plugins.gradle.org/m2/")
     }
 
     dependencies {
         classpath(kotlin("gradle-plugin", embeddedKotlinVersion))
         classpath("com.android.tools.build:gradle:3.6.0")
+        classpath("com.supercilex.gradle:version-master:0.6.0")
         classpath("com.github.triplet.gradle:play-publisher:" +
                           file("../version.txt").readText().trim())
     }
@@ -40,6 +44,7 @@ allprojects {
 
 apply(plugin = "com.android.application")
 apply(plugin = "kotlin-android")
+apply(plugin = "com.supercilex.gradle.versions")
 apply(plugin = "com.github.triplet.play")
 
 configure<BaseExtension> {
@@ -87,7 +92,7 @@ configure<BaseExtension> {
     (this as ExtensionAware).extensions.configure<
             NamedDomainObjectContainer<PlayPublisherExtension>>("playConfigs") {
         register("debug") {
-            isEnabled = false
+            enabled.set(false)
         }
     }
 
@@ -102,11 +107,15 @@ configure<BaseExtension> {
 }
 
 configure<PlayPublisherExtension> {
-    serviceAccountCredentials = file("google-play-auto-publisher.json")
-    promoteTrack = "alpha"
-    resolutionStrategy = "auto"
-    outputProcessor { versionNameOverride = "$versionNameOverride.$versionCode" }
-    defaultToAppBundles = true
+    serviceAccountCredentials.set(file("google-play-auto-publisher.json"))
+    defaultToAppBundles.set(true)
+
+    promoteTrack.set("alpha")
+    resolutionStrategy.set(ResolutionStrategy.AUTO)
+}
+
+configure<VersionMasterExtension> {
+    configureVersionCode.set(false)
 }
 
 dependencies {

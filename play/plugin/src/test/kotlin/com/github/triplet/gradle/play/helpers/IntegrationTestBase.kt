@@ -6,6 +6,7 @@ import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
+import java.util.UUID
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
@@ -13,8 +14,10 @@ abstract class IntegrationTestBase {
     @TempDir
     @JvmField
     var _tempDir: File? = null
-    val tempDir get() = _tempDir!!
+    private val tempDir get() = _tempDir!!
+
     protected val appDir by lazy { File(tempDir, "app") }
+    protected val playgroundDir by lazy { File(tempDir, UUID.randomUUID().toString()) }
 
     protected open val factoryInstallerStatement: String? = null
 
@@ -24,7 +27,7 @@ abstract class IntegrationTestBase {
         File("src/test/fixtures/${javaClass.simpleName}").orNull()?.copyRecursively(appDir)
     }
 
-    protected fun escapedTempDir() = tempDir.toString().replace("\\", "\\\\")
+    protected fun File.escaped() = toString().replace("\\", "\\\\")
 
     protected fun execute(config: String, vararg tasks: String) = execute(config, false, *tasks)
 
@@ -70,6 +73,9 @@ abstract class IntegrationTestBase {
 
         // language=gradle
         File(appDir, "build.gradle").writeText("""
+            import com.github.triplet.gradle.androidpublisher.ReleaseStatus
+            import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
+
             plugins {
                 id 'com.android.application'
                 id 'com.github.triplet.play'

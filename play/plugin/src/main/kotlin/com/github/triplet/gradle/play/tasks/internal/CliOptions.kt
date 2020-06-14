@@ -4,10 +4,6 @@ import com.github.triplet.gradle.androidpublisher.ReleaseStatus
 import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import com.github.triplet.gradle.common.utils.orNull
 import com.github.triplet.gradle.play.PlayPublisherExtension
-import com.github.triplet.gradle.play.internal.PlayExtensionConfig
-import com.github.triplet.gradle.play.internal.textToReleaseStatus
-import com.github.triplet.gradle.play.internal.textToResolutionStrategy
-import com.github.triplet.gradle.play.internal.updateProperty
 import org.gradle.api.Project
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
@@ -36,7 +32,7 @@ internal interface ArtifactExtensionOptions : ExtensionOptionsBase {
             val f = requireNotNull(dir.orNull()) {
                 "Folder '$dir' does not exist."
             }
-            extension.updateProperty(PlayExtensionConfig::artifactDir, f, force = true)
+            extension.artifactDir.set(f)
         }
 }
 
@@ -49,7 +45,7 @@ internal interface WriteTrackExtensionOptions : ExtensionOptionsBase {
     var noCommitOption: Boolean
         get() = throw UnsupportedOperationException()
         set(value) {
-            extension.updateProperty(PlayExtensionConfig::commit, !value, force = true)
+            extension.commit.set(!value)
         }
 }
 
@@ -63,8 +59,7 @@ internal interface TrackExtensionOptions : WriteTrackExtensionOptions {
     var userFractionOption: String
         get() = throw UnsupportedOperationException()
         set(value) {
-            extension.updateProperty(
-                    PlayExtensionConfig::userFraction, value.toDouble(), force = true)
+            extension.userFraction.set(value.toDouble())
         }
 
     @get:Internal
@@ -75,8 +70,7 @@ internal interface TrackExtensionOptions : WriteTrackExtensionOptions {
     var updatePriorityOption: String
         get() = throw UnsupportedOperationException()
         set(value) {
-            extension.updateProperty(
-                    PlayExtensionConfig::updatePriority, value.toInt(), force = true)
+            extension.updatePriority.set(value.toInt())
         }
 
     @get:OptionValues("release-status")
@@ -88,11 +82,10 @@ internal interface TrackExtensionOptions : WriteTrackExtensionOptions {
             option = "release-status",
             description = "Set the app release status."
     )
-    var releaseStatusOption: String
+    var releaseStatusOption: ReleaseStatus
         get() = throw UnsupportedOperationException()
         set(value) {
-            extension.updateProperty(
-                    PlayExtensionConfig::releaseStatus, textToReleaseStatus(value), force = true)
+            extension.releaseStatus.set(value)
         }
 
     @get:Internal
@@ -103,7 +96,7 @@ internal interface TrackExtensionOptions : WriteTrackExtensionOptions {
     var releaseName: String
         get() = throw UnsupportedOperationException()
         set(value) {
-            extension.updateProperty(PlayExtensionConfig::releaseName, value, force = true)
+            extension.releaseName.set(value)
         }
 }
 
@@ -116,7 +109,7 @@ internal interface UpdatableTrackExtensionOptions : TrackExtensionOptions {
     var fromTrackOption: String
         get() = throw UnsupportedOperationException()
         set(value) {
-            extension.updateProperty(PlayExtensionConfig::fromTrack, value, force = true)
+            extension.fromTrack.set(value)
         }
 
     @get:Internal
@@ -127,7 +120,7 @@ internal interface UpdatableTrackExtensionOptions : TrackExtensionOptions {
     var promoteTrackOption: String
         get() = throw UnsupportedOperationException()
         set(value) {
-            extension.updateProperty(PlayExtensionConfig::promoteTrack, value, force = true)
+            extension.promoteTrack.set(value)
         }
 
     @get:Internal
@@ -154,7 +147,7 @@ internal interface PublishableTrackExtensionOptions : TrackExtensionOptions,
     var trackOption: String
         get() = throw UnsupportedOperationException()
         set(value) {
-            extension.updateProperty(PlayExtensionConfig::track, value, force = true)
+            extension.track.set(value)
         }
 
     @get:OptionValues("resolution-strategy")
@@ -166,14 +159,10 @@ internal interface PublishableTrackExtensionOptions : TrackExtensionOptions,
             option = "resolution-strategy",
             description = "Set the version conflict resolution strategy."
     )
-    var resolutionStrategyOption: String
+    var resolutionStrategyOption: ResolutionStrategy
         get() = throw UnsupportedOperationException()
         set(value) {
-            extension.updateProperty(
-                    PlayExtensionConfig::resolutionStrategy,
-                    textToResolutionStrategy(value),
-                    force = true
-            )
+            extension.resolutionStrategy.set(value)
         }
 }
 
@@ -186,7 +175,7 @@ internal interface GlobalPublishableArtifactExtensionOptions : PublishableTrackE
     var defaultToAppBundlesOption: Boolean
         get() = throw UnsupportedOperationException()
         set(value) {
-            extension.updateProperty(PlayExtensionConfig::defaultToAppBundles, value, force = true)
+            extension.defaultToAppBundles.set(value)
         }
 }
 

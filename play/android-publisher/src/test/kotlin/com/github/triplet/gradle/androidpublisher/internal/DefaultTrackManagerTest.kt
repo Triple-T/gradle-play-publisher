@@ -24,7 +24,6 @@ class DefaultTrackManagerTest {
         val config = TrackManager.UpdateConfig(
                 trackName = "alpha",
                 versionCodes = listOf(888),
-                releaseStatus = ReleaseStatus.COMPLETED,
                 didPreviousBuildSkipCommit = false,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
@@ -55,11 +54,63 @@ class DefaultTrackManagerTest {
     }
 
     @Test
+    fun `Standard build uses default release status when unspecified`() {
+        val config = TrackManager.UpdateConfig(
+                trackName = "alpha",
+                versionCodes = listOf(888),
+                didPreviousBuildSkipCommit = false,
+                base = TrackManager.BaseConfig(
+                        releaseStatus = null,
+                        userFraction = null,
+                        updatePriority = null,
+                        releaseNotes = null,
+                        retainableArtifacts = null,
+                        releaseName = null
+                )
+        )
+        `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().setTrack("alpha"))
+
+        tracks.update(config)
+
+        val trackCaptor = ArgumentCaptor.forClass(Track::class.java)
+        verify(mockPublisher).updateTrack(eq("edit-id"), trackCaptor.capture())
+        assertThat(trackCaptor.value.track).isEqualTo("alpha")
+        assertThat(trackCaptor.value.releases).hasSize(1)
+        assertThat(trackCaptor.value.releases.single().status).isEqualTo("completed")
+    }
+
+    @Test
+    fun `Standard build configures user fraction when unspecified for inProgress release`() {
+        val config = TrackManager.UpdateConfig(
+                trackName = "alpha",
+                versionCodes = listOf(888),
+                didPreviousBuildSkipCommit = false,
+                base = TrackManager.BaseConfig(
+                        releaseStatus = ReleaseStatus.IN_PROGRESS,
+                        userFraction = null,
+                        updatePriority = null,
+                        releaseNotes = null,
+                        retainableArtifacts = null,
+                        releaseName = null
+                )
+        )
+        `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().setTrack("alpha"))
+
+        tracks.update(config)
+
+        val trackCaptor = ArgumentCaptor.forClass(Track::class.java)
+        verify(mockPublisher).updateTrack(eq("edit-id"), trackCaptor.capture())
+        assertThat(trackCaptor.value.track).isEqualTo("alpha")
+        assertThat(trackCaptor.value.releases).hasSize(1)
+        assertThat(trackCaptor.value.releases.single().status).isEqualTo("inProgress")
+        assertThat(trackCaptor.value.releases.single().userFraction).isEqualTo(0.1)
+    }
+
+    @Test
     fun `Standard build with rollout release creates new release`() {
         val config = TrackManager.UpdateConfig(
                 trackName = "alpha",
                 versionCodes = listOf(888),
-                releaseStatus = ReleaseStatus.IN_PROGRESS,
                 didPreviousBuildSkipCommit = false,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.IN_PROGRESS,
@@ -105,7 +156,6 @@ class DefaultTrackManagerTest {
         val config = TrackManager.UpdateConfig(
                 trackName = "alpha",
                 versionCodes = listOf(888),
-                releaseStatus = ReleaseStatus.IN_PROGRESS,
                 didPreviousBuildSkipCommit = false,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.IN_PROGRESS,
@@ -157,7 +207,6 @@ class DefaultTrackManagerTest {
         val config = TrackManager.UpdateConfig(
                 trackName = "alpha",
                 versionCodes = listOf(888),
-                releaseStatus = ReleaseStatus.COMPLETED,
                 didPreviousBuildSkipCommit = true,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
@@ -194,7 +243,6 @@ class DefaultTrackManagerTest {
         val config = TrackManager.UpdateConfig(
                 trackName = "alpha",
                 versionCodes = listOf(888),
-                releaseStatus = ReleaseStatus.COMPLETED,
                 didPreviousBuildSkipCommit = true,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
@@ -245,7 +293,6 @@ class DefaultTrackManagerTest {
         val config = TrackManager.UpdateConfig(
                 trackName = "alpha",
                 versionCodes = listOf(888),
-                releaseStatus = ReleaseStatus.COMPLETED,
                 didPreviousBuildSkipCommit = true,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
@@ -293,10 +340,9 @@ class DefaultTrackManagerTest {
         val config = TrackManager.UpdateConfig(
                 trackName = "alpha",
                 versionCodes = listOf(888),
-                releaseStatus = ReleaseStatus.DRAFT,
                 didPreviousBuildSkipCommit = true,
                 base = TrackManager.BaseConfig(
-                        releaseStatus = null,
+                        releaseStatus = ReleaseStatus.DRAFT,
                         userFraction = null,
                         updatePriority = null,
                         releaseNotes = null,
@@ -342,7 +388,6 @@ class DefaultTrackManagerTest {
         val config = TrackManager.UpdateConfig(
                 trackName = "alpha",
                 versionCodes = listOf(888),
-                releaseStatus = ReleaseStatus.DRAFT,
                 didPreviousBuildSkipCommit = true,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.DRAFT,
@@ -397,7 +442,6 @@ class DefaultTrackManagerTest {
         val config = TrackManager.UpdateConfig(
                 trackName = "alpha",
                 versionCodes = listOf(888),
-                releaseStatus = ReleaseStatus.COMPLETED,
                 didPreviousBuildSkipCommit = false,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,

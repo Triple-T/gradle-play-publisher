@@ -1,14 +1,14 @@
 package com.github.triplet.gradle.play.tasks.internal.workers
 
 import com.github.triplet.gradle.common.utils.marked
-import com.github.triplet.gradle.play.internal.serializableConfig
+import com.github.triplet.gradle.play.internal.toConfig
 import com.github.triplet.gradle.play.tasks.internal.PublishArtifactTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PublishEditTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.UploadArtifactTaskBase
 
 internal fun PublishTaskBase.paramsForBase(params: PlayWorkerBase.PlayPublishingParams) {
-    params.config.set(extension.serializableConfig)
+    params.config.set(extension.toConfig())
     params.appId.set(variant.applicationId)
 
     if (params is EditWorkerBase.EditPublishingParams) {

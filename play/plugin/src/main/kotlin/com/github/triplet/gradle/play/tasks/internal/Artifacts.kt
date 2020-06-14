@@ -4,11 +4,10 @@ import com.android.build.VariantOutput.OutputType
 import com.android.build.gradle.api.ApkVariantOutput
 import com.android.build.gradle.internal.api.InstallableVariantImpl
 import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.github.triplet.gradle.play.internal.config
 import java.io.File
 
 internal fun PublishTaskBase.findBundleFile(): File? {
-    val customDir = extension.config.artifactDir
+    val customDir = extension.artifactDir.orNull?.asFile
 
     return if (customDir == null) {
         val installable = variant as InstallableVariantImpl
@@ -27,7 +26,7 @@ internal fun PublishTaskBase.findBundleFile(): File? {
 }
 
 internal fun PublishTaskBase.findApkFiles(allowSplits: Boolean): List<File>? {
-    val customDir = extension.config.artifactDir
+    val customDir = extension.artifactDir.orNull?.asFile
 
     return if (customDir == null) {
         var result = variant.outputs.filterIsInstance<ApkVariantOutput>()

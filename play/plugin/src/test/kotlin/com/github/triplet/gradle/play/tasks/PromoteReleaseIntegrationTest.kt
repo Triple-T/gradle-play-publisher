@@ -15,10 +15,10 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
             "PromoteReleaseIntegrationTest.installFactories()"
 
     @Test
-    fun `Promote uses standard track by default`() {
+    fun `Promote uses promote track by default`() {
         // language=gradle
         val config = """
-            play.track = 'foobar'
+            play.promoteTrack = 'foobar'
         """
 
         val result = execute(config, "promoteReleaseArtifact")
@@ -26,11 +26,12 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":promoteReleaseArtifact")).isNotNull()
         assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("promoteRelease(")
+        assertThat(result.output).contains("fromTrackName=auto-track")
         assertThat(result.output).contains("promoteTrackName=foobar")
     }
 
     @Test
-    fun `Promote uses promote track when specified`() {
+    fun `Promote uses promote track even with track specified`() {
         // language=gradle
         val config = """
             play.track = 'foobar'
@@ -53,6 +54,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("promoteRelease(")
         assertThat(result.output).contains("fromTrackName=auto-track")
+        assertThat(result.output).contains("promoteTrackName=auto-track")
     }
 
     @Test
@@ -68,6 +70,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("promoteRelease(")
         assertThat(result.output).contains("fromTrackName=foobar")
+        assertThat(result.output).contains("promoteTrackName=foobar")
     }
 
     @Test
@@ -93,6 +96,8 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         assertThat(result.output).contains("releaseStatus=DRAFT")
         assertThat(result.output).contains("userFraction=0.88")
         assertThat(result.output).contains("updatePriority=3")
+        assertThat(result.output).contains("insertEdit()")
+        assertThat(result.output).doesNotContain("commitEdit(")
     }
 
     @Test
@@ -101,7 +106,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         val config = """
             playConfigs {
                 release {
-                    track = 'unused'
+                    track.set('unused')
                 }
             }
         """
@@ -127,6 +132,8 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         assertThat(result.output).contains("releaseStatus=DRAFT")
         assertThat(result.output).contains("userFraction=0.88")
         assertThat(result.output).contains("updatePriority=3")
+        assertThat(result.output).contains("insertEdit()")
+        assertThat(result.output).doesNotContain("commitEdit(")
     }
 
     @Test
@@ -162,7 +169,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
     fun `Build uses correct release status`() {
         // language=gradle
         val config = """
-            play.releaseStatus 'draft'
+            play.releaseStatus = ReleaseStatus.DRAFT
         """
 
         val result = execute(config, "promoteReleaseArtifact")
@@ -199,7 +206,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
                 consoleNames {}
             }
 
-            play.track 'custom-track'
+            play.promoteTrack = 'custom-track'
         """
 
         val result = execute(config, "promoteConsoleNamesArtifact")
@@ -219,8 +226,8 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
                 consoleNames {}
             }
 
-            play.track 'custom-track'
-            play.promoteTrack 'promote-track'
+            play.track = 'custom-track'
+            play.promoteTrack = 'promote-track'
         """
 
         val result = execute(config, "promoteConsoleNamesArtifact")
@@ -261,7 +268,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
                 releaseNotes {}
             }
 
-            play.fromTrack 'custom-track'
+            play.fromTrack = 'custom-track'
         """
 
         val result = execute(config, "promoteReleaseNotesArtifact")
@@ -297,7 +304,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
     fun `Build uses correct user fraction`() {
         // language=gradle
         val config = """
-            play.userFraction 0.123
+            play.userFraction = 0.123d
         """
 
         val result = execute(config, "promoteReleaseArtifact")
@@ -312,7 +319,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
     fun `Build uses correct update priority`() {
         // language=gradle
         val config = """
-            play.updatePriority 5
+            play.updatePriority = 5
         """
 
         val result = execute(config, "promoteReleaseArtifact")
@@ -327,7 +334,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
     fun `Build uses correct retained artifacts`() {
         // language=gradle
         val config = """
-            play.retain.artifacts = [1, 2, 3]
+            play.retain.artifacts = [1l, 2l, 3l]
         """
 
         val result = execute(config, "promoteReleaseArtifact")
