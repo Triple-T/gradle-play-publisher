@@ -97,7 +97,11 @@ allprojects {
     }
 
     tasks.withType<Test> {
-        maxParallelForks = Runtime.getRuntime().availableProcessors()
+        useJUnitPlatform()
+
+        maxHeapSize = "2g"
+        systemProperty("junit.jupiter.execution.parallel.enabled", true)
+        systemProperty("junit.jupiter.execution.parallel.mode.default", "concurrent")
 
         testLogging {
             events("passed", "failed", "skipped")

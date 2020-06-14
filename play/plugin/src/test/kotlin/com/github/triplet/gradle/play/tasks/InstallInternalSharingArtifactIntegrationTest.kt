@@ -6,7 +6,7 @@ import com.github.triplet.gradle.androidpublisher.newUploadInternalSharingArtifa
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.io.File
 
 class InstallInternalSharingArtifactIntegrationTest : IntegrationTestBase() {

@@ -3,25 +3,28 @@ package com.github.triplet.gradle.play.helpers
 import com.github.triplet.gradle.common.utils.orNull
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
-import org.junit.Before
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.io.TempDir
 import java.io.File
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 abstract class IntegrationTestBase {
-    @get:Rule
-    val tempDir = TemporaryFolder()
-    protected val appDir by lazy { File(tempDir.root, "app") }
+    @TempDir
+    @JvmField
+    var _tempDir: File? = null
+    val tempDir get() = _tempDir!!
+    protected val appDir by lazy { File(tempDir, "app") }
 
     protected open val factoryInstallerStatement: String? = null
 
-    @Before
+    @BeforeEach
     fun initTestResources() {
         File("src/test/fixtures/app").copyRecursively(appDir)
         File("src/test/fixtures/${javaClass.simpleName}").orNull()?.copyRecursively(appDir)
     }
 
-    protected fun escapedTempDir() = tempDir.root.toString().replace("\\", "\\\\")
+    protected fun escapedTempDir() = tempDir.toString().replace("\\", "\\\\")
 
     protected fun execute(config: String, vararg tasks: String) = execute(config, false, *tasks)
 
@@ -48,7 +51,7 @@ abstract class IntegrationTestBase {
                 File("../android-publisher/build/resources/testFixtures")
         ))
 
-        val result = if (expectFailure) runner.buildAndFail() else runner.build()
+        val result = lock.withLock { if (expectFailure) runner.buildAndFail() else runner.build() }
         println(result.output)
         return result
     }
@@ -58,7 +61,7 @@ abstract class IntegrationTestBase {
             expectFailure: Boolean,
             vararg tasks: String
     ): BuildResult {
-        val buildCacheDir = File(tempDir.root, "gradle").path.replace("\\", "\\\\")
+        val buildCacheDir = File(tempDir, "gradle").path.replace("\\", "\\\\")
 
         // language=gradle
         File(appDir, "settings.gradle").writeText("""
@@ -103,5 +106,9 @@ abstract class IntegrationTestBase {
         return executeGradle(expectFailure) {
             withArguments("-S", "--build-cache", *tasks)
         }
+    }
+
+    private companion object {
+        val lock = ReentrantLock()
     }
 }

@@ -5,8 +5,8 @@ import com.google.api.services.androidpublisher.model.LocalizedText
 import com.google.api.services.androidpublisher.model.Track
 import com.google.api.services.androidpublisher.model.TrackRelease
 import com.google.common.truth.Truth.assertThat
-import org.junit.Assert.assertThrows
-import org.junit.Test
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.any
@@ -599,7 +599,7 @@ class DefaultTrackManagerTest {
             releases = listOf(TrackRelease())
         })
 
-        assertThrows(IllegalStateException::class.java) {
+        assertThrows<IllegalStateException> {
             tracks.promote(config)
         }
 

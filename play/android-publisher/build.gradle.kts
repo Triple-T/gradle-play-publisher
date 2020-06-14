@@ -15,6 +15,7 @@ dependencies {
     implementation(Config.Libs.All.auth)
 
     testImplementation(Config.Libs.All.junit)
+    testImplementation(Config.Libs.All.junitEngine)
     testImplementation(Config.Libs.All.truth)
     testImplementation(Config.Libs.All.mockito)
 }

@@ -7,8 +7,8 @@ import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.Ignore
-import org.junit.Test
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Test
 
 class ProcessArtifactMetadataIntegrationTest : IntegrationTestBase() {
     override val factoryInstallerStatement = "com.github.triplet.gradle.play.tasks." +
@@ -29,7 +29,7 @@ class ProcessArtifactMetadataIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":processReleaseMetadata")!!.outcome).isEqualTo(TaskOutcome.SKIPPED)
     }
 
-    @Ignore("https://github.com/Triple-T/gradle-play-publisher/issues/790") // TODO
+    @Disabled("https://github.com/Triple-T/gradle-play-publisher/issues/790") // TODO
     @Test
     fun `Version code is incremented and output processor is run with updated version code`() {
         // language=gradle

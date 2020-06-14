@@ -11,7 +11,7 @@ import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.services.androidpublisher.model.AppDetails
 import com.google.api.services.androidpublisher.model.Listing
-import org.gradle.api.logging.Logging
+import org.slf4j.LoggerFactory
 import java.io.File
 
 internal class DefaultEditManager(
@@ -251,7 +251,7 @@ internal class DefaultEditManager(
                             "$variantName.",
                     e
             )
-            ResolutionStrategy.IGNORE -> Logging.getLogger(EditManager::class.java).warn(
+            ResolutionStrategy.IGNORE -> LoggerFactory.getLogger(EditManager::class.java).warn(
                     "Ignoring artifact ($artifact) for version code $versionCode")
         }
         null

@@ -15,8 +15,8 @@ import com.google.api.services.androidpublisher.model.LocalizedText
 import com.google.api.services.androidpublisher.model.Track
 import com.google.api.services.androidpublisher.model.TrackRelease
 import com.google.common.truth.Truth.assertThat
-import org.junit.Assert.assertThrows
-import org.junit.Test
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.eq
@@ -179,7 +179,7 @@ class DefaultEditManagerTest {
                 GoogleJsonResponseExceptionFactoryTesting.newMock(
                         JacksonFactory.getDefaultInstance(), 400, "apkUpgradeVersionConflict"))
 
-        assertThrows(IllegalStateException::class.java) {
+        assertThrows<IllegalStateException> {
             edits.uploadBundle(
                     bundleFile = mockFile,
                     mappingFile = mockFile,
@@ -302,7 +302,7 @@ class DefaultEditManagerTest {
                 GoogleJsonResponseExceptionFactoryTesting.newMock(
                         JacksonFactory.getDefaultInstance(), 400, "apkUpgradeVersionConflict"))
 
-        assertThrows(IllegalStateException::class.java) {
+        assertThrows<IllegalStateException> {
             edits.uploadApk(
                     apkFile = mockFile,
                     mappingFile = mockFile,

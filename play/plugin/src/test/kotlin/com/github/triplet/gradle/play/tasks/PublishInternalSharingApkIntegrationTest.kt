@@ -6,7 +6,7 @@ import com.github.triplet.gradle.androidpublisher.newUploadInternalSharingArtifa
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.io.File
 
 class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
@@ -48,7 +48,7 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":uploadReleasePrivateApk")).isNotNull()
         assertThat(result.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.FAILED)
         assertThat(result.output).contains("Warning")
-        assertThat(result.output).contains(tempDir.root.name)
+        assertThat(result.output).contains(tempDir.name)
     }
 
     @Test
@@ -60,14 +60,14 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
             }
         """
 
-        File(tempDir.root, "foo.apk").createNewFile()
+        File(tempDir, "foo.apk").createNewFile()
         val result = execute(config, "uploadReleasePrivateApk")
 
         assertThat(result.task(":assembleRelease")).isNull()
         assertThat(result.task(":uploadReleasePrivateApk")).isNotNull()
         assertThat(result.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingApk(")
-        assertThat(result.output).contains(tempDir.root.name)
+        assertThat(result.output).contains(tempDir.name)
     }
 
     @Test
@@ -79,7 +79,7 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
             }
         """
 
-        File(tempDir.root, "foo.apk").createNewFile()
+        File(tempDir, "foo.apk").createNewFile()
         val result1 = execute(config, "uploadReleasePrivateApk")
         val result2 = execute(config, "uploadReleasePrivateApk")
 
@@ -91,14 +91,14 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Using custom artifact CLI arg skips on-the-fly apk build`() {
-        File(tempDir.root, "foo.apk").createNewFile()
-        val result = execute("", "uploadReleasePrivateApk", "--artifact-dir=${tempDir.root}")
+        File(tempDir, "foo.apk").createNewFile()
+        val result = execute("", "uploadReleasePrivateApk", "--artifact-dir=${tempDir}")
 
         assertThat(result.task(":assembleRelease")).isNull()
         assertThat(result.task(":uploadReleasePrivateApk")).isNotNull()
         assertThat(result.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingApk(")
-        assertThat(result.output).contains(tempDir.root.name)
+        assertThat(result.output).contains(tempDir.name)
     }
 
     @Test
@@ -114,14 +114,14 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
             tasks.all {}
         """
 
-        File(tempDir.root, "foo.apk").createNewFile()
-        val result = execute(config, "uploadReleasePrivateApk", "--artifact-dir=${tempDir.root}")
+        File(tempDir, "foo.apk").createNewFile()
+        val result = execute(config, "uploadReleasePrivateApk", "--artifact-dir=${tempDir}")
 
         assertThat(result.task(":assembleRelease")).isNull()
         assertThat(result.task(":uploadReleasePrivateApk")).isNotNull()
         assertThat(result.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingApk(")
-        assertThat(result.output).contains(tempDir.root.name)
+        assertThat(result.output).contains(tempDir.name)
     }
 
     @Test
@@ -133,8 +133,8 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
             }
         """
 
-        File(tempDir.root, "1.apk").createNewFile()
-        File(tempDir.root, "2.apk").createNewFile()
+        File(tempDir, "1.apk").createNewFile()
+        File(tempDir, "2.apk").createNewFile()
         val result = execute(config, "uploadReleasePrivateApk")
 
         assertThat(result.task(":uploadReleasePrivateApk")).isNotNull()

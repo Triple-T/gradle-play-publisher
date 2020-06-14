@@ -9,8 +9,8 @@ import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.Ignore
-import org.junit.Test
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Test
 import java.io.File
 
 class PublishApkIntegrationTest : IntegrationTestBase() {
@@ -53,7 +53,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":publishReleaseApk")).isNotNull()
         assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.FAILED)
         assertThat(result.output).contains("Warning")
-        assertThat(result.output).contains(tempDir.root.name)
+        assertThat(result.output).contains(tempDir.name)
     }
 
     @Test
@@ -65,8 +65,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
             }
         """
 
-        File(tempDir.root, "1.apk").createNewFile()
-        File(tempDir.root, "2.apk").createNewFile()
+        File(tempDir, "1.apk").createNewFile()
+        File(tempDir, "2.apk").createNewFile()
         val result = execute(config, "publishReleaseApk")
 
         assertThat(result.task(":publishReleaseApk")).isNotNull()
@@ -84,14 +84,14 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
             }
         """
 
-        File(tempDir.root, "foo.apk").createNewFile()
+        File(tempDir, "foo.apk").createNewFile()
         val result = execute(config, "publishReleaseApk")
 
         assertThat(result.task(":assembleRelease")).isNull()
         assertThat(result.task(":publishReleaseApk")).isNotNull()
         assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadApk(")
-        assertThat(result.output).contains(tempDir.root.name)
+        assertThat(result.output).contains(tempDir.name)
     }
 
     @Test
@@ -103,7 +103,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
             }
         """
 
-        File(tempDir.root, "foo.apk").createNewFile()
+        File(tempDir, "foo.apk").createNewFile()
         val result1 = execute(config, "publishReleaseApk")
         val result2 = execute(config, "publishReleaseApk")
 
@@ -115,14 +115,14 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Using custom artifact CLI arg skips on-the-fly APK build`() {
-        File(tempDir.root, "foo.apk").createNewFile()
-        val result = execute("", "publishReleaseApk", "--artifact-dir=${tempDir.root}")
+        File(tempDir, "foo.apk").createNewFile()
+        val result = execute("", "publishReleaseApk", "--artifact-dir=${tempDir}")
 
         assertThat(result.task(":assembleRelease")).isNull()
         assertThat(result.task(":publishReleaseApk")).isNotNull()
         assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadApk(")
-        assertThat(result.output).contains(tempDir.root.name)
+        assertThat(result.output).contains(tempDir.name)
     }
 
     @Test
@@ -196,12 +196,12 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
             tasks.all {}
         """
-        File(tempDir.root, "foo.apk").createNewFile()
+        File(tempDir, "foo.apk").createNewFile()
 
         val result = execute(
                 config,
                 "publishApk",
-                "--artifact-dir=${tempDir.root}"
+                "--artifact-dir=${tempDir}"
         )
 
         assertThat(result.task(":assembleRelease")).isNull()
@@ -209,7 +209,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("publishApk(")
         assertThat(result.output).contains("trackName=hello")
-        assertThat(result.output).contains(tempDir.root.name)
+        assertThat(result.output).contains(tempDir.name)
     }
 
     @Test
@@ -264,7 +264,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         assertThat(result2.output).contains("didPreviousBuildSkipCommit=true")
     }
 
-    @Ignore("https://github.com/Triple-T/gradle-play-publisher/issues/790") // TODO
+    @Disabled("https://github.com/Triple-T/gradle-play-publisher/issues/790") // TODO
     @Test
     fun `Build processes manifest when resolution strategy is set to auto`() {
         // language=gradle

@@ -1,7 +1,7 @@
 package com.github.triplet.gradle.play.tasks.internal
 
 import com.google.common.truth.Truth.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class CliOptionsTest {
     @Test

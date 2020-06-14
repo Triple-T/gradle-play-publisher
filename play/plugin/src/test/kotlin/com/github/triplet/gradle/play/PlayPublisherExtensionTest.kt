@@ -7,8 +7,8 @@ import com.github.triplet.gradle.play.internal.evaluate
 import com.github.triplet.gradle.play.internal.mergeExtensions
 import com.github.triplet.gradle.play.internal.mergeWith
 import com.google.common.truth.Truth.assertThat
-import org.junit.Assert.assertThrows
-import org.junit.Test
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class PlayPublisherExtensionTest {
     @Test
@@ -66,7 +66,7 @@ class PlayPublisherExtensionTest {
     fun `Merging extensions with empty throws`() {
         val exts = emptyList<PlayPublisherExtension>()
 
-        assertThrows(NoSuchElementException::class.java) { mergeExtensions(exts) }
+        assertThrows<NoSuchElementException> { mergeExtensions(exts) }
     }
 
     @Test

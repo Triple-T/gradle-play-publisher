@@ -7,7 +7,7 @@ import com.google.common.hash.Hashing
 import com.google.common.io.Files
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.io.File
 
 class GenerateResourcesIntegrationTest : IntegrationTestBase() {

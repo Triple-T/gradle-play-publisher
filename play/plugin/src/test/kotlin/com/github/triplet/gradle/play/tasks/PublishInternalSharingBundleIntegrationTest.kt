@@ -6,7 +6,7 @@ import com.github.triplet.gradle.androidpublisher.newUploadInternalSharingArtifa
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.io.File
 
 class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
@@ -49,7 +49,7 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":uploadReleasePrivateBundle")!!.outcome)
                 .isEqualTo(TaskOutcome.FAILED)
         assertThat(result.output).contains("Warning")
-        assertThat(result.output).contains(tempDir.root.name)
+        assertThat(result.output).contains(tempDir.name)
     }
 
     @Test
@@ -61,15 +61,15 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
             }
         """
 
-        File(tempDir.root, "1.aab").createNewFile()
-        File(tempDir.root, "2.aab").createNewFile()
+        File(tempDir, "1.aab").createNewFile()
+        File(tempDir, "2.aab").createNewFile()
         val result = executeExpectingFailure(config, "uploadReleasePrivateBundle")
 
         assertThat(result.task(":uploadReleasePrivateBundle")).isNotNull()
         assertThat(result.task(":uploadReleasePrivateBundle")!!.outcome)
                 .isEqualTo(TaskOutcome.FAILED)
         assertThat(result.output).contains("Warning")
-        assertThat(result.output).contains(tempDir.root.name)
+        assertThat(result.output).contains(tempDir.name)
     }
 
     @Test
@@ -81,7 +81,7 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
             }
         """
 
-        File(tempDir.root, "foo.aab").createNewFile()
+        File(tempDir, "foo.aab").createNewFile()
         val result = execute(config, "uploadReleasePrivateBundle")
 
         assertThat(result.task(":bundleRelease")).isNull()
@@ -89,7 +89,7 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":uploadReleasePrivateBundle")!!.outcome)
                 .isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingBundle(")
-        assertThat(result.output).contains(tempDir.root.name)
+        assertThat(result.output).contains(tempDir.name)
     }
 
     @Test
@@ -101,7 +101,7 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
             }
         """
 
-        File(tempDir.root, "foo.aab").createNewFile()
+        File(tempDir, "foo.aab").createNewFile()
         val result1 = execute(config, "uploadReleasePrivateBundle")
         val result2 = execute(config, "uploadReleasePrivateBundle")
 
@@ -113,15 +113,15 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Using custom artifact CLI arg skips on-the-fly bundle build`() {
-        File(tempDir.root, "foo.aab").createNewFile()
-        val result = execute("", "uploadReleasePrivateBundle", "--artifact-dir=${tempDir.root}")
+        File(tempDir, "foo.aab").createNewFile()
+        val result = execute("", "uploadReleasePrivateBundle", "--artifact-dir=${tempDir}")
 
         assertThat(result.task(":bundleRelease")).isNull()
         assertThat(result.task(":uploadReleasePrivateBundle")).isNotNull()
         assertThat(result.task(":uploadReleasePrivateBundle")!!.outcome)
                 .isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingBundle(")
-        assertThat(result.output).contains(tempDir.root.name)
+        assertThat(result.output).contains(tempDir.name)
     }
 
     @Test
@@ -137,15 +137,15 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
             tasks.all {}
         """
 
-        File(tempDir.root, "foo.aab").createNewFile()
-        val result = execute(config, "uploadReleasePrivateBundle", "--artifact-dir=${tempDir.root}")
+        File(tempDir, "foo.aab").createNewFile()
+        val result = execute(config, "uploadReleasePrivateBundle", "--artifact-dir=${tempDir}")
 
         assertThat(result.task(":bundleRelease")).isNull()
         assertThat(result.task(":uploadReleasePrivateBundle")).isNotNull()
         assertThat(result.task(":uploadReleasePrivateBundle")!!.outcome)
                 .isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingBundle(")
-        assertThat(result.output).contains(tempDir.root.name)
+        assertThat(result.output).contains(tempDir.name)
     }
 
     @Test

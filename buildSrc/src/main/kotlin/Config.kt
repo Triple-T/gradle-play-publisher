@@ -73,7 +73,8 @@ object Config {
             const val guava = "com.google.guava:guava:29.0-jre"
             const val jackson = "com.google.http-client:google-http-client-jackson2:1.35.0"
 
-            const val junit = "junit:junit:4.13"
+            const val junit = "org.junit.jupiter:junit-jupiter-api:5.6.2"
+            const val junitEngine = "org.junit.jupiter:junit-jupiter-engine:5.6.2"
             const val truth = "com.google.truth:truth:1.0.1"
             const val mockito = "org.mockito:mockito-core:3.3.3"
         }

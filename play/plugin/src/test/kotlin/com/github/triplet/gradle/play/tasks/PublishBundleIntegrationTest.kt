@@ -9,8 +9,8 @@ import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.Ignore
-import org.junit.Test
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Test
 import java.io.File
 
 class PublishBundleIntegrationTest : IntegrationTestBase() {
@@ -52,7 +52,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":publishReleaseBundle")).isNotNull()
         assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.FAILED)
         assertThat(result.output).contains("Warning")
-        assertThat(result.output).contains(tempDir.root.name)
+        assertThat(result.output).contains(tempDir.name)
     }
 
     @Test
@@ -64,14 +64,14 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
             }
         """
 
-        File(tempDir.root, "1.aab").createNewFile()
-        File(tempDir.root, "2.aab").createNewFile()
+        File(tempDir, "1.aab").createNewFile()
+        File(tempDir, "2.aab").createNewFile()
         val result = executeExpectingFailure(config, "publishReleaseBundle")
 
         assertThat(result.task(":publishReleaseBundle")).isNotNull()
         assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.FAILED)
         assertThat(result.output).contains("Warning")
-        assertThat(result.output).contains(tempDir.root.name)
+        assertThat(result.output).contains(tempDir.name)
     }
 
     @Test
@@ -83,14 +83,14 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
             }
         """
 
-        File(tempDir.root, "foo.aab").createNewFile()
+        File(tempDir, "foo.aab").createNewFile()
         val result = execute(config, "publishReleaseBundle")
 
         assertThat(result.task(":bundleRelease")).isNull()
         assertThat(result.task(":publishReleaseBundle")).isNotNull()
         assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadBundle(")
-        assertThat(result.output).contains(tempDir.root.name)
+        assertThat(result.output).contains(tempDir.name)
     }
 
     @Test
@@ -102,7 +102,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
             }
         """
 
-        File(tempDir.root, "foo.aab").createNewFile()
+        File(tempDir, "foo.aab").createNewFile()
         val result1 = execute(config, "publishReleaseBundle")
         val result2 = execute(config, "publishReleaseBundle")
 
@@ -114,14 +114,14 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Using custom artifact CLI arg skips on-the-fly bundle build`() {
-        File(tempDir.root, "foo.aab").createNewFile()
-        val result = execute("", "publishReleaseBundle", "--artifact-dir=${tempDir.root}")
+        File(tempDir, "foo.aab").createNewFile()
+        val result = execute("", "publishReleaseBundle", "--artifact-dir=${tempDir}")
 
         assertThat(result.task(":bundleRelease")).isNull()
         assertThat(result.task(":publishReleaseBundle")).isNotNull()
         assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadBundle(")
-        assertThat(result.output).contains(tempDir.root.name)
+        assertThat(result.output).contains(tempDir.name)
     }
 
     @Test
@@ -195,12 +195,12 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
 
             tasks.all {}
         """
-        File(tempDir.root, "foo.aab").createNewFile()
+        File(tempDir, "foo.aab").createNewFile()
 
         val result = execute(
                 config,
                 "publishBundle",
-                "--artifact-dir=${tempDir.root}"
+                "--artifact-dir=${tempDir}"
         )
 
         assertThat(result.task(":bundleRelease")).isNull()
@@ -208,7 +208,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadBundle(")
         assertThat(result.output).contains("trackName=hello")
-        assertThat(result.output).contains(tempDir.root.name)
+        assertThat(result.output).contains(tempDir.name)
     }
 
     @Test
@@ -263,7 +263,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
         assertThat(result2.output).contains("didPreviousBuildSkipCommit=true")
     }
 
-    @Ignore("https://github.com/Triple-T/gradle-play-publisher/issues/790") // TODO
+    @Disabled("https://github.com/Triple-T/gradle-play-publisher/issues/790") // TODO
     @Test
     fun `Build processes manifest when resolution strategy is set to auto`() {
         // language=gradle
@@ -312,7 +312,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
             }
         """
         val bundle = File(appDir, "build/outputs/bundle/release/app-release.aab")
-        val bundleCopy = File(tempDir.root, "app-release.aab")
+        val bundleCopy = File(tempDir, "app-release.aab")
 
         execute(config, "bundleRelease")
         bundle.copyTo(bundleCopy)
