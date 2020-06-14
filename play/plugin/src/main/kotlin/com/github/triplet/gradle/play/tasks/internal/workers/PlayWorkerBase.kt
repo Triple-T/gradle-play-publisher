@@ -9,10 +9,9 @@ import org.gradle.workers.WorkParameters
 
 internal abstract class PlayWorkerBase<T : PlayWorkerBase.PlayPublishingParams> : WorkAction<T> {
     protected val config = parameters.config.get()
-    protected val publisher = PlayPublisher(
-            config.serviceAccountCredentialsOrDefault,
-            parameters.appId.get()
-    )
+    protected val publisher = config.serviceAccountCredentialsOrDefault.use {
+        PlayPublisher(it, parameters.appId.get())
+    }
 
     internal interface PlayPublishingParams : WorkParameters {
         val config: Property<PlayExtensionConfig>

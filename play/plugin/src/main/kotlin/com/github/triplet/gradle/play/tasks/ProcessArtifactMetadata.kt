@@ -22,10 +22,9 @@ internal abstract class ProcessArtifactMetadata @Inject constructor(
 
     @TaskAction
     fun process() {
-        val publisher = PlayPublisher(
-                extension.config.serviceAccountCredentialsOrDefault,
-                variant.applicationId
-        )
+        val publisher = extension.config.serviceAccountCredentialsOrDefault.use {
+            PlayPublisher(it, variant.applicationId)
+        }
         val edits = EditManager(publisher, editId)
         val maxVersionCode = edits.findMaxAppVersionCode()
 

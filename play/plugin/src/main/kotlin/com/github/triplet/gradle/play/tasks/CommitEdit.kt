@@ -42,10 +42,9 @@ internal abstract class CommitEdit @Inject constructor(
     ) : WorkAction<Committer.Params> {
         private val file = parameters.editIdFile.get().asFile
         private val appId = file.nameWithoutExtension
-        private val publisher = PlayPublisher(
-                parameters.config.get().serviceAccountCredentialsOrDefault,
-                appId
-        )
+        private val publisher = parameters.config.get().serviceAccountCredentialsOrDefault.use {
+            PlayPublisher(it, appId)
+        }
 
         override fun execute() {
             if (file.marked("commit").exists()) {
