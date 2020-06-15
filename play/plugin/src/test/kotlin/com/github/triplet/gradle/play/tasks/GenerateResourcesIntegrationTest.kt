@@ -43,7 +43,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 free { dimension 'pricing' }
                 paid { dimension 'pricing' }
             }
-        """
+        """.withAndroidBlock()
 
         execute(config, "generateFreeReleasePlayResources", "generatePaidReleasePlayResources")
 
@@ -71,7 +71,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
             buildTypes {
                 dogfood.initWith(buildTypes.release)
             }
-        """
+        """.withAndroidBlock()
 
         execute(config, "generateDogfoodPlayResources")
 
@@ -91,7 +91,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
             buildTypes {
                 dogfood.initWith(buildTypes.release)
             }
-        """
+        """.withAndroidBlock()
 
         execute(config, "generatePaidDogfoodPlayResources")
 
@@ -111,7 +111,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
             buildTypes {
                 dogfood.initWith(buildTypes.release)
             }
-        """
+        """.withAndroidBlock()
 
         execute(config, "generateFreeDogfoodPlayResources")
 
@@ -133,7 +133,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
             buildTypes {
                 dogfood.initWith(buildTypes.release)
             }
-        """
+        """.withAndroidBlock()
 
         execute(config, "generateFreeStagingDogfoodPlayResources")
 
@@ -152,7 +152,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 staging { dimension 'server' }
                 prod { dimension 'server' }
             }
-        """
+        """.withAndroidBlock()
 
         execute(config, "generateFreeStagingReleasePlayResources")
 
@@ -171,7 +171,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 staging { dimension 'server' }
                 prod { dimension 'server' }
             }
-        """
+        """.withAndroidBlock()
 
         execute(config, "generateFreeStagingReleasePlayResources")
 
@@ -190,7 +190,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 staging { dimension 'server' }
                 prod { dimension 'server' }
             }
-        """
+        """.withAndroidBlock()
 
         execute(config, "generateProdFreeReleasePlayResources")
 
@@ -208,7 +208,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 staging { dimension 'server' }
                 prod { dimension 'server' }
             }
-        """
+        """.withAndroidBlock()
 
         execute(config, "generateFreeStagingReleasePlayResources")
 
@@ -227,7 +227,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 staging { dimension 'server' }
                 prod { dimension 'pricing' }
             }
-        """
+        """.withAndroidBlock()
 
         execute(config, "generateProdStagingReleasePlayResources")
 
@@ -247,7 +247,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 staging { dimension 'server' }
                 prod { dimension 'pricing' }
             }
-        """
+        """.withAndroidBlock()
         File(appDir, "src/main/play/default-language.txt")("ja-JA")
 
         execute(config, "generateProdStagingReleasePlayResources")
@@ -269,7 +269,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 staging { dimension 'server' }
                 prod { dimension 'pricing' }
             }
-        """
+        """.withAndroidBlock()
 
         execute(config, "generateProdStagingReleasePlayResources")
 
@@ -286,10 +286,10 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
     fun `Top-level graphics are filed into their respective folders`() {
         // language=gradle
         val config = """
-            android.buildTypes {
+            buildTypes {
                 topLevelGraphics {}
             }
-        """
+        """.withAndroidBlock()
 
         execute(config, "generateTopLevelGraphicsPlayResources")
 
@@ -306,10 +306,10 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
     fun `Top-level graphic wins on conflict with filed graphic`() {
         // language=gradle
         val config = """
-            android.buildTypes {
+            buildTypes {
                 topLevelGraphicsConflict {}
             }
-        """
+        """.withAndroidBlock()
 
         execute(config, "generateTopLevelGraphicsConflictPlayResources")
 
@@ -332,7 +332,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 staging { dimension 'server' }
                 prod { dimension 'pricing' }
             }
-        """
+        """.withAndroidBlock()
         File(appDir, "src/main/play/default-language.txt").delete()
 
         execute(config, "generateProdStagingReleasePlayResources")
@@ -350,7 +350,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
             productFlavors {
                 hiddenFile { dimension 'pricing' }
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "generateHiddenFileReleasePlayResources")
 
@@ -366,7 +366,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
             productFlavors {
                 play { dimension 'pricing' }
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "generatePlayReleasePlayResources")
 
@@ -382,7 +382,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
             productFlavors {
                 illegalPlay { dimension 'pricing' }
             }
-        """
+        """.withAndroidBlock()
 
         val result = executeExpectingFailure(
                 config, "generateIllegalPlayReleasePlayResources")
@@ -399,7 +399,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
             productFlavors {
                 invalidLocale { dimension 'pricing' }
             }
-        """
+        """.withAndroidBlock()
 
         val result = executeExpectingFailure(
                 config, "generateInvalidLocaleReleasePlayResources")
@@ -416,7 +416,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
             productFlavors {
                 unknownFile { dimension 'pricing' }
             }
-        """
+        """.withAndroidBlock()
 
         val result = executeExpectingFailure(
                 config, "generateUnknownFileReleasePlayResources")
@@ -436,7 +436,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 staging { dimension 'server' }
                 prod { dimension 'pricing' }
             }
-        """
+        """.withAndroidBlock()
 
         File(appDir, "src").walkTopDown()
                 .filter { it.isFile && it.path.contains("play") }
@@ -459,7 +459,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 staging { dimension 'server' }
                 prod { dimension 'pricing' }
             }
-        """
+        """.withAndroidBlock()
 
         val result1 = execute(config, "generateProdStagingReleasePlayResources")
         val result2 = execute(config, "generateProdStagingReleasePlayResources")
@@ -481,7 +481,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 staging { dimension 'server' }
                 prod { dimension 'pricing' }
             }
-        """
+        """.withAndroidBlock()
         val mainUS = File(appDir, "src/main/play/listings/en-US/incremental.txt")
 
         val result1 = execute(config, "generateProdStagingReleasePlayResources")
@@ -509,7 +509,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 staging { dimension 'server' }
                 prod { dimension 'pricing' }
             }
-        """
+        """.withAndroidBlock()
         val mainUS = File(appDir, "src/main/play/listings/en-US/incremental.txt")
 
         execute(config, "generateProdStagingReleasePlayResources")
@@ -532,7 +532,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 staging { dimension 'server' }
                 prod { dimension 'pricing' }
             }
-        """
+        """.withAndroidBlock()
         val mainUS = File(appDir, "src/main/play/listings/en-US/incremental.txt")
         val mainFR = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
 
@@ -558,7 +558,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 staging { dimension 'server' }
                 prod { dimension 'pricing' }
             }
-        """
+        """.withAndroidBlock()
         val mainUS = File(appDir, "src/main/play/listings/en-US/incremental.txt")
         val mainFR = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
 
@@ -583,7 +583,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 staging { dimension 'server' }
                 prod { dimension 'pricing' }
             }
-        """
+        """.withAndroidBlock()
         val stagingUS = File(appDir, "src/staging/play/listings/en-US/incremental.txt")
         val mainFR = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
         val releaseDE = File(appDir, "src/release/play/listings/de-DE/incremental.txt")
@@ -633,7 +633,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 staging { dimension 'server' }
                 prod { dimension 'pricing' }
             }
-        """
+        """.withAndroidBlock()
         val mainUS = File(appDir, "src/main/play/listings/en-US/incremental.txt")
 
         mainUS("en-US incremental")
@@ -657,7 +657,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 staging { dimension 'server' }
                 prod { dimension 'pricing' }
             }
-        """
+        """.withAndroidBlock()
         val mainUS = File(appDir, "src/main/play/listings/en-US/incremental.txt")
         val mainFR = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
 
@@ -683,7 +683,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 staging { dimension 'server' }
                 prod { dimension 'pricing' }
             }
-        """
+        """.withAndroidBlock()
         val stagingUS = File(appDir, "src/staging/play/listings/en-US/incremental.txt")
         val mainFR = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
         val releaseDE = File(appDir, "src/release/play/listings/de-DE/incremental.txt")
@@ -737,7 +737,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 staging { dimension 'server' }
                 prod { dimension 'pricing' }
             }
-        """
+        """.withAndroidBlock()
         val mainUS = File(appDir, "src/main/play/listings/en-US/incremental.txt")
 
         mainUS("en-US incremental")
@@ -761,7 +761,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 staging { dimension 'server' }
                 prod { dimension 'pricing' }
             }
-        """
+        """.withAndroidBlock()
         val mainUS = File(appDir, "src/main/play/listings/en-US/incremental.txt")
         val mainFR = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
 
@@ -787,7 +787,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 staging { dimension 'server' }
                 prod { dimension 'pricing' }
             }
-        """
+        """.withAndroidBlock()
         val stagingUS = File(appDir, "src/staging/play/listings/en-US/incremental.txt")
         val mainFR = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
         val releaseDE = File(appDir, "src/release/play/listings/de-DE/incremental.txt")
@@ -831,7 +831,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
                 staging { dimension 'server' }
                 prod { dimension 'pricing' }
             }
-        """
+        """.withAndroidBlock()
         val stagingUS = File(appDir, "src/staging/play/listings/en-US/incremental.txt")
         val mainFR = File(appDir, "src/main/play/listings/fr-FR/incremental.txt")
         val releaseDE = File(appDir, "src/release/play/listings/de-DE/incremental.txt")

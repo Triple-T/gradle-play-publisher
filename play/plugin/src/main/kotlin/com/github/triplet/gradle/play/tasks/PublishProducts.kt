@@ -1,6 +1,5 @@
 package com.github.triplet.gradle.play.tasks
 
-import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.workers.PlayWorkerBase
@@ -27,8 +26,8 @@ import javax.inject.Inject
 
 internal abstract class PublishProducts @Inject constructor(
         extension: PlayPublisherExtension,
-        variant: ApplicationVariant
-) : PublishTaskBase(extension, variant) {
+        appId: String
+) : PublishTaskBase(extension, appId) {
     @get:Incremental
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles

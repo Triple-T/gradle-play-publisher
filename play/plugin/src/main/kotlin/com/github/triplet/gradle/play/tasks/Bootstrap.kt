@@ -1,6 +1,5 @@
 package com.github.triplet.gradle.play.tasks
 
-import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.androidpublisher.GppListing
 import com.github.triplet.gradle.common.utils.nullOrFull
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
@@ -34,9 +33,9 @@ import javax.inject.Inject
 
 internal abstract class Bootstrap @Inject constructor(
         extension: PlayPublisherExtension,
-        variant: ApplicationVariant,
+        appId: String,
         optionsHolder: BootstrapOptions.Holder
-) : PublishEditTaskBase(extension, variant), BootstrapOptions by optionsHolder {
+) : PublishEditTaskBase(extension, appId), BootstrapOptions by optionsHolder {
     @get:OutputDirectory
     abstract val srcDir: DirectoryProperty
 

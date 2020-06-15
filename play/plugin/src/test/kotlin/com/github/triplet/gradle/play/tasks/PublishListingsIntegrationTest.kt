@@ -28,10 +28,10 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
     fun `Invalid file is ignored and task is skipped`() {
         // language=gradle
         val config = """
-            android.buildTypes {
+            buildTypes {
                 invalid {}
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "publishInvalidListing")
 
@@ -43,10 +43,10 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
     fun `Hidden file is ignored and task is skipped`() {
         // language=gradle
         val config = """
-            android.buildTypes {
+            buildTypes {
                 hidden {}
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "publishHiddenListing")
 
@@ -58,10 +58,10 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
     fun `Publishing app details succeeds`() {
         // language=gradle
         val config = """
-            android.buildTypes {
+            buildTypes {
                 details {}
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "publishDetailsListing")
 
@@ -80,10 +80,10 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
     fun `Publishing single listing succeeds`() {
         // language=gradle
         val config = """
-            android.buildTypes {
+            buildTypes {
                 singleListing {}
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "publishSingleListingListing")
 
@@ -104,10 +104,10 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
     fun `Publishing multiple listing locales succeeds`() {
         // language=gradle
         val config = """
-            android.buildTypes {
+            buildTypes {
                 multiLangListing {}
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "publishMultiLangListingListing")
 
@@ -126,10 +126,10 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
     fun `Publishing single graphic succeeds`() {
         // language=gradle
         val config = """
-            android.buildTypes {
+            buildTypes {
                 singleGraphics {}
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "publishSingleGraphicsListing")
 
@@ -148,13 +148,13 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
     fun `Publishing ignores graphics already on server`() {
         // language=gradle
         val config = """
-            android.buildTypes {
+            buildTypes {
                 singleGraphics {}
             }
 
             System.setProperty(
                     "HASHES", "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "publishSingleGraphicsListing")
 
@@ -170,10 +170,10 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
     fun `Publishing multiple graphics succeeds`() {
         // language=gradle
         val config = """
-            android.buildTypes {
+            buildTypes {
                 multiGraphics {}
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "publishMultiGraphicsListing")
 
@@ -196,10 +196,10 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
     fun `Publishing multiple graphic locales succeeds`() {
         // language=gradle
         val config = """
-            android.buildTypes {
+            buildTypes {
                 multiLangGraphics {}
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "publishMultiLangGraphicsListing")
 
@@ -221,10 +221,10 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
     fun `Publishing top-level graphic succeeds`() {
         // language=gradle
         val config = """
-            android.buildTypes {
+            buildTypes {
                 topLevelGraphics {}
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "publishTopLevelGraphicsListing")
 
@@ -243,10 +243,10 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
     fun `Publishing mixed top-level and filed graphics succeeds`() {
         // language=gradle
         val config = """
-            android.buildTypes {
+            buildTypes {
                 mixedLevelGraphics {}
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "publishMixedLevelGraphicsListing")
 
@@ -268,10 +268,10 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
     fun `Publishing all metadata succeeds`() {
         // language=gradle
         val config = """
-            android.buildTypes {
+            buildTypes {
                 everything {}
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "publishEverythingListing")
 

@@ -1,6 +1,5 @@
 package com.github.triplet.gradle.play.tasks
 
-import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.common.utils.orNull
 import com.github.triplet.gradle.common.utils.readProcessed
 import com.github.triplet.gradle.play.PlayPublisherExtension
@@ -41,8 +40,8 @@ import javax.inject.Inject
 
 internal abstract class PublishListings @Inject constructor(
         extension: PlayPublisherExtension,
-        variant: ApplicationVariant
-) : PublishEditTaskBase(extension, variant), WriteTrackExtensionOptions {
+        appId: String
+) : PublishEditTaskBase(extension, appId), WriteTrackExtensionOptions {
     @get:Internal
     internal abstract val resDir: DirectoryProperty
 

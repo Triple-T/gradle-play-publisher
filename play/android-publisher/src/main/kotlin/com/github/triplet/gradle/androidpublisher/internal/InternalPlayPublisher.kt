@@ -12,6 +12,8 @@ import java.io.File
 import java.io.IOException
 
 internal interface InternalPlayPublisher : PlayPublisher {
+    val appId: String
+
     fun getAppDetails(editId: String): AppDetails
 
     fun getListings(editId: String): List<Listing>

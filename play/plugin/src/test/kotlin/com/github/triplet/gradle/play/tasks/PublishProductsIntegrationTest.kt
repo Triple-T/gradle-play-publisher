@@ -25,10 +25,10 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
     fun `Invalid file is ignored and task is skipped`() {
         // language=gradle
         val config = """
-            android.buildTypes {
+            buildTypes {
                 invalid {}
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "publishInvalidProducts")
 
@@ -40,10 +40,10 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
     fun `Hidden file is ignored and task is skipped`() {
         // language=gradle
         val config = """
-            android.buildTypes {
+            buildTypes {
                 hidden {}
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "publishHiddenProducts")
 
@@ -55,10 +55,10 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
     fun `Basic product publishes`() {
         // language=gradle
         val config = """
-            android.buildTypes {
+            buildTypes {
                 simple {}
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "publishSimpleProducts")
 
@@ -74,10 +74,10 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
     fun `Multiple products are all published`() {
         // language=gradle
         val config = """
-            android.buildTypes {
+            buildTypes {
                 multipleProducts {}
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "publishMultipleProductsProducts")
 
@@ -91,12 +91,12 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
     fun `Non-existent product tries updating then inserts`() {
         // language=gradle
         val config = """
-            android.buildTypes {
+            buildTypes {
                 simple {}
             }
 
             System.setProperty("NEEDS_CREATING", "true")
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "publishSimpleProducts")
 
@@ -110,17 +110,18 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
     fun `Republishing products uses cached build`() {
         // language=gradle
         val config = """
-            android.buildTypes {
+            buildTypes {
                 multipleProducts {}
             }
-        """
+        """.withAndroidBlock()
 
-        val result = execute(config, "publishMultipleProductsProducts")
+        val result1 = execute(config, "publishMultipleProductsProducts")
+        val result2 = execute(config, "publishMultipleProductsProducts")
 
-        assertThat(result.task(":publishMultipleProductsProducts")).isNotNull()
-        assertThat(result.task(":publishMultipleProductsProducts")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result.output).contains("sku1")
-        assertThat(result.output).contains("sku2")
+        assertThat(result1.task(":publishMultipleProductsProducts")).isNotNull()
+        assertThat(result1.task(":publishMultipleProductsProducts")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result2.task(":publishMultipleProductsProducts")).isNotNull()
+        assertThat(result2.task(":publishMultipleProductsProducts")!!.outcome).isEqualTo(TaskOutcome.UP_TO_DATE)
     }
 
     companion object {

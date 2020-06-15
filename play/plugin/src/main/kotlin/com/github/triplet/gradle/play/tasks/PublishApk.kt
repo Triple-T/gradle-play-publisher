@@ -1,15 +1,13 @@
 package com.github.triplet.gradle.play.tasks
 
-import com.android.build.gradle.api.ApplicationVariant
-import com.github.triplet.gradle.common.utils.orNull
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.tasks.internal.PublishableTrackExtensionOptions
 import com.github.triplet.gradle.play.tasks.internal.UploadArtifactTaskBase
-import com.github.triplet.gradle.play.tasks.internal.findApkFiles
 import com.github.triplet.gradle.play.tasks.internal.workers.UploadArtifactWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.workers.copy
 import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
@@ -18,6 +16,7 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
 import org.gradle.kotlin.dsl.support.serviceOf
@@ -27,12 +26,12 @@ import javax.inject.Inject
 
 internal abstract class PublishApk @Inject constructor(
         extension: PlayPublisherExtension,
-        variant: ApplicationVariant
-) : UploadArtifactTaskBase(extension, variant), PublishableTrackExtensionOptions {
+        appId: String
+) : UploadArtifactTaskBase(extension, appId), PublishableTrackExtensionOptions {
     @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:SkipWhenEmpty
     @get:InputFiles
-    protected val apks
-        get() = findApkFiles(true)
+    internal abstract val apks: ConfigurableFileCollection
 
     // This directory isn't used, but it's needed for up-to-date checks to work
     @Suppress("MemberVisibilityCanBePrivate", "unused")
@@ -42,8 +41,6 @@ internal abstract class PublishApk @Inject constructor(
 
     @TaskAction
     fun publishApks() {
-        val apks = apks.orEmpty().mapNotNull(File::orNull).ifEmpty { return }
-
         project.delete(temporaryDir) // Make sure previous executions get cleared out
         project.serviceOf<WorkerExecutor>().noIsolation().submit(Processor::class) {
             paramsForBase(this)
@@ -100,8 +97,6 @@ internal abstract class PublishApk @Inject constructor(
                     apkFile,
                     parameters.mappingFile.orNull?.asFile,
                     config.resolutionStrategy,
-                    findBestVersionCode(apkFile),
-                    parameters.variantName.get(),
                     config.retainMainObb,
                     config.retainPatchObb
             ) ?: return

@@ -129,8 +129,6 @@ internal class DefaultEditManager(
             bundleFile: File,
             mappingFile: File?,
             strategy: ResolutionStrategy,
-            versionCode: Long,
-            variantName: String,
             didPreviousBuildSkipCommit: Boolean,
             trackName: String,
             releaseStatus: ReleaseStatus?,
@@ -143,7 +141,7 @@ internal class DefaultEditManager(
         val bundle = try {
             publisher.uploadBundle(editId, bundleFile)
         } catch (e: GoogleJsonResponseException) {
-            handleUploadFailures(e, strategy, bundleFile, versionCode, variantName)
+            handleUploadFailures(e, strategy, bundleFile)
         } ?: return
 
         uploadMappingFile(bundle.versionCode, mappingFile)
@@ -166,15 +164,13 @@ internal class DefaultEditManager(
             apkFile: File,
             mappingFile: File?,
             strategy: ResolutionStrategy,
-            versionCode: Long,
-            variantName: String,
             mainObbRetainable: Int?,
             patchObbRetainable: Int?
     ): Long? {
         val apk = try {
             publisher.uploadApk(editId, apkFile)
         } catch (e: GoogleJsonResponseException) {
-            handleUploadFailures(e, strategy, apkFile, versionCode, variantName)
+            handleUploadFailures(e, strategy, apkFile)
             return null
         }
 
@@ -228,9 +224,7 @@ internal class DefaultEditManager(
     private fun handleUploadFailures(
             e: GoogleJsonResponseException,
             strategy: ResolutionStrategy,
-            artifact: File,
-            versionCode: Long,
-            variantName: String
+            artifact: File
     ): Nothing? = if (
             e has "apkNotificationMessageKeyUpgradeVersionConflict" ||
             e has "apkUpgradeVersionConflict" ||
@@ -238,19 +232,19 @@ internal class DefaultEditManager(
     ) {
         when (strategy) {
             ResolutionStrategy.AUTO -> throw IllegalStateException(
-                    "Concurrent uploads for variant $variantName (version code $versionCode " +
+                    "Concurrent uploads for app ${publisher.appId} (version code " +
                             "already used). Make sure to synchronously upload your APKs such " +
                             "that they don't conflict. If this problem persists, delete your " +
                             "drafts in the Play Console's artifact library.",
                     e
             )
             ResolutionStrategy.FAIL -> throw IllegalStateException(
-                    "Version code $versionCode is too low or has already been used for variant " +
-                            "$variantName.",
+                    "Version code is too low or has already been used for app " +
+                            "${publisher.appId}.",
                     e
             )
             ResolutionStrategy.IGNORE -> LoggerFactory.getLogger(EditManager::class.java).warn(
-                    "Ignoring artifact ($artifact) for version code $versionCode")
+                    "Ignoring artifact ($artifact)")
         }
         null
     } else {

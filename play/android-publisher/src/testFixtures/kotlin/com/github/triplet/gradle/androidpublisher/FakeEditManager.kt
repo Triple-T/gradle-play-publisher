@@ -58,8 +58,6 @@ abstract class FakeEditManager : EditManager {
             bundleFile: File,
             mappingFile: File?,
             strategy: ResolutionStrategy,
-            versionCode: Long,
-            variantName: String,
             didPreviousBuildSkipCommit: Boolean,
             trackName: String,
             releaseStatus: ReleaseStatus?,
@@ -74,8 +72,6 @@ abstract class FakeEditManager : EditManager {
             apkFile: File,
             mappingFile: File?,
             strategy: ResolutionStrategy,
-            versionCode: Long,
-            variantName: String,
             mainObbRetainable: Int?,
             patchObbRetainable: Int?
     ): Long? = throw IllegalStateException("Test wasn't expecting this method to be called.")

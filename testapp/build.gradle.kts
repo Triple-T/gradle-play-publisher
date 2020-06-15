@@ -15,12 +15,13 @@ buildscript {
         jcenter()
         mavenLocal()
         maven("https://plugins.gradle.org/m2/")
+        maven("https://oss.sonatype.org/content/repositories/snapshots")
     }
 
     dependencies {
         classpath(kotlin("gradle-plugin", embeddedKotlinVersion))
-        classpath("com.android.tools.build:gradle:3.6.0")
-        classpath("com.supercilex.gradle:version-master:0.6.0")
+        classpath("com.android.tools.build:gradle:4.1.0-beta01")
+        classpath("com.supercilex.gradle:version-master:1.0.0-SNAPSHOT")
         classpath("com.github.triplet.gradle:play-publisher:" +
                           file("../version.txt").readText().trim())
     }

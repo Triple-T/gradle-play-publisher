@@ -5,7 +5,6 @@ import com.android.build.gradle.internal.LoggerWrapper
 import com.android.build.gradle.internal.testing.ConnectedDeviceProvider
 import com.android.builder.testing.api.DeviceProvider
 import com.android.ddmlib.MultiLineReceiver
-import com.android.utils.ILogger
 import com.google.api.client.json.jackson2.JacksonFactory
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
@@ -135,24 +134,12 @@ internal abstract class InstallInternalSharingArtifact @Inject constructor(
 
         companion object : AdbShell.Factory {
             override fun create(adbExecutable: File, timeOutInMs: Int): AdbShell {
-                val deviceProvider = try {
-                    ConnectedDeviceProvider(
-                            adbExecutable,
-                            timeOutInMs,
-                            LoggerWrapper(Logging.getLogger(
-                                    InstallInternalSharingArtifact::class.java))
-                    )
-                } catch (e: NoClassDefFoundError) {
-                    // TODO(#756): remove when AGP 4.0 is the minimum
-                    Class.forName("com.android.builder.testing.ConnectedDeviceProvider")
-                            .getConstructor(File::class.java, Int::class.java, ILogger::class.java)
-                            .newInstance(
-                                    adbExecutable,
-                                    timeOutInMs,
-                                    LoggerWrapper(Logging.getLogger(
-                                            InstallInternalSharingArtifact::class.java))
-                            ) as DeviceProvider
-                }
+                val deviceProvider = ConnectedDeviceProvider(
+                        adbExecutable,
+                        timeOutInMs,
+                        LoggerWrapper(Logging.getLogger(
+                                InstallInternalSharingArtifact::class.java))
+                )
                 return DefaultAdbShell(deviceProvider, timeOutInMs.toLong())
             }
         }

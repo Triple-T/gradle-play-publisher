@@ -9,7 +9,7 @@ import com.github.triplet.gradle.play.tasks.internal.UploadArtifactTaskBase
 
 internal fun PublishTaskBase.paramsForBase(params: PlayWorkerBase.PlayPublishingParams) {
     params.config.set(extension.toConfig())
-    params.appId.set(variant.applicationId)
+    params.appId.set(appId)
 
     if (params is EditWorkerBase.EditPublishingParams) {
         this as PublishEditTaskBase
@@ -28,9 +28,6 @@ internal fun PublishTaskBase.paramsForBase(params: PlayWorkerBase.PlayPublishing
 
     if (params is UploadArtifactWorkerBase.ArtifactUploadingParams) {
         this as UploadArtifactTaskBase
-
-        params.variantName.set(variant.name)
-        params.versionCodes.set(variant.outputs.associate { it.outputFile to it.versionCode })
 
         params.mappingFile.set(mappingFile)
     }
@@ -62,9 +59,6 @@ internal fun UploadArtifactWorkerBase.ArtifactUploadingParams.copy(
         into: UploadArtifactWorkerBase.ArtifactUploadingParams
 ) {
     (this as PublishArtifactWorkerBase.ArtifactPublishingParams).copy(into)
-
-    into.variantName.set(variantName)
-    into.versionCodes.set(versionCodes.get())
 
     into.mappingFile.set(mappingFile)
 }

@@ -1,6 +1,7 @@
 package com.github.triplet.gradle.common.validation
 
-import com.android.build.gradle.api.ApplicationVariant
+import com.android.build.api.variant.ApplicationVariant
+import com.android.build.api.variant.ApplicationVariantProperties
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.kotlin.dsl.apply
@@ -14,11 +15,11 @@ fun Project.validateRuntime() {
 }
 
 /** @return true if the variant is *not* debuggable and can therefore be published. */
-fun validateDebuggability(variant: ApplicationVariant, logger: Logger): Boolean {
-    val isValid = !variant.buildType.isDebuggable
+fun validateDebuggability(variant: ApplicationVariant<ApplicationVariantProperties>, logger: Logger): Boolean {
+    val isValid = !variant.debuggable
 
     if (!isValid) {
-        val typeName = variant.buildType.getName()
+        val typeName = variant.buildType
         if (typeName.equals("release", true)) {
             logger.error("GPP cannot configure variant '${variant.name}' because it is debuggable")
         } else {

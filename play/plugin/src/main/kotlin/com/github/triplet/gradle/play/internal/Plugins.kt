@@ -1,7 +1,7 @@
 package com.github.triplet.gradle.play.internal
 
-import com.android.build.gradle.api.ApplicationVariant
-import com.android.build.gradle.api.BaseVariant
+import com.android.build.api.variant.ApplicationVariant
+import com.android.build.api.variant.ApplicationVariantProperties
 import com.github.triplet.gradle.common.utils.PLUGIN_GROUP
 import com.github.triplet.gradle.common.utils.nullOrFull
 import com.github.triplet.gradle.play.PlayPublisherExtension
@@ -15,9 +15,10 @@ import org.gradle.api.Task
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.register
 
-internal val BaseVariant.flavorNameOrDefault get() = flavorName.nullOrFull() ?: "main"
+internal val ApplicationVariantProperties.flavorNameOrDefault
+    get() = flavorName.nullOrFull() ?: "main"
 
-internal val BaseVariant.playPath get() = "$RESOURCES_OUTPUT_PATH/$name/$PLAY_PATH"
+internal val ApplicationVariantProperties.playPath get() = "$RESOURCES_OUTPUT_PATH/$name/$PLAY_PATH"
 
 internal fun Project.newTask(
         name: String,
@@ -51,7 +52,7 @@ internal fun Project.getCommitEditTask(
         extension: PlayPublisherExtension
 ) = rootProject.getOrRegisterEditTask<CommitEdit>("commitEditFor", extension, appId)
 
-internal fun ApplicationVariant.buildExtension(
+internal fun ApplicationVariant<ApplicationVariantProperties>.buildExtension(
         extensionContainer: NamedDomainObjectContainer<PlayPublisherExtension>,
         baseExtension: PlayPublisherExtension,
         cliOptionsExtension: PlayPublisherExtension
@@ -63,16 +64,16 @@ internal fun ApplicationVariant.buildExtension(
 )
 
 private fun buildExtensionInternal(
-        variant: ApplicationVariant,
+        variant: ApplicationVariant<ApplicationVariantProperties>,
         extensionContainer: NamedDomainObjectContainer<PlayPublisherExtension>,
         baseExtension: PlayPublisherExtension,
         cliOptionsExtension: PlayPublisherExtension
 ): PlayPublisherExtension {
     val variantExtension = extensionContainer.findByName(variant.name)
-    val flavorExtension = variant.productFlavors.mapNotNull {
-        extensionContainer.findByName(it.name)
+    val flavorExtension = variant.productFlavors.mapNotNull { (_, flavor) ->
+        extensionContainer.findByName(flavor)
     }.singleOrNull()
-    val buildTypeExtension = extensionContainer.findByName(variant.buildType.name)
+    val buildTypeExtension = variant.buildType?.let { extensionContainer.findByName(it) }
 
     val extensions = listOfNotNull(
             cliOptionsExtension,

@@ -43,8 +43,6 @@ class DefaultEditManagerTest {
                 bundleFile = mockFile,
                 mappingFile = null,
                 strategy = ResolutionStrategy.FAIL,
-                versionCode = 888,
-                variantName = "release",
                 didPreviousBuildSkipCommit = false,
                 trackName = "alpha",
                 releaseStatus = ReleaseStatus.COMPLETED,
@@ -80,8 +78,6 @@ class DefaultEditManagerTest {
                 bundleFile = mockFile,
                 mappingFile = null,
                 strategy = ResolutionStrategy.FAIL,
-                versionCode = 888,
-                variantName = "release",
                 didPreviousBuildSkipCommit = false,
                 trackName = "alpha",
                 releaseStatus = ReleaseStatus.COMPLETED,
@@ -106,8 +102,6 @@ class DefaultEditManagerTest {
                 bundleFile = mockFile,
                 mappingFile = mockFile,
                 strategy = ResolutionStrategy.FAIL,
-                versionCode = 888,
-                variantName = "release",
                 didPreviousBuildSkipCommit = false,
                 trackName = "alpha",
                 releaseStatus = ReleaseStatus.COMPLETED,
@@ -132,8 +126,6 @@ class DefaultEditManagerTest {
                 bundleFile = mockFile,
                 mappingFile = mockFile,
                 strategy = ResolutionStrategy.FAIL,
-                versionCode = 888,
-                variantName = "release",
                 didPreviousBuildSkipCommit = false,
                 trackName = "alpha",
                 releaseStatus = ReleaseStatus.COMPLETED,
@@ -157,8 +149,6 @@ class DefaultEditManagerTest {
                 bundleFile = mockFile,
                 mappingFile = mockFile,
                 strategy = ResolutionStrategy.IGNORE,
-                versionCode = 888,
-                variantName = "release",
                 didPreviousBuildSkipCommit = false,
                 trackName = "alpha",
                 releaseStatus = ReleaseStatus.COMPLETED,
@@ -183,8 +173,6 @@ class DefaultEditManagerTest {
                     bundleFile = mockFile,
                     mappingFile = mockFile,
                     strategy = ResolutionStrategy.FAIL,
-                    versionCode = 888,
-                    variantName = "release",
                     didPreviousBuildSkipCommit = false,
                     trackName = "alpha",
                     releaseStatus = ReleaseStatus.COMPLETED,
@@ -207,8 +195,6 @@ class DefaultEditManagerTest {
                 apkFile = mockFile,
                 mappingFile = null,
                 strategy = ResolutionStrategy.FAIL,
-                versionCode = 789,
-                variantName = "release",
                 mainObbRetainable = 123,
                 patchObbRetainable = 321
         )
@@ -227,8 +213,6 @@ class DefaultEditManagerTest {
                 apkFile = mockFile,
                 mappingFile = mockFile,
                 strategy = ResolutionStrategy.FAIL,
-                versionCode = 888,
-                variantName = "release",
                 mainObbRetainable = 123,
                 patchObbRetainable = 321
         )
@@ -247,8 +231,6 @@ class DefaultEditManagerTest {
                 apkFile = mockFile,
                 mappingFile = mockFile,
                 strategy = ResolutionStrategy.FAIL,
-                versionCode = 888,
-                variantName = "release",
                 mainObbRetainable = 123,
                 patchObbRetainable = 321
         )
@@ -267,8 +249,6 @@ class DefaultEditManagerTest {
                 apkFile = mockFile,
                 mappingFile = mockFile,
                 strategy = ResolutionStrategy.FAIL,
-                versionCode = 888,
-                variantName = "release",
                 mainObbRetainable = 123,
                 patchObbRetainable = 321
         )
@@ -286,8 +266,6 @@ class DefaultEditManagerTest {
                 apkFile = mockFile,
                 mappingFile = mockFile,
                 strategy = ResolutionStrategy.IGNORE,
-                versionCode = 888,
-                variantName = "release",
                 mainObbRetainable = 123,
                 patchObbRetainable = 321
         )
@@ -306,8 +284,6 @@ class DefaultEditManagerTest {
                     apkFile = mockFile,
                     mappingFile = mockFile,
                     strategy = ResolutionStrategy.FAIL,
-                    versionCode = 888,
-                    variantName = "release",
                     mainObbRetainable = 123,
                     patchObbRetainable = 321
             )
@@ -324,8 +300,6 @@ class DefaultEditManagerTest {
                 apkFile = mockFile,
                 mappingFile = mockFile,
                 strategy = ResolutionStrategy.FAIL,
-                versionCode = 888,
-                variantName = "release",
                 mainObbRetainable = 123,
                 patchObbRetainable = 321
         )
@@ -344,8 +318,6 @@ class DefaultEditManagerTest {
                 apkFile = mockFile,
                 mappingFile = mockFile,
                 strategy = ResolutionStrategy.FAIL,
-                versionCode = 888,
-                variantName = "release",
                 mainObbRetainable = null,
                 patchObbRetainable = null
         )

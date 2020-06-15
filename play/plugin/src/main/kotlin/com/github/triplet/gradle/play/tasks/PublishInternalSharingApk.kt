@@ -1,14 +1,12 @@
 package com.github.triplet.gradle.play.tasks
 
-import com.android.build.gradle.api.ApplicationVariant
-import com.github.triplet.gradle.common.utils.orNull
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.tasks.internal.ArtifactExtensionOptions
 import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
-import com.github.triplet.gradle.play.tasks.internal.findApkFiles
 import com.github.triplet.gradle.play.tasks.internal.workers.PlayWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.workers.copy
 import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
@@ -16,6 +14,7 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
 import org.gradle.kotlin.dsl.support.serviceOf
@@ -25,20 +24,18 @@ import javax.inject.Inject
 
 internal abstract class PublishInternalSharingApk @Inject constructor(
         extension: PlayPublisherExtension,
-        variant: ApplicationVariant
-) : PublishTaskBase(extension, variant), ArtifactExtensionOptions {
+        appId: String
+) : PublishTaskBase(extension, appId), ArtifactExtensionOptions {
     @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:SkipWhenEmpty
     @get:InputFiles
-    protected val apks: List<File>?
-        get() = findApkFiles(false)
+    internal abstract val apks: ConfigurableFileCollection
 
     @get:OutputDirectory
     abstract val outputDirectory: DirectoryProperty
 
     @TaskAction
     fun publishApk() {
-        val apks = apks.orEmpty().mapNotNull(File::orNull).ifEmpty { return }
-
         project.serviceOf<WorkerExecutor>().noIsolation().submit(Processor::class) {
             paramsForBase(this)
 

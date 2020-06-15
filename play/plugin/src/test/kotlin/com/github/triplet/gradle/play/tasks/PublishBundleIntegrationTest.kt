@@ -10,7 +10,6 @@ import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.io.File
 
@@ -22,8 +21,8 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
     fun `Builds bundle on-the-fly by default`() {
         val result = execute("", "publishReleaseBundle")
 
-        assertThat(result.task(":bundleRelease")).isNotNull()
-        assertThat(result.task(":bundleRelease")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.task(":packageReleaseBundle")).isNotNull()
+        assertThat(result.task(":packageReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadBundle(")
         assertThat(result.output).contains(".aab")
     }
@@ -52,7 +51,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
 
         assertThat(result.task(":publishReleaseBundle")).isNotNull()
         assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.FAILED)
-        assertThat(result.output).contains("Warning")
+        assertThat(result.output).contains("ERROR_no-unique-aab-found")
         assertThat(result.output).contains(playgroundDir.name)
     }
 
@@ -71,7 +70,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
 
         assertThat(result.task(":publishReleaseBundle")).isNotNull()
         assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.FAILED)
-        assertThat(result.output).contains("Warning")
+        assertThat(result.output).contains("ERROR_no-unique-aab-found")
         assertThat(result.output).contains(playgroundDir.name)
     }
 
@@ -87,7 +86,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
         File(playgroundDir, "foo.aab").safeCreateNewFile()
         val result = execute(config, "publishReleaseBundle")
 
-        assertThat(result.task(":bundleRelease")).isNull()
+        assertThat(result.task(":packageReleaseBundle")).isNull()
         assertThat(result.task(":publishReleaseBundle")).isNotNull()
         assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadBundle(")
@@ -118,7 +117,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
         File(playgroundDir, "foo.aab").safeCreateNewFile()
         val result = execute("", "publishReleaseBundle", "--artifact-dir=${playgroundDir}")
 
-        assertThat(result.task(":bundleRelease")).isNull()
+        assertThat(result.task(":packageReleaseBundle")).isNull()
         assertThat(result.task(":publishReleaseBundle")).isNotNull()
         assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadBundle(")
@@ -161,7 +160,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
                     track.set('unused')
                 }
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(
                 config,
@@ -188,7 +187,6 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
         assertThat(result.output).doesNotContain("commitEdit(")
     }
 
-    @Disabled("Need property API configuration with AGP") // TODO
     @Test
     fun `Eagerly evaluated global CLI artifact-dir param skips on-the-fly bundle build`() {
         // language=gradle
@@ -200,7 +198,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
             }
 
             tasks.all {}
-        """
+        """.withAndroidBlock()
 
         File(playgroundDir, "foo.aab").safeCreateNewFile()
         val result = execute(
@@ -209,7 +207,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
                 "--artifact-dir=${playgroundDir}"
         )
 
-        assertThat(result.task(":bundleRelease")).isNull()
+        assertThat(result.task(":packageReleaseBundle")).isNull()
         assertThat(result.task(":publishReleaseBundle")).isNotNull()
         assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadBundle(")
@@ -269,18 +267,17 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
         assertThat(result2.output).contains("didPreviousBuildSkipCommit=true")
     }
 
-    @Disabled("https://github.com/Triple-T/gradle-play-publisher/issues/790") // TODO
     @Test
     fun `Build processes manifest when resolution strategy is set to auto`() {
         // language=gradle
         val config = """
-            play.resolutionStrategy = 'auto'
+            play.resolutionStrategy = ResolutionStrategy.AUTO
         """
 
         val result = execute(config, "publishReleaseBundle")
 
-        assertThat(result.task(":processReleaseMetadata")).isNotNull()
-        assertThat(result.task(":processReleaseMetadata")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.task(":processReleaseVersionCodes")).isNotNull()
+        assertThat(result.task(":processReleaseVersionCodes")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.task(":publishReleaseBundle")).isNotNull()
         assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("findMaxAppVersionCode(")
@@ -291,12 +288,12 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
     fun `Build uploads mapping file when available`() {
         // language=gradle
         val config = """
-            android.buildTypes.release {
+            buildTypes.release {
                 shrinkResources true
                 minifyEnabled true
                 proguardFiles(getDefaultProguardFile("proguard-android.txt"))
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "publishReleaseBundle")
 
@@ -305,32 +302,6 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
         assertThat(result.output).contains("uploadBundle(")
         assertThat(result.output).contains("mappingFile=")
         assertThat(result.output).doesNotContain("mappingFile=null")
-    }
-
-    @Test
-    fun `Build uploads bundle when mapping file does not exist`() {
-        // language=gradle
-        val config = """
-            android.buildTypes.release {
-                shrinkResources true
-                minifyEnabled true
-                proguardFiles(getDefaultProguardFile("proguard-android.txt"))
-            }
-        """
-        val bundle = File(appDir, "build/outputs/bundle/release/app-release.aab")
-        val bundleCopy = File(playgroundDir, "app-release.aab")
-
-        execute(config, "bundleRelease")
-        bundle.copyTo(bundleCopy)
-        execute(config, "clean")
-        bundleCopy.copyTo(bundle)
-        val result = execute(config, "publishReleaseBundle", "-x", "bundleRelease")
-
-        assertThat(result.task(":publishReleaseBundle")).isNotNull()
-        assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result.output).contains("uploadBundle(")
-        assertThat(result.output).contains(".aab")
-        assertThat(result.output).contains("mappingFile=null")
     }
 
     @Test
@@ -345,31 +316,6 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":publishReleaseBundle")).isNotNull()
         assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.FAILED)
         assertThat(result.output).contains("Upload failed")
-    }
-
-    @Test
-    fun `Build uses correct version code`() {
-        // language=gradle
-        val config = """
-            android.defaultConfig.versionCode 8
-        """
-
-        val result = execute(config, "publishReleaseBundle")
-
-        assertThat(result.task(":publishReleaseBundle")).isNotNull()
-        assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result.output).contains("uploadBundle(")
-        assertThat(result.output).contains("versionCode=8")
-    }
-
-    @Test
-    fun `Build uses correct variant name`() {
-        val result = execute("", "publishReleaseBundle")
-
-        assertThat(result.task(":publishReleaseBundle")).isNotNull()
-        assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result.output).contains("uploadBundle(")
-        assertThat(result.output).contains("variantName=release")
     }
 
     @Test
@@ -406,10 +352,10 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
     fun `Build picks default release name when no track specific ones are available`() {
         // language=gradle
         val config = """
-            android.buildTypes {
+            buildTypes {
                 consoleNames {}
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "publishConsoleNamesBundle")
 
@@ -465,10 +411,10 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
     fun `Build picks default release notes when no track specific ones are available`() {
         // language=gradle
         val config = """
-            android.buildTypes {
+            buildTypes {
                 releaseNotes {}
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "publishReleaseNotesBundle")
 
@@ -596,8 +542,6 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
                         bundleFile: File,
                         mappingFile: File?,
                         strategy: ResolutionStrategy,
-                        versionCode: Long,
-                        variantName: String,
                         didPreviousBuildSkipCommit: Boolean,
                         trackName: String,
                         releaseStatus: ReleaseStatus?,
@@ -611,8 +555,6 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
                                     "bundleFile=$bundleFile, " +
                                     "mappingFile=$mappingFile, " +
                                     "strategy=$strategy, " +
-                                    "versionCode=$versionCode, " +
-                                    "variantName=$variantName, " +
                                     "didPreviousBuildSkipCommit=$didPreviousBuildSkipCommit, " +
                                     "trackName=$trackName, " +
                                     "releaseStatus=$releaseStatus, " +

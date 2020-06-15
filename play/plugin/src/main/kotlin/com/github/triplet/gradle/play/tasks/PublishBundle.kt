@@ -1,11 +1,8 @@
 package com.github.triplet.gradle.play.tasks
 
-import com.android.build.gradle.api.ApplicationVariant
-import com.github.triplet.gradle.common.utils.orNull
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.tasks.internal.PublishableTrackExtensionOptions
 import com.github.triplet.gradle.play.tasks.internal.UploadArtifactTaskBase
-import com.github.triplet.gradle.play.tasks.internal.findBundleFile
 import com.github.triplet.gradle.play.tasks.internal.workers.UploadArtifactWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
 import org.gradle.api.file.RegularFileProperty
@@ -22,12 +19,11 @@ import javax.inject.Inject
 
 internal abstract class PublishBundle @Inject constructor(
         extension: PlayPublisherExtension,
-        variant: ApplicationVariant
-) : UploadArtifactTaskBase(extension, variant), PublishableTrackExtensionOptions {
+        appId: String
+) : UploadArtifactTaskBase(extension, appId), PublishableTrackExtensionOptions {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFile
-    protected val bundle
-        get() = findBundleFile()
+    internal abstract val bundle: RegularFileProperty
 
     // This directory isn't used, but it's needed for up-to-date checks to work
     @Suppress("MemberVisibilityCanBePrivate", "unused")
@@ -37,7 +33,6 @@ internal abstract class PublishBundle @Inject constructor(
 
     @TaskAction
     fun publishBundle() {
-        val bundle = bundle?.orNull() ?: return
         project.serviceOf<WorkerExecutor>().noIsolation().submit(BundleUploader::class) {
             paramsForBase(this)
             bundleFile.set(bundle)
@@ -51,8 +46,6 @@ internal abstract class PublishBundle @Inject constructor(
                     bundleFile,
                     parameters.mappingFile.orNull?.asFile,
                     config.resolutionStrategy,
-                    findBestVersionCode(bundleFile),
-                    parameters.variantName.get(),
                     parameters.skippedMarker.get().asFile.exists(),
                     config.track,
                     config.releaseStatus,

@@ -109,7 +109,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
                     track.set('unused')
                 }
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(
                 config,
@@ -151,12 +151,12 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
     fun `Build succeeds when mapping file is produced but unavailable`() {
         // language=gradle
         val config = """
-            android.buildTypes.release {
+            buildTypes.release {
                 shrinkResources true
                 minifyEnabled true
                 proguardFiles(getDefaultProguardFile("proguard-android.txt"))
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, ":promoteReleaseArtifact")
 
@@ -184,10 +184,10 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
     fun `Build picks default release name when no track specific ones are available`() {
         // language=gradle
         val config = """
-            android.buildTypes {
+            buildTypes {
                 consoleNames {}
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "promoteConsoleNamesArtifact")
 
@@ -285,10 +285,10 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
     fun `Build picks remote track specific release notes when available`() {
         // language=gradle
         val config = """
-            android.buildTypes {
+            buildTypes {
                 releaseNotes {}
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "promoteReleaseNotesArtifact")
 

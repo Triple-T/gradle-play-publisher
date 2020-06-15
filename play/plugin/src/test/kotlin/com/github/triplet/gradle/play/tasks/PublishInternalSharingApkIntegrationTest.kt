@@ -7,7 +7,6 @@ import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.io.File
 
@@ -19,8 +18,8 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
     fun `Builds apk on-the-fly by default`() {
         val result = execute("", "uploadReleasePrivateApk")
 
-        assertThat(result.task(":assembleRelease")).isNotNull()
-        assertThat(result.task(":assembleRelease")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.task(":packageRelease")).isNotNull()
+        assertThat(result.task(":packageRelease")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingApk(")
         assertThat(result.output).contains(".apk")
     }
@@ -37,7 +36,7 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `Using non-existent custom artifact fails build with warning`() {
+    fun `Using non-existent custom artifact skips build`() {
         // language=gradle
         val config = """
             play {
@@ -45,12 +44,11 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
             }
         """
 
-        val result = executeExpectingFailure(config, "uploadReleasePrivateApk")
+        val result = execute(config, "uploadReleasePrivateApk")
 
+        assertThat(result.task(":packageRelease")).isNull()
         assertThat(result.task(":uploadReleasePrivateApk")).isNotNull()
-        assertThat(result.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.FAILED)
-        assertThat(result.output).contains("Warning")
-        assertThat(result.output).contains(playgroundDir.name)
+        assertThat(result.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.NO_SOURCE)
     }
 
     @Test
@@ -65,11 +63,32 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
         File(playgroundDir, "foo.apk").safeCreateNewFile()
         val result = execute(config, "uploadReleasePrivateApk")
 
-        assertThat(result.task(":assembleRelease")).isNull()
+        assertThat(result.task(":packageRelease")).isNull()
         assertThat(result.task(":uploadReleasePrivateApk")).isNotNull()
         assertThat(result.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingApk(")
         assertThat(result.output).contains(playgroundDir.name)
+        assertThat(result.output).contains("foo.apk")
+    }
+
+    @Test
+    fun `Using custom artifact file skips on-the-fly apk build`() {
+        val app = File(playgroundDir, "foo.apk").safeCreateNewFile()
+        // language=gradle
+        val config = """
+            play {
+                artifactDir = file('${app.escaped()}')
+            }
+        """
+
+        val result = execute(config, "uploadReleasePrivateApk")
+
+        assertThat(result.task(":packageRelease")).isNull()
+        assertThat(result.task(":uploadReleasePrivateApk")).isNotNull()
+        assertThat(result.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("uploadInternalSharingApk(")
+        assertThat(result.output).contains(playgroundDir.name)
+        assertThat(result.output).contains("foo.apk")
     }
 
     @Test
@@ -92,18 +111,52 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Using custom artifact correctly tracks dependencies`() {
+        // language=gradle
+        val config = """
+            abstract class CustomTask extends DefaultTask {
+                @OutputDirectory
+                abstract DirectoryProperty getAppDir()
+
+                @TaskAction
+                void doStuff() {
+                    appDir.get().file("foo.apk").asFile.createNewFile()
+                }
+            }
+
+            def c = tasks.register("myCustomTask", CustomTask) {
+                appDir.set(layout.projectDirectory.dir('${playgroundDir.escaped()}'))
+            }
+
+            play {
+                artifactDir = c.flatMap { it.appDir }
+            }
+        """
+
+        val result = execute(config, "uploadReleasePrivateApk")
+
+        assertThat(result.task(":packageRelease")).isNull()
+        assertThat(result.task(":myCustomTask")).isNotNull()
+        assertThat(result.task(":myCustomTask")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.task(":uploadReleasePrivateApk")).isNotNull()
+        assertThat(result.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("uploadInternalSharingApk(")
+        assertThat(result.output).contains(playgroundDir.name)
+        assertThat(result.output).contains("foo.apk")
+    }
+
+    @Test
     fun `Using custom artifact CLI arg skips on-the-fly apk build`() {
         File(playgroundDir, "foo.apk").safeCreateNewFile()
         val result = execute("", "uploadReleasePrivateApk", "--artifact-dir=${playgroundDir}")
 
-        assertThat(result.task(":assembleRelease")).isNull()
+        assertThat(result.task(":packageRelease")).isNull()
         assertThat(result.task(":uploadReleasePrivateApk")).isNotNull()
         assertThat(result.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingApk(")
         assertThat(result.output).contains(playgroundDir.name)
     }
 
-    @Disabled("Need property API configuration with AGP") // TODO
     @Test
     fun `Using custom artifact CLI arg with eager evaluation skips on-the-fly apk build`() {
         // language=gradle
@@ -115,12 +168,12 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
             }
 
             tasks.all {}
-        """
+        """.withAndroidBlock()
 
         File(playgroundDir, "foo.apk").safeCreateNewFile()
         val result = execute(config, "uploadReleasePrivateApk", "--artifact-dir=${playgroundDir}")
 
-        assertThat(result.task(":assembleRelease")).isNull()
+        assertThat(result.task(":packageRelease")).isNull()
         assertThat(result.task(":uploadReleasePrivateApk")).isNotNull()
         assertThat(result.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingApk(")

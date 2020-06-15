@@ -7,7 +7,6 @@ import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.io.File
 
@@ -19,8 +18,8 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
     fun `Builds bundle on-the-fly by default`() {
         val result = execute("", "uploadReleasePrivateBundle")
 
-        assertThat(result.task(":bundleRelease")).isNotNull()
-        assertThat(result.task(":bundleRelease")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.task(":packageReleaseBundle")).isNotNull()
+        assertThat(result.task(":packageReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingBundle(")
         assertThat(result.output).contains(".aab")
     }
@@ -47,10 +46,11 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
 
         val result = executeExpectingFailure(config, "uploadReleasePrivateBundle")
 
+        assertThat(result.task(":packageReleaseBundle")).isNull()
         assertThat(result.task(":uploadReleasePrivateBundle")).isNotNull()
         assertThat(result.task(":uploadReleasePrivateBundle")!!.outcome)
                 .isEqualTo(TaskOutcome.FAILED)
-        assertThat(result.output).contains("Warning")
+        assertThat(result.output).contains("ERROR_no-unique-aab-found")
         assertThat(result.output).contains(playgroundDir.name)
     }
 
@@ -70,7 +70,7 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":uploadReleasePrivateBundle")).isNotNull()
         assertThat(result.task(":uploadReleasePrivateBundle")!!.outcome)
                 .isEqualTo(TaskOutcome.FAILED)
-        assertThat(result.output).contains("Warning")
+        assertThat(result.output).contains("ERROR_no-unique-aab-found")
         assertThat(result.output).contains(playgroundDir.name)
     }
 
@@ -86,12 +86,34 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
         File(playgroundDir, "foo.aab").safeCreateNewFile()
         val result = execute(config, "uploadReleasePrivateBundle")
 
-        assertThat(result.task(":bundleRelease")).isNull()
+        assertThat(result.task(":packageReleaseBundle")).isNull()
         assertThat(result.task(":uploadReleasePrivateBundle")).isNotNull()
         assertThat(result.task(":uploadReleasePrivateBundle")!!.outcome)
                 .isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingBundle(")
         assertThat(result.output).contains(playgroundDir.name)
+        assertThat(result.output).contains("foo.aab")
+    }
+
+    @Test
+    fun `Using custom artifact file skips on-the-fly bundle build`() {
+        val app = File(playgroundDir, "foo.aab").safeCreateNewFile()
+        // language=gradle
+        val config = """
+            play {
+                artifactDir = file('${app.escaped()}')
+            }
+        """
+
+        val result = execute(config, "uploadReleasePrivateBundle")
+
+        assertThat(result.task(":packageReleaseBundle")).isNull()
+        assertThat(result.task(":uploadReleasePrivateBundle")).isNotNull()
+        assertThat(result.task(":uploadReleasePrivateBundle")!!.outcome)
+                .isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("uploadInternalSharingBundle(")
+        assertThat(result.output).contains(playgroundDir.name)
+        assertThat(result.output).contains("foo.aab")
     }
 
     @Test
@@ -114,11 +136,47 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Using custom artifact correctly tracks dependencies`() {
+        // language=gradle
+        val config = """
+            abstract class CustomTask extends DefaultTask {
+                @OutputDirectory
+                abstract DirectoryProperty getAppDir()
+
+                @TaskAction
+                void doStuff() {
+                    appDir.get().file("foo.aab").asFile.createNewFile()
+                }
+            }
+
+            def c = tasks.register("myCustomTask", CustomTask) {
+                appDir.set(layout.projectDirectory.dir('${playgroundDir.escaped()}'))
+            }
+
+            play {
+                artifactDir = c.flatMap { it.appDir }
+            }
+        """
+
+        val result = execute(config, "uploadReleasePrivateBundle")
+
+        assertThat(result.task(":packageReleaseBundle")).isNull()
+        assertThat(result.task(":myCustomTask")).isNotNull()
+        assertThat(result.task(":myCustomTask")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.task(":uploadReleasePrivateBundle")).isNotNull()
+        assertThat(result.task(":uploadReleasePrivateBundle")!!.outcome)
+                .isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("uploadInternalSharingBundle(")
+        assertThat(result.output).contains(playgroundDir.name)
+        assertThat(result.output).contains("foo.aab")
+    }
+
+    @Test
     fun `Using custom artifact CLI arg skips on-the-fly bundle build`() {
         File(playgroundDir, "foo.aab").safeCreateNewFile()
         val result = execute("", "uploadReleasePrivateBundle", "--artifact-dir=${playgroundDir}")
 
-        assertThat(result.task(":bundleRelease")).isNull()
+        assertThat(result.task(":packageReleaseBundle")).isNull()
         assertThat(result.task(":uploadReleasePrivateBundle")).isNotNull()
         assertThat(result.task(":uploadReleasePrivateBundle")!!.outcome)
                 .isEqualTo(TaskOutcome.SUCCESS)
@@ -126,7 +184,6 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
         assertThat(result.output).contains(playgroundDir.name)
     }
 
-    @Disabled("Need property API configuration with AGP") // TODO
     @Test
     fun `Using custom artifact CLI arg with eager evaluation skips on-the-fly bundle build`() {
         // language=gradle
@@ -138,12 +195,12 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
             }
 
             tasks.all {}
-        """
+        """.withAndroidBlock()
 
         File(playgroundDir, "foo.aab").safeCreateNewFile()
         val result = execute(config, "uploadReleasePrivateBundle", "--artifact-dir=${playgroundDir}")
 
-        assertThat(result.task(":bundleRelease")).isNull()
+        assertThat(result.task(":packageReleaseBundle")).isNull()
         assertThat(result.task(":uploadReleasePrivateBundle")).isNotNull()
         assertThat(result.task(":uploadReleasePrivateBundle")!!.outcome)
                 .isEqualTo(TaskOutcome.SUCCESS)

@@ -26,7 +26,7 @@ import kotlin.math.roundToInt
 
 internal class DefaultPlayPublisher(
         private val publisher: AndroidPublisher,
-        private val appId: String
+        override val appId: String
 ) : InternalPlayPublisher {
     override fun insertEdit(): EditResponse {
         return try {

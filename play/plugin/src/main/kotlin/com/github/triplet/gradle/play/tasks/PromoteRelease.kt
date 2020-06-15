@@ -1,6 +1,5 @@
 package com.github.triplet.gradle.play.tasks
 
-import com.android.build.gradle.api.ApplicationVariant
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.tasks.internal.PublishArtifactTaskBase
 import com.github.triplet.gradle.play.tasks.internal.UpdatableTrackExtensionOptions
@@ -14,8 +13,8 @@ import javax.inject.Inject
 
 internal abstract class PromoteRelease @Inject constructor(
         extension: PlayPublisherExtension,
-        variant: ApplicationVariant
-) : PublishArtifactTaskBase(extension, variant), UpdatableTrackExtensionOptions {
+        appId: String
+) : PublishArtifactTaskBase(extension, appId), UpdatableTrackExtensionOptions {
     init {
         // Always out-of-date since we don't know what's changed on the network
         outputs.upToDateWhen { false }

@@ -72,8 +72,6 @@ interface EditManager {
             bundleFile: File,
             mappingFile: File?,
             strategy: ResolutionStrategy,
-            versionCode: Long,
-            variantName: String,
             didPreviousBuildSkipCommit: Boolean,
             trackName: String,
             releaseStatus: ReleaseStatus?,
@@ -94,8 +92,6 @@ interface EditManager {
             apkFile: File,
             mappingFile: File?,
             strategy: ResolutionStrategy,
-            versionCode: Long,
-            variantName: String,
             mainObbRetainable: Int?,
             patchObbRetainable: Int?
     ): Long?

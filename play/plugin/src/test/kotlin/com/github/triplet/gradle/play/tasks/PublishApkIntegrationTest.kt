@@ -6,13 +6,14 @@ import com.github.triplet.gradle.androidpublisher.FakePlayPublisher
 import com.github.triplet.gradle.androidpublisher.ReleaseStatus
 import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
+import com.github.triplet.gradle.common.utils.nullOrFull
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.io.File
+import java.util.concurrent.atomic.AtomicInteger
 
 class PublishApkIntegrationTest : IntegrationTestBase() {
     override val factoryInstallerStatement = "com.github.triplet.gradle.play.tasks." +
@@ -22,8 +23,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
     fun `Builds apk on-the-fly by default`() {
         val result = execute("", "publishReleaseApk")
 
-        assertThat(result.task(":assembleRelease")).isNotNull()
-        assertThat(result.task(":assembleRelease")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.task(":packageRelease")).isNotNull()
+        assertThat(result.task(":packageRelease")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadApk(")
         assertThat(result.output).contains(".apk")
         assertThat(result.output).contains("publishApk(")
@@ -49,12 +50,11 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
             }
         """
 
-        val result = executeExpectingFailure(config, "publishReleaseApk")
+        val result = execute(config, "publishReleaseApk")
 
+        assertThat(result.task(":packageRelease")).isNull()
         assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.FAILED)
-        assertThat(result.output).contains("Warning")
-        assertThat(result.output).contains(playgroundDir.name)
+        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.NO_SOURCE)
     }
 
     @Test
@@ -88,11 +88,31 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         File(playgroundDir, "foo.apk").safeCreateNewFile()
         val result = execute(config, "publishReleaseApk")
 
-        assertThat(result.task(":assembleRelease")).isNull()
+        assertThat(result.task(":packageRelease")).isNull()
         assertThat(result.task(":publishReleaseApk")).isNotNull()
         assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadApk(")
         assertThat(result.output).contains(playgroundDir.name)
+    }
+
+    @Test
+    fun `Using custom artifact file skips on-the-fly apk build`() {
+        val app = File(playgroundDir, "foo.apk").safeCreateNewFile()
+        // language=gradle
+        val config = """
+            play {
+                artifactDir = file('${app.escaped()}')
+            }
+        """
+
+        val result = execute(config, "publishReleaseApk")
+
+        assertThat(result.task(":packageRelease")).isNull()
+        assertThat(result.task(":publishReleaseApk")).isNotNull()
+        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("uploadApk(")
+        assertThat(result.output).contains(playgroundDir.name)
+        assertThat(result.output).contains("foo.apk")
     }
 
     @Test
@@ -115,11 +135,46 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Using custom artifact correctly tracks dependencies`() {
+        // language=gradle
+        val config = """
+            abstract class CustomTask extends DefaultTask {
+                @OutputDirectory
+                abstract DirectoryProperty getAppDir()
+
+                @TaskAction
+                void doStuff() {
+                    appDir.get().file("foo.apk").asFile.createNewFile()
+                }
+            }
+
+            def c = tasks.register("myCustomTask", CustomTask) {
+                appDir.set(layout.projectDirectory.dir('${playgroundDir.escaped()}'))
+            }
+
+            play {
+                artifactDir = c.flatMap { it.appDir }
+            }
+        """
+
+        val result = execute(config, "publishReleaseApk")
+
+        assertThat(result.task(":packageRelease")).isNull()
+        assertThat(result.task(":myCustomTask")).isNotNull()
+        assertThat(result.task(":myCustomTask")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.task(":publishReleaseApk")).isNotNull()
+        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("uploadApk(")
+        assertThat(result.output).contains(playgroundDir.name)
+        assertThat(result.output).contains("foo.apk")
+    }
+
+    @Test
     fun `Using custom artifact CLI arg skips on-the-fly APK build`() {
         File(playgroundDir, "foo.apk").safeCreateNewFile()
         val result = execute("", "publishReleaseApk", "--artifact-dir=${playgroundDir}")
 
-        assertThat(result.task(":assembleRelease")).isNull()
+        assertThat(result.task(":packageRelease")).isNull()
         assertThat(result.task(":publishReleaseApk")).isNotNull()
         assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadApk(")
@@ -162,7 +217,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
                     track.set('unused')
                 }
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(
                 config,
@@ -189,7 +244,6 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         assertThat(result.output).doesNotContain("commitEdit(")
     }
 
-    @Disabled("Need property API configuration with AGP") // TODO
     @Test
     fun `Eagerly evaluated global CLI artifact-dir param skips on-the-fly APK build`() {
         // language=gradle
@@ -201,7 +255,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
             }
 
             tasks.all {}
-        """
+        """.withAndroidBlock()
 
         File(playgroundDir, "foo.apk").safeCreateNewFile()
         val result = execute(
@@ -210,7 +264,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
                 "--artifact-dir=$playgroundDir"
         )
 
-        assertThat(result.task(":assembleRelease")).isNull()
+        assertThat(result.task(":packageRelease")).isNull()
         assertThat(result.task(":publishReleaseApk")).isNotNull()
         assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("publishApk(")
@@ -270,18 +324,17 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         assertThat(result2.output).contains("didPreviousBuildSkipCommit=true")
     }
 
-    @Disabled("https://github.com/Triple-T/gradle-play-publisher/issues/790") // TODO
     @Test
     fun `Build processes manifest when resolution strategy is set to auto`() {
         // language=gradle
         val config = """
-            play.resolutionStrategy = 'auto'
+            play.resolutionStrategy = ResolutionStrategy.AUTO
         """
 
         val result = execute(config, "publishReleaseApk")
 
-        assertThat(result.task(":processReleaseMetadata")).isNotNull()
-        assertThat(result.task(":processReleaseMetadata")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.task(":processReleaseVersionCodes")).isNotNull()
+        assertThat(result.task(":processReleaseVersionCodes")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.task(":publishReleaseApk")).isNotNull()
         assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("findMaxAppVersionCode(")
@@ -292,12 +345,12 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
     fun `Build uploads mapping file when available`() {
         // language=gradle
         val config = """
-            android.buildTypes.release {
+            buildTypes.release {
                 shrinkResources true
                 minifyEnabled true
                 proguardFiles(getDefaultProguardFile("proguard-android.txt"))
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "publishReleaseApk")
 
@@ -342,19 +395,27 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
     fun `Build uploads multiple APKs when splits are used`() {
         // language=gradle
         val config = """
-            android.splits.density {
+            splits.density {
                 enable true
                 reset()
                 include "xxhdpi", "xxxhdpi"
             }
 
+            def versionCodes = ''
             def count = 0
-            android.applicationVariants.all { variant ->
-                variant.outputs.each { output ->
-                    output.versionCodeOverride = count++
+            applicationVariants.all { variant ->
+                if (variant.name == 'release') {
+                    variant.outputs.each { output ->
+                        output.versionCodeOverride = count++
+                        versionCodes += count + ', '
+                    }
                 }
             }
-        """
+
+            afterEvaluate {
+                System.setProperty("VERSION_CODES", versionCodes.take(versionCodes.length() - 2))
+            }
+        """.withAndroidBlock()
 
         val result = execute(config, "publishReleaseApk")
 
@@ -369,15 +430,14 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         assertThat(result.output.split("\n").filter {
             it.contains("publishApk(")
         }).hasSize(1)
-        assertThat(result.output).contains("versionCodes=[3, 4, 5]")
-
+        assertThat(result.output).contains("versionCodes=[1, 2, 3]")
     }
 
     @Test
     fun `Build uses correct version code`() {
         // language=gradle
         val config = """
-            android.defaultConfig.versionCode 8
+            System.setProperty("VERSION_CODES", "8")
         """
 
         val result = execute(config, "publishReleaseApk")
@@ -385,17 +445,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":publishReleaseApk")).isNotNull()
         assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("uploadApk(")
-        assertThat(result.output).contains("versionCode=8")
-    }
-
-    @Test
-    fun `Build uses correct variant name`() {
-        val result = execute("", "publishReleaseApk")
-
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result.output).contains("uploadApk(")
-        assertThat(result.output).contains("variantName=release")
+        assertThat(result.output).contains("versionCodes=[8]")
     }
 
     @Test
@@ -432,10 +482,10 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
     fun `Build picks default release name when no track specific ones are available`() {
         // language=gradle
         val config = """
-            android.buildTypes {
+            buildTypes {
                 consoleNames {}
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "publishConsoleNamesApk")
 
@@ -491,10 +541,10 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
     fun `Build picks default release notes when no track specific ones are available`() {
         // language=gradle
         val config = """
-            android.buildTypes {
+            buildTypes {
                 releaseNotes {}
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "publishReleaseNotesApk")
 
@@ -632,6 +682,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
                 }
             }
             val edits = object : FakeEditManager() {
+                val versionCodeIndex = AtomicInteger()
+
                 override fun findMaxAppVersionCode(): Long {
                     println("findMaxAppVersionCode()")
                     return 123
@@ -641,8 +693,6 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
                         apkFile: File,
                         mappingFile: File?,
                         strategy: ResolutionStrategy,
-                        versionCode: Long,
-                        variantName: String,
                         mainObbRetainable: Int?,
                         patchObbRetainable: Int?
                 ): Long? {
@@ -650,8 +700,6 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
                                     "apkFile=$apkFile, " +
                                     "mappingFile=$mappingFile, " +
                                     "strategy=$strategy, " +
-                                    "versionCode=$versionCode, " +
-                                    "variantName=$variantName, " +
                                     "mainObbRetainable=$mainObbRetainable, " +
                                     "patchObbRetainable=$patchObbRetainable)")
 
@@ -660,7 +708,14 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
                         println("Soft failure")
                         return null
                     }
-                    return versionCode
+
+                    val versionCodes = System.getProperty("VERSION_CODES").nullOrFull().orEmpty()
+                            .replace(" ", "").ifEmpty { "1" }.split(",")
+                            .map { it.toLong() }
+                    val index = versionCodeIndex.getAndUpdate {
+                        (it + 1).coerceAtMost(versionCodes.size - 1)
+                    }
+                    return versionCodes[index]
                 }
 
                 override fun publishApk(

@@ -29,6 +29,12 @@ abstract class IntegrationTestBase {
 
     protected fun File.escaped() = toString().replace("\\", "\\\\")
 
+    protected fun String.withAndroidBlock() = """
+        android {
+            $this
+        }
+    """.trimIndent()
+
     protected fun execute(config: String, vararg tasks: String) = execute(config, false, *tasks)
 
     protected fun executeExpectingFailure(config: String, vararg tasks: String) =
@@ -98,13 +104,13 @@ abstract class IntegrationTestBase {
                     versionCode 1
                     versionName "1.0"
                 }
-
-                $config
             }
 
             play {
                 serviceAccountCredentials = file('creds.json')
             }
+
+            $config
 
             ${factoryInstallerStatement ?: ""}
         """)

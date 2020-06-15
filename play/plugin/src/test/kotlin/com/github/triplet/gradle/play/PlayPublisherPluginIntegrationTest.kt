@@ -42,7 +42,7 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
                     debuggable true
                 }
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "tasks", "--group", "publishing")
 
@@ -53,10 +53,10 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
     fun `Disabled build types are ignored`() {
         // language=gradle
         val config = """
-            android.variantFilter { variant ->
+            variantFilter { variant ->
                 variant.setIgnore(true)
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "tasks", "--group", "publishing")
 
@@ -149,12 +149,12 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
     fun `Disabled GPP variant is ignored`() {
         // language=gradle
         val config = """
-            android.playConfigs {
+            playConfigs {
                 release {
                     enabled.set(false)
                 }
             }
-        """
+        """.withAndroidBlock()
 
         val result = execute(config, "tasks", "--group", "publishing")
 
@@ -257,20 +257,22 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
     fun `Variant specific extension overrides root`() {
         // language=gradle
         val config = """
-            flavorDimensions 'pricing'
-            productFlavors {
-                free { dimension 'pricing' }
-                paid { dimension 'pricing' }
+            android {
+                flavorDimensions 'pricing'
+                productFlavors {
+                    free { dimension 'pricing' }
+                    paid { dimension 'pricing' }
+                }
+
+                playConfigs {
+                    paidRelease {
+                        track.set('variant')
+                    }
+                }
             }
 
             play {
                 track = 'root'
-            }
-
-            playConfigs {
-                paidRelease {
-                    track.set('variant')
-                }
             }
         """
 
@@ -283,20 +285,22 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
     fun `Flavor specific extension overrides root`() {
         // language=gradle
         val config = """
-            flavorDimensions 'pricing'
-            productFlavors {
-                free { dimension 'pricing' }
-                paid { dimension 'pricing' }
+            android {
+                flavorDimensions 'pricing'
+                productFlavors {
+                    free { dimension 'pricing' }
+                    paid { dimension 'pricing' }
+                }
+
+                playConfigs {
+                    paid {
+                        track.set('flavor')
+                    }
+                }
             }
 
             play {
                 track = 'root'
-            }
-
-            playConfigs {
-                paid {
-                    track.set('flavor')
-                }
             }
         """
 
@@ -309,20 +313,22 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
     fun `Build type specific extension overrides root`() {
         // language=gradle
         val config = """
-            flavorDimensions 'pricing'
-            productFlavors {
-                free { dimension 'pricing' }
-                paid { dimension 'pricing' }
+            android {
+                flavorDimensions 'pricing'
+                productFlavors {
+                    free { dimension 'pricing' }
+                    paid { dimension 'pricing' }
+                }
+
+                playConfigs {
+                    release {
+                        track.set('build type')
+                    }
+                }
             }
 
             play {
                 track = 'root'
-            }
-
-            playConfigs {
-                release {
-                    track.set('build type')
-                }
             }
         """
 
@@ -335,8 +341,8 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
     fun `Root extension is used if no overrides are present`() {
         // language=gradle
         val config = """
-            flavorDimensions 'pricing'
-            productFlavors {
+            android.flavorDimensions 'pricing'
+            android.productFlavors {
                 free { dimension 'pricing' }
                 paid { dimension 'pricing' }
             }
@@ -355,31 +361,33 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
     fun `Combination of extensions merges`() {
         // language=gradle
         val config = """
-            flavorDimensions 'pricing'
-            productFlavors {
-                free { dimension 'pricing' }
-                paid { dimension 'pricing' }
+            android {
+                flavorDimensions 'pricing'
+                productFlavors {
+                    free { dimension 'pricing' }
+                    paid { dimension 'pricing' }
+                }
+
+                playConfigs {
+                    paidRelease {
+                        track.set('variant')
+                    }
+
+                    paid {
+                        fromTrack.set('flavor')
+                        defaultToAppBundles.set(true)
+                    }
+
+                    release {
+                        fromTrack.set('build type')
+                        promoteTrack.set('build type')
+                    }
+                }
             }
 
             play {
                 track = 'root'
                 releaseName = 'hello'
-            }
-
-            playConfigs {
-                paidRelease {
-                    track.set('variant')
-                }
-
-                paid {
-                    fromTrack.set('flavor')
-                    defaultToAppBundles.set(true)
-                }
-
-                release {
-                    fromTrack.set('build type')
-                    promoteTrack.set('build type')
-                }
             }
         """
 
@@ -396,22 +404,24 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
     fun `No warnings are logged on valid playConfigs`() {
         // language=gradle
         val config = """
-            flavorDimensions 'pricing'
-            productFlavors {
-                free { dimension 'pricing' }
-                paid { dimension 'pricing' }
+            android {
+                flavorDimensions 'pricing'
+                productFlavors {
+                    free { dimension 'pricing' }
+                    paid { dimension 'pricing' }
+                }
+
+                playConfigs {
+                    paidRelease {}
+                    paid {}
+                    freeRelease {}
+                    free {}
+                    release {}
+                }
             }
 
             play {
                 track = 'root'
-            }
-
-            playConfigs {
-                paidRelease {}
-                paid {}
-                freeRelease {}
-                free {}
-                release {}
             }
         """
 
@@ -424,14 +434,16 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
     fun `Warning is logged on invalid playConfigs`() {
         // language=gradle
         val config = """
-            flavorDimensions 'pricing'
-            productFlavors {
-                free { dimension 'pricing' }
-                paid { dimension 'pricing' }
-            }
+            android {
+                flavorDimensions 'pricing'
+                productFlavors {
+                    free { dimension 'pricing' }
+                    paid { dimension 'pricing' }
+                }
 
-            playConfigs {
-                foo {}
+                playConfigs {
+                    foo {}
+                }
             }
         """
 
