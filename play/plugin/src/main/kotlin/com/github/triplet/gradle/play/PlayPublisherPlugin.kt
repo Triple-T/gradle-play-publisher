@@ -330,7 +330,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                     editIdFile.set(editFile)
                     versionCodes.set(staticVersionCodes)
                     playVersionCodes.set(project.layout.buildDirectory.file(
-                            "$INTERMEDIATES_OUTPUT_PATH/$name"))
+                            "$INTERMEDIATES_OUTPUT_PATH/${this@v.name}/available-version-codes.txt"))
 
                     dependsOn(genEditTask)
                 }
