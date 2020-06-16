@@ -38,8 +38,7 @@ internal inline fun <reified T : Task> Project.newTask(
         block()
     }
 
-    val safeName = if (tasks.findByName(name) == null) name else "gpp" + name.capitalize()
-    return tasks.register<T>(safeName, *constructorArgs).apply { configure(config) }
+    return tasks.register<T>(name, *constructorArgs).apply { configure(config) }
 }
 
 internal fun Project.getGenEditTask(
