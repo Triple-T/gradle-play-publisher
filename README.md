@@ -151,7 +151,7 @@ available from
 buildscript {
     repositories {
         // ...
-        maven("https://oss.sonatype.org/content/repositories/snapshots")
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
     }
 
     dependencies {
