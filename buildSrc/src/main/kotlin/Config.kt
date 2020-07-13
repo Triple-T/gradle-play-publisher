@@ -69,6 +69,7 @@ object Config {
             const val ap =
                     "com.google.apis:google-api-services-androidpublisher:v3-rev20200526-1.30.9"
             const val googleClient = "com.google.api-client:google-api-client:1.30.9"
+            const val apacheClientV2 = "com.google.http-client:google-http-client-apache-v2:1.35.0"
             const val auth = "com.google.auth:google-auth-library-oauth2-http:0.20.0"
             const val guava = "com.google.guava:guava:29.0-jre"
             const val jackson = "com.google.http-client:google-http-client-jackson2:1.35.0"

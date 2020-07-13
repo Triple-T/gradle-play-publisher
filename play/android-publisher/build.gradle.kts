@@ -13,6 +13,7 @@ dependencies {
     implementation(Config.Libs.All.ap)
     implementation(Config.Libs.All.googleClient)
     implementation(Config.Libs.All.auth)
+    implementation(Config.Libs.All.apacheClientV2)
 
     testImplementation(Config.Libs.All.junit)
     testImplementation(Config.Libs.All.junitEngine)
