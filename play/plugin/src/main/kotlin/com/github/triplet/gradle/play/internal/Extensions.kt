@@ -10,6 +10,7 @@ import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.InputStream
 import java.io.Serializable
+import java.util.*
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.declaredMemberProperties
 
@@ -40,16 +41,17 @@ internal fun mergeExtensions(extensions: List<PlayPublisherExtension>): PlayPubl
     requireNotNull(extensions.isNotEmpty()) { "At least one extension must be provided." }
     if (extensions.size == 1) return extensions.single()
 
-    for (i in 1 until extensions.size) {
+    val child = extensions.first()
+
+    for (i in (extensions.size - 1) downTo 1) {
         val parent = extensions[i]
-        val child = extensions[i - 1]
 
         PlayPublisherExtension::class.declaredMemberProperties.linkProperties(parent, child)
         PlayPublisherExtension.Retain::class.declaredMemberProperties
                 .linkProperties(parent.retain, child.retain)
     }
 
-    return extensions.first()
+    return child
 }
 
 private fun <T> Collection<KProperty1<T, *>>.linkProperties(parent: T, child: T) {
@@ -59,9 +61,15 @@ private fun <T> Collection<KProperty1<T, *>>.linkProperties(parent: T, child: T)
         val value = property.get(child)
         @Suppress("UNCHECKED_CAST")
         if (value is Property<*>) {
-            value.convention(property.get(parent) as Property<Nothing>)
+            val parentValue = property.get(parent) as Property<Nothing>
+            if (parentValue.isPresent) {
+                value.value(parentValue)
+            }
         } else if (value is ListProperty<*>) {
-            value.convention(property.get(parent) as ListProperty<Nothing>)
+            val parentValue = property.get(parent) as ListProperty<Nothing>
+            if (parentValue.isPresent) {
+                value.value(parentValue)
+            }
         }
     }
 }

@@ -14,6 +14,7 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.register
+import java.util.*
 
 internal val ApplicationVariantProperties.flavorNameOrDefault
     get() = flavorName.nullOrFull() ?: "main"
@@ -74,7 +75,10 @@ private fun buildExtensionInternal(
     }.singleOrNull()
     val buildTypeExtension = variant.buildType?.let { extensionContainer.findByName(it) }
 
+    val result = extensionContainer.create(UUID.randomUUID().toString())
+
     val extensions = listOfNotNull(
+            result,
             cliOptionsExtension,
             variantExtension,
             flavorExtension,
