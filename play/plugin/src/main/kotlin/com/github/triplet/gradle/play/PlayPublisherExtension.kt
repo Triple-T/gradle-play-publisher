@@ -15,10 +15,11 @@ import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
+import javax.inject.Inject
 
 /** The entry point for all GPP related configuration. */
-abstract class PlayPublisherExtension @JvmOverloads constructor(
-        private val name: String = "default"
+abstract class PlayPublisherExtension @Inject constructor(
+        private val name: String
 ) : Named {
     @Internal
     override fun getName(): String = name

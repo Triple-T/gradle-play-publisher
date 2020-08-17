@@ -2,6 +2,7 @@ package com.github.triplet.gradle.play
 
 import com.github.triplet.gradle.androidpublisher.ReleaseStatus
 import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
+import com.github.triplet.gradle.play.internal.ExtensionMergeHolder
 import com.github.triplet.gradle.play.internal.mergeExtensions
 import com.google.common.truth.Truth.assertThat
 import org.gradle.api.file.DirectoryProperty
@@ -21,7 +22,7 @@ class PlayPublisherExtensionTest {
     fun `Merging extensions with empty throws`() {
         val exts = emptyList<PlayPublisherExtension>()
 
-        assertThrows<NoSuchElementException> { mergeExtensions(exts) }
+        assertThrows<NoSuchElementException> { mergeExtensions(exts.withCopies()) }
     }
 
     @Test
@@ -29,7 +30,7 @@ class PlayPublisherExtensionTest {
         val p0 = Extension().apply { track.set("test") }
         val exts = listOf(p0)
 
-        val merged = mergeExtensions(exts)
+        val merged = mergeExtensions(exts.withCopies())
 
         assertThat(merged).isSameInstanceAs(p0)
     }
@@ -40,7 +41,7 @@ class PlayPublisherExtensionTest {
         val p1 = Extension().apply { releaseStatus.set(ReleaseStatus.IN_PROGRESS) }
         val exts = listOf(p0, p1)
 
-        val merged = mergeExtensions(exts)
+        val merged = mergeExtensions(exts.withCopies())
 
         assertThat(merged.track.get()).isEqualTo("test")
         assertThat(merged.releaseStatus.get()).isEqualTo(ReleaseStatus.IN_PROGRESS)
@@ -52,7 +53,7 @@ class PlayPublisherExtensionTest {
         val p1 = Extension().apply { retain.mainObb.set(8) }
         val exts = listOf(p0, p1)
 
-        val merged = mergeExtensions(exts)
+        val merged = mergeExtensions(exts.withCopies())
 
         assertThat(merged.track.get()).isEqualTo("test")
         assertThat(merged.retain.mainObb.get()).isEqualTo(8)
@@ -76,7 +77,7 @@ class PlayPublisherExtensionTest {
         }
         val exts = listOf(p0, p1, p3, p4)
 
-        val merged = mergeExtensions(exts)
+        val merged = mergeExtensions(exts.withCopies())
 
         assertThat(merged.track.get()).isEqualTo("test")
         assertThat(merged.releaseStatus.get()).isEqualTo(ReleaseStatus.IN_PROGRESS)
@@ -95,7 +96,7 @@ class PlayPublisherExtensionTest {
         }
         val exts = listOf(p0, p1, p3)
 
-        val merged = mergeExtensions(exts)
+        val merged = mergeExtensions(exts.withCopies())
 
         assertThat(merged.track.get()).isEqualTo("test")
         assertThat(merged.retain.mainObb.get()).isEqualTo(8)
@@ -108,7 +109,7 @@ class PlayPublisherExtensionTest {
         val p1 = Extension().apply { retain.artifacts.set(listOf(1, 2, 3)) }
         val exts = listOf(p0, p1)
 
-        val merged = mergeExtensions(exts)
+        val merged = mergeExtensions(exts.withCopies())
 
         assertThat(merged.retain.artifacts.get()).containsExactly(1L, 2L, 3L)
     }
@@ -120,13 +121,11 @@ class PlayPublisherExtensionTest {
         val p2 = Extension().apply { track.set("root") }
         val exts = listOf(p0, p1, p2)
 
-        mergeExtensions(exts)
+        val merged = mergeExtensions(exts.withCopies())
 
         p2.track.set("new")
 
-        assertThat(p2.track.get()).isEqualTo("new")
-        assertThat(p1.track.get()).isEqualTo("new")
-        assertThat(p0.track.get()).isEqualTo("new")
+        assertThat(merged.track.get()).isEqualTo("new")
     }
 
     @Test
@@ -135,7 +134,7 @@ class PlayPublisherExtensionTest {
         val p1 = Extension().apply { track.set("parent") }
         val exts = listOf(p0, p1)
 
-        mergeExtensions(exts)
+        mergeExtensions(exts.withCopies())
 
         p1.track.set("new parent")
 
@@ -143,7 +142,10 @@ class PlayPublisherExtensionTest {
         assertThat(p0.track.get()).isEqualTo("child")
     }
 
-    private inner class Extension : PlayPublisherExtension() {
+    private fun List<PlayPublisherExtension>.withCopies() =
+            map { ExtensionMergeHolder(it, Extension()) }
+
+    private inner class Extension : PlayPublisherExtension("test") {
         override val enabled: Property<Boolean> = project.objects.property()
         override val serviceAccountCredentials: RegularFileProperty = project.objects.fileProperty()
         override val defaultToAppBundles: Property<Boolean> = project.objects.property()
