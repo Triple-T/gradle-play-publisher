@@ -244,7 +244,7 @@ play {
     // Overrides defaults
     track = "production"
     userFraction = 0.5
-    updatePriority = 0.5
+    updatePriority = 2
     releaseStatus = "inProgress"
 
     // ...
