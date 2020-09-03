@@ -1,7 +1,6 @@
 package com.github.triplet.gradle.play
 
 import com.android.build.api.artifact.ArtifactType
-import com.android.build.api.variant.impl.ApplicationVariantPropertiesImpl
 import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
 import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
@@ -272,22 +271,27 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 }
                 bootstrapAllTask { dependsOn(bootstrapTask) }
 
-                // TODO(asaveau): remove internal API usage
-                val sourceSets = run {
-                    (this as ApplicationVariantPropertiesImpl).variantSources.sortedSourceProviders
-                }
                 val resourceDir = project.newTask<GenerateResources>(
                         "generate${variantName}PlayResources"
                 ) {
-                    val dirs = sourceSets.map {
-                        project.layout.projectDirectory.dir("src/${it.name}/$PLAY_PATH")
-                    }
-                    resSrcDirs.set(dirs)
-                    resSrcTree.setFrom(dirs.map { project.fileTree(it).apply { exclude("**/.*") } })
-
                     resDir.set(project.layout.buildDirectory.dir(playPath))
 
                     mustRunAfter(bootstrapTask)
+                }.also { task ->
+                    // TODO(asaveau): remove once there's an API for sourceSets in the new model
+                    android.applicationVariants
+                            .matching { it.name == this@v.name }
+                            .whenObjectAdded {
+                                val dirs = sourceSets.map {
+                                    project.layout.projectDirectory.dir("src/${it.name}/$PLAY_PATH")
+                                }
+                                task {
+                                    resSrcDirs.set(dirs)
+                                    resSrcTree.setFrom(dirs.map {
+                                        project.fileTree(it).apply { exclude("**/.*") }
+                                    })
+                                }
+                            }
                 }.flatMap {
                     it.resDir
                 }

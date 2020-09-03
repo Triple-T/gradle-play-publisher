@@ -12,12 +12,12 @@ buildscript {
 
 plugins {
     `lifecycle-base`
-    id("com.github.ben-manes.versions") version "0.28.0"
+    id("com.github.ben-manes.versions") version "0.29.0"
 
     // Needed to support publishing all modules atomically
     id("de.marcphilipp.nexus-publish") version "0.4.0" apply false
     // Needed to deploy library releases
-    id("io.codearte.nexus-staging") version "0.21.2"
+    id("io.codearte.nexus-staging") version "0.22.0"
 }
 
 buildScan {

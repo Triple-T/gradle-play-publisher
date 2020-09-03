@@ -65,19 +65,19 @@ fun Project.configureMaven(handler: RepositoryHandler) = handler.maven {
 object Config {
     object Libs {
         object All {
-            const val agp = "com.android.tools.build:gradle:4.2.0-alpha01"
+            const val agp = "com.android.tools.build:gradle:4.2.0-alpha09"
             const val ap =
-                    "com.google.apis:google-api-services-androidpublisher:v3-rev20200526-1.30.9"
-            const val googleClient = "com.google.api-client:google-api-client:1.30.9"
-            const val apacheClientV2 = "com.google.http-client:google-http-client-apache-v2:1.35.0"
-            const val auth = "com.google.auth:google-auth-library-oauth2-http:0.20.0"
+                    "com.google.apis:google-api-services-androidpublisher:v3-rev20200817-1.30.10"
+            const val googleClient = "com.google.api-client:google-api-client:1.30.10"
+            const val apacheClientV2 = "com.google.http-client:google-http-client-apache-v2:1.36.0"
+            const val auth = "com.google.auth:google-auth-library-oauth2-http:0.21.1"
             const val guava = "com.google.guava:guava:29.0-jre"
-            const val jackson = "com.google.http-client:google-http-client-jackson2:1.35.0"
+            const val jackson = "com.google.http-client:google-http-client-jackson2:1.36.0"
 
             const val junit = "org.junit.jupiter:junit-jupiter-api:5.6.2"
             const val junitEngine = "org.junit.jupiter:junit-jupiter-engine:5.6.2"
             const val truth = "com.google.truth:truth:1.0.1"
-            const val mockito = "org.mockito:mockito-core:3.3.3"
+            const val mockito = "org.mockito:mockito-core:3.5.9"
         }
     }
 }
