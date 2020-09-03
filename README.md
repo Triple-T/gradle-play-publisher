@@ -507,7 +507,6 @@ Directory | Max # of images | Image dimension constraints (px)
 --- | --- | ---
 `icon` | 1 | 512x512
 `feature-graphic` | 1 | 1024x500
-`promo-graphic` | 1 | 180x120
 `phone-screenshots` | 8 | [320..3840]x[320..3840]
 `tablet-screenshots` | 8 | [320..3840]x[320..3840]
 `large-tablet-screenshots` | 8 | [320..3840]x[320..3840]
