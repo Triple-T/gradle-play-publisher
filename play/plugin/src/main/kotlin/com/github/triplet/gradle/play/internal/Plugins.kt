@@ -13,7 +13,9 @@ import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.kotlin.dsl.newInstance
 import org.gradle.kotlin.dsl.register
+import java.util.UUID
 
 internal val ApplicationVariantProperties.flavorNameOrDefault
     get() = flavorName.nullOrFull() ?: "main"
@@ -52,10 +54,12 @@ internal fun Project.getCommitEditTask(
 ) = rootProject.getOrRegisterEditTask<CommitEdit>("commitEditFor", extension, appId)
 
 internal fun ApplicationVariant<ApplicationVariantProperties>.buildExtension(
+        project: Project,
         extensionContainer: NamedDomainObjectContainer<PlayPublisherExtension>,
         baseExtension: PlayPublisherExtension,
         cliOptionsExtension: PlayPublisherExtension
 ): PlayPublisherExtension = buildExtensionInternal(
+        project,
         this,
         extensionContainer,
         baseExtension,
@@ -63,6 +67,7 @@ internal fun ApplicationVariant<ApplicationVariantProperties>.buildExtension(
 )
 
 private fun buildExtensionInternal(
+        project: Project,
         variant: ApplicationVariant<ApplicationVariantProperties>,
         extensionContainer: NamedDomainObjectContainer<PlayPublisherExtension>,
         baseExtension: PlayPublisherExtension,
@@ -82,6 +87,11 @@ private fun buildExtensionInternal(
             baseExtension
     ).distinctBy {
         it.name
+    }.map {
+        ExtensionMergeHolder(
+                original = it,
+                uninitializedCopy = project.objects.newInstance(UUID.randomUUID().toString())
+        )
     }
 
     return mergeExtensions(extensions)

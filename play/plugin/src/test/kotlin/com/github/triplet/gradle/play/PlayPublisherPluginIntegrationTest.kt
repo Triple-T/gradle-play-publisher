@@ -411,6 +411,39 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Same-level extensions are resolved independently`() {
+        // language=gradle
+        val config = """
+            android {
+                flavorDimensions 'pricing'
+                productFlavors {
+                    free { dimension 'pricing' }
+                    paid { dimension 'pricing' }
+                }
+
+                playConfigs {
+                    free {
+                        serviceAccountCredentials.set(file('free-creds.json'))
+                    }
+
+                    paid {
+                        serviceAccountCredentials.set(file('paid-creds.json'))
+                    }
+                }
+            }
+        """
+
+        val result = execute(config, "help", "--debug")
+        val resolvedLines = result.output.lines()
+                .filter { "Extension resolved for variant" in it }
+                .filter { "Release'" in it }
+
+        assertThat(resolvedLines).hasSize(2)
+        assertThat(resolvedLines.first()).contains("free-creds.json")
+        assertThat(resolvedLines.last()).contains("paid-creds.json")
+    }
+
+    @Test
     fun `No warnings are logged on valid playConfigs`() {
         // language=gradle
         val config = """

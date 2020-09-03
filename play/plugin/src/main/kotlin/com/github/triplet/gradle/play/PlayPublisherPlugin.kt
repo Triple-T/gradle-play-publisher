@@ -60,7 +60,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         project.validateRuntime()
 
-        project.extensions.create<PlayPublisherExtension>(PLAY_PATH).apply {
+        project.extensions.create<PlayPublisherExtension>(PLAY_PATH, "default").apply {
             enabled.convention(true)
             defaultToAppBundles.convention(false)
             commit.convention(true)
@@ -157,8 +157,17 @@ internal class PlayPublisherPlugin : Plugin<Project> {
 
         android.onVariants v@{
             val variantName = name.capitalize()
-            val extension = buildExtension(extensionContainer, baseExtension, cliOptionsExtension)
+            val extension = buildExtension(
+                    project,
+                    extensionContainer,
+                    baseExtension,
+                    cliOptionsExtension
+            )
             project.logger.debug("Extension computed for variant '$name': ${extension.toConfig()}")
+            project.afterEvaluate {
+                project.logger.debug(
+                        "Extension resolved for variant '${this@v.name}': ${extension.toConfig()}")
+            }
 
             if (!extension.enabled.get()) {
                 project.logger.info("Gradle Play Publisher is disabled for variant '$name'.")
