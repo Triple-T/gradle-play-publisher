@@ -190,7 +190,7 @@ with your private key. Add a `play` block alongside your `android` one with the 
 android { ... }
 
 play {
-    serviceAccountCredentials = file("your-key.json")
+    serviceAccountCredentials.set(file("your-key.json"))
 }
 ```
 
@@ -211,10 +211,6 @@ To find available tasks, run `./gradlew tasks --group publishing` and use
 `./gradlew help --task [task]` where `task` is something like `publishBundle` to get more detailed
 documentation for a specific task.
 
-> Note: if a task conflict occurs, say with the `maven-publish` plugin for example, be sure to apply
-> the GPP plugin *last*. Conflicting tasks will then be prefixed with `gpp` (ex: `publish` ->
-> `gppPublish`).
-
 ## Managing artifacts
 
 GPP supports uploading both the App Bundle and APK. Once uploaded, GPP also supports promoting those
@@ -227,11 +223,11 @@ Several options are available to customize how your artifacts are published:
 * `track` is the target stage for an artifact, i.e. `internal`/`alpha`/`beta`/`production` or any
   custom track
   * Defaults to `internal`
-* `releaseStatus` is the type of release, i.e. `completed`/`draft`/`inProgress`/`halted`
-  * Defaults to `completed`
+* `releaseStatus` is the type of release, i.e. `ReleaseStatus.[COMPLETED/DRAFT/HALTED/IN_PROGRESS]`
+  * Defaults to `ReleaseStatus.COMPLETED`
 * `userFraction` is the percentage of users who will receive a staged release
   * Defaults to `0.1` aka 10%
-  * **Note:** the `userFraction` is only applicable where `releaseStatus=[inProgress/halted]`
+  * **Note:** the `userFraction` is only applicable where `releaseStatus=[IN_PROGRESS/HALTED]`
 * `updatePriority` sets the update priority for a new release. See
   [Google's documentation](https://developer.android.com/guide/playcore/in-app-updates) on consuming
   this value.
@@ -242,10 +238,10 @@ Example configuration:
 ```kt
 play {
     // Overrides defaults
-    track = "production"
-    userFraction = 0.5
-    updatePriority = 2
-    releaseStatus = "inProgress"
+    track.set("production")
+    userFraction.set(0.5)
+    updatePriority.set(2)
+    releaseStatus.set(ReleaseStatus.IN_PROGRESS)
 
     // ...
 }
@@ -291,7 +287,7 @@ is available:
 ```kt
 play {
     // ...
-    releaseName = "My custom release name"
+    releaseName.set("My custom release name")
 }
 ```
 
@@ -313,7 +309,7 @@ publishable artifacts may be found:
 ```kt
 play {
     // ...
-    artifactDir = file("path/to/apk-or-app-bundle/dir")
+    artifactDir.set(file("path/to/apk-or-app-bundle/dir"))
 }
 ```
 
@@ -333,9 +329,9 @@ GPP supports keeping around old artifacts such as OBB files or WearOS APKs:
 play {
     // ...
     retain {
-        artifacts = listOf(123) // Old APK version code
-        mainObb = 123 // Old main OBB version code
-        patchObb = 123 // Old patch OBB version code
+        artifacts.set(listOf(123)) // Old APK version code
+        mainObb.set(123) // Old main OBB version code
+        patchObb.set(123) // Old patch OBB version code
     }
 }
 ```
@@ -352,7 +348,7 @@ default to the App Bundle:
 ```kt
 play {
     // ...
-    defaultToAppBundles = true
+    defaultToAppBundles.set(true)
 }
 ```
 
@@ -388,17 +384,18 @@ property:
 ```kt
 play {
     // ...
-    fromTrack = "alpha"
+    fromTrack.set("alpha")
 }
 ```
 
 Similarly, the track *to* which to promote a release defaults to the `promoteTrack` property. If
-unspecified, the `track` property will be used instead. Example configuration:
+unspecified, the resolved `fromTrack` property will be used instead and an in-place update will be
+performed. Example configuration:
 
 ```kt
 play {
     // ...
-    promoteTrack = "beta"
+    promoteTrack.set("beta")
 }
 ```
 
@@ -416,15 +413,16 @@ would promote an artifact from the alpha ➡️ beta track with only 25% of user
 If an artifact already exists with a version code greater than or equal to the one you're trying to
 upload, an error will be thrown when attempting to publish the new artifact. You have two options:
 
-* Ignore the error and continue (`ignore`)
-* Automatically pick the correct version code so you don't have to manually update it (`auto`)
+* Ignore the error and continue (`ResolutionStrategy.IGNORE`)
+* Automatically pick the correct version code so you don't have to manually update it
+  (`ResolutionStrategy.AUTO`)
 
 Example configuration:
 
 ```kt
 play {
     // ...
-    resolutionStrategy = "ignore"
+    resolutionStrategy.set(ResolutionStrategy.IGNORE)
 }
 ```
 
@@ -435,10 +433,21 @@ For example, you could update you app's version name based on the new version co
 ```kt
 play {
     // ...
-    resolutionStrategy = "auto"
-    outputProcessor { // this: ApkVariantOutput
-        versionNameOverride = "$versionNameOverride.$versionCode"
+    resolutionStrategy.set(ResolutionStrategy.AUTO)
+}
+
+android {
+  onVariantProperties {
+    for (output in outputs) {
+      val processedVersionCode = output.versionCode.map { playVersionCode ->
+        // Do something to the version code...
+        // In this example, version names will look like `myCustomVersionName.123`
+        "myCustomVersionName.$playVersionCode"
+      }
+
+      output.versionName.set(processedVersionCode)
     }
+  }
 }
 ```
 
@@ -614,7 +623,7 @@ android {
 
     playConfigs {
         register("myCustomVariantOrProductFlavor") {
-            isEnabled = true
+            enabled.set(true)
         }
 
         // ...
@@ -622,7 +631,7 @@ android {
 }
 
 play {
-    isEnabled = false // This disables GPP by default. It could be the other way around.
+    enabled.set(false) // This disables GPP by default. It could be the other way around.
     // ...
 }
 ```
@@ -637,7 +646,7 @@ android {
 
     playConfigs {
         myCustomVariantOrProductFlavor {
-            enabled = true
+            enabled.set(true)
         }
 
         // ...
@@ -645,7 +654,7 @@ android {
 }
 
 play {
-    enabled = false // This disables GPP by default. It could be the other way around.
+    enabled.set(false) // This disables GPP by default. It could be the other way around.
     // ...
 }
 ```
@@ -665,11 +674,11 @@ android {
 
     playConfigs {
         register("someFlavor1") {
-            commit = false
+            commit.set(false)
         }
 
         register("someFlavor[2..N)") {
-            commit = false
+            commit.set(false)
         }
 
         register("someFlavorN") {
@@ -677,7 +686,7 @@ android {
             // 1. A starter no-commit variant (someFlavor1 in this case)
             // 2. (Optional) Intermediate no-commit variants (someFlavor2, someFlavor3, ...)
             // 3. One finisher variant to commit (aka do NOT mark someFlavorN as no-commit)
-            commit = true
+            commit.set(true)
         }
 
         // ...
@@ -710,11 +719,11 @@ android {
 
     playConfigs {
         someFlavor1 {
-            commit = false
+            commit.set(false)
         }
 
         someFlavor[2..N) {
-            commit = false
+            commit.set(false)
         }
 
         someFlavorN {
@@ -722,7 +731,7 @@ android {
             // 1. A starter no-commit variant (someFlavor1 in this case)
             // 2. (Optional) Intermediate no-commit variants (someFlavor2, someFlavor3, ...)
             // 3. One finisher variant to commit (aka do NOT mark someFlavorN as no-commit)
-            commit = true
+            commit.set(true)
         }
 
         // ...
@@ -760,11 +769,11 @@ android {
 
     playConfigs {
         register("firstCustomer") {
-            serviceAccountCredentials = file("customer-one-key.json")
+            serviceAccountCredentials.set(file("customer-one-key.json"))
         }
 
         register("secondCustomer") {
-            serviceAccountCredentials = file("customer-two-key.json")
+            serviceAccountCredentials.set(file("customer-two-key.json"))
         }
     }
 }
@@ -780,11 +789,11 @@ android {
 
     playConfigs {
         firstCustomer {
-            serviceAccountCredentials = file('customer-one-key.json')
+            serviceAccountCredentials.set(file('customer-one-key.json'))
         }
 
         secondCustomer {
-            serviceAccountCredentials = file('customer-two-key.json')
+            serviceAccountCredentials.set(file('customer-two-key.json'))
         }
     }
 }
