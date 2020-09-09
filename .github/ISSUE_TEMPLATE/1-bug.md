@@ -15,14 +15,15 @@ A clear and concise description of what the bug is.
 
 <!--
 Run this command to get all the version info you need:
-```
-sh ./gradlew buildEnvironment app:buildEnvironment | grep 'com.github.triplet'; \
+```sh
+./gradlew buildEnvironment app:buildEnvironment | grep 'com.github.triplet'; \
   ./gradlew -v | grep 'Gradle'; \
   ./gradlew buildEnvironment | grep 'com.android.tools.build:gradle:'
 ```
 
 For Windows users the equivalent command is:
-```
+
+```bat
 gradlew.bat buildEnvironment app:buildEnvironment | findstr "com.github.triplet" & ^
 gradlew.bat -v | findstr "Gradle" & ^
 gradlew.bat buildEnvironment | findstr "com.android.tools.build:gradle:"
