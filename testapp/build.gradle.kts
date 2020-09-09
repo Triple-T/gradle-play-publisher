@@ -1,4 +1,4 @@
-import com.android.build.gradle.BaseExtension
+import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
 import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import com.github.triplet.gradle.common.utils.orNull
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
@@ -48,7 +48,7 @@ apply(plugin = "kotlin-android")
 apply(plugin = "com.supercilex.gradle.versions")
 apply(plugin = "com.github.triplet.play")
 
-configure<BaseExtension> {
+configure<BaseAppModuleExtension> {
     compileSdkVersion(29)
 
     defaultConfig {
