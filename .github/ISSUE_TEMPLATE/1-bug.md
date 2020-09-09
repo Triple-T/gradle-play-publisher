@@ -20,6 +20,14 @@ Run this command to get all the version info you need:
   ./gradlew -v | grep 'Gradle'; \
   ./gradlew buildEnvironment | grep 'com.android.tools.build:gradle:'
 ```
+
+For Windows users the equivalent command is:
+
+```bat
+gradlew.bat buildEnvironment app:buildEnvironment | findstr "com.github.triplet" & ^
+gradlew.bat -v | findstr "Gradle" & ^
+gradlew.bat buildEnvironment | findstr "com.android.tools.build:gradle:"
+```
 -->
 
 - Gradle Play Publisher: 
