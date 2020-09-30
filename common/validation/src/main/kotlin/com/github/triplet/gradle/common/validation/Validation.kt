@@ -1,7 +1,8 @@
 package com.github.triplet.gradle.common.validation
 
+import com.android.build.api.component.analytics.AnalyticsEnabledApplicationVariant
 import com.android.build.api.variant.ApplicationVariant
-import com.android.build.api.variant.ApplicationVariantProperties
+import com.android.build.gradle.internal.component.ApkCreationConfig
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.kotlin.dsl.apply
@@ -15,8 +16,10 @@ fun Project.validateRuntime() {
 }
 
 /** @return true if the variant is *not* debuggable and can therefore be published. */
-fun validateDebuggability(variant: ApplicationVariant<ApplicationVariantProperties>, logger: Logger): Boolean {
-    val isValid = !variant.debuggable
+fun validateDebuggability(variant: ApplicationVariant, logger: Logger): Boolean {
+    val hackToGetDebuggable =
+            ((variant as AnalyticsEnabledApplicationVariant).delegate as ApkCreationConfig)
+    val isValid = !hackToGetDebuggable.debuggable
 
     if (!isValid) {
         val typeName = variant.buildType

@@ -158,7 +158,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
         val android = project.the<BaseAppModuleExtension>()
         (android as ExtensionAware).extensions.add(PLAY_CONFIGS_PATH, extensionContainer)
 
-        android.onVariants v@{
+        android.onVariantProperties p@{
             val variantName = name.capitalize()
             val extension = buildExtension(
                     project,
@@ -169,16 +169,17 @@ internal class PlayPublisherPlugin : Plugin<Project> {
             project.logger.debug("Extension computed for variant '$name': ${extension.toConfig()}")
             project.afterEvaluate {
                 project.logger.debug(
-                        "Extension resolved for variant '${this@v.name}': ${extension.toConfig()}")
+                        "Extension resolved for variant '${this@p.name}': ${extension.toConfig()}")
             }
 
             if (!extension.enabled.get()) {
                 project.logger.info("Gradle Play Publisher is disabled for variant '$name'.")
-                return@v
+                return@p
             }
             extension.validateCreds()
 
-            onProperties p@{
+            // Add a pointless run block to keep the same indentation as the code without this patch
+            run {
                 fun findApkFiles(): Provider<List<String>> = extension.artifactDir.map {
                     val customDir = it.asFile
                     if (customDir.isFile && customDir.extension == "apk") {
@@ -225,7 +226,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                     apiService.set(api)
                     apks.from(findApkFiles())
                     outputDirectory.set(project.layout.buildDirectory.dir(
-                            "outputs/internal-sharing/apk/${this@v.name}"))
+                            "outputs/internal-sharing/apk/${this@p.name}"))
 
                     configure3pDeps(variantName)
                 }
@@ -241,7 +242,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                     apiService.set(api)
                     bundle.set(findBundleFile())
                     outputDirectory.set(project.layout.buildDirectory.dir(
-                            "outputs/internal-sharing/bundle/${this@v.name}"))
+                            "outputs/internal-sharing/bundle/${this@p.name}"))
 
                     configure3pDeps(variantName)
                 }
@@ -288,7 +289,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 }.also { task ->
                     // TODO(asaveau): remove once there's an API for sourceSets in the new model
                     android.applicationVariants
-                            .matching { it.name == this@v.name }
+                            .matching { it.name == this@p.name }
                             .whenObjectAdded {
                                 val dirs = sourceSets.map {
                                     project.layout.projectDirectory.dir("src/${it.name}/$PLAY_PATH")
@@ -342,7 +343,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                     apiService.set(api)
                     versionCodes.set(staticVersionCodes)
                     playVersionCodes.set(project.layout.buildDirectory.file(
-                            "$INTERMEDIATES_OUTPUT_PATH/${this@v.name}/available-version-codes.txt"))
+                            "$INTERMEDIATES_OUTPUT_PATH/${this@p.name}/available-version-codes.txt"))
                 }
                 if (extension.resolutionStrategy.get() == ResolutionStrategy.AUTO) {
                     for ((i, output) in outputs.withIndex()) {
@@ -393,7 +394,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                     configure3pDeps(variantName)
 
                     nativeDebugSymbols.set(project.layout.buildDirectory.file(
-                            "outputs/native-debug-symbols/${this@v.name}/native-debug-symbols.zip"
+                            "outputs/native-debug-symbols/${this@p.name}/native-debug-symbols.zip"
                     ).map {
                         it.takeIf { it.asFile.exists() }.sneakyNull()
                     })

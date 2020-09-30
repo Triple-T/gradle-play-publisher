@@ -7,6 +7,7 @@ import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class ProcessArtifactVersionCodesIntegrationTest : IntegrationTestBase() {
@@ -79,6 +80,7 @@ class ProcessArtifactVersionCodesIntegrationTest : IntegrationTestBase() {
         assertThat(result.output).contains("versionCode=42")
     }
 
+    @Disabled("Known bug with AGP 4.2")
     @Test
     fun `Version code with splits is patch incremented`() {
         // language=gradle

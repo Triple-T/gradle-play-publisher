@@ -7,6 +7,7 @@ import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.GradleRunner
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
@@ -573,6 +574,7 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
         }
     }
 
+    @Disabled("Bugsnag borked")
     @ParameterizedTest
     @ValueSource(booleans = [false, true])
     fun `Bugsnag runs on publish`(flavors: Boolean) {
