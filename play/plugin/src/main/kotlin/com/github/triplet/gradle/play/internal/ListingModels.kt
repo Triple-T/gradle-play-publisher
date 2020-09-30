@@ -28,7 +28,6 @@ internal enum class ImageType(
 ) {
     ICON("icon", "icon", 1),
     FEATURE_GRAPHIC("featureGraphic", "feature-graphic", 1),
-    PROMO_GRAPHIC("promoGraphic", "promo-graphic", 1),
 
     PHONE_SCREENSHOTS("phoneScreenshots", "phone-screenshots"),
     SEVEN_INCH_SCREENSHOTS("sevenInchScreenshots", "tablet-screenshots"),
