@@ -82,7 +82,7 @@ To use GPP, you must create a service account with access to the Play Developer 
 1. Enable the
    [AndroidPublisher API](https://console.cloud.google.com/apis/library/androidpublisher.googleapis.com)
    for that GCP project
-1. [Link your Google Play developer account](https://play.google.com/apps/publish#ApiAccessPlace)
+1. [Link your Google Play developer account](https://play.google.com/console/developers/api-access)
    to your GCP project
 1. Create a
    [service account and key](https://console.cloud.google.com/apis/credentials/serviceaccountkey)
@@ -94,9 +94,10 @@ To use GPP, you must create a service account with access to the Play Developer 
 1. Move the downloaded JSON credentials into your project and
    [tell GPP about it](#authenticating-gradle-play-publisher)
 1. Give your service account
-   [permissions to publish apps](https://play.google.com/apps/publish#AdminPlace) on your behalf
+   [permissions to publish apps](https://play.google.com/console/developers/users-and-permissions)
+   on your behalf
    1. Click `Invite new user`
-   1. Copypaste the service account email (you can find it in the JSON credentials)
+   1. Copy/paste the service account email (you can find it in the JSON credentials)
    1. Don't touch the roles
    1. Specify which apps the service account should have access to. In this example, GPP has full
       access to testing tracks and app listings, but will be unable to make production releases:
