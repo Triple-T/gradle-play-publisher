@@ -67,17 +67,17 @@ object Config {
         object All {
             const val agp = "com.android.tools.build:gradle:4.2.0-alpha09"
             const val ap =
-                    "com.google.apis:google-api-services-androidpublisher:v3-rev20200817-1.30.10"
-            const val googleClient = "com.google.api-client:google-api-client:1.30.10"
-            const val apacheClientV2 = "com.google.http-client:google-http-client-apache-v2:1.36.0"
-            const val auth = "com.google.auth:google-auth-library-oauth2-http:0.21.1"
-            const val guava = "com.google.guava:guava:29.0-jre"
-            const val jackson = "com.google.http-client:google-http-client-jackson2:1.36.0"
+                    "com.google.apis:google-api-services-androidpublisher:v3-rev20201125-1.31.0"
+            const val googleClient = "com.google.api-client:google-api-client:1.31.1"
+            const val apacheClientV2 = "com.google.http-client:google-http-client-apache-v2:1.38.0"
+            const val auth = "com.google.auth:google-auth-library-oauth2-http:0.22.2"
+            const val guava = "com.google.guava:guava:30.1-jre"
+            const val jackson = "com.google.http-client:google-http-client-jackson2:1.38.0"
 
-            const val junit = "org.junit.jupiter:junit-jupiter-api:5.6.2"
-            const val junitEngine = "org.junit.jupiter:junit-jupiter-engine:5.6.2"
-            const val truth = "com.google.truth:truth:1.0.1"
-            const val mockito = "org.mockito:mockito-core:3.5.9"
+            const val junit = "org.junit.jupiter:junit-jupiter-api:5.7.0"
+            const val junitEngine = "org.junit.jupiter:junit-jupiter-engine:5.7.0"
+            const val truth = "com.google.truth:truth:1.1"
+            const val mockito = "org.mockito:mockito-core:3.6.28"
         }
     }
 }
