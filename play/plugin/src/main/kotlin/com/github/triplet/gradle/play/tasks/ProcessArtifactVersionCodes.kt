@@ -14,6 +14,7 @@ import org.gradle.kotlin.dsl.submit
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.workers.WorkerExecutor
 import javax.inject.Inject
+import kotlin.math.max
 
 internal abstract class ProcessArtifactVersionCodes @Inject constructor(
         extension: PlayPublisherExtension,
@@ -46,9 +47,9 @@ internal abstract class ProcessArtifactVersionCodes @Inject constructor(
             val smallestVersionCode = parameters.defaultVersionCodes.get().min() ?: 1
 
             val outputLines = StringBuilder()
-            val patch = maxVersionCode - smallestVersionCode + 1
+            val patch = max(0, maxVersionCode - smallestVersionCode + 1)
             for ((i, default) in parameters.defaultVersionCodes.get().withIndex()) {
-                if (patch > 0) outputLines.append(default + patch.toInt() + i).append("\n")
+                outputLines.append(default + patch.toInt() + i).append("\n")
             }
 
             parameters.nextAvailableVersionCodes.get().asFile.safeCreateNewFile()

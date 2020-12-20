@@ -56,6 +56,30 @@ class ProcessArtifactVersionCodesIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Version code isn't modified when no changes are necessary`() {
+        // language=gradle
+        val config = """
+            play.resolutionStrategy = ResolutionStrategy.AUTO
+            defaultConfig.versionCode = 42
+
+            onVariantProperties {
+                for (output in outputs) {
+                    output.versionName.set(output.versionCode.map {
+                        println('versionCode=' + it)
+                        it.toString()
+                    })
+                }
+            }
+        """.withAndroidBlock()
+
+        val result = execute(config, "assembleRelease")
+
+        assertThat(result.task(":processReleaseVersionCodes")).isNotNull()
+        assertThat(result.task(":processReleaseVersionCodes")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("versionCode=42")
+    }
+
+    @Test
     fun `Version code with splits is patch incremented`() {
         // language=gradle
         val config = """
