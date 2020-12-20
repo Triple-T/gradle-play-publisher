@@ -237,6 +237,8 @@ Several options are available to customize how your artifacts are published:
 Example configuration:
 
 ```kt
+import com.github.triplet.gradle.androidpublisher.ReleaseStatus
+
 play {
     // Overrides defaults
     track.set("production")
@@ -421,6 +423,8 @@ upload, an error will be thrown when attempting to publish the new artifact. You
 Example configuration:
 
 ```kt
+import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
+
 play {
     // ...
     resolutionStrategy.set(ResolutionStrategy.IGNORE)
@@ -432,6 +436,8 @@ play {
 For example, you could update you app's version name based on the new version code:
 
 ```kt
+import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
+
 play {
     // ...
     resolutionStrategy.set(ResolutionStrategy.AUTO)
