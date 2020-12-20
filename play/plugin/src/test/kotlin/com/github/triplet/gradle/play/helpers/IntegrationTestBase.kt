@@ -104,6 +104,11 @@ abstract class IntegrationTestBase {
                     versionCode 1
                     versionName "1.0"
                 }
+
+                lintOptions {
+                    checkReleaseBuilds false
+                    abortOnError false
+                }
             }
 
             play {
