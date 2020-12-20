@@ -6,12 +6,12 @@ import com.github.triplet.gradle.common.utils.PLUGIN_GROUP
 import com.github.triplet.gradle.common.utils.nullOrFull
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.tasks.CommitEdit
-import com.github.triplet.gradle.play.tasks.GenerateEdit
-import com.github.triplet.gradle.play.tasks.internal.EditTaskBase
+import com.github.triplet.gradle.play.tasks.internal.PlayApiService
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.newInstance
 import org.gradle.kotlin.dsl.register
@@ -43,15 +43,23 @@ internal inline fun <reified T : Task> Project.newTask(
     return tasks.register<T>(name, *constructorArgs).apply { configure(config) }
 }
 
-internal fun Project.getGenEditTask(
-        appId: String,
-        extension: PlayPublisherExtension
-) = rootProject.getOrRegisterEditTask<GenerateEdit>("generateEditFor", extension, appId)
-
 internal fun Project.getCommitEditTask(
         appId: String,
-        extension: PlayPublisherExtension
-) = rootProject.getOrRegisterEditTask<CommitEdit>("commitEditFor", extension, appId)
+        extension: PlayPublisherExtension,
+        api: Provider<PlayApiService>
+): TaskProvider<CommitEdit> {
+    val taskName = "commitEditFor" + appId.split(".").joinToString("Dot") { it.capitalize() }
+    return try {
+        rootProject.tasks.register<CommitEdit>(taskName, extension).apply {
+            configure {
+                apiService.set(api)
+            }
+        }
+    } catch (e: InvalidUserDataException) {
+        @Suppress("UNCHECKED_CAST")
+        rootProject.tasks.named(taskName) as TaskProvider<CommitEdit>
+    }
+}
 
 internal fun ApplicationVariant<ApplicationVariantProperties>.buildExtension(
         project: Project,
@@ -95,22 +103,4 @@ private fun buildExtensionInternal(
     }
 
     return mergeExtensions(extensions)
-}
-
-private inline fun <reified T : EditTaskBase> Project.getOrRegisterEditTask(
-        baseName: String,
-        extension: PlayPublisherExtension,
-        appId: String
-): TaskProvider<T> {
-    val taskName = baseName + appId.split(".").joinToString("Dot") { it.capitalize() }
-    return try {
-        tasks.register<T>(taskName, extension).apply {
-            configure {
-                editIdFile.set(layout.buildDirectory.file("$OUTPUT_PATH/$appId.txt"))
-            }
-        }
-    } catch (e: InvalidUserDataException) {
-        @Suppress("UNCHECKED_CAST")
-        tasks.named(taskName) as TaskProvider<T>
-    }
 }

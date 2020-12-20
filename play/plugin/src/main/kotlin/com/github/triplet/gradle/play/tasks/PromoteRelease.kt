@@ -12,9 +12,8 @@ import org.gradle.workers.WorkerExecutor
 import javax.inject.Inject
 
 internal abstract class PromoteRelease @Inject constructor(
-        extension: PlayPublisherExtension,
-        appId: String
-) : PublishArtifactTaskBase(extension, appId), UpdatableTrackExtensionOptions {
+        extension: PlayPublisherExtension
+) : PublishArtifactTaskBase(extension), UpdatableTrackExtensionOptions {
     init {
         // Always out-of-date since we don't know what's changed on the network
         outputs.upToDateWhen { false }
@@ -29,11 +28,11 @@ internal abstract class PromoteRelease @Inject constructor(
 
     abstract class Promoter : PublishArtifactWorkerBase<PublishArtifactWorkerBase.ArtifactPublishingParams>() {
         override fun upload() {
-            val fromTrack = config.fromTrack ?: edits.findLeastStableTrackName()
+            val fromTrack = config.fromTrack ?: apiService.edits.findLeastStableTrackName()
             checkNotNull(fromTrack) { "No tracks to promote. Did you mean to run publish?" }
             val promoteTrack = config.promoteTrack ?: fromTrack
 
-            edits.promoteRelease(
+            apiService.edits.promoteRelease(
                     promoteTrack,
                     fromTrack,
                     config.releaseStatus,

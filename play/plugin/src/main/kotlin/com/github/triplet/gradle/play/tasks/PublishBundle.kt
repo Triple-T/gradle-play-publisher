@@ -18,9 +18,8 @@ import org.gradle.workers.WorkerExecutor
 import javax.inject.Inject
 
 internal abstract class PublishBundle @Inject constructor(
-        extension: PlayPublisherExtension,
-        appId: String
-) : PublishArtifactTaskBase(extension, appId), PublishableTrackExtensionOptions {
+        extension: PlayPublisherExtension
+) : PublishArtifactTaskBase(extension), PublishableTrackExtensionOptions {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFile
     internal abstract val bundle: RegularFileProperty
@@ -42,10 +41,10 @@ internal abstract class PublishBundle @Inject constructor(
     abstract class BundleUploader : PublishArtifactWorkerBase<BundleUploader.Params>() {
         override fun upload() {
             val bundleFile = parameters.bundleFile.get().asFile
-            edits.uploadBundle(
+            apiService.edits.uploadBundle(
                     bundleFile,
                     config.resolutionStrategy,
-                    parameters.skippedMarker.get().asFile.exists(),
+                    apiService.shouldSkip(),
                     config.track,
                     config.releaseStatus,
                     findReleaseName(config.track),

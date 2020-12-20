@@ -23,9 +23,8 @@ import java.io.File
 import javax.inject.Inject
 
 internal abstract class PublishInternalSharingApk @Inject constructor(
-        extension: PlayPublisherExtension,
-        appId: String
-) : PublishTaskBase(extension, appId), ArtifactExtensionOptions {
+        extension: PlayPublisherExtension
+) : PublishTaskBase(extension), ArtifactExtensionOptions {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:SkipWhenEmpty
     @get:InputFiles
@@ -67,7 +66,7 @@ internal abstract class PublishInternalSharingApk @Inject constructor(
     abstract class ApkUploader : PlayWorkerBase<ApkUploader.Params>() {
         override fun execute() {
             val apkFile = parameters.apkFile.get().asFile
-            val response = publisher.uploadInternalSharingApk(apkFile)
+            val response = apiService.publisher.uploadInternalSharingApk(apkFile)
 
             println("Upload successful: ${response.downloadUrl}")
             parameters.outputDir.get().file("${System.currentTimeMillis()}.json").asFile

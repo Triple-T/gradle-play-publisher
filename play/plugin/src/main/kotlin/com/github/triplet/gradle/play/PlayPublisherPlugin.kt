@@ -8,6 +8,7 @@ import com.github.triplet.gradle.common.utils.safeMkdirs
 import com.github.triplet.gradle.common.validation.validateRuntime
 import com.github.triplet.gradle.play.internal.CliPlayPublisherExtension
 import com.github.triplet.gradle.play.internal.INTERMEDIATES_OUTPUT_PATH
+import com.github.triplet.gradle.play.internal.OUTPUT_PATH
 import com.github.triplet.gradle.play.internal.PLAY_CONFIGS_PATH
 import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
@@ -16,7 +17,6 @@ import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
 import com.github.triplet.gradle.play.internal.buildExtension
 import com.github.triplet.gradle.play.internal.flavorNameOrDefault
 import com.github.triplet.gradle.play.internal.getCommitEditTask
-import com.github.triplet.gradle.play.internal.getGenEditTask
 import com.github.triplet.gradle.play.internal.newTask
 import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.internal.toConfig
@@ -36,6 +36,7 @@ import com.github.triplet.gradle.play.tasks.PublishProducts
 import com.github.triplet.gradle.play.tasks.internal.BootstrapLifecycleTask
 import com.github.triplet.gradle.play.tasks.internal.BootstrapOptions
 import com.github.triplet.gradle.play.tasks.internal.GlobalPublishableArtifactLifecycleTask
+import com.github.triplet.gradle.play.tasks.internal.PlayApiService
 import com.github.triplet.gradle.play.tasks.internal.PublishArtifactTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PublishableTrackLifecycleTask
 import com.github.triplet.gradle.play.tasks.internal.UpdatableTrackLifecycleTask
@@ -53,6 +54,7 @@ import org.gradle.kotlin.dsl.findPlugin
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.invoke
 import org.gradle.kotlin.dsl.newInstance
+import org.gradle.kotlin.dsl.registerIfAbsent
 import org.gradle.kotlin.dsl.the
 import org.gradle.kotlin.dsl.withType
 
@@ -205,6 +207,12 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 }.orElse(artifacts.get(ArtifactType.BUNDLE))
 
                 val appId = applicationId.get()
+                val api = project.gradle.sharedServices.registerIfAbsent(
+                        "playApi-$appId", PlayApiService::class) {
+                    parameters.appId.set(appId)
+                    parameters.config.set(extension.toConfig())
+                    parameters.editIdFile.set(project.layout.buildDirectory.file("$OUTPUT_PATH/$appId.txt"))
+                }
 
                 val publishInternalSharingApkTask = project.newTask<PublishInternalSharingApk>(
                         "upload${variantName}PrivateApk",
@@ -212,8 +220,9 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                         |Uploads Internal Sharing APK for variant '$name'.
                         |   See https://github.com/Triple-T/gradle-play-publisher#uploading-an-internal-sharing-artifact
                         """.trimMargin(),
-                        arrayOf(extension, appId)
+                        arrayOf(extension)
                 ) {
+                    apiService.set(api)
                     apks.from(findApkFiles())
                     outputDirectory.set(project.layout.buildDirectory.dir(
                             "outputs/internal-sharing/apk/${this@v.name}"))
@@ -227,8 +236,9 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                         |Uploads Internal Sharing App Bundle for variant '$name'.
                         |   See https://github.com/Triple-T/gradle-play-publisher#uploading-an-internal-sharing-artifact
                         """.trimMargin(),
-                        arrayOf(extension, appId)
+                        arrayOf(extension)
                 ) {
+                    apiService.set(api)
                     bundle.set(findBundleFile())
                     outputDirectory.set(project.layout.buildDirectory.dir(
                             "outputs/internal-sharing/bundle/${this@v.name}"))
@@ -254,10 +264,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
 
                 if (!validateDebuggability()) return@p
 
-                val genEditTask = project.getGenEditTask(appId, extension)
-                val commitEditTask = project.getCommitEditTask(appId, extension)
-                val editFile = genEditTask.flatMap { it.editIdFile }
-                genEditTask { finalizedBy(commitEditTask) }
+                val commitEditTask = project.getCommitEditTask(appId, extension, api)
 
                 val bootstrapTask = project.newTask<Bootstrap>(
                         "bootstrap$variantName",
@@ -265,12 +272,10 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                         |Downloads the Play Store listing metadata for variant '$name'.
                         |   See https://github.com/Triple-T/gradle-play-publisher#quickstart
                         """.trimMargin(),
-                        arrayOf(extension, appId, bootstrapOptionsHolder)
+                        arrayOf(extension, bootstrapOptionsHolder)
                 ) {
+                    apiService.set(api)
                     srcDir.set(project.file("src/$flavorNameOrDefault/$PLAY_PATH"))
-                    editIdFile.set(editFile)
-
-                    dependsOn(genEditTask)
                 }
                 bootstrapAllTask { dependsOn(bootstrapTask) }
 
@@ -305,14 +310,13 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                         |Uploads all Play Store metadata for variant '$name'.
                         |   See https://github.com/Triple-T/gradle-play-publisher#publishing-listings
                         """.trimMargin(),
-                        arrayOf(extension, appId)
+                        arrayOf(extension)
                 ) {
+                    apiService.set(api)
                     resDir.set(resourceDir)
-                    editIdFile.set(editFile)
 
-                    dependsOn(genEditTask)
+                    finalizedBy(commitEditTask)
                 }
-                commitEditTask { mustRunAfter(publishListingTask) }
                 publishListingAllTask { dependsOn(publishListingTask) }
 
                 val publishProductsTask = project.newTask<PublishProducts>(
@@ -321,8 +325,9 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                         |Uploads all Play Store in-app products for variant '$name'.
                         |   See https://github.com/Triple-T/gradle-play-publisher#publishing-in-app-products
                         """.trimMargin(),
-                        arrayOf(extension, appId)
+                        arrayOf(extension)
                 ) {
+                    apiService.set(api)
                     productsDir.setFrom(resourceDir.map {
                         it.dir(PRODUCTS_PATH).asFileTree.matching { include("*.json") }
                     })
@@ -332,14 +337,12 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 val staticVersionCodes = outputs.map { it.versionCode.get() }
                 val processArtifactVersionCodes = project.newTask<ProcessArtifactVersionCodes>(
                         "process${variantName}VersionCodes",
-                        constructorArgs = arrayOf(extension, appId)
+                        constructorArgs = arrayOf(extension)
                 ) {
-                    editIdFile.set(editFile)
+                    apiService.set(api)
                     versionCodes.set(staticVersionCodes)
                     playVersionCodes.set(project.layout.buildDirectory.file(
                             "$INTERMEDIATES_OUTPUT_PATH/${this@v.name}/available-version-codes.txt"))
-
-                    dependsOn(genEditTask)
                 }
                 if (extension.resolutionStrategy.get() == ResolutionStrategy.AUTO) {
                     for ((i, output) in outputs.withIndex()) {
@@ -351,7 +354,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
 
 
                 fun PublishArtifactTaskBase.configureInputs() {
-                    editIdFile.set(editFile)
+                    apiService.set(api)
                     releaseNotesDir.set(resourceDir.map {
                         it.dir(RELEASE_NOTES_PATH).also { it.asFile.safeMkdirs() }
                     })
@@ -366,7 +369,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                         |Uploads APK for variant '$name'.
                         |   See https://github.com/Triple-T/gradle-play-publisher#publishing-apks
                         """.trimMargin(),
-                        arrayOf(extension, appId)
+                        arrayOf(extension)
                 ) {
                     configureInputs()
                     apks.from(findApkFiles())
@@ -386,7 +389,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                         files
                     }))
 
-                    dependsOn(genEditTask)
+                    finalizedBy(commitEditTask)
                     configure3pDeps(variantName)
 
                     nativeDebugSymbols.set(project.layout.buildDirectory.file(
@@ -396,7 +399,6 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                     })
                     dependsOn("merge${variantName}NativeDebugMetadata")
                 }
-                commitEditTask { mustRunAfter(publishApkTask) }
                 publishApkAllTask { dependsOn(publishApkTask) }
 
                 val publishBundleTask = project.newTask<PublishBundle>(
@@ -405,15 +407,14 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                         |Uploads App Bundle for variant '$name'.
                         |   See https://github.com/Triple-T/gradle-play-publisher#publishing-an-app-bundle
                         """.trimMargin(),
-                        arrayOf(extension, appId)
+                        arrayOf(extension)
                 ) {
                     configureInputs()
                     bundle.set(findBundleFile())
 
-                    dependsOn(genEditTask)
+                    finalizedBy(commitEditTask)
                     configure3pDeps(variantName)
                 }
-                commitEditTask { mustRunAfter(publishBundleTask) }
                 publishBundleAllTask { dependsOn(publishBundleTask) }
 
                 val promoteReleaseTask = project.newTask<PromoteRelease>(
@@ -422,15 +423,14 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                         |Promotes a release for variant '$name'.
                         |   See https://github.com/Triple-T/gradle-play-publisher#promoting-artifacts
                         """.trimMargin(),
-                        arrayOf(extension, appId)
+                        arrayOf(extension)
                 ) {
                     configureInputs()
 
-                    dependsOn(genEditTask)
+                    finalizedBy(commitEditTask)
                     mustRunAfter(publishApkTask)
                     mustRunAfter(publishBundleTask)
                 }
-                commitEditTask { mustRunAfter(promoteReleaseTask) }
                 promoteReleaseAllTask { dependsOn(promoteReleaseTask) }
 
                 val publishTask = project.newTask<GlobalPublishableArtifactLifecycleTask>(

@@ -2,7 +2,7 @@ package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.PlayPublisherExtension
-import com.github.triplet.gradle.play.tasks.internal.PublishEditTaskBase
+import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.workers.EditWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
 import org.gradle.api.file.RegularFileProperty
@@ -17,9 +17,8 @@ import javax.inject.Inject
 import kotlin.math.max
 
 internal abstract class ProcessArtifactVersionCodes @Inject constructor(
-        extension: PlayPublisherExtension,
-        appId: String
-) : PublishEditTaskBase(extension, appId) {
+        extension: PlayPublisherExtension
+) : PublishTaskBase(extension) {
     @get:Input
     internal abstract val versionCodes: ListProperty<Int>
 
@@ -42,7 +41,7 @@ internal abstract class ProcessArtifactVersionCodes @Inject constructor(
 
     abstract class VersionCoder : EditWorkerBase<VersionCoder.Params>() {
         override fun execute() {
-            val maxVersionCode = edits.findMaxAppVersionCode()
+            val maxVersionCode = apiService.edits.findMaxAppVersionCode()
 
             val smallestVersionCode = parameters.defaultVersionCodes.get().min() ?: 1
 

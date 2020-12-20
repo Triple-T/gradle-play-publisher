@@ -18,9 +18,8 @@ import org.gradle.workers.WorkerExecutor
 import javax.inject.Inject
 
 internal abstract class PublishInternalSharingBundle @Inject constructor(
-        extension: PlayPublisherExtension,
-        appId: String
-) : PublishTaskBase(extension, appId), ArtifactExtensionOptions {
+        extension: PlayPublisherExtension
+) : PublishTaskBase(extension), ArtifactExtensionOptions {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFile
     internal abstract val bundle: RegularFileProperty
@@ -41,7 +40,7 @@ internal abstract class PublishInternalSharingBundle @Inject constructor(
     abstract class BundleUploader : PlayWorkerBase<BundleUploader.Params>() {
         override fun execute() {
             val bundleFile = parameters.bundleFile.get().asFile
-            val response = publisher.uploadInternalSharingBundle(bundleFile)
+            val response = apiService.publisher.uploadInternalSharingBundle(bundleFile)
 
             println("Upload successful: ${response.downloadUrl}")
             parameters.outputDir.get().file("${System.currentTimeMillis()}.json").asFile

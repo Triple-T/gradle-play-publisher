@@ -1,22 +1,12 @@
 package com.github.triplet.gradle.play.tasks.internal.workers
 
-import com.github.triplet.gradle.common.utils.marked
 import com.github.triplet.gradle.play.internal.toConfig
 import com.github.triplet.gradle.play.tasks.internal.PublishArtifactTaskBase
-import com.github.triplet.gradle.play.tasks.internal.PublishEditTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 
 internal fun PublishTaskBase.paramsForBase(params: PlayWorkerBase.PlayPublishingParams) {
     params.config.set(extension.toConfig())
-    params.appId.set(appId)
-
-    if (params is EditWorkerBase.EditPublishingParams) {
-        this as PublishEditTaskBase
-
-        params.editId.set(editId)
-        params.commitMarker.set(editIdFile.get().asFile.marked("commit"))
-        params.skippedMarker.set(editIdFile.get().asFile.marked("skipped"))
-    }
+    params.apiService.set(apiService)
 
     if (params is PublishArtifactWorkerBase.ArtifactPublishingParams) {
         this as PublishArtifactTaskBase
@@ -28,15 +18,11 @@ internal fun PublishTaskBase.paramsForBase(params: PlayWorkerBase.PlayPublishing
 
 internal fun PlayWorkerBase.PlayPublishingParams.copy(into: PlayWorkerBase.PlayPublishingParams) {
     into.config.set(config)
-    into.appId.set(appId)
+    into.apiService.set(apiService)
 }
 
 internal fun EditWorkerBase.EditPublishingParams.copy(into: EditWorkerBase.EditPublishingParams) {
     (this as PlayWorkerBase.PlayPublishingParams).copy(into)
-
-    into.editId.set(editId)
-    into.commitMarker.set(commitMarker)
-    into.skippedMarker.set(skippedMarker)
 }
 
 internal fun PublishArtifactWorkerBase.ArtifactPublishingParams.copy(

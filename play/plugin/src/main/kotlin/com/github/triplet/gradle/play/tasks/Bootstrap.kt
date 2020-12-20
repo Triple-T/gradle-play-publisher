@@ -12,7 +12,7 @@ import com.github.triplet.gradle.play.internal.ListingDetail
 import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
 import com.github.triplet.gradle.play.tasks.internal.BootstrapOptions
-import com.github.triplet.gradle.play.tasks.internal.PublishEditTaskBase
+import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.workers.EditWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.workers.copy
 import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
@@ -33,9 +33,8 @@ import javax.inject.Inject
 
 internal abstract class Bootstrap @Inject constructor(
         extension: PlayPublisherExtension,
-        appId: String,
         optionsHolder: BootstrapOptions.Holder
-) : PublishEditTaskBase(extension, appId), BootstrapOptions by optionsHolder {
+) : PublishTaskBase(extension), BootstrapOptions by optionsHolder {
     @get:OutputDirectory
     abstract val srcDir: DirectoryProperty
 
@@ -86,7 +85,7 @@ internal abstract class Bootstrap @Inject constructor(
     abstract class DetailsDownloader : EditWorkerBase<DetailsDownloader.Params>() {
         override fun execute() {
             println("Downloading app details")
-            val details = edits.getAppDetails()
+            val details = apiService.edits.getAppDetails()
 
             details.defaultLocale.nullOrFull()?.write(AppDetail.DEFAULT_LANGUAGE)
             details.contactEmail.nullOrFull()?.write(AppDetail.CONTACT_EMAIL)
@@ -107,7 +106,7 @@ internal abstract class Bootstrap @Inject constructor(
     ) : EditWorkerBase<ListingsDownloader.Params>() {
         override fun execute() {
             println("Downloading listings")
-            val listings = edits.getListings()
+            val listings = apiService.edits.getListings()
 
             for (listing in listings) {
                 val rootDir = parameters.dir.get().dir(listing.locale)
@@ -149,7 +148,7 @@ internal abstract class Bootstrap @Inject constructor(
     ) : EditWorkerBase<ImageFetcher.Params>() {
         override fun execute() {
             val typeName = parameters.imageType.get().publishedName
-            val images = edits.getImages(parameters.language.get(), typeName)
+            val images = apiService.edits.getImages(parameters.language.get(), typeName)
             val imageDir = parameters.dir.get().dir(parameters.imageType.get().dirName)
 
             if (images.isEmpty()) return
@@ -190,7 +189,7 @@ internal abstract class Bootstrap @Inject constructor(
         override fun execute() {
             println("Downloading release notes")
 
-            val notes = edits.getReleaseNotes()
+            val notes = apiService.edits.getReleaseNotes()
             for (note in notes) {
                 parameters.dir.get().file("${note.locale}/${note.track}.txt")
                         .write(note.contents)
@@ -206,7 +205,7 @@ internal abstract class Bootstrap @Inject constructor(
         override fun execute() {
             println("Downloading in-app products")
 
-            val products = publisher.getInAppProducts()
+            val products = apiService.publisher.getInAppProducts()
             for (product in products) {
                 parameters.dir.get().file("${product.sku}.json").write(product.json)
             }

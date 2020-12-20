@@ -1,6 +1,7 @@
 package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.androidpublisher.EditResponse
+import com.github.triplet.gradle.androidpublisher.FakeEditManager
 import com.github.triplet.gradle.androidpublisher.FakePlayPublisher
 import com.github.triplet.gradle.androidpublisher.newFailureEditResponse
 import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
@@ -8,6 +9,7 @@ import com.github.triplet.gradle.common.utils.marked
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
+import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.Test
 import java.io.File
@@ -20,11 +22,10 @@ class GenerateEditIntegrationTest : IntegrationTestBase() {
     fun `Fresh edit is created by default`() {
         val editFile = File(appDir, "build/gpp/com.example.publisher.txt")
 
-        val result = execute("", "generateEditForComDotExampleDotPublisher")
+        val result = configureLazyEditGeneration()
 
-        assertThat(result.task(":generateEditForComDotExampleDotPublisher")).isNotNull()
-        assertThat(result.task(":generateEditForComDotExampleDotPublisher")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.task(":gen")).isNotNull()
+        assertThat(result.task(":gen")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).doesNotContain("getEdit")
         assertThat(result.output).contains("insertEdit(")
         assertThat(editFile.readText()).isEqualTo("edit-id")
@@ -36,11 +37,10 @@ class GenerateEditIntegrationTest : IntegrationTestBase() {
         editFile.safeCreateNewFile().writeText("foobar")
         editFile.marked("skipped").safeCreateNewFile()
 
-        val result = execute("", "generateEditForComDotExampleDotPublisher",
-                             "-x", "commitEditForComDotExampleDotPublisher")
+        val result = configureLazyEditGeneration()
 
-        assertThat(result.task(":generateEditForComDotExampleDotPublisher")).isNotNull()
-        assertThat(result.task(":generateEditForComDotExampleDotPublisher")!!.outcome)
+        assertThat(result.task(":gen")).isNotNull()
+        assertThat(result.task(":gen")!!.outcome)
                 .isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).doesNotContain("insertEdit")
         assertThat(result.output).contains("getEdit(foobar)")
@@ -57,14 +57,34 @@ class GenerateEditIntegrationTest : IntegrationTestBase() {
         editFile.safeCreateNewFile().writeText("foobar")
         editFile.marked("skipped").safeCreateNewFile()
 
-        val result = execute(config, "generateEditForComDotExampleDotPublisher")
+        val result = configureLazyEditGeneration(config)
 
-        assertThat(result.task(":generateEditForComDotExampleDotPublisher")).isNotNull()
-        assertThat(result.task(":generateEditForComDotExampleDotPublisher")!!.outcome)
+        assertThat(result.task(":gen")).isNotNull()
+        assertThat(result.task(":gen")!!.outcome)
                 .isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("getEdit(foobar)")
         assertThat(result.output).contains("insertEdit(")
         assertThat(editFile.readText()).isEqualTo("edit-id")
+    }
+
+    private fun configureLazyEditGeneration(additionalConfig: String = ""): BuildResult {
+        // language=gradle
+        val config = """
+            import com.github.triplet.gradle.play.tasks.internal.PlayApiService
+
+            tasks.register("gen") { gen ->
+                def service = gradle.sharedServices.registrations
+                            .named("playApi-com.example.publisher")
+                            .get().getService().get() as PlayApiService
+
+                doLast {
+                    service.getEdits()
+                }
+            }
+
+            $additionalConfig
+        """
+        return execute(config, "gen")
     }
 
     companion object {
@@ -85,7 +105,11 @@ class GenerateEditIntegrationTest : IntegrationTestBase() {
                     }
                 }
             }
+            val edits = object : FakeEditManager() {
+            }
+
             publisher.install()
+            edits.install()
         }
     }
 }

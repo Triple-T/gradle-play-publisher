@@ -8,7 +8,7 @@ import com.github.triplet.gradle.play.internal.GRAPHICS_PATH
 import com.github.triplet.gradle.play.internal.ImageType
 import com.github.triplet.gradle.play.internal.LISTINGS_PATH
 import com.github.triplet.gradle.play.internal.ListingDetail
-import com.github.triplet.gradle.play.tasks.internal.PublishEditTaskBase
+import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.WriteTrackExtensionOptions
 import com.github.triplet.gradle.play.tasks.internal.workers.EditWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.workers.copy
@@ -39,9 +39,8 @@ import java.io.Serializable
 import javax.inject.Inject
 
 internal abstract class PublishListings @Inject constructor(
-        extension: PlayPublisherExtension,
-        appId: String
-) : PublishEditTaskBase(extension, appId), WriteTrackExtensionOptions {
+        extension: PlayPublisherExtension
+) : PublishTaskBase(extension), WriteTrackExtensionOptions {
     @get:Internal
     internal abstract val resDir: DirectoryProperty
 
@@ -185,7 +184,8 @@ internal abstract class PublishListings @Inject constructor(
             val contactWebsite = AppDetail.CONTACT_WEBSITE.read()
 
             println("Uploading app details")
-            edits.publishAppDetails(defaultLanguage, contactEmail, contactPhone, contactWebsite)
+            apiService.edits.publishAppDetails(
+                    defaultLanguage, contactEmail, contactPhone, contactWebsite)
         }
 
         private fun AppDetail.read() =
@@ -211,7 +211,8 @@ internal abstract class PublishListings @Inject constructor(
             }
 
             println("Uploading $locale listing")
-            edits.publishListing(locale, title, shortDescription, fullDescription, video)
+            apiService.edits.publishListing(
+                    locale, title, shortDescription, fullDescription, video)
         }
 
         private fun ListingDetail.read() =
@@ -235,13 +236,13 @@ internal abstract class PublishListings @Inject constructor(
                     .parentFile // graphics
                     .parentFile // en-US
                     .name
-            val remoteHashes = edits.getImages(locale, typeName).map { it.sha256 }
+            val remoteHashes = apiService.edits.getImages(locale, typeName).map { it.sha256 }
             val localHashes = files.map {
                 Files.asByteSource(it).hash(Hashing.sha256()).toString()
             }
             if (remoteHashes == localHashes) return
 
-            edits.publishImages(locale, typeName, files)
+            apiService.edits.publishImages(locale, typeName, files)
         }
 
         interface Params : EditPublishingParams {

@@ -26,9 +26,8 @@ import java.io.File
 import javax.inject.Inject
 
 internal abstract class PublishApk @Inject constructor(
-        extension: PlayPublisherExtension,
-        appId: String
-) : PublishArtifactTaskBase(extension, appId), PublishableTrackExtensionOptions {
+        extension: PlayPublisherExtension
+) : PublishArtifactTaskBase(extension), PublishableTrackExtensionOptions {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:SkipWhenEmpty
     @get:InputFiles
@@ -90,9 +89,9 @@ internal abstract class PublishApk @Inject constructor(
             val versions = parameters.uploadResults.asFileTree.map {
                 it.name.toLong()
             }.sorted()
-            edits.publishApk(
+            apiService.edits.publishApk(
                     versions,
-                    parameters.skippedMarker.get().asFile.exists(),
+                    apiService.shouldSkip(),
                     config.track,
                     config.releaseStatus,
                     findReleaseName(config.track),
@@ -118,7 +117,7 @@ internal abstract class PublishApk @Inject constructor(
 
         override fun upload() {
             val apkFile = parameters.apkFile.get().asFile
-            val versionCode = edits.uploadApk(
+            val versionCode = apiService.edits.uploadApk(
                     apkFile,
                     parameters.mappingFile.orNull?.asFile,
                     parameters.debugSymbolsFile.orNull?.asFile,

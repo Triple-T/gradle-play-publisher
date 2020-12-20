@@ -25,9 +25,8 @@ import org.gradle.workers.WorkerExecutor
 import javax.inject.Inject
 
 internal abstract class PublishProducts @Inject constructor(
-        extension: PlayPublisherExtension,
-        appId: String
-) : PublishTaskBase(extension, appId) {
+        extension: PlayPublisherExtension
+) : PublishTaskBase(extension) {
     @get:Incremental
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
@@ -68,8 +67,8 @@ internal abstract class PublishProducts @Inject constructor(
             }
 
             println("Uploading ${product["sku"]}")
-            val response = publisher.updateInAppProduct(productFile)
-            if (response.needsCreating) publisher.insertInAppProduct(productFile)
+            val response = apiService.publisher.updateInAppProduct(productFile)
+            if (response.needsCreating) apiService.publisher.insertInAppProduct(productFile)
         }
 
         interface Params : PlayPublishingParams {
