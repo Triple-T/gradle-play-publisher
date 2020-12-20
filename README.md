@@ -411,6 +411,11 @@ would promote an artifact from the alpha ➡️ beta track with only 25% of user
   --release-status inProgress --user-fraction .25
 ```
 
+#### Finishing a rollout
+
+If you have an ongoing `inProgress` release and would like to perform a full rollout, simply change
+the release status to `completed`. A user fraction of `1.0` is invalid and will be rejected.
+
 ### Handling version conflicts
 
 If an artifact already exists with a version code greater than or equal to the one you're trying to
