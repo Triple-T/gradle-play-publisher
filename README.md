@@ -23,32 +23,32 @@ other metadata.
 
 1. [Quickstart guide](#quickstart-guide)
 1. [Prerequisites](#prerequisites)
-   1. [Initial Play Store upload](#initial-play-store-upload)
-   1. [Signing configuration](#signing-configuration)
-   1. [Service Account](#service-account)
+    1. [Initial Play Store upload](#initial-play-store-upload)
+    1. [Signing configuration](#signing-configuration)
+    1. [Service Account](#service-account)
 1. [Basic setup](#basic-setup)
-   1. [Installation](#installation)
-   1. [Authenticating Gradle Play Publisher](#authenticating-gradle-play-publisher)
+    1. [Installation](#installation)
+    1. [Authenticating Gradle Play Publisher](#authenticating-gradle-play-publisher)
 1. [Task organization](#task-organization)
 1. [Managing artifacts](#managing-artifacts)
-   1. [Common configuration](#common-configuration)
-   1. [Publishing an App Bundle](#publishing-an-app-bundle)
-   1. [Publishing APKs](#publishing-apks)
-   1. [Uploading an Internal Sharing artifact](#uploading-an-internal-sharing-artifact)
-   1. [Promoting artifacts](#promoting-artifacts)
-   1. [Handling version conflicts](#handling-version-conflicts)
+    1. [Common configuration](#common-configuration)
+    1. [Publishing an App Bundle](#publishing-an-app-bundle)
+    1. [Publishing APKs](#publishing-apks)
+    1. [Uploading an Internal Sharing artifact](#uploading-an-internal-sharing-artifact)
+    1. [Promoting artifacts](#promoting-artifacts)
+    1. [Handling version conflicts](#handling-version-conflicts)
 1. [Managing Play Store metadata](#managing-play-store-metadata)
-   1. [Quickstart](#quickstart)
-   1. [Directory structure](#directory-structure)
-   1. [Publishing listings](#publishing-listings)
-   1. [Publishing in-app products](#publishing-in-app-products)
+    1. [Quickstart](#quickstart)
+    1. [Directory structure](#directory-structure)
+    1. [Publishing listings](#publishing-listings)
+    1. [Publishing in-app products](#publishing-in-app-products)
 1. [Working with product flavors](#working-with-product-flavors)
-   1. [Disabling publishing](#disabling-publishing)
-   1. [Combining artifacts into a single release](#combining-artifacts-into-a-single-release)
-   1. [Using multiple Service Accounts](#using-multiple-service-accounts)
+    1. [Disabling publishing](#disabling-publishing)
+    1. [Combining artifacts into a single release](#combining-artifacts-into-a-single-release)
+    1. [Using multiple Service Accounts](#using-multiple-service-accounts)
 1. [Advanced topics](#advanced-topics)
-   1. [Using CLI options](#using-cli-options)
-   1. [Using HTTPS proxies](#using-https-proxies)
+    1. [Using CLI options](#using-cli-options)
+    1. [Using HTTPS proxies](#using-https-proxies)
 
 ## Quickstart guide
 
@@ -86,30 +86,30 @@ To use GPP, you must create a service account with access to the Play Developer 
    to your GCP project
 1. Create a
    [service account and key](https://console.cloud.google.com/apis/credentials/serviceaccountkey)
-   1. Make sure you're in the GCP project you used above (check the `project` query param in the
-      URL)
-   1. Select `New service account`
-   1. Give it a name and the Project Owner role (don't worry, we'll remove this later)
-   1. Leave JSON checked
+    1. Make sure you're in the GCP project you used above (check the `project` query param in the
+       URL)
+    1. Select `New service account`
+    1. Give it a name and the Project Owner role (don't worry, we'll remove this later)
+    1. Leave JSON checked
 1. Move the downloaded JSON credentials into your project and
    [tell GPP about it](#authenticating-gradle-play-publisher)
 1. Give your service account
    [permissions to publish apps](https://play.google.com/console/developers/users-and-permissions)
    on your behalf
-   1. Click `Invite new user`
-   1. Copy/paste the service account email (you can find it in the JSON credentials)
-   1. Don't touch the roles
-   1. Specify which apps the service account should have access to. In this example, GPP has full
-      access to testing tracks and app listings, but will be unable to make production releases:
-      <img alt="Minimum Service Account permissions" src="assets/min-perms.png" width="66%" />
+    1. Click `Invite new user`
+    1. Copy/paste the service account email (you can find it in the JSON credentials)
+    1. Don't touch the roles
+    1. Specify which apps the service account should have access to. In this example, GPP has full
+       access to testing tracks and app listings, but will be unable to make production releases:
+       <img alt="Minimum Service Account permissions" src="assets/min-perms.png" width="66%" />
 1. Run `./gradlew bootstrap` or some other GPP task to validate your setup
 1. Now that you've successfully created the connection between GCP and Google Play, you can remove
    the Project Owner persmissions
-   1. Go to your [IAM settings](https://console.cloud.google.com/iam-admin/iam)
-   1. Search for the service account you created
-   1. Click the edit icon (found at the end of the row)
-   1. In the permission selection panel that opens, click the trash icon to remove the owner role
-   1. Click save
+    1. Go to your [IAM settings](https://console.cloud.google.com/iam-admin/iam)
+    1. Search for the service account you created
+    1. Click the edit icon (found at the end of the row)
+    1. In the permission selection panel that opens, click the trash icon to remove the owner role
+    1. Click save
 
 ## Basic setup
 
@@ -223,16 +223,16 @@ Several options are available to customize how your artifacts are published:
 
 * `track` is the target stage for an artifact, i.e. `internal`/`alpha`/`beta`/`production` or any
   custom track
-  * Defaults to `internal`
+    * Defaults to `internal`
 * `releaseStatus` is the type of release, i.e. `ReleaseStatus.[COMPLETED/DRAFT/HALTED/IN_PROGRESS]`
-  * Defaults to `ReleaseStatus.COMPLETED`
+    * Defaults to `ReleaseStatus.COMPLETED`
 * `userFraction` is the percentage of users who will receive a staged release
-  * Defaults to `0.1` aka 10%
-  * **Note:** the `userFraction` is only applicable where `releaseStatus=[IN_PROGRESS/HALTED]`
+    * Defaults to `0.1` aka 10%
+    * **Note:** the `userFraction` is only applicable where `releaseStatus=[IN_PROGRESS/HALTED]`
 * `updatePriority` sets the update priority for a new release. See
   [Google's documentation](https://developer.android.com/guide/playcore/in-app-updates) on consuming
   this value.
-  * Defaults to the API value
+    * Defaults to the API value
 
 Example configuration:
 
