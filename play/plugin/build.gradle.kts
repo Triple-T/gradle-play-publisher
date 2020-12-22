@@ -23,6 +23,7 @@ dependencies {
 
     testImplementation(Config.Libs.All.junit)
     testImplementation(Config.Libs.All.junitEngine)
+    testImplementation(Config.Libs.All.junitParams)
     testImplementation(Config.Libs.All.truth)
 }
 

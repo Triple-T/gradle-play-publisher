@@ -76,6 +76,7 @@ object Config {
 
             const val junit = "org.junit.jupiter:junit-jupiter-api:5.7.0"
             const val junitEngine = "org.junit.jupiter:junit-jupiter-engine:5.7.0"
+            const val junitParams = "org.junit.jupiter:junit-jupiter-params:5.7.0"
             const val truth = "com.google.truth:truth:1.1"
             const val mockito = "org.mockito:mockito-core:3.6.28"
         }

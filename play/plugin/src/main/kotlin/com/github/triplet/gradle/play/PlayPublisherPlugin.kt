@@ -42,6 +42,7 @@ import com.github.triplet.gradle.play.tasks.internal.UpdatableTrackLifecycleTask
 import com.github.triplet.gradle.play.tasks.internal.WriteTrackLifecycleTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.file.RegularFile
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Provider
@@ -227,6 +228,8 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                     apks.from(findApkFiles())
                     outputDirectory.set(project.layout.buildDirectory.dir(
                             "outputs/internal-sharing/apk/${this@v.name}"))
+
+                    configure3pDeps(variantName)
                 }
 
                 val publishInternalSharingBundleTask = project.newTask<PublishInternalSharingBundle>(
@@ -240,6 +243,8 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                     bundle.set(findBundleFile())
                     outputDirectory.set(project.layout.buildDirectory.dir(
                             "outputs/internal-sharing/bundle/${this@v.name}"))
+
+                    configure3pDeps(variantName)
                 }
 
                 project.newTask<InstallInternalSharingArtifact>(
@@ -379,6 +384,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                     mappingFile.set(findDeobfuscationFile())
 
                     dependsOn(genEditTask)
+                    configure3pDeps(variantName)
                 }
                 commitEditTask { mustRunAfter(publishApkTask) }
                 publishApkAllTask { dependsOn(publishApkTask) }
@@ -396,6 +402,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                     mappingFile.set(findDeobfuscationFile())
 
                     dependsOn(genEditTask)
+                    configure3pDeps(variantName)
                 }
                 commitEditTask { mustRunAfter(publishBundleTask) }
                 publishBundleAllTask { dependsOn(publishBundleTask) }
@@ -452,6 +459,30 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 }
             }
         }
+    }
+
+    private fun Task.configure3pDeps(variantName: String) {
+        fun maybeAddDependency(task: String) {
+            if (task in project.tasks.names) {
+                dependsOn(task)
+            }
+        }
+
+        maybeAddDependency("uploadCrashlyticsMappingFile$variantName")
+
+        val bugsnagName = buildString {
+            var seenUpper = false
+            for (c in variantName) {
+                if (c.isUpperCase() && seenUpper) {
+                    append('-')
+                    append(c.toLowerCase())
+                } else {
+                    append(c)
+                }
+                seenUpper = c.isUpperCase() || seenUpper
+            }
+        }
+        maybeAddDependency("uploadBugsnag${bugsnagName}Mapping")
     }
 
     // TODO(asaveau): remove after https://github.com/gradle/gradle/issues/12388

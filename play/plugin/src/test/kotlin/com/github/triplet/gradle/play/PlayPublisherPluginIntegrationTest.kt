@@ -6,7 +6,10 @@ import com.github.triplet.gradle.androidpublisher.PlayPublisher
 import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
+import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import java.io.File
 
 class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
@@ -493,6 +496,158 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
         val result = execute(config, "help")
 
         assertThat(result.output).contains("does not match")
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [false, true])
+    fun `Crashlytics runs on publish`(flavors: Boolean) {
+        // language=gradle
+        val flavorsConfig = """
+            flavorDimensions "version"
+            productFlavors {
+                demo {
+                    dimension "version"
+                    applicationIdSuffix ".demo"
+                    versionNameSuffix "-demo"
+                }
+
+                full {
+                    dimension "version"
+                    applicationIdSuffix ".full"
+                    versionNameSuffix "-full"
+                }
+            }
+        """
+        // language=gradle
+        File(appDir, "build.gradle").writeText("""
+            buildscript {
+                repositories.google()
+
+                dependencies.classpath 'com.google.firebase:firebase-crashlytics-gradle:2.4.1'
+            }
+
+            plugins {
+                id 'com.android.application'
+                id 'com.github.triplet.play'
+            }
+            apply plugin: 'com.google.firebase.crashlytics'
+
+            android {
+                compileSdkVersion 28
+
+                defaultConfig {
+                    applicationId "com.supercilex.test"
+                    minSdkVersion 21
+                    targetSdkVersion 28
+                    versionCode 1
+                    versionName "1.0"
+                }
+
+                buildTypes.release {
+                    shrinkResources true
+                    minifyEnabled true
+                    proguardFiles(getDefaultProguardFile("proguard-android.txt"))
+                }
+
+                ${flavorsConfig.takeIf { flavors } ?: ""}
+            }
+
+            play {
+                serviceAccountCredentials = file('creds.json')
+            }
+        """)
+
+        val flavor = if (flavors) "FullRelease" else "Release"
+        val crashingSensitivePublishingTasks = setOf(
+                "publishApk",
+                "publishBundle",
+                "upload${flavor}PrivateApk",
+                "upload${flavor}PrivateBundle"
+        )
+        for (task in crashingSensitivePublishingTasks) {
+            val result = executeGradle(false) {
+                withArguments(task, "--dry-run")
+            }
+
+            assertThat(result.output).contains(":uploadCrashlyticsMappingFile$flavor")
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [false, true])
+    fun `Bugsnag runs on publish`(flavors: Boolean) {
+        val classpathJars = GradleRunner.create().withPluginClasspath().pluginClasspath
+                .joinToString { "'$it'" }
+
+        // language=gradle
+        val flavorsConfig = """
+            flavorDimensions "version"
+            productFlavors {
+                demo {
+                    dimension "version"
+                    applicationIdSuffix ".demo"
+                    versionNameSuffix "-demo"
+                }
+
+                full {
+                    dimension "version"
+                    applicationIdSuffix ".full"
+                    versionNameSuffix "-full"
+                }
+            }
+        """
+        // language=gradle
+        File(appDir, "build.gradle").writeText("""
+           buildscript {
+                repositories.jcenter()
+
+                dependencies.classpath files($classpathJars)
+                dependencies.classpath 'com.bugsnag:bugsnag-android-gradle-plugin:5.6.0'
+            }
+
+            apply plugin: 'com.android.application'
+            apply plugin: 'com.github.triplet.play'
+            apply plugin: 'com.bugsnag.android.gradle'
+
+            android {
+                compileSdkVersion 28
+
+                defaultConfig {
+                    applicationId "com.supercilex.test"
+                    minSdkVersion 21
+                    targetSdkVersion 28
+                    versionCode 1
+                    versionName "1.0"
+                }
+
+                buildTypes.release {
+                    shrinkResources true
+                    minifyEnabled true
+                    proguardFiles(getDefaultProguardFile("proguard-android.txt"))
+                }
+
+                ${flavorsConfig.takeIf { flavors } ?: ""}
+            }
+
+            play {
+                serviceAccountCredentials = file('creds.json')
+            }
+        """)
+
+        val flavor = if (flavors) "FullRelease" else "Release"
+        val crashingSensitivePublishingTasks = setOf(
+                "publishApk",
+                "publishBundle",
+                "upload${flavor}PrivateApk",
+                "upload${flavor}PrivateBundle"
+        )
+        for (task in crashingSensitivePublishingTasks) {
+            val result = executeGradle(false) {
+                withArguments(task, "--dry-run")
+            }
+
+            assertThat(result.output).contains(":uploadBugsnag")
+        }
     }
 
     companion object {
