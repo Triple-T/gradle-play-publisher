@@ -11,6 +11,7 @@ import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
+import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
@@ -33,6 +34,11 @@ internal abstract class PublishApk @Inject constructor(
     @get:InputFiles
     internal abstract val apks: ConfigurableFileCollection
 
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:Optional
+    @get:InputFile
+    internal abstract val nativeDebugSymbols: RegularFileProperty
+
     // This directory isn't used, but it's needed for up-to-date checks to work
     @Suppress("MemberVisibilityCanBePrivate", "unused")
     @get:Optional
@@ -46,6 +52,7 @@ internal abstract class PublishApk @Inject constructor(
             paramsForBase(this)
 
             apkFiles.set(apks)
+            debugSymbolsFile.set(nativeDebugSymbols)
             uploadResults.set(temporaryDir)
         }
     }
@@ -59,6 +66,7 @@ internal abstract class PublishApk @Inject constructor(
                     parameters.copy(this)
 
                     apkFile.set(apk)
+                    debugSymbolsFile.set(parameters.debugSymbolsFile)
                     uploadResults.set(parameters.uploadResults)
                 }
             }
@@ -82,6 +90,7 @@ internal abstract class PublishApk @Inject constructor(
 
         interface Params : ArtifactUploadingParams {
             val apkFiles: ListProperty<File>
+            val debugSymbolsFile: RegularFileProperty
             val uploadResults: DirectoryProperty
         }
     }
@@ -96,6 +105,7 @@ internal abstract class PublishApk @Inject constructor(
             val versionCode = edits.uploadApk(
                     apkFile,
                     parameters.mappingFile.orNull?.asFile,
+                    parameters.debugSymbolsFile.orNull?.asFile,
                     config.resolutionStrategy,
                     config.retainMainObb,
                     config.retainPatchObb
@@ -106,6 +116,7 @@ internal abstract class PublishApk @Inject constructor(
 
         interface Params : ArtifactUploadingParams {
             val apkFile: RegularFileProperty
+            val debugSymbolsFile: RegularFileProperty
             val uploadResults: DirectoryProperty
         }
     }

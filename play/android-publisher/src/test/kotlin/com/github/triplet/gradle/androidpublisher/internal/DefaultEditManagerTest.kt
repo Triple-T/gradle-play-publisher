@@ -88,7 +88,7 @@ class DefaultEditManagerTest {
                 retainableArtifacts = listOf(777)
         )
 
-        verify(mockPublisher, never()).uploadDeobfuscationFile(any(), any(), anyInt())
+        verify(mockPublisher, never()).uploadDeobfuscationFile(any(), any(), anyInt(), any())
     }
 
     @Test
@@ -112,7 +112,7 @@ class DefaultEditManagerTest {
                 retainableArtifacts = listOf(777)
         )
 
-        verify(mockPublisher, never()).uploadDeobfuscationFile(any(), any(), anyInt())
+        verify(mockPublisher, never()).uploadDeobfuscationFile(any(), any(), anyInt(), any())
     }
 
     @Test
@@ -136,7 +136,8 @@ class DefaultEditManagerTest {
                 retainableArtifacts = listOf(777)
         )
 
-        verify(mockPublisher).uploadDeobfuscationFile(eq("edit-id"), eq(mockFile), eq(888))
+        verify(mockPublisher)
+                .uploadDeobfuscationFile(eq("edit-id"), eq(mockFile), eq(888), eq("proguard"))
     }
 
     @Test
@@ -194,6 +195,7 @@ class DefaultEditManagerTest {
         val versionCode = edits.uploadApk(
                 apkFile = mockFile,
                 mappingFile = null,
+                debugSymbolsFile = null,
                 strategy = ResolutionStrategy.FAIL,
                 mainObbRetainable = 123,
                 patchObbRetainable = 321
@@ -212,12 +214,13 @@ class DefaultEditManagerTest {
         edits.uploadApk(
                 apkFile = mockFile,
                 mappingFile = mockFile,
+                debugSymbolsFile = null,
                 strategy = ResolutionStrategy.FAIL,
                 mainObbRetainable = 123,
                 patchObbRetainable = 321
         )
 
-        verify(mockPublisher, never()).uploadDeobfuscationFile(any(), any(), anyInt())
+        verify(mockPublisher, never()).uploadDeobfuscationFile(any(), any(), anyInt(), any())
     }
 
     @Test
@@ -230,12 +233,13 @@ class DefaultEditManagerTest {
         edits.uploadApk(
                 apkFile = mockFile,
                 mappingFile = mockFile,
+                debugSymbolsFile = null,
                 strategy = ResolutionStrategy.FAIL,
                 mainObbRetainable = 123,
                 patchObbRetainable = 321
         )
 
-        verify(mockPublisher, never()).uploadDeobfuscationFile(any(), any(), anyInt())
+        verify(mockPublisher, never()).uploadDeobfuscationFile(any(), any(), anyInt(), any())
     }
 
     @Test
@@ -248,12 +252,34 @@ class DefaultEditManagerTest {
         edits.uploadApk(
                 apkFile = mockFile,
                 mappingFile = mockFile,
+                debugSymbolsFile = null,
                 strategy = ResolutionStrategy.FAIL,
                 mainObbRetainable = 123,
                 patchObbRetainable = 321
         )
 
-        verify(mockPublisher).uploadDeobfuscationFile(eq("edit-id"), eq(mockFile), eq(888))
+        verify(mockPublisher)
+                .uploadDeobfuscationFile(eq("edit-id"), eq(mockFile), eq(888), eq("proguard"))
+    }
+
+    @Test
+    fun `uploadApk uploads native symbols file when non-null`() {
+        `when`(mockPublisher.uploadApk(any(), any())).thenReturn(Apk().apply {
+            versionCode = 888
+        })
+        `when`(mockFile.length()).thenReturn(1)
+
+        edits.uploadApk(
+                apkFile = mockFile,
+                mappingFile = null,
+                debugSymbolsFile = mockFile,
+                strategy = ResolutionStrategy.FAIL,
+                mainObbRetainable = 123,
+                patchObbRetainable = 321
+        )
+
+        verify(mockPublisher)
+                .uploadDeobfuscationFile(eq("edit-id"), eq(mockFile), eq(888), eq("nativeCode"))
     }
 
     @Test
@@ -264,7 +290,8 @@ class DefaultEditManagerTest {
 
         edits.uploadApk(
                 apkFile = mockFile,
-                mappingFile = mockFile,
+                mappingFile = null,
+                debugSymbolsFile = null,
                 strategy = ResolutionStrategy.IGNORE,
                 mainObbRetainable = 123,
                 patchObbRetainable = 321
@@ -282,7 +309,8 @@ class DefaultEditManagerTest {
         assertThrows<IllegalStateException> {
             edits.uploadApk(
                     apkFile = mockFile,
-                    mappingFile = mockFile,
+                    mappingFile = null,
+                    debugSymbolsFile = null,
                     strategy = ResolutionStrategy.FAIL,
                     mainObbRetainable = 123,
                     patchObbRetainable = 321
@@ -298,7 +326,8 @@ class DefaultEditManagerTest {
 
         edits.uploadApk(
                 apkFile = mockFile,
-                mappingFile = mockFile,
+                mappingFile = null,
+                debugSymbolsFile = null,
                 strategy = ResolutionStrategy.FAIL,
                 mainObbRetainable = 123,
                 patchObbRetainable = 321
@@ -316,7 +345,8 @@ class DefaultEditManagerTest {
 
         edits.uploadApk(
                 apkFile = mockFile,
-                mappingFile = mockFile,
+                mappingFile = null,
+                debugSymbolsFile = null,
                 strategy = ResolutionStrategy.FAIL,
                 mainObbRetainable = null,
                 patchObbRetainable = null

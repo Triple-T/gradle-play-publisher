@@ -362,6 +362,28 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Build uploads debug symbols when available`() {
+        // language=gradle
+        val config = """
+            defaultConfig.ndk.debugSymbolLevel = 'full'
+
+            externalNativeBuild {
+                cmake {
+                    path = file("src/main/cpp/CMakeLists.txt")
+                }
+            }
+        """.withAndroidBlock()
+
+        val result = execute(config, "publishReleaseApk")
+
+        assertThat(result.task(":publishReleaseApk")).isNotNull()
+        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("uploadApk(")
+        assertThat(result.output).contains("debugSymbolsFile=")
+        assertThat(result.output).doesNotContain("debugSymbolsFile=null")
+    }
+
+    @Test
     fun `Build fails by default when upload fails`() {
         // language=gradle
         val config = """
@@ -692,6 +714,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
                 override fun uploadApk(
                         apkFile: File,
                         mappingFile: File?,
+                        debugSymbolsFile: File?,
                         strategy: ResolutionStrategy,
                         mainObbRetainable: Int?,
                         patchObbRetainable: Int?
@@ -699,6 +722,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
                     println("uploadApk(" +
                                     "apkFile=$apkFile, " +
                                     "mappingFile=$mappingFile, " +
+                                    "debugSymbolsFile=$debugSymbolsFile, " +
                                     "strategy=$strategy, " +
                                     "mainObbRetainable=$mainObbRetainable, " +
                                     "patchObbRetainable=$patchObbRetainable)")

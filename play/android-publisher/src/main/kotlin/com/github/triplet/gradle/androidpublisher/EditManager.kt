@@ -91,6 +91,7 @@ interface EditManager {
     fun uploadApk(
             apkFile: File,
             mappingFile: File?,
+            debugSymbolsFile: File?,
             strategy: ResolutionStrategy,
             mainObbRetainable: Int?,
             patchObbRetainable: Int?

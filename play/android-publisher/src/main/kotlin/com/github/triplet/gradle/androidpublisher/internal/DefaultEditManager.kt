@@ -163,6 +163,7 @@ internal class DefaultEditManager(
     override fun uploadApk(
             apkFile: File,
             mappingFile: File?,
+            debugSymbolsFile: File?,
             strategy: ResolutionStrategy,
             mainObbRetainable: Int?,
             patchObbRetainable: Int?
@@ -178,6 +179,10 @@ internal class DefaultEditManager(
         patchObbRetainable?.attachObb("patch", apk.versionCode)
 
         uploadMappingFile(apk.versionCode, mappingFile)
+        if (debugSymbolsFile != null) {
+            publisher.uploadDeobfuscationFile(
+                    editId, debugSymbolsFile, apk.versionCode, "nativeCode")
+        }
 
         return apk.versionCode.toLong()
     }
@@ -212,7 +217,7 @@ internal class DefaultEditManager(
 
     private fun uploadMappingFile(versionCode: Int, mappingFile: File?) {
         if (mappingFile != null && mappingFile.length() > 0) {
-            publisher.uploadDeobfuscationFile(editId, mappingFile, versionCode)
+            publisher.uploadDeobfuscationFile(editId, mappingFile, versionCode, "proguard")
         }
     }
 

@@ -124,13 +124,19 @@ internal class DefaultPlayPublisher(
 
     override fun uploadDeobfuscationFile(
             editId: String,
-            mappingFile: File,
-            versionCode: Int
+            file: File,
+            versionCode: Int,
+            type: String
     ): DeobfuscationFilesUploadResponse {
-        val mapping = FileContent(MIME_TYPE_STREAM, mappingFile)
+        val mapping = FileContent(MIME_TYPE_STREAM, file)
+        val humanFileName = when (type) {
+            "proguard" -> "mapping"
+            "nativeCode" -> "native debug symbols"
+            else -> type
+        }
         return publisher.edits().deobfuscationfiles()
-                .upload(appId, editId, versionCode, "proguard", mapping)
-                .trackUploadProgress("mapping file", mappingFile)
+                .upload(appId, editId, versionCode, type, mapping)
+                .trackUploadProgress("$humanFileName file", file)
                 .execute()
     }
 

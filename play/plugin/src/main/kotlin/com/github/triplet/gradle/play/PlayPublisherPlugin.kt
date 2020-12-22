@@ -385,6 +385,13 @@ internal class PlayPublisherPlugin : Plugin<Project> {
 
                     dependsOn(genEditTask)
                     configure3pDeps(variantName)
+
+                    nativeDebugSymbols.set(project.layout.buildDirectory.file(
+                            "outputs/native-debug-symbols/${this@v.name}/native-debug-symbols.zip"
+                    ).map {
+                        it.takeIf { it.asFile.exists() }.sneakyNull()
+                    })
+                    dependsOn("merge${variantName}NativeDebugMetadata")
                 }
                 commitEditTask { mustRunAfter(publishApkTask) }
                 publishApkAllTask { dependsOn(publishApkTask) }

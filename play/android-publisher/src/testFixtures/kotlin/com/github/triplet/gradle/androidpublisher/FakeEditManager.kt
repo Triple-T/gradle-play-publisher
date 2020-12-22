@@ -71,6 +71,7 @@ abstract class FakeEditManager : EditManager {
     override fun uploadApk(
             apkFile: File,
             mappingFile: File?,
+            debugSymbolsFile: File?,
             strategy: ResolutionStrategy,
             mainObbRetainable: Int?,
             patchObbRetainable: Int?
