@@ -100,7 +100,7 @@ allprojects {
     tasks.withType<Test> {
         useJUnitPlatform()
 
-        maxHeapSize = "2g"
+        maxHeapSize = "4g"
         systemProperty("junit.jupiter.execution.parallel.enabled", true)
         systemProperty("junit.jupiter.execution.parallel.mode.default", "concurrent")
 

@@ -7,8 +7,10 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.util.UUID
-import java.util.concurrent.locks.ReentrantLock
-import kotlin.concurrent.withLock
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.BlockingQueue
+import kotlin.math.max
+import kotlin.random.Random
 
 abstract class IntegrationTestBase {
     @TempDir
@@ -43,10 +45,11 @@ abstract class IntegrationTestBase {
     protected fun executeGradle(
             expectFailure: Boolean,
             block: GradleRunner.() -> GradleRunner
-    ): BuildResult {
+    ): BuildResult = runWithTestDir { testDir ->
         val runner = GradleRunner.create()
                 .withPluginClasspath()
                 .withProjectDir(appDir)
+                .withTestKitDir(testDir)
                 .let(block)
 
         // We're doing some pretty wack (and disgusting, shameful) shit to run integration tests without
@@ -60,9 +63,13 @@ abstract class IntegrationTestBase {
                 File("../android-publisher/build/resources/testFixtures")
         ))
 
-        val result = lock.withLock { if (expectFailure) runner.buildAndFail() else runner.build() }
-        println(result.output)
-        return result
+        val result = if (expectFailure) runner.buildAndFail() else runner.build()
+
+        if ("--debug" !in runner.arguments) {
+            println(result.output)
+        }
+
+        result
     }
 
     private fun execute(
@@ -126,6 +133,37 @@ abstract class IntegrationTestBase {
     }
 
     private companion object {
-        val lock = ReentrantLock()
+        val testDirPool: BlockingQueue<File>
+
+        init {
+            // Each test kit Gradle runner must start its own daemon which takes a significant
+            // amount of time. Thus, we only want a small amount of concurrency. Furthermore,
+            // having multiple test kits running in parallel without using different directories is
+            // useless as they will all fight to acquire file locks, but initializing those
+            // directories also takes some time.
+            //
+            // To balance all these tradeoffs, we generate a persistent, random set of test kit
+            // directories and pool them for concurrent use by test threads.
+
+            val random = Random(System.getProperty("user.name").hashCode())
+            val tempDir = System.getProperty("java.io.tmpdir")
+
+            val threads = max(1, Runtime.getRuntime().availableProcessors() / 4 - 1)
+            val dirs = mutableListOf<File>()
+            repeat(threads) {
+                dirs.add(File("$tempDir/gppGradleTests${random.nextInt()}"))
+            }
+
+            testDirPool = ArrayBlockingQueue(threads, false, dirs)
+        }
+
+        fun <T> runWithTestDir(block: (File) -> T): T {
+            val dir = testDirPool.take()
+            try {
+                return block(dir)
+            } finally {
+                testDirPool.put(dir)
+            }
+        }
     }
 }
