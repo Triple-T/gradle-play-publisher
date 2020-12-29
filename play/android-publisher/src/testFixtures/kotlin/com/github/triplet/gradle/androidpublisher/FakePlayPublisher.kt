@@ -17,6 +17,9 @@ abstract class FakePlayPublisher : PlayPublisher {
     override fun commitEdit(id: String): Unit =
             throw IllegalStateException("Test wasn't expecting this method to be called.")
 
+    override fun validateEdit(id: String): Unit =
+            throw IllegalStateException("Test wasn't expecting this method to be called.")
+
     override fun uploadInternalSharingBundle(bundleFile: File): UploadInternalSharingArtifactResponse =
             throw IllegalStateException("Test wasn't expecting this method to be called.")
 

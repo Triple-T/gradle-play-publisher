@@ -36,6 +36,14 @@ interface PlayPublisher {
     fun commitEdit(id: String)
 
     /**
+     * Validates an edit with the given [id].
+     *
+     * More docs are available
+     * [here](https://developers.google.com/android-publisher/api-ref/edits/validate).
+     */
+    fun validateEdit(id: String)
+
+    /**
      * Uploads the given [bundleFile] as an Internal Sharing artifact.
      *
      * More docs are available

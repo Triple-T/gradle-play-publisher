@@ -56,6 +56,12 @@ internal abstract class CommitEdit @Inject constructor(
                 }
             } else if (file.marked("skipped").exists()) {
                 println("Changes pending commit")
+                try {
+                    publisher.validateEdit(file.readText())
+                } catch (e: Exception) {
+                    fileOps.delete { delete(file.editIdAndFriends) }
+                    throw e
+                }
             } else {
                 Logging.getLogger(CommitEdit::class.java).info("Nothing to commit, skipping")
             }

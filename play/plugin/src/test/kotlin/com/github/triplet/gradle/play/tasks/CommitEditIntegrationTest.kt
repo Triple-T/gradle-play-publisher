@@ -38,6 +38,7 @@ class CommitEditIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":commitEditForComDotExampleDotPublisher")!!.outcome)
                 .isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).doesNotContain("commitEdit(")
+        assertThat(result.output).contains("validateEdit(")
     }
 
     @Test
@@ -60,6 +61,10 @@ class CommitEditIntegrationTest : IntegrationTestBase() {
             val publisher = object : FakePlayPublisher() {
                 override fun commitEdit(id: String) {
                     println("commitEdit($id)")
+                }
+
+                override fun validateEdit(id: String) {
+                    println("validateEdit($id)")
                 }
             }
             publisher.install()

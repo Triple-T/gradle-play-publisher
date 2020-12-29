@@ -238,6 +238,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("insertEdit()")
         assertThat(result.output).doesNotContain("commitEdit(")
+        assertThat(result.output).contains("validateEdit(")
     }
 
     @Test
@@ -530,6 +531,10 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
 
                 override fun commitEdit(id: String) {
                     println("commitEdit($id)")
+                }
+
+                override fun validateEdit(id: String) {
+                    println("validateEdit($id)")
                 }
             }
             val edits = object : FakeEditManager() {

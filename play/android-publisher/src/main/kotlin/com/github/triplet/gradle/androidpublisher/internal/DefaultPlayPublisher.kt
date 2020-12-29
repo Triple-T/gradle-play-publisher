@@ -48,6 +48,10 @@ internal class DefaultPlayPublisher(
         publisher.edits().commit(appId, id).execute()
     }
 
+    override fun validateEdit(id: String) {
+        publisher.edits().validate(appId, id).execute()
+    }
+
     override fun getAppDetails(editId: String): AppDetails {
         return publisher.edits().details().get(appId, editId).execute()
     }

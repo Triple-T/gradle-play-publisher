@@ -295,6 +295,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("insertEdit()")
         assertThat(result.output).doesNotContain("commitEdit(")
+        assertThat(result.output).contains("validateEdit(")
     }
 
     @Test
@@ -701,6 +702,10 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
                 override fun commitEdit(id: String) {
                     println("commitEdit($id)")
+                }
+
+                override fun validateEdit(id: String) {
+                    println("validateEdit($id)")
                 }
             }
             val edits = object : FakeEditManager() {

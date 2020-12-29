@@ -381,6 +381,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("insertEdit()")
         assertThat(result.output).doesNotContain("commitEdit(")
+        assertThat(result.output).contains("validateEdit(")
     }
 
     companion object {
@@ -400,9 +401,13 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
                 override fun commitEdit(id: String) {
                     println("commitEdit($id)")
                 }
+
+                override fun validateEdit(id: String) {
+                    println("validateEdit($id)")
+                }
             }
             val edits = object : FakeEditManager() {
-                override fun findLeastStableTrackName(): String? {
+                override fun findLeastStableTrackName(): String {
                     println("findLeastStableTrackName()")
                     return System.getProperty("AUTOTRACK") ?: "auto-track"
                 }

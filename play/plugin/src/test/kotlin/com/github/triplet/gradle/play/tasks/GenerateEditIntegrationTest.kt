@@ -36,7 +36,8 @@ class GenerateEditIntegrationTest : IntegrationTestBase() {
         editFile.safeCreateNewFile().writeText("foobar")
         editFile.marked("skipped").safeCreateNewFile()
 
-        val result = execute("", "generateEditForComDotExampleDotPublisher")
+        val result = execute("", "generateEditForComDotExampleDotPublisher",
+                             "-x", "commitEditForComDotExampleDotPublisher")
 
         assertThat(result.task(":generateEditForComDotExampleDotPublisher")).isNotNull()
         assertThat(result.task(":generateEditForComDotExampleDotPublisher")!!.outcome)
