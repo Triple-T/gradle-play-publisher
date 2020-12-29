@@ -324,6 +324,25 @@ For quick access, you can also use the `--artifact-dir` CLI option:
 
 > Note: all artifacts in the specified directory will be published.
 
+##### Uploading mapping files
+
+> Note: mapping files aren't applicable to App Bundles since the mapping file is contained within
+> the bundle.
+
+By default, GPP will look for a file called `mapping.txt` in your artifact directory. If you need
+more granularity, you can prefix `mapping.txt` with your APK file name. For example:
+
+```
+artifact-dir/
+├── mapping.txt
+├── my-first-app.apk
+├── my-second-app.apk
+└── my-second-app.mapping.txt
+```
+
+`my-second-app.apk` will use `my-second-app.mapping.txt` and `my-first-app.apk` will use the
+default `mapping.txt` because no specific mapping file was specified.
+
 #### Retaining artifacts
 
 GPP supports keeping around old artifacts such as OBB files or WearOS APKs:
