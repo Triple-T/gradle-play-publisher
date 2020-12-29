@@ -5,7 +5,6 @@ import com.github.triplet.gradle.play.internal.toConfig
 import com.github.triplet.gradle.play.tasks.internal.PublishArtifactTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PublishEditTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
-import com.github.triplet.gradle.play.tasks.internal.UploadArtifactTaskBase
 
 internal fun PublishTaskBase.paramsForBase(params: PlayWorkerBase.PlayPublishingParams) {
     params.config.set(extension.toConfig())
@@ -24,12 +23,6 @@ internal fun PublishTaskBase.paramsForBase(params: PlayWorkerBase.PlayPublishing
 
         params.releaseNotesDir.set(releaseNotesDir)
         params.consoleNamesDir.set(consoleNamesDir)
-    }
-
-    if (params is UploadArtifactWorkerBase.ArtifactUploadingParams) {
-        this as UploadArtifactTaskBase
-
-        params.mappingFile.set(mappingFile)
     }
 }
 
@@ -53,12 +46,4 @@ internal fun PublishArtifactWorkerBase.ArtifactPublishingParams.copy(
 
     into.releaseNotesDir.set(releaseNotesDir)
     into.consoleNamesDir.set(consoleNamesDir)
-}
-
-internal fun UploadArtifactWorkerBase.ArtifactUploadingParams.copy(
-        into: UploadArtifactWorkerBase.ArtifactUploadingParams
-) {
-    (this as PublishArtifactWorkerBase.ArtifactPublishingParams).copy(into)
-
-    into.mappingFile.set(mappingFile)
 }

@@ -77,6 +77,83 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Using custom artifact with single default mapping file uploads it`() {
+        // language=gradle
+        val config = """
+            play {
+                artifactDir = file('${playgroundDir.escaped()}')
+            }
+        """
+
+        File(playgroundDir, "1.apk").safeCreateNewFile()
+        File(playgroundDir, "mapping.txt").safeCreateNewFile()
+        val result = execute(config, "publishReleaseApk")
+
+        assertThat(result.task(":publishReleaseApk")).isNotNull()
+        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("mapping.txt")
+    }
+
+    @Test
+    fun `Using custom artifact with single specific mapping file uploads it`() {
+        // language=gradle
+        val config = """
+            play {
+                artifactDir = file('${playgroundDir.escaped()}')
+            }
+        """
+
+        File(playgroundDir, "1.apk").safeCreateNewFile()
+        File(playgroundDir, "1.mapping.txt").safeCreateNewFile()
+        val result = execute(config, "publishReleaseApk")
+
+        assertThat(result.task(":publishReleaseApk")).isNotNull()
+        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("1.mapping.txt")
+    }
+
+    @Test
+    fun `Using custom artifact with default and specific mapping files uploads specific`() {
+        // language=gradle
+        val config = """
+            play {
+                artifactDir = file('${playgroundDir.escaped()}')
+            }
+        """
+
+        File(playgroundDir, "1.apk").safeCreateNewFile()
+        File(playgroundDir, "1.mapping.txt").safeCreateNewFile()
+        File(playgroundDir, "mapping.txt").safeCreateNewFile()
+        val result = execute(config, "publishReleaseApk")
+
+        assertThat(result.task(":publishReleaseApk")).isNotNull()
+        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("1.mapping.txt")
+        assertThat(result.output).doesNotContain("/mapping.txt")
+    }
+
+    @Test
+    fun `Using custom artifact with mix of mapping files uploads them`() {
+        // language=gradle
+        val config = """
+            play {
+                artifactDir = file('${playgroundDir.escaped()}')
+            }
+        """
+
+        File(playgroundDir, "1.apk").safeCreateNewFile()
+        File(playgroundDir, "2.apk").safeCreateNewFile()
+        File(playgroundDir, "2.mapping.txt").safeCreateNewFile()
+        File(playgroundDir, "mapping.txt").safeCreateNewFile()
+        val result = execute(config, "publishReleaseApk")
+
+        assertThat(result.task(":publishReleaseApk")).isNotNull()
+        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.output).contains("/mapping.txt")
+        assertThat(result.output).contains("2.mapping.txt")
+    }
+
+    @Test
     fun `Using custom artifact skips on-the-fly apk build`() {
         // language=gradle
         val config = """

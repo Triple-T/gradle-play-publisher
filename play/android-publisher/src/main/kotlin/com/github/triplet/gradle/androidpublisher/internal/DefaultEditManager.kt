@@ -127,7 +127,6 @@ internal class DefaultEditManager(
 
     override fun uploadBundle(
             bundleFile: File,
-            mappingFile: File?,
             strategy: ResolutionStrategy,
             didPreviousBuildSkipCommit: Boolean,
             trackName: String,
@@ -144,7 +143,6 @@ internal class DefaultEditManager(
             handleUploadFailures(e, strategy, bundleFile)
         } ?: return
 
-        uploadMappingFile(bundle.versionCode, mappingFile)
         tracks.update(TrackManager.UpdateConfig(
                 trackName,
                 listOf(bundle.versionCode.toLong()),

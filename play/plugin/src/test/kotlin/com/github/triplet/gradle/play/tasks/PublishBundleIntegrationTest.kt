@@ -286,26 +286,6 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `Build uploads mapping file when available`() {
-        // language=gradle
-        val config = """
-            buildTypes.release {
-                shrinkResources true
-                minifyEnabled true
-                proguardFiles(getDefaultProguardFile("proguard-android.txt"))
-            }
-        """.withAndroidBlock()
-
-        val result = execute(config, "publishReleaseBundle")
-
-        assertThat(result.task(":publishReleaseBundle")).isNotNull()
-        assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result.output).contains("uploadBundle(")
-        assertThat(result.output).contains("mappingFile=")
-        assertThat(result.output).doesNotContain("mappingFile=null")
-    }
-
-    @Test
     fun `Build fails by default when upload fails`() {
         // language=gradle
         val config = """
@@ -545,7 +525,6 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
 
                 override fun uploadBundle(
                         bundleFile: File,
-                        mappingFile: File?,
                         strategy: ResolutionStrategy,
                         didPreviousBuildSkipCommit: Boolean,
                         trackName: String,
@@ -558,7 +537,6 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
                 ) {
                     println("uploadBundle(" +
                                     "bundleFile=$bundleFile, " +
-                                    "mappingFile=$mappingFile, " +
                                     "strategy=$strategy, " +
                                     "didPreviousBuildSkipCommit=$didPreviousBuildSkipCommit, " +
                                     "trackName=$trackName, " +

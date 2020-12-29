@@ -1,9 +1,9 @@
 package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.play.PlayPublisherExtension
+import com.github.triplet.gradle.play.tasks.internal.PublishArtifactTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PublishableTrackExtensionOptions
-import com.github.triplet.gradle.play.tasks.internal.UploadArtifactTaskBase
-import com.github.triplet.gradle.play.tasks.internal.workers.UploadArtifactWorkerBase
+import com.github.triplet.gradle.play.tasks.internal.workers.PublishArtifactWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.InputFile
@@ -20,7 +20,7 @@ import javax.inject.Inject
 internal abstract class PublishBundle @Inject constructor(
         extension: PlayPublisherExtension,
         appId: String
-) : UploadArtifactTaskBase(extension, appId), PublishableTrackExtensionOptions {
+) : PublishArtifactTaskBase(extension, appId), PublishableTrackExtensionOptions {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFile
     internal abstract val bundle: RegularFileProperty
@@ -39,12 +39,11 @@ internal abstract class PublishBundle @Inject constructor(
         }
     }
 
-    abstract class BundleUploader : UploadArtifactWorkerBase<BundleUploader.Params>() {
+    abstract class BundleUploader : PublishArtifactWorkerBase<BundleUploader.Params>() {
         override fun upload() {
             val bundleFile = parameters.bundleFile.get().asFile
             edits.uploadBundle(
                     bundleFile,
-                    parameters.mappingFile.orNull?.asFile,
                     config.resolutionStrategy,
                     parameters.skippedMarker.get().asFile.exists(),
                     config.track,
@@ -57,7 +56,7 @@ internal abstract class PublishBundle @Inject constructor(
             )
         }
 
-        interface Params : ArtifactUploadingParams {
+        interface Params : ArtifactPublishingParams {
             val bundleFile: RegularFileProperty
         }
     }

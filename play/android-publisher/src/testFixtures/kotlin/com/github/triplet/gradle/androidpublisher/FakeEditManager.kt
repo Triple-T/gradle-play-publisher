@@ -56,7 +56,6 @@ abstract class FakeEditManager : EditManager {
 
     override fun uploadBundle(
             bundleFile: File,
-            mappingFile: File?,
             strategy: ResolutionStrategy,
             didPreviousBuildSkipCommit: Boolean,
             trackName: String,

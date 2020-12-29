@@ -2,9 +2,9 @@ package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.PlayPublisherExtension
+import com.github.triplet.gradle.play.tasks.internal.PublishArtifactTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PublishableTrackExtensionOptions
-import com.github.triplet.gradle.play.tasks.internal.UploadArtifactTaskBase
-import com.github.triplet.gradle.play.tasks.internal.workers.UploadArtifactWorkerBase
+import com.github.triplet.gradle.play.tasks.internal.workers.PublishArtifactWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.workers.copy
 import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
 import org.gradle.api.file.ConfigurableFileCollection
@@ -28,11 +28,16 @@ import javax.inject.Inject
 internal abstract class PublishApk @Inject constructor(
         extension: PlayPublisherExtension,
         appId: String
-) : UploadArtifactTaskBase(extension, appId), PublishableTrackExtensionOptions {
+) : PublishArtifactTaskBase(extension, appId), PublishableTrackExtensionOptions {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:SkipWhenEmpty
     @get:InputFiles
     internal abstract val apks: ConfigurableFileCollection
+
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:SkipWhenEmpty
+    @get:InputFiles
+    internal abstract val mappingFiles: ConfigurableFileCollection
 
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:Optional
@@ -52,6 +57,7 @@ internal abstract class PublishApk @Inject constructor(
             paramsForBase(this)
 
             apkFiles.set(apks)
+            deobfuscationFiles.from(mappingFiles)
             debugSymbolsFile.set(nativeDebugSymbols)
             uploadResults.set(temporaryDir)
         }
@@ -59,13 +65,22 @@ internal abstract class PublishApk @Inject constructor(
 
     abstract class Processor @Inject constructor(
             private val executor: WorkerExecutor
-    ) : UploadArtifactWorkerBase<Processor.Params>() {
+    ) : PublishArtifactWorkerBase<Processor.Params>() {
         override fun upload() {
+            val deobFiles = parameters.deobfuscationFiles.files.associateBy {
+                it.name.removeSuffix("mapping.txt").removeSuffix(".")
+            }
+
             for (apk in parameters.apkFiles.get()) {
                 executor.noIsolation().submit(ApkUploader::class) {
                     parameters.copy(this)
 
                     apkFile.set(apk)
+                    mappingFile.set(deobFiles.getOrDefault(
+                            apk.nameWithoutExtension,
+                            // The empty name is the default file called "mapping.txt"
+                            deobFiles[""]
+                    ))
                     debugSymbolsFile.set(parameters.debugSymbolsFile)
                     uploadResults.set(parameters.uploadResults)
                 }
@@ -88,14 +103,15 @@ internal abstract class PublishApk @Inject constructor(
             )
         }
 
-        interface Params : ArtifactUploadingParams {
+        interface Params : ArtifactPublishingParams {
             val apkFiles: ListProperty<File>
+            val deobfuscationFiles: ConfigurableFileCollection
             val debugSymbolsFile: RegularFileProperty
             val uploadResults: DirectoryProperty
         }
     }
 
-    abstract class ApkUploader : UploadArtifactWorkerBase<ApkUploader.Params>() {
+    abstract class ApkUploader : PublishArtifactWorkerBase<ApkUploader.Params>() {
         init {
             commit = false
         }
@@ -114,8 +130,9 @@ internal abstract class PublishApk @Inject constructor(
             parameters.uploadResults.get().file(versionCode.toString()).asFile.safeCreateNewFile()
         }
 
-        interface Params : ArtifactUploadingParams {
+        interface Params : ArtifactPublishingParams {
             val apkFile: RegularFileProperty
+            val mappingFile: RegularFileProperty
             val debugSymbolsFile: RegularFileProperty
             val uploadResults: DirectoryProperty
         }

@@ -204,17 +204,6 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                     }
                 }.orElse(artifacts.get(ArtifactType.BUNDLE))
 
-                fun findDeobfuscationFile(
-                ): Provider<RegularFile> = extension.artifactDir.map { customDir ->
-                    customDir.asFileTree.matching {
-                        include("mapping.txt")
-                    }.singleOrNull()?.let { customDir.file(it.absolutePath) }.sneakyNull()
-                }.orElse(project.provider {
-                    artifacts.get(ArtifactType.OBFUSCATION_MAPPING_FILE).takeUnless {
-                        extension.artifactDir.isPresent
-                    }
-                }.flatMap { it })
-
                 val appId = applicationId.get()
 
                 val publishInternalSharingApkTask = project.newTask<PublishInternalSharingApk>(
@@ -381,7 +370,21 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 ) {
                     configureInputs()
                     apks.from(findApkFiles())
-                    mappingFile.set(findDeobfuscationFile())
+                    mappingFiles.from(extension.artifactDir.map { customDir ->
+                        project.objects.fileCollection().from(customDir.asFileTree.matching {
+                            include("mapping.txt", "*.mapping.txt")
+                        })
+                    }.orElse(project.provider {
+                        artifacts.get(ArtifactType.OBFUSCATION_MAPPING_FILE).takeUnless {
+                            extension.artifactDir.isPresent
+                        }
+                    }.map {
+                        val files = project.objects.fileCollection()
+                        if (it.isPresent) {
+                            files.from(it)
+                        }
+                        files
+                    }))
 
                     dependsOn(genEditTask)
                     configure3pDeps(variantName)
@@ -406,7 +409,6 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 ) {
                     configureInputs()
                     bundle.set(findBundleFile())
-                    mappingFile.set(findDeobfuscationFile())
 
                     dependsOn(genEditTask)
                     configure3pDeps(variantName)

@@ -41,7 +41,6 @@ class DefaultEditManagerTest {
 
         edits.uploadBundle(
                 bundleFile = mockFile,
-                mappingFile = null,
                 strategy = ResolutionStrategy.FAIL,
                 didPreviousBuildSkipCommit = false,
                 trackName = "alpha",
@@ -69,78 +68,6 @@ class DefaultEditManagerTest {
     }
 
     @Test
-    fun `uploadBundle skips mapping file upload when null`() {
-        `when`(mockPublisher.uploadBundle(any(), any())).thenReturn(Bundle().apply {
-            versionCode = 888
-        })
-
-        edits.uploadBundle(
-                bundleFile = mockFile,
-                mappingFile = null,
-                strategy = ResolutionStrategy.FAIL,
-                didPreviousBuildSkipCommit = false,
-                trackName = "alpha",
-                releaseStatus = ReleaseStatus.COMPLETED,
-                releaseName = "relname",
-                releaseNotes = mapOf("locale" to "notes"),
-                userFraction = .88,
-                updatePriority = 3,
-                retainableArtifacts = listOf(777)
-        )
-
-        verify(mockPublisher, never()).uploadDeobfuscationFile(any(), any(), anyInt(), any())
-    }
-
-    @Test
-    fun `uploadBundle skips mapping file upload when empty`() {
-        `when`(mockPublisher.uploadBundle(any(), any())).thenReturn(Bundle().apply {
-            versionCode = 888
-        })
-        `when`(mockFile.length()).thenReturn(0)
-
-        edits.uploadBundle(
-                bundleFile = mockFile,
-                mappingFile = mockFile,
-                strategy = ResolutionStrategy.FAIL,
-                didPreviousBuildSkipCommit = false,
-                trackName = "alpha",
-                releaseStatus = ReleaseStatus.COMPLETED,
-                releaseName = "relname",
-                releaseNotes = mapOf("locale" to "notes"),
-                userFraction = .88,
-                updatePriority = 3,
-                retainableArtifacts = listOf(777)
-        )
-
-        verify(mockPublisher, never()).uploadDeobfuscationFile(any(), any(), anyInt(), any())
-    }
-
-    @Test
-    fun `uploadBundle uploads mapping file when non-empty`() {
-        `when`(mockPublisher.uploadBundle(any(), any())).thenReturn(Bundle().apply {
-            versionCode = 888
-        })
-        `when`(mockFile.length()).thenReturn(1)
-
-        edits.uploadBundle(
-                bundleFile = mockFile,
-                mappingFile = mockFile,
-                strategy = ResolutionStrategy.FAIL,
-                didPreviousBuildSkipCommit = false,
-                trackName = "alpha",
-                releaseStatus = ReleaseStatus.COMPLETED,
-                releaseName = "relname",
-                releaseNotes = mapOf("locale" to "notes"),
-                userFraction = .88,
-                updatePriority = 3,
-                retainableArtifacts = listOf(777)
-        )
-
-        verify(mockPublisher)
-                .uploadDeobfuscationFile(eq("edit-id"), eq(mockFile), eq(888), eq("proguard"))
-    }
-
-    @Test
     fun `uploadBundle fails silently when conflict occurs with ignore strategy`() {
         `when`(mockPublisher.uploadBundle(any(), any())).thenThrow(
                 GoogleJsonResponseExceptionFactoryTesting.newMock(
@@ -148,7 +75,6 @@ class DefaultEditManagerTest {
 
         edits.uploadBundle(
                 bundleFile = mockFile,
-                mappingFile = mockFile,
                 strategy = ResolutionStrategy.IGNORE,
                 didPreviousBuildSkipCommit = false,
                 trackName = "alpha",
@@ -172,7 +98,6 @@ class DefaultEditManagerTest {
         assertThrows<IllegalStateException> {
             edits.uploadBundle(
                     bundleFile = mockFile,
-                    mappingFile = mockFile,
                     strategy = ResolutionStrategy.FAIL,
                     didPreviousBuildSkipCommit = false,
                     trackName = "alpha",

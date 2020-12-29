@@ -70,7 +70,6 @@ interface EditManager {
     /** Uploads and publishes the given [bundleFile]. */
     fun uploadBundle(
             bundleFile: File,
-            mappingFile: File?,
             strategy: ResolutionStrategy,
             didPreviousBuildSkipCommit: Boolean,
             trackName: String,
