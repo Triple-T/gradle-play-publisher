@@ -39,15 +39,17 @@ class ProcessArtifactVersionCodesIntegrationTest : IntegrationTestBase() {
         val config = """
             play.resolutionStrategy = ResolutionStrategy.AUTO
 
-            onVariantProperties {
-                for (output in outputs) {
-                    output.versionName.set(output.versionCode.map {
-                        println('versionCode=' + it)
-                        it.toString()
-                    })
+            androidComponents {
+                onVariants(selector().all()) {
+                    for (output in outputs) {
+                        output.versionName.set(output.versionCode.map {
+                            println('versionCode=' + it)
+                            it.toString()
+                        })
+                    }
                 }
             }
-        """.withAndroidBlock()
+        """
 
         val result = execute(config, "assembleRelease")
 
@@ -61,17 +63,19 @@ class ProcessArtifactVersionCodesIntegrationTest : IntegrationTestBase() {
         // language=gradle
         val config = """
             play.resolutionStrategy = ResolutionStrategy.AUTO
-            defaultConfig.versionCode = 42
+            android.defaultConfig.versionCode = 42
 
-            onVariantProperties {
-                for (output in outputs) {
-                    output.versionName.set(output.versionCode.map {
-                        println('versionCode=' + it)
-                        it.toString()
-                    })
+            androidComponents {
+                onVariants(selector().all()) {
+                    for (output in outputs) {
+                        output.versionName.set(output.versionCode.map {
+                            println('versionCode=' + it)
+                            it.toString()
+                        })
+                    }
                 }
             }
-        """.withAndroidBlock()
+        """
 
         val result = execute(config, "assembleRelease")
 
@@ -87,7 +91,7 @@ class ProcessArtifactVersionCodesIntegrationTest : IntegrationTestBase() {
         val config = """
             play.resolutionStrategy = ResolutionStrategy.AUTO
 
-            splits.density {
+            android.splits.density {
                 enable true
                 reset()
                 include "xxhdpi", "xxxhdpi"
@@ -95,18 +99,20 @@ class ProcessArtifactVersionCodesIntegrationTest : IntegrationTestBase() {
 
 
             def count = 0
-            onVariantProperties {
-                if (name == 'release') {
-                    for (output in outputs) {
-                        output.versionCode.set(count++)
-                        output.versionName.set(output.versionCode.map {
-                            println('versionCode=' + it)
-                            it.toString()
-                        })
+            androidComponents {
+                onVariants(selector().all()) {
+                    if (name == 'release') {
+                        for (output in outputs) {
+                            output.versionCode.set(count++)
+                            output.versionName.set(output.versionCode.map {
+                                println('versionCode=' + it)
+                                it.toString()
+                            })
+                        }
                     }
                 }
             }
-        """.withAndroidBlock()
+        """
 
         val result = execute(config, "assembleRelease")
 

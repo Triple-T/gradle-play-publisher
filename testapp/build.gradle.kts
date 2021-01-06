@@ -20,7 +20,7 @@ buildscript {
 
     dependencies {
         classpath(kotlin("gradle-plugin", embeddedKotlinVersion))
-        classpath("com.android.tools.build:gradle:4.2.0-beta02")
+        classpath("com.android.tools.build:gradle:4.2.0-beta03")
         classpath("com.supercilex.gradle:version-master:1.0.0-SNAPSHOT")
         classpath("com.github.triplet.gradle:play-publisher:" +
                           file("../version.txt").readText().trim())
