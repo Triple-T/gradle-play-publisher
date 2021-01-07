@@ -34,7 +34,7 @@ jobs:
       - name: Build project
         run: |
           ./gradlew assemble publishToMavenLocal -S
-          cd testapp && ./gradlew help -PskipValidation
+          cd testapp && ./gradlew help -PskipValidation -S
 
   test:
     runs-on: ubuntu-latest
