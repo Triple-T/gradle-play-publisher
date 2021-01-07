@@ -11,11 +11,12 @@ import java.util.Properties
 
 buildscript {
     repositories {
+        mavenLocal()
+        maven("https://oss.sonatype.org/content/repositories/snapshots")
+
         google()
         jcenter()
-        mavenLocal()
         maven("https://plugins.gradle.org/m2/")
-        maven("https://oss.sonatype.org/content/repositories/snapshots")
     }
 
     dependencies {
