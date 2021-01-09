@@ -2,6 +2,7 @@ package com.github.triplet.gradle.play.tasks.shared
 
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.helpers.SharedIntegrationTest
+import com.github.triplet.gradle.play.helpers.SharedIntegrationTest.Companion.DEFAULT_TASK_VARIANT
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
@@ -9,6 +10,7 @@ import org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.ValueSource
 import java.io.File
 
 interface ArtifactIntegrationTests : SharedIntegrationTest {
@@ -62,10 +64,19 @@ interface ArtifactIntegrationTests : SharedIntegrationTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = ["false,false", "false,true", "true,false", "true,true"])
+    @CsvSource(value = [
+        "false,false,",
+        "false,true,",
+        "true,false,",
+        "true,true,",
+        "false,false,$DEFAULT_TASK_VARIANT",
+        "false,true,$DEFAULT_TASK_VARIANT",
+        "true,false,$DEFAULT_TASK_VARIANT",
+        "true,true,$DEFAULT_TASK_VARIANT"])
     fun `Using custom artifact file with supported 3P dep skips on-the-fly build`(
             eager: Boolean,
-            cliParam: Boolean
+            cliParam: Boolean,
+            taskVariant: String?
     ) {
         val app = File(playgroundDir, customArtifactName()).safeCreateNewFile()
         // language=gradle
@@ -111,7 +122,7 @@ interface ArtifactIntegrationTests : SharedIntegrationTest {
         """)
 
         val result = executeGradle(expectFailure = false) {
-            withArguments(taskName())
+            withArguments(taskName(taskVariant.orEmpty()))
             if (cliParam) {
                 withArguments(arguments + listOf("--artifact-dir=${app}"))
             }
@@ -172,10 +183,11 @@ interface ArtifactIntegrationTests : SharedIntegrationTest {
         assertCustomArtifactResults(result)
     }
 
-    @Test
-    fun `Using custom artifact CLI arg skips on-the-fly build`() {
+    @ParameterizedTest
+    @ValueSource(strings = ["", DEFAULT_TASK_VARIANT])
+    fun `Using custom artifact CLI arg skips on-the-fly build`(taskVariant: String) {
         File(playgroundDir, customArtifactName()).safeCreateNewFile()
-        val result = execute("", taskName(), "--artifact-dir=${playgroundDir}")
+        val result = execute("", taskName(taskVariant), "--artifact-dir=${playgroundDir}")
 
         result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains(playgroundDir.name)
