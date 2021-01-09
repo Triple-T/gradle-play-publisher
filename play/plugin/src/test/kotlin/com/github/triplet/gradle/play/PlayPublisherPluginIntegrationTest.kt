@@ -13,9 +13,6 @@ import org.junit.jupiter.params.provider.ValueSource
 import java.io.File
 
 class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
-    override val factoryInstallerStatement = "com.github.triplet.gradle.play." +
-            "PlayPublisherPluginIntegrationTest.installFactories()"
-
     @Test
     fun `Error is thrown if AGP is not applied`() {
         // language=gradle

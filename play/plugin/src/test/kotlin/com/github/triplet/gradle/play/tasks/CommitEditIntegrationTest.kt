@@ -10,9 +10,6 @@ import org.junit.jupiter.api.Test
 import java.io.File
 
 class CommitEditIntegrationTest : IntegrationTestBase() {
-    override val factoryInstallerStatement = "com.github.triplet.gradle.play.tasks." +
-            "CommitEditIntegrationTest.installFactories()"
-
     @Test
     fun `Commit is not applied by default`() {
         val editFile = File(appDir, "build/gpp/com.example.publisher.txt")

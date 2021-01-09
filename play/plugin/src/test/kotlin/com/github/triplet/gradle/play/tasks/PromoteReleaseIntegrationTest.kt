@@ -11,9 +11,6 @@ import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.Test
 
 class PromoteReleaseIntegrationTest : IntegrationTestBase() {
-    override val factoryInstallerStatement = "com.github.triplet.gradle.play.tasks." +
-            "PromoteReleaseIntegrationTest.installFactories()"
-
     @Test
     fun `Promote uses promote track by default`() {
         // language=gradle

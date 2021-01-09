@@ -21,9 +21,6 @@ import org.junit.jupiter.api.Test
 import java.io.File
 
 class BootstrapIntegrationTest : IntegrationTestBase() {
-    override val factoryInstallerStatement = "com.github.triplet.gradle.play.tasks." +
-            "BootstrapIntegrationTest.installFactories()"
-
     @Test
     fun `Existing contents get deleted`() {
         File(appDir, "foobar.txt").safeCreateNewFile().writeText("yo")

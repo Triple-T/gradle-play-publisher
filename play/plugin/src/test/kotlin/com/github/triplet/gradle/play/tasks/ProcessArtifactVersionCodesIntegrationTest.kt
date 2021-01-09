@@ -10,9 +10,6 @@ import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.Test
 
 class ProcessArtifactVersionCodesIntegrationTest : IntegrationTestBase() {
-    override val factoryInstallerStatement = "com.github.triplet.gradle.play.tasks." +
-            "ProcessArtifactVersionCodesIntegrationTest.installFactories()"
-
     @Test
     fun `Task only runs on release`() {
         // language=gradle

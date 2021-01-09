@@ -21,7 +21,14 @@ abstract class IntegrationTestBase {
     protected val appDir by lazy { File(tempDir, "app") }
     protected val playgroundDir by lazy { File(tempDir, UUID.randomUUID().toString()) }
 
-    protected open val factoryInstallerStatement: String? = null
+    private val factoryInstallerStatement = run {
+        try {
+            javaClass.getDeclaredMethod("installFactories")
+            "${javaClass.canonicalName}.installFactories()"
+        } catch (_: NoSuchMethodException) {
+            null
+        }
+    }
 
     @BeforeEach
     fun initTestResources() {
