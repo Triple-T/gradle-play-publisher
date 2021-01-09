@@ -321,6 +321,34 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Dimension specific extension overrides root`() {
+        // language=gradle
+        val config = """
+            android {
+                flavorDimensions 'pricing'
+                productFlavors {
+                    free { dimension 'pricing' }
+                    paid { dimension 'pricing' }
+                }
+
+                playConfigs {
+                    pricing {
+                        track.set('dimension')
+                    }
+                }
+            }
+
+            play {
+                track = 'root'
+            }
+        """
+
+        val result = execute(config, "help", "--debug")
+
+        assertThat(result.output).contains("track=dimension")
+    }
+
+    @Test
     fun `Build type specific extension overrides root`() {
         // language=gradle
         val config = """
@@ -385,8 +413,12 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
                     }
 
                     paid {
-                        fromTrack.set('flavor')
+                        fromTrack.set('paid flavor')
                         defaultToAppBundles.set(true)
+                    }
+
+                    pricing {
+                        fromTrack.set('pricing dimension')
                     }
 
                     release {
@@ -406,7 +438,8 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
 
         assertThat(result.output).contains("defaultToAppBundles=true")
         assertThat(result.output).contains("track=variant")
-        assertThat(result.output).contains("fromTrack=flavor")
+        assertThat(result.output).contains("fromTrack=paid flavor")
+        assertThat(result.output).contains("fromTrack=pricing dimension")
         assertThat(result.output).contains("promoteTrack=build type")
         assertThat(result.output).contains("releaseName=hello")
     }
@@ -460,6 +493,7 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
                     paid {}
                     freeRelease {}
                     free {}
+                    pricing {}
                     release {}
                 }
             }
