@@ -455,8 +455,9 @@ internal class PlayPublisherPlugin : Plugin<Project> {
 
         project.afterEvaluate {
             val allPossiblePlayConfigNames: Set<String> by lazy {
-                android.applicationVariants.flatMapTo(mutableSetOf()) {
-                    listOf(it.name, it.buildType.name) + it.productFlavors.map { it.name }
+                android.applicationVariants.flatMapTo(mutableSetOf()) { variant ->
+                    listOf(variant.name, variant.buildType.name) +
+                            variant.productFlavors.flatMap { listOfNotNull(it.name, it.dimension) }
                 }
             }
 
@@ -464,7 +465,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 if (configName !in allPossiblePlayConfigNames) {
                     project.logger.warn(
                             "Warning: Gradle Play Publisher playConfigs object '$configName' " +
-                                    "does not match a variant, flavor, or build type.")
+                                    "does not match a variant, flavor, dimension, or build type.")
                 }
             }
         }

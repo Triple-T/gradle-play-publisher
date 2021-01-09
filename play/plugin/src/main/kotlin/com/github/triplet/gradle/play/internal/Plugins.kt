@@ -85,12 +85,16 @@ private fun buildExtensionInternal(
     val flavorExtension = variant.productFlavors.mapNotNull { (_, flavor) ->
         extensionContainer.findByName(flavor)
     }.singleOrNull()
+    val dimensionExtension = variant.productFlavors.mapNotNull { (dimension, _) ->
+        extensionContainer.findByName(dimension)
+    }.singleOrNull()
     val buildTypeExtension = variant.buildType?.let { extensionContainer.findByName(it) }
 
     val extensions = listOfNotNull(
             cliOptionsExtension,
             variantExtension,
             flavorExtension,
+            dimensionExtension,
             buildTypeExtension,
             baseExtension
     ).distinctBy {
