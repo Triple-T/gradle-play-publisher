@@ -227,7 +227,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                     outputDirectory.set(project.layout.buildDirectory.dir(
                             "outputs/internal-sharing/apk/${this@v.name}"))
 
-                    configure3pDeps(variantName)
+                    configure3pDeps(extension, variantName)
                 }
 
                 val publishInternalSharingBundleTask = project.newTask<PublishInternalSharingBundle>(
@@ -243,7 +243,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                     outputDirectory.set(project.layout.buildDirectory.dir(
                             "outputs/internal-sharing/bundle/${this@v.name}"))
 
-                    configure3pDeps(variantName)
+                    configure3pDeps(extension, variantName)
                 }
 
                 project.newTask<InstallInternalSharingArtifact>(
@@ -390,7 +390,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                     }))
 
                     finalizedBy(commitEditTask)
-                    configure3pDeps(variantName)
+                    configure3pDeps(extension, variantName)
 
                     nativeDebugSymbols.set(project.layout.buildDirectory.file(
                             "outputs/native-debug-symbols/${this@v.name}/native-debug-symbols.zip"
@@ -413,7 +413,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                     bundle.set(findBundleFile())
 
                     finalizedBy(commitEditTask)
-                    configure3pDeps(variantName)
+                    configure3pDeps(extension, variantName)
                 }
                 publishBundleAllTask { dependsOn(publishBundleTask) }
 
@@ -470,10 +470,12 @@ internal class PlayPublisherPlugin : Plugin<Project> {
         }
     }
 
-    private fun Task.configure3pDeps(variantName: String) {
+    private fun Task.configure3pDeps(extension: PlayPublisherExtension, variantName: String) {
         fun maybeAddDependency(task: String) {
             if (task in project.tasks.names) {
-                dependsOn(task)
+                dependsOn(extension.artifactDir.map {
+                    listOf<String>()
+                }.orElse(listOf(task)))
             }
         }
 

@@ -21,12 +21,12 @@ abstract class IntegrationTestBase : IntegrationTest {
     override val appDir by lazy { File(tempDir, "app") }
     override val playgroundDir by lazy { File(tempDir, UUID.randomUUID().toString()) }
 
-    private val factoryInstallerStatement = run {
+    override val factoryInstallerStatement = run {
         try {
             javaClass.getDeclaredMethod("installFactories")
             "${javaClass.canonicalName}.installFactories()"
         } catch (_: NoSuchMethodException) {
-            null
+            ""
         }
     }
 
@@ -43,15 +43,15 @@ abstract class IntegrationTestBase : IntegrationTest {
     override fun executeExpectingFailure(config: String, vararg tasks: String) =
             execute(config, true, *tasks)
 
-    protected fun executeGradle(
+    override fun executeGradle(
             expectFailure: Boolean,
-            block: GradleRunner.() -> GradleRunner
+            block: GradleRunner.() -> Unit
     ): BuildResult = runWithTestDir { testDir ->
         val runner = GradleRunner.create()
                 .withPluginClasspath()
                 .withProjectDir(appDir)
                 .withTestKitDir(testDir)
-                .let(block)
+                .apply(block)
 
         // We're doing some pretty wack (and disgusting, shameful) shit to run integration tests without
         // actually publishing anything. The idea is have the build file call into the test class to run
@@ -125,7 +125,7 @@ abstract class IntegrationTestBase : IntegrationTest {
 
             $config
 
-            ${factoryInstallerStatement ?: ""}
+            $factoryInstallerStatement
         """)
 
         return executeGradle(expectFailure) {
