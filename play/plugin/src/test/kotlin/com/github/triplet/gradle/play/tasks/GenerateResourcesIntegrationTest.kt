@@ -2,15 +2,22 @@ package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
+import com.github.triplet.gradle.play.helpers.SharedIntegrationTest
 import com.google.common.hash.HashCode
 import com.google.common.hash.Hashing
 import com.google.common.io.Files
 import com.google.common.truth.Truth.assertThat
-import org.gradle.testkit.runner.TaskOutcome
+import org.gradle.testkit.runner.TaskOutcome.FAILED
+import org.gradle.testkit.runner.TaskOutcome.FROM_CACHE
+import org.gradle.testkit.runner.TaskOutcome.NO_SOURCE
+import org.gradle.testkit.runner.TaskOutcome.SUCCESS
+import org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
 import org.junit.jupiter.api.Test
 import java.io.File
 
-class GenerateResourcesIntegrationTest : IntegrationTestBase() {
+class GenerateResourcesIntegrationTest : IntegrationTestBase(), SharedIntegrationTest {
+    override fun taskName(taskVariant: String) = ":generate${taskVariant}PlayResources"
+
     @Test
     fun `Basic resources are correctly copied to their respective folders`() {
         execute("", "generateReleasePlayResources")
@@ -354,8 +361,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "generateHiddenFileReleasePlayResources")
 
-        assertThat(result.task(":generateHiddenFileReleasePlayResources")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("HiddenFileRelease"), outcome = SUCCESS)
     }
 
     @Test
@@ -370,8 +376,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "generatePlayReleasePlayResources")
 
-        assertThat(result.task(":generatePlayReleasePlayResources")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("PlayRelease"), outcome = SUCCESS)
     }
 
     @Test
@@ -387,8 +392,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
         val result = executeExpectingFailure(
                 config, "generateIllegalPlayReleasePlayResources")
 
-        assertThat(result.task(":generateIllegalPlayReleasePlayResources")!!.outcome)
-                .isEqualTo(TaskOutcome.FAILED)
+        result.requireTask(taskName("IllegalPlayRelease"), outcome = FAILED)
     }
 
     @Test
@@ -404,8 +408,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
         val result = executeExpectingFailure(
                 config, "generateInvalidLocaleReleasePlayResources")
 
-        assertThat(result.task(":generateInvalidLocaleReleasePlayResources")!!.outcome)
-                .isEqualTo(TaskOutcome.FAILED)
+        result.requireTask(taskName("InvalidLocaleRelease"), outcome = FAILED)
     }
 
     @Test
@@ -421,8 +424,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
         val result = executeExpectingFailure(
                 config, "generateUnknownFileReleasePlayResources")
 
-        assertThat(result.task(":generateUnknownFileReleasePlayResources")!!.outcome)
-                .isEqualTo(TaskOutcome.FAILED)
+        result.requireTask(taskName("UnknownFileRelease"), outcome = FAILED)
     }
 
     @Test
@@ -444,8 +446,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "generateProdStagingReleasePlayResources")
 
-        assertThat(result.task(":generateProdStagingReleasePlayResources")!!.outcome)
-                .isEqualTo(TaskOutcome.NO_SOURCE)
+        result.requireTask(taskName("ProdStagingRelease"), outcome = NO_SOURCE)
     }
 
     @Test
@@ -464,10 +465,8 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
         val result1 = execute(config, "generateProdStagingReleasePlayResources")
         val result2 = execute(config, "generateProdStagingReleasePlayResources")
 
-        assertThat(result1.task(":generateProdStagingReleasePlayResources")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result2.task(":generateProdStagingReleasePlayResources")!!.outcome)
-                .isEqualTo(TaskOutcome.UP_TO_DATE)
+        result1.requireTask(taskName("ProdStagingRelease"), outcome = SUCCESS)
+        result2.requireTask(taskName("ProdStagingRelease"), outcome = UP_TO_DATE)
     }
 
     @Test
@@ -490,12 +489,9 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase() {
         mainUS.delete()
         val result3 = execute(config, "generateProdStagingReleasePlayResources")
 
-        assertThat(result1.task(":generateProdStagingReleasePlayResources")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result2.task(":generateProdStagingReleasePlayResources")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result3.task(":generateProdStagingReleasePlayResources")!!.outcome)
-                .isEqualTo(TaskOutcome.FROM_CACHE)
+        result1.requireTask(taskName("ProdStagingRelease"), outcome = SUCCESS)
+        result2.requireTask(taskName("ProdStagingRelease"), outcome = SUCCESS)
+        result3.requireTask(taskName("ProdStagingRelease"), outcome = FROM_CACHE)
     }
 
     @Test

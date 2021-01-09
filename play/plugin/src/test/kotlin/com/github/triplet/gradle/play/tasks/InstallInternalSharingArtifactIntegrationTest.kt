@@ -4,18 +4,21 @@ import com.github.triplet.gradle.androidpublisher.FakePlayPublisher
 import com.github.triplet.gradle.androidpublisher.UploadInternalSharingArtifactResponse
 import com.github.triplet.gradle.androidpublisher.newUploadInternalSharingArtifactResponse
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
+import com.github.triplet.gradle.play.helpers.SharedIntegrationTest
 import com.google.common.truth.Truth.assertThat
-import org.gradle.testkit.runner.TaskOutcome
+import org.gradle.testkit.runner.TaskOutcome.FAILED
+import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Test
 import java.io.File
 
-class InstallInternalSharingArtifactIntegrationTest : IntegrationTestBase() {
+class InstallInternalSharingArtifactIntegrationTest : IntegrationTestBase(), SharedIntegrationTest {
+    override fun taskName(taskVariant: String) = ":install${taskVariant}PrivateArtifact"
+
     @Test
     fun `Build depends on uploading apk artifact by default`() {
         val result = execute("", "installReleasePrivateArtifact")
 
-        assertThat(result.task(":uploadReleasePrivateApk")).isNotNull()
-        assertThat(result.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
     }
 
     @Test
@@ -27,8 +30,7 @@ class InstallInternalSharingArtifactIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "installReleasePrivateArtifact")
 
-        assertThat(result.task(":uploadReleasePrivateBundle")).isNotNull()
-        assertThat(result.task(":uploadReleasePrivateBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
     }
 
     @Test
@@ -36,18 +38,15 @@ class InstallInternalSharingArtifactIntegrationTest : IntegrationTestBase() {
         val result1 = execute("", "installReleasePrivateArtifact")
         val result2 = execute("", "installReleasePrivateArtifact")
 
-        assertThat(result1.task(":installReleasePrivateArtifact")).isNotNull()
-        assertThat(result1.task(":installReleasePrivateArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result2.task(":installReleasePrivateArtifact")).isNotNull()
-        assertThat(result2.task(":installReleasePrivateArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result1.requireTask(outcome = SUCCESS)
+        result2.requireTask(outcome = SUCCESS)
     }
 
     @Test
     fun `Task launches view intent with artifact URL`() {
         val result = execute("", "installReleasePrivateArtifact")
 
-        assertThat(result.task(":installReleasePrivateArtifact")).isNotNull()
-        assertThat(result.task(":installReleasePrivateArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output)
                 .contains("am start -a \"android.intent.action.VIEW\" -d myDownloadUrl")
     }
@@ -61,8 +60,7 @@ class InstallInternalSharingArtifactIntegrationTest : IntegrationTestBase() {
 
         val result = executeExpectingFailure(config, "installReleasePrivateArtifact")
 
-        assertThat(result.task(":installReleasePrivateArtifact")).isNotNull()
-        assertThat(result.task(":installReleasePrivateArtifact")!!.outcome).isEqualTo(TaskOutcome.FAILED)
+        result.requireTask(outcome = FAILED)
         assertThat(result.output).contains("Failed to install")
     }
 

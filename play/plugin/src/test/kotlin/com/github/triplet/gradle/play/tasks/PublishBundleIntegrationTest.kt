@@ -8,18 +8,22 @@ import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
+import com.github.triplet.gradle.play.helpers.SharedIntegrationTest
 import com.google.common.truth.Truth.assertThat
-import org.gradle.testkit.runner.TaskOutcome
+import org.gradle.testkit.runner.TaskOutcome.FAILED
+import org.gradle.testkit.runner.TaskOutcome.SUCCESS
+import org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
 import org.junit.jupiter.api.Test
 import java.io.File
 
-class PublishBundleIntegrationTest : IntegrationTestBase() {
+class PublishBundleIntegrationTest : IntegrationTestBase(), SharedIntegrationTest {
+    override fun taskName(taskVariant: String) = ":publish${taskVariant}Bundle"
+
     @Test
     fun `Builds bundle on-the-fly by default`() {
         val result = execute("", "publishReleaseBundle")
 
-        assertThat(result.task(":packageReleaseBundle")).isNotNull()
-        assertThat(result.task(":packageReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(":packageReleaseBundle", outcome = SUCCESS)
         assertThat(result.output).contains("uploadBundle(")
         assertThat(result.output).contains(".aab")
     }
@@ -29,10 +33,8 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
         val result1 = execute("", "publishReleaseBundle")
         val result2 = execute("", "publishReleaseBundle")
 
-        assertThat(result1.task(":publishReleaseBundle")).isNotNull()
-        assertThat(result1.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result2.task(":publishReleaseBundle")).isNotNull()
-        assertThat(result2.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.UP_TO_DATE)
+        result1.requireTask(outcome = SUCCESS)
+        result2.requireTask(outcome = UP_TO_DATE)
     }
 
     @Test
@@ -46,8 +48,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
 
         val result = executeExpectingFailure(config, "publishReleaseBundle")
 
-        assertThat(result.task(":publishReleaseBundle")).isNotNull()
-        assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.FAILED)
+        result.requireTask(outcome = FAILED)
         assertThat(result.output).contains("ERROR_no-unique-aab-found")
         assertThat(result.output).contains(playgroundDir.name)
     }
@@ -65,8 +66,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
         File(playgroundDir, "2.aab").safeCreateNewFile()
         val result = executeExpectingFailure(config, "publishReleaseBundle")
 
-        assertThat(result.task(":publishReleaseBundle")).isNotNull()
-        assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.FAILED)
+        result.requireTask(outcome = FAILED)
         assertThat(result.output).contains("ERROR_no-unique-aab-found")
         assertThat(result.output).contains(playgroundDir.name)
     }
@@ -84,8 +84,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
         val result = execute(config, "publishReleaseBundle")
 
         assertThat(result.task(":packageReleaseBundle")).isNull()
-        assertThat(result.task(":publishReleaseBundle")).isNotNull()
-        assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadBundle(")
         assertThat(result.output).contains(playgroundDir.name)
     }
@@ -103,10 +102,8 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
         val result1 = execute(config, "publishReleaseBundle")
         val result2 = execute(config, "publishReleaseBundle")
 
-        assertThat(result1.task(":publishReleaseBundle")).isNotNull()
-        assertThat(result1.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result2.task(":publishReleaseBundle")).isNotNull()
-        assertThat(result2.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.UP_TO_DATE)
+        result1.requireTask(outcome = SUCCESS)
+        result2.requireTask(outcome = UP_TO_DATE)
     }
 
     @Test
@@ -115,8 +112,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
         val result = execute("", "publishReleaseBundle", "--artifact-dir=${playgroundDir}")
 
         assertThat(result.task(":packageReleaseBundle")).isNull()
-        assertThat(result.task(":publishReleaseBundle")).isNotNull()
-        assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadBundle(")
         assertThat(result.output).contains(playgroundDir.name)
     }
@@ -135,8 +131,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
                 "--update-priority=3"
         )
 
-        assertThat(result.task(":publishReleaseBundle")).isNotNull()
-        assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadBundle(")
         assertThat(result.output).contains("releaseName=myRelName")
         assertThat(result.output).contains("releaseStatus=DRAFT")
@@ -171,8 +166,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
                 "--update-priority=3"
         )
 
-        assertThat(result.task(":publishReleaseBundle")).isNotNull()
-        assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadBundle(")
         assertThat(result.output).contains("releaseName=myRelName")
         assertThat(result.output).contains("releaseStatus=DRAFT")
@@ -205,8 +199,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
         )
 
         assertThat(result.task(":packageReleaseBundle")).isNull()
-        assertThat(result.task(":publishReleaseBundle")).isNotNull()
-        assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadBundle(")
         assertThat(result.output).contains("trackName=hello")
         assertThat(result.output).contains(playgroundDir.name)
@@ -216,8 +209,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
     fun `Build generates and commits edit by default`() {
         val result = execute("", "publishReleaseBundle")
 
-        assertThat(result.task(":publishReleaseBundle")).isNotNull()
-        assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("insertEdit()")
         assertThat(result.output).contains("commitEdit(edit-id)")
     }
@@ -231,8 +223,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishReleaseBundle")
 
-        assertThat(result.task(":publishReleaseBundle")).isNotNull()
-        assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("insertEdit()")
         assertThat(result.output).doesNotContain("commitEdit(")
         assertThat(result.output).contains("validateEdit(")
@@ -254,13 +245,11 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
         val result1 = execute(config1, "publishReleaseBundle")
         val result2 = execute(config2, "publishReleaseBundle")
 
-        assertThat(result1.task(":publishReleaseBundle")).isNotNull()
-        assertThat(result1.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result1.requireTask(outcome = SUCCESS)
         assertThat(result1.output).contains("uploadBundle(")
         assertThat(result1.output).contains("didPreviousBuildSkipCommit=false")
 
-        assertThat(result2.task(":publishReleaseBundle")).isNotNull()
-        assertThat(result2.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result2.requireTask(outcome = SUCCESS)
         assertThat(result2.output).contains("uploadBundle(")
         assertThat(result2.output).contains("didPreviousBuildSkipCommit=true")
     }
@@ -274,10 +263,8 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishReleaseBundle")
 
-        assertThat(result.task(":processReleaseVersionCodes")).isNotNull()
-        assertThat(result.task(":processReleaseVersionCodes")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result.task(":publishReleaseBundle")).isNotNull()
-        assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(":processReleaseVersionCodes", outcome = SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("findMaxAppVersionCode(")
         assertThat(result.output).contains("uploadBundle(")
     }
@@ -291,8 +278,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
 
         val result = executeExpectingFailure(config, "publishReleaseBundle")
 
-        assertThat(result.task(":publishReleaseBundle")).isNotNull()
-        assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.FAILED)
+        result.requireTask(outcome = FAILED)
         assertThat(result.output).contains("Upload failed")
     }
 
@@ -305,8 +291,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishReleaseBundle")
 
-        assertThat(result.task(":publishReleaseBundle")).isNotNull()
-        assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadBundle(")
         assertThat(result.output).contains("trackName=myCustomTrack")
     }
@@ -320,8 +305,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishReleaseBundle")
 
-        assertThat(result.task(":publishReleaseBundle")).isNotNull()
-        assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadBundle(")
         assertThat(result.output).contains("releaseStatus=DRAFT")
     }
@@ -337,9 +321,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishConsoleNamesBundle")
 
-        assertThat(result.task(":publishConsoleNamesBundle")).isNotNull()
-        assertThat(result.task(":publishConsoleNamesBundle")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("ConsoleNames"), outcome = SUCCESS)
         assertThat(result.output).contains("uploadBundle(")
         assertThat(result.output).contains("releaseName=myDefaultName")
     }
@@ -357,9 +339,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishConsoleNamesBundle")
 
-        assertThat(result.task(":publishConsoleNamesBundle")).isNotNull()
-        assertThat(result.task(":publishConsoleNamesBundle")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("ConsoleNames"), outcome = SUCCESS)
         assertThat(result.output).contains("uploadBundle(")
         assertThat(result.output).contains("releaseName=myCustomName")
     }
@@ -378,9 +358,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishConsoleNamesBundle")
 
-        assertThat(result.task(":publishConsoleNamesBundle")).isNotNull()
-        assertThat(result.task(":publishConsoleNamesBundle")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("ConsoleNames"), outcome = SUCCESS)
         assertThat(result.output).contains("uploadBundle(")
         assertThat(result.output).contains("releaseName=myCustomName")
     }
@@ -396,9 +374,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishReleaseNotesBundle")
 
-        assertThat(result.task(":publishReleaseNotesBundle")).isNotNull()
-        assertThat(result.task(":publishReleaseNotesBundle")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("ReleaseNotes"), outcome = SUCCESS)
         assertThat(result.output).contains("uploadBundle(")
         assertThat(result.output).contains("releaseNotes={en-US=My default release notes, " +
                                                    "fr-FR=Mes notes de mise à jour}")
@@ -417,9 +393,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishReleaseNotesBundle")
 
-        assertThat(result.task(":publishReleaseNotesBundle")).isNotNull()
-        assertThat(result.task(":publishReleaseNotesBundle")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("ReleaseNotes"), outcome = SUCCESS)
         assertThat(result.output).contains("uploadBundle(")
         assertThat(result.output).contains("releaseNotes={en-US=Custom track release notes, " +
                                                    "fr-FR=Mes notes de mise à jour}")
@@ -439,9 +413,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishReleaseNotesBundle")
 
-        assertThat(result.task(":publishReleaseNotesBundle")).isNotNull()
-        assertThat(result.task(":publishReleaseNotesBundle")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("ReleaseNotes"), outcome = SUCCESS)
         assertThat(result.output).contains("uploadBundle(")
         assertThat(result.output).contains("releaseNotes={en-US=Custom track release notes, " +
                                                    "fr-FR=Mes notes de mise à jour}")
@@ -456,8 +428,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishReleaseBundle")
 
-        assertThat(result.task(":publishReleaseBundle")).isNotNull()
-        assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadBundle(")
         assertThat(result.output).contains("userFraction=0.123")
     }
@@ -471,8 +442,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishReleaseBundle")
 
-        assertThat(result.task(":publishReleaseBundle")).isNotNull()
-        assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadBundle(")
         assertThat(result.output).contains("updatePriority=5")
     }
@@ -486,8 +456,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishReleaseBundle")
 
-        assertThat(result.task(":publishReleaseBundle")).isNotNull()
-        assertThat(result.task(":publishReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadBundle(")
         assertThat(result.output).contains("retainableArtifacts=[1, 2, 3]")
     }

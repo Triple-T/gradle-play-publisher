@@ -5,18 +5,22 @@ import com.github.triplet.gradle.androidpublisher.UploadInternalSharingArtifactR
 import com.github.triplet.gradle.androidpublisher.newUploadInternalSharingArtifactResponse
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
+import com.github.triplet.gradle.play.helpers.SharedIntegrationTest
 import com.google.common.truth.Truth.assertThat
-import org.gradle.testkit.runner.TaskOutcome
+import org.gradle.testkit.runner.TaskOutcome.NO_SOURCE
+import org.gradle.testkit.runner.TaskOutcome.SUCCESS
+import org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
 import org.junit.jupiter.api.Test
 import java.io.File
 
-class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
+class PublishInternalSharingApkIntegrationTest : IntegrationTestBase(), SharedIntegrationTest {
+    override fun taskName(taskVariant: String) = ":upload${taskVariant}PrivateApk"
+
     @Test
     fun `Builds apk on-the-fly by default`() {
         val result = execute("", "uploadReleasePrivateApk")
 
-        assertThat(result.task(":packageRelease")).isNotNull()
-        assertThat(result.task(":packageRelease")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(":packageRelease", outcome = SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingApk(")
         assertThat(result.output).contains(".apk")
     }
@@ -26,10 +30,8 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
         val result1 = execute("", "uploadReleasePrivateApk")
         val result2 = execute("", "uploadReleasePrivateApk")
 
-        assertThat(result1.task(":uploadReleasePrivateApk")).isNotNull()
-        assertThat(result1.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result2.task(":uploadReleasePrivateApk")).isNotNull()
-        assertThat(result2.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.UP_TO_DATE)
+        result1.requireTask(outcome = SUCCESS)
+        result2.requireTask(outcome = UP_TO_DATE)
     }
 
     @Test
@@ -44,8 +46,7 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
         val result = execute(config, "uploadReleasePrivateApk")
 
         assertThat(result.task(":packageRelease")).isNull()
-        assertThat(result.task(":uploadReleasePrivateApk")).isNotNull()
-        assertThat(result.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.NO_SOURCE)
+        result.requireTask(outcome = NO_SOURCE)
     }
 
     @Test
@@ -61,8 +62,7 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
         val result = execute(config, "uploadReleasePrivateApk")
 
         assertThat(result.task(":packageRelease")).isNull()
-        assertThat(result.task(":uploadReleasePrivateApk")).isNotNull()
-        assertThat(result.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingApk(")
         assertThat(result.output).contains(playgroundDir.name)
         assertThat(result.output).contains("foo.apk")
@@ -81,8 +81,7 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
         val result = execute(config, "uploadReleasePrivateApk")
 
         assertThat(result.task(":packageRelease")).isNull()
-        assertThat(result.task(":uploadReleasePrivateApk")).isNotNull()
-        assertThat(result.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingApk(")
         assertThat(result.output).contains(playgroundDir.name)
         assertThat(result.output).contains("foo.apk")
@@ -101,10 +100,8 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
         val result1 = execute(config, "uploadReleasePrivateApk")
         val result2 = execute(config, "uploadReleasePrivateApk")
 
-        assertThat(result1.task(":uploadReleasePrivateApk")).isNotNull()
-        assertThat(result1.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result2.task(":uploadReleasePrivateApk")).isNotNull()
-        assertThat(result2.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.UP_TO_DATE)
+        result1.requireTask(outcome = SUCCESS)
+        result2.requireTask(outcome = UP_TO_DATE)
     }
 
     @Test
@@ -133,10 +130,8 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
         val result = execute(config, "uploadReleasePrivateApk")
 
         assertThat(result.task(":packageRelease")).isNull()
-        assertThat(result.task(":myCustomTask")).isNotNull()
-        assertThat(result.task(":myCustomTask")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result.task(":uploadReleasePrivateApk")).isNotNull()
-        assertThat(result.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(":myCustomTask", outcome = SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingApk(")
         assertThat(result.output).contains(playgroundDir.name)
         assertThat(result.output).contains("foo.apk")
@@ -148,8 +143,7 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
         val result = execute("", "uploadReleasePrivateApk", "--artifact-dir=${playgroundDir}")
 
         assertThat(result.task(":packageRelease")).isNull()
-        assertThat(result.task(":uploadReleasePrivateApk")).isNotNull()
-        assertThat(result.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingApk(")
         assertThat(result.output).contains(playgroundDir.name)
     }
@@ -171,8 +165,7 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
         val result = execute(config, "uploadReleasePrivateApk", "--artifact-dir=${playgroundDir}")
 
         assertThat(result.task(":packageRelease")).isNull()
-        assertThat(result.task(":uploadReleasePrivateApk")).isNotNull()
-        assertThat(result.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingApk(")
         assertThat(result.output).contains(playgroundDir.name)
     }
@@ -190,8 +183,7 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
         File(playgroundDir, "2.apk").safeCreateNewFile()
         val result = execute(config, "uploadReleasePrivateApk")
 
-        assertThat(result.task(":uploadReleasePrivateApk")).isNotNull()
-        assertThat(result.task(":uploadReleasePrivateApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("1.apk")
         assertThat(result.output).contains("2.apk")
     }

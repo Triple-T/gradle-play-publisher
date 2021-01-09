@@ -5,12 +5,15 @@ import com.github.triplet.gradle.androidpublisher.FakeEditManager
 import com.github.triplet.gradle.androidpublisher.FakePlayPublisher
 import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
+import com.github.triplet.gradle.play.helpers.SharedIntegrationTest
 import com.google.common.truth.Truth.assertThat
-import org.gradle.testkit.runner.TaskOutcome
+import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
-class ProcessArtifactVersionCodesIntegrationTest : IntegrationTestBase() {
+class ProcessArtifactVersionCodesIntegrationTest : IntegrationTestBase(), SharedIntegrationTest {
+    override fun taskName(taskVariant: String) = ":process${taskVariant}VersionCodes"
+
     @Test
     fun `Task only runs on release`() {
         // language=gradle
@@ -50,8 +53,7 @@ class ProcessArtifactVersionCodesIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "assembleRelease")
 
-        assertThat(result.task(":processReleaseVersionCodes")).isNotNull()
-        assertThat(result.task(":processReleaseVersionCodes")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("versionCode=42")
     }
 
@@ -76,8 +78,7 @@ class ProcessArtifactVersionCodesIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "assembleRelease")
 
-        assertThat(result.task(":processReleaseVersionCodes")).isNotNull()
-        assertThat(result.task(":processReleaseVersionCodes")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("versionCode=42")
     }
 
@@ -113,8 +114,7 @@ class ProcessArtifactVersionCodesIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "assembleRelease")
 
-        assertThat(result.task(":processReleaseVersionCodes")).isNotNull()
-        assertThat(result.task(":processReleaseVersionCodes")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("versionCode=42")
         assertThat(result.output).contains("versionCode=44")
         assertThat(result.output).contains("versionCode=46")

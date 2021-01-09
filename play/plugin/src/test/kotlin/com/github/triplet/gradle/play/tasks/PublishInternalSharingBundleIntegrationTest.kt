@@ -5,18 +5,22 @@ import com.github.triplet.gradle.androidpublisher.UploadInternalSharingArtifactR
 import com.github.triplet.gradle.androidpublisher.newUploadInternalSharingArtifactResponse
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
+import com.github.triplet.gradle.play.helpers.SharedIntegrationTest
 import com.google.common.truth.Truth.assertThat
-import org.gradle.testkit.runner.TaskOutcome
+import org.gradle.testkit.runner.TaskOutcome.FAILED
+import org.gradle.testkit.runner.TaskOutcome.SUCCESS
+import org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
 import org.junit.jupiter.api.Test
 import java.io.File
 
-class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
+class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase(), SharedIntegrationTest {
+    override fun taskName(taskVariant: String) = ":upload${taskVariant}PrivateBundle"
+
     @Test
     fun `Builds bundle on-the-fly by default`() {
         val result = execute("", "uploadReleasePrivateBundle")
 
-        assertThat(result.task(":packageReleaseBundle")).isNotNull()
-        assertThat(result.task(":packageReleaseBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(":packageReleaseBundle", outcome = SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingBundle(")
         assertThat(result.output).contains(".aab")
     }
@@ -26,10 +30,8 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
         val result1 = execute("", "uploadReleasePrivateBundle")
         val result2 = execute("", "uploadReleasePrivateBundle")
 
-        assertThat(result1.task(":uploadReleasePrivateBundle")).isNotNull()
-        assertThat(result1.task(":uploadReleasePrivateBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result2.task(":uploadReleasePrivateBundle")).isNotNull()
-        assertThat(result2.task(":uploadReleasePrivateBundle")!!.outcome).isEqualTo(TaskOutcome.UP_TO_DATE)
+        result1.requireTask(outcome = SUCCESS)
+        result2.requireTask(outcome = UP_TO_DATE)
     }
 
     @Test
@@ -44,9 +46,7 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
         val result = executeExpectingFailure(config, "uploadReleasePrivateBundle")
 
         assertThat(result.task(":packageReleaseBundle")).isNull()
-        assertThat(result.task(":uploadReleasePrivateBundle")).isNotNull()
-        assertThat(result.task(":uploadReleasePrivateBundle")!!.outcome)
-                .isEqualTo(TaskOutcome.FAILED)
+        result.requireTask(outcome = FAILED)
         assertThat(result.output).contains("ERROR_no-unique-aab-found")
         assertThat(result.output).contains(playgroundDir.name)
     }
@@ -64,9 +64,7 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
         File(playgroundDir, "2.aab").safeCreateNewFile()
         val result = executeExpectingFailure(config, "uploadReleasePrivateBundle")
 
-        assertThat(result.task(":uploadReleasePrivateBundle")).isNotNull()
-        assertThat(result.task(":uploadReleasePrivateBundle")!!.outcome)
-                .isEqualTo(TaskOutcome.FAILED)
+        result.requireTask(outcome = FAILED)
         assertThat(result.output).contains("ERROR_no-unique-aab-found")
         assertThat(result.output).contains(playgroundDir.name)
     }
@@ -84,9 +82,7 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
         val result = execute(config, "uploadReleasePrivateBundle")
 
         assertThat(result.task(":packageReleaseBundle")).isNull()
-        assertThat(result.task(":uploadReleasePrivateBundle")).isNotNull()
-        assertThat(result.task(":uploadReleasePrivateBundle")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingBundle(")
         assertThat(result.output).contains(playgroundDir.name)
         assertThat(result.output).contains("foo.aab")
@@ -105,9 +101,7 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
         val result = execute(config, "uploadReleasePrivateBundle")
 
         assertThat(result.task(":packageReleaseBundle")).isNull()
-        assertThat(result.task(":uploadReleasePrivateBundle")).isNotNull()
-        assertThat(result.task(":uploadReleasePrivateBundle")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingBundle(")
         assertThat(result.output).contains(playgroundDir.name)
         assertThat(result.output).contains("foo.aab")
@@ -126,10 +120,8 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
         val result1 = execute(config, "uploadReleasePrivateBundle")
         val result2 = execute(config, "uploadReleasePrivateBundle")
 
-        assertThat(result1.task(":uploadReleasePrivateBundle")).isNotNull()
-        assertThat(result1.task(":uploadReleasePrivateBundle")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result2.task(":uploadReleasePrivateBundle")).isNotNull()
-        assertThat(result2.task(":uploadReleasePrivateBundle")!!.outcome).isEqualTo(TaskOutcome.UP_TO_DATE)
+        result1.requireTask(outcome = SUCCESS)
+        result2.requireTask(outcome = UP_TO_DATE)
     }
 
     @Test
@@ -158,11 +150,8 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
         val result = execute(config, "uploadReleasePrivateBundle")
 
         assertThat(result.task(":packageReleaseBundle")).isNull()
-        assertThat(result.task(":myCustomTask")).isNotNull()
-        assertThat(result.task(":myCustomTask")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result.task(":uploadReleasePrivateBundle")).isNotNull()
-        assertThat(result.task(":uploadReleasePrivateBundle")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(":myCustomTask", outcome = SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingBundle(")
         assertThat(result.output).contains(playgroundDir.name)
         assertThat(result.output).contains("foo.aab")
@@ -174,9 +163,7 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
         val result = execute("", "uploadReleasePrivateBundle", "--artifact-dir=${playgroundDir}")
 
         assertThat(result.task(":packageReleaseBundle")).isNull()
-        assertThat(result.task(":uploadReleasePrivateBundle")).isNotNull()
-        assertThat(result.task(":uploadReleasePrivateBundle")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingBundle(")
         assertThat(result.output).contains(playgroundDir.name)
     }
@@ -198,9 +185,7 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase() {
         val result = execute(config, "uploadReleasePrivateBundle", "--artifact-dir=${playgroundDir}")
 
         assertThat(result.task(":packageReleaseBundle")).isNull()
-        assertThat(result.task(":uploadReleasePrivateBundle")).isNotNull()
-        assertThat(result.task(":uploadReleasePrivateBundle")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingBundle(")
         assertThat(result.output).contains(playgroundDir.name)
     }

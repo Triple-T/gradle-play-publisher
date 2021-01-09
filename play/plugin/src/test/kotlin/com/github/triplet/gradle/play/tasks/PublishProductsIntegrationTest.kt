@@ -4,18 +4,22 @@ import com.github.triplet.gradle.androidpublisher.FakePlayPublisher
 import com.github.triplet.gradle.androidpublisher.UpdateProductResponse
 import com.github.triplet.gradle.androidpublisher.newUpdateProductResponse
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
+import com.github.triplet.gradle.play.helpers.SharedIntegrationTest
 import com.google.common.truth.Truth.assertThat
-import org.gradle.testkit.runner.TaskOutcome
+import org.gradle.testkit.runner.TaskOutcome.NO_SOURCE
+import org.gradle.testkit.runner.TaskOutcome.SUCCESS
+import org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
 import org.junit.jupiter.api.Test
 import java.io.File
 
-class PublishProductsIntegrationTest : IntegrationTestBase() {
+class PublishProductsIntegrationTest : IntegrationTestBase(), SharedIntegrationTest {
+    override fun taskName(taskVariant: String) = ":publish${taskVariant}Products"
+
     @Test
     fun `Empty dir of products skips task`() {
         val result = execute("", "publishReleaseProducts")
 
-        assertThat(result.task(":publishReleaseProducts")).isNotNull()
-        assertThat(result.task(":publishReleaseProducts")!!.outcome).isEqualTo(TaskOutcome.NO_SOURCE)
+        result.requireTask(outcome = NO_SOURCE)
     }
 
     @Test
@@ -29,8 +33,7 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishInvalidProducts")
 
-        assertThat(result.task(":publishInvalidProducts")).isNotNull()
-        assertThat(result.task(":publishInvalidProducts")!!.outcome).isEqualTo(TaskOutcome.NO_SOURCE)
+        result.requireTask(taskName("Invalid"), outcome = NO_SOURCE)
     }
 
     @Test
@@ -44,8 +47,7 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishHiddenProducts")
 
-        assertThat(result.task(":publishHiddenProducts")).isNotNull()
-        assertThat(result.task(":publishHiddenProducts")!!.outcome).isEqualTo(TaskOutcome.NO_SOURCE)
+        result.requireTask(taskName("Hidden"), outcome = NO_SOURCE)
     }
 
     @Test
@@ -59,8 +61,7 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishSimpleProducts")
 
-        assertThat(result.task(":publishSimpleProducts")).isNotNull()
-        assertThat(result.task(":publishSimpleProducts")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("Simple"), outcome = SUCCESS)
         assertThat(result.output).contains("updateInAppProduct(")
         assertThat(result.output).doesNotContain("insertInAppProduct(")
         assertThat(result.output).contains("product.json")
@@ -78,8 +79,7 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishMultipleProductsProducts")
 
-        assertThat(result.task(":publishMultipleProductsProducts")).isNotNull()
-        assertThat(result.task(":publishMultipleProductsProducts")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("MultipleProducts"), outcome = SUCCESS)
         assertThat(result.output).contains("sku1")
         assertThat(result.output).contains("sku2")
     }
@@ -97,8 +97,7 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishSimpleProducts")
 
-        assertThat(result.task(":publishSimpleProducts")).isNotNull()
-        assertThat(result.task(":publishSimpleProducts")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("Simple"), outcome = SUCCESS)
         assertThat(result.output).contains("updateInAppProduct(")
         assertThat(result.output).contains("insertInAppProduct(")
     }
@@ -115,10 +114,8 @@ class PublishProductsIntegrationTest : IntegrationTestBase() {
         val result1 = execute(config, "publishMultipleProductsProducts")
         val result2 = execute(config, "publishMultipleProductsProducts")
 
-        assertThat(result1.task(":publishMultipleProductsProducts")).isNotNull()
-        assertThat(result1.task(":publishMultipleProductsProducts")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result2.task(":publishMultipleProductsProducts")).isNotNull()
-        assertThat(result2.task(":publishMultipleProductsProducts")!!.outcome).isEqualTo(TaskOutcome.UP_TO_DATE)
+        result1.requireTask(taskName("MultipleProducts"), outcome = SUCCESS)
+        result2.requireTask(taskName("MultipleProducts"), outcome = UP_TO_DATE)
     }
 
     companion object {

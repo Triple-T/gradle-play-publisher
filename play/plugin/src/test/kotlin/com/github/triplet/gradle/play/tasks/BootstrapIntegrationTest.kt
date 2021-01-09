@@ -15,20 +15,22 @@ import com.github.triplet.gradle.androidpublisher.newReleaseNote
 import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
+import com.github.triplet.gradle.play.helpers.SharedIntegrationTest
 import com.google.common.truth.Truth.assertThat
-import org.gradle.testkit.runner.TaskOutcome
+import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Test
 import java.io.File
 
-class BootstrapIntegrationTest : IntegrationTestBase() {
+class BootstrapIntegrationTest : IntegrationTestBase(), SharedIntegrationTest {
+    override fun taskName(taskVariant: String) = ":bootstrap$taskVariant"
+
     @Test
     fun `Existing contents get deleted`() {
         File(appDir, "foobar.txt").safeCreateNewFile().writeText("yo")
 
         val result = execute("", "bootstrapRelease")
 
-        assertThat(result.task(":bootstrapRelease")).isNotNull()
-        assertThat(result.task(":bootstrapRelease")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
 
         "foobar.txt".exists(no)
     }
@@ -37,8 +39,7 @@ class BootstrapIntegrationTest : IntegrationTestBase() {
     fun `App details can be bootstrapped`() {
         val result = execute("", "bootstrapRelease", "--app-details")
 
-        assertThat(result.task(":bootstrapRelease")).isNotNull()
-        assertThat(result.task(":bootstrapRelease")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
 
         "default-language.txt" produced "en-US"
         "contact-email.txt" produced "email"
@@ -54,8 +55,7 @@ class BootstrapIntegrationTest : IntegrationTestBase() {
     fun `Listings can be bootstrapped`() {
         val result = execute("", "bootstrapRelease", "--listings")
 
-        assertThat(result.task(":bootstrapRelease")).isNotNull()
-        assertThat(result.task(":bootstrapRelease")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
 
         "listings/en-US/title.txt" produced "title"
         "listings/en-US/full-description.txt" produced "full"
@@ -71,8 +71,7 @@ class BootstrapIntegrationTest : IntegrationTestBase() {
     fun `Release notes can be bootstrapped`() {
         val result = execute("", "bootstrapRelease", "--release-notes")
 
-        assertThat(result.task(":bootstrapRelease")).isNotNull()
-        assertThat(result.task(":bootstrapRelease")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
 
         "release-notes/en-US/production.txt" produced "prod"
         "release-notes/fr-FR/alpha.txt" produced "alpha"
@@ -86,8 +85,7 @@ class BootstrapIntegrationTest : IntegrationTestBase() {
     fun `Products can be bootstrapped`() {
         val result = execute("", "bootstrapRelease", "--products")
 
-        assertThat(result.task(":bootstrapRelease")).isNotNull()
-        assertThat(result.task(":bootstrapRelease")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
 
         "products/sku1.json" produced "product 1"
         "products/sku2.json" produced "product 2"

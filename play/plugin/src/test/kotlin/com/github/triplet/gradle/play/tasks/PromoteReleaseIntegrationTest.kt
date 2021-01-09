@@ -6,11 +6,14 @@ import com.github.triplet.gradle.androidpublisher.FakePlayPublisher
 import com.github.triplet.gradle.androidpublisher.ReleaseStatus
 import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
+import com.github.triplet.gradle.play.helpers.SharedIntegrationTest
 import com.google.common.truth.Truth.assertThat
-import org.gradle.testkit.runner.TaskOutcome
+import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Test
 
-class PromoteReleaseIntegrationTest : IntegrationTestBase() {
+class PromoteReleaseIntegrationTest : IntegrationTestBase(), SharedIntegrationTest {
+    override fun taskName(taskVariant: String) = ":promote${taskVariant}Artifact"
+
     @Test
     fun `Promote uses promote track by default`() {
         // language=gradle
@@ -20,8 +23,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "promoteReleaseArtifact")
 
-        assertThat(result.task(":promoteReleaseArtifact")).isNotNull()
-        assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("promoteRelease(")
         assertThat(result.output).contains("fromTrackName=auto-track")
         assertThat(result.output).contains("promoteTrackName=foobar")
@@ -37,8 +39,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "promoteReleaseArtifact")
 
-        assertThat(result.task(":promoteReleaseArtifact")).isNotNull()
-        assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("promoteRelease(")
         assertThat(result.output).contains("promoteTrackName=not-foobar")
     }
@@ -47,8 +48,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
     fun `Promote finds from track dynamically by default`() {
         val result = execute("", "promoteReleaseArtifact")
 
-        assertThat(result.task(":promoteReleaseArtifact")).isNotNull()
-        assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("promoteRelease(")
         assertThat(result.output).contains("fromTrackName=auto-track")
         assertThat(result.output).contains("promoteTrackName=auto-track")
@@ -63,8 +63,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "promoteReleaseArtifact")
 
-        assertThat(result.task(":promoteReleaseArtifact")).isNotNull()
-        assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("promoteRelease(")
         assertThat(result.output).contains("fromTrackName=foobar")
         assertThat(result.output).contains("promoteTrackName=foobar")
@@ -84,8 +83,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
                 "--update-priority=3"
         )
 
-        assertThat(result.task(":promoteReleaseArtifact")).isNotNull()
-        assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("promoteRelease(")
         assertThat(result.output).contains("fromTrackName=myFromTrack")
         assertThat(result.output).contains("promoteTrackName=myPromoteTrack")
@@ -120,8 +118,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
                 "--update-priority=3"
         )
 
-        assertThat(result.task(":promoteReleaseArtifact")).isNotNull()
-        assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("promoteRelease(")
         assertThat(result.output).contains("fromTrackName=myFromTrack")
         assertThat(result.output).contains("promoteTrackName=myPromoteTrack")
@@ -137,8 +134,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
     fun `CLI params can be used to update track`() {
         val result = execute("", "promoteReleaseArtifact", "--update=myUpdateTrack")
 
-        assertThat(result.task(":promoteReleaseArtifact")).isNotNull()
-        assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("promoteRelease(")
         assertThat(result.output).contains("fromTrackName=myUpdateTrack")
         assertThat(result.output).contains("promoteTrackName=myUpdateTrack")
@@ -157,8 +153,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, ":promoteReleaseArtifact")
 
-        assertThat(result.task(":promoteReleaseArtifact")).isNotNull()
-        assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("promoteRelease(")
     }
 
@@ -171,8 +166,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "promoteReleaseArtifact")
 
-        assertThat(result.task(":promoteReleaseArtifact")).isNotNull()
-        assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("promoteRelease(")
         assertThat(result.output).contains("releaseStatus=DRAFT")
     }
@@ -188,9 +182,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "promoteConsoleNamesArtifact")
 
-        assertThat(result.task(":promoteConsoleNamesArtifact")).isNotNull()
-        assertThat(result.task(":promoteConsoleNamesArtifact")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("ConsoleNames"), outcome = SUCCESS)
         assertThat(result.output).contains("promoteRelease(")
         assertThat(result.output).contains("releaseName=myDefaultName")
     }
@@ -208,9 +200,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "promoteConsoleNamesArtifact")
 
-        assertThat(result.task(":promoteConsoleNamesArtifact")).isNotNull()
-        assertThat(result.task(":promoteConsoleNamesArtifact")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("ConsoleNames"), outcome = SUCCESS)
         assertThat(result.output).contains("promoteRelease(")
         assertThat(result.output).contains("releaseName=myCustomName")
     }
@@ -229,9 +219,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "promoteConsoleNamesArtifact")
 
-        assertThat(result.task(":promoteConsoleNamesArtifact")).isNotNull()
-        assertThat(result.task(":promoteConsoleNamesArtifact")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("ConsoleNames"), outcome = SUCCESS)
         assertThat(result.output).contains("promoteRelease(")
         assertThat(result.output).contains("releaseName=myPromoteName")
     }
@@ -249,9 +237,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "promoteReleaseNotesArtifact")
 
-        assertThat(result.task(":promoteReleaseNotesArtifact")).isNotNull()
-        assertThat(result.task(":promoteReleaseNotesArtifact")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("ReleaseNotes"), outcome = SUCCESS)
         assertThat(result.output).contains("promoteRelease(")
         assertThat(result.output).contains("releaseNotes={en-US=My default release notes, " +
                                                    "fr-FR=Mes notes de mise à jour}")
@@ -270,9 +256,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "promoteReleaseNotesArtifact")
 
-        assertThat(result.task(":promoteReleaseNotesArtifact")).isNotNull()
-        assertThat(result.task(":promoteReleaseNotesArtifact")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("ReleaseNotes"), outcome = SUCCESS)
         assertThat(result.output).contains("promoteRelease(")
         assertThat(result.output).contains("releaseNotes={en-US=Custom track release notes, " +
                                                    "fr-FR=Mes notes de mise à jour}")
@@ -289,9 +273,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "promoteReleaseNotesArtifact")
 
-        assertThat(result.task(":promoteReleaseNotesArtifact")).isNotNull()
-        assertThat(result.task(":promoteReleaseNotesArtifact")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("ReleaseNotes"), outcome = SUCCESS)
         assertThat(result.output).contains("promoteRelease(")
         assertThat(result.output).contains("releaseNotes={en-US=Auto track release notes, " +
                                                    "fr-FR=Mes notes de mise à jour}")
@@ -306,8 +288,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "promoteReleaseArtifact")
 
-        assertThat(result.task(":promoteReleaseArtifact")).isNotNull()
-        assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("promoteRelease(")
         assertThat(result.output).contains("userFraction=0.123")
     }
@@ -321,8 +302,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "promoteReleaseArtifact")
 
-        assertThat(result.task(":promoteReleaseArtifact")).isNotNull()
-        assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("promoteRelease(")
         assertThat(result.output).contains("updatePriority=5")
     }
@@ -336,8 +316,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "promoteReleaseArtifact")
 
-        assertThat(result.task(":promoteReleaseArtifact")).isNotNull()
-        assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("promoteRelease(")
         assertThat(result.output).contains("retainableArtifacts=[1, 2, 3]")
     }
@@ -347,10 +326,8 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
         val result1 = execute("", "promoteReleaseArtifact")
         val result2 = execute("", "promoteReleaseArtifact")
 
-        assertThat(result1.task(":promoteReleaseArtifact")).isNotNull()
-        assertThat(result1.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result2.task(":promoteReleaseArtifact")).isNotNull()
-        assertThat(result2.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result1.requireTask(outcome = SUCCESS)
+        result2.requireTask(outcome = SUCCESS)
         assertThat(result1.output).contains("promoteRelease(")
         assertThat(result2.output).contains("promoteRelease(")
     }
@@ -359,8 +336,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
     fun `Build generates and commits edit by default`() {
         val result = execute("", "promoteReleaseArtifact")
 
-        assertThat(result.task(":promoteReleaseArtifact")).isNotNull()
-        assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("insertEdit()")
         assertThat(result.output).contains("commitEdit(edit-id)")
     }
@@ -374,8 +350,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "promoteReleaseArtifact")
 
-        assertThat(result.task(":promoteReleaseArtifact")).isNotNull()
-        assertThat(result.task(":promoteReleaseArtifact")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("insertEdit()")
         assertThat(result.output).doesNotContain("commitEdit(")
         assertThat(result.output).contains("validateEdit(")
