@@ -18,7 +18,7 @@ class InstallInternalSharingArtifactIntegrationTest : IntegrationTestBase(), Sha
     fun `Build depends on uploading apk artifact by default`() {
         val result = execute("", "installReleasePrivateArtifact")
 
-        result.requireTask(outcome = SUCCESS)
+        result.requireTask(":uploadReleasePrivateApk", outcome = SUCCESS)
     }
 
     @Test
@@ -30,7 +30,7 @@ class InstallInternalSharingArtifactIntegrationTest : IntegrationTestBase(), Sha
 
         val result = execute(config, "installReleasePrivateArtifact")
 
-        result.requireTask(outcome = SUCCESS)
+        result.requireTask(":uploadReleasePrivateBundle", outcome = SUCCESS)
     }
 
     @Test

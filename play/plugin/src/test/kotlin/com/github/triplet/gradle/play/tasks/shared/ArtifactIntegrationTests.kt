@@ -14,6 +14,10 @@ import org.junit.jupiter.params.provider.ValueSource
 import java.io.File
 
 interface ArtifactIntegrationTests : SharedIntegrationTest {
+    fun customArtifactName(): String
+
+    fun assertCustomArtifactResults(result: BuildResult)
+
     @Test
     fun `Rebuilding artifact on-the-fly uses cached build`() {
         val result1 = execute("", taskName())
@@ -22,10 +26,6 @@ interface ArtifactIntegrationTests : SharedIntegrationTest {
         result1.requireTask(outcome = SUCCESS)
         result2.requireTask(outcome = UP_TO_DATE)
     }
-
-    fun customArtifactName(): String
-
-    fun assertCustomArtifactResults(result: BuildResult)
 
     @Test
     fun `Using custom artifact skips on-the-fly build`() {
@@ -72,7 +72,8 @@ interface ArtifactIntegrationTests : SharedIntegrationTest {
         "false,false,$DEFAULT_TASK_VARIANT",
         "false,true,$DEFAULT_TASK_VARIANT",
         "true,false,$DEFAULT_TASK_VARIANT",
-        "true,true,$DEFAULT_TASK_VARIANT"])
+        "true,true,$DEFAULT_TASK_VARIANT"
+    ])
     fun `Using custom artifact file with supported 3P dep skips on-the-fly build`(
             eager: Boolean,
             cliParam: Boolean,
@@ -199,14 +200,8 @@ interface ArtifactIntegrationTests : SharedIntegrationTest {
     fun `Eagerly evaluated global CLI artifact-dir param skips on-the-fly build`() {
         // language=gradle
         val config = """
-            playConfigs {
-                release {
-                    track.set('hello')
-                }
-            }
-
             tasks.all {}
-        """.withAndroidBlock()
+        """
 
         File(playgroundDir, customArtifactName()).safeCreateNewFile()
         val result = execute(

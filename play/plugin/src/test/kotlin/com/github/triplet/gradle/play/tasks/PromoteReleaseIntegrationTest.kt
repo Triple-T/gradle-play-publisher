@@ -7,15 +7,22 @@ import com.github.triplet.gradle.androidpublisher.ReleaseStatus
 import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.github.triplet.gradle.play.helpers.SharedIntegrationTest
+import com.github.triplet.gradle.play.helpers.SharedIntegrationTest.Companion.DEFAULT_TASK_VARIANT
 import com.github.triplet.gradle.play.tasks.shared.PublishOrPromoteArtifactIntegrationTests
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 
 class PromoteReleaseIntegrationTest : IntegrationTestBase(), SharedIntegrationTest,
         PublishOrPromoteArtifactIntegrationTests {
     override fun taskName(taskVariant: String) = ":promote${taskVariant}Artifact"
+
+    override fun assertArtifactUpload(result: BuildResult) {
+        assertThat(result.output).contains("promoteRelease(")
+    }
 
     @Test
     fun `Promote uses promote track by default`() {
@@ -72,38 +79,9 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase(), SharedIntegrationTe
         assertThat(result.output).contains("promoteTrackName=foobar")
     }
 
-    override fun assertArtifactUpload(result: BuildResult) {
-        assertThat(result.output).contains("promoteRelease(")
-    }
-
-    @Test
-    fun `CLI params can be used to configure task`() {
-        val result = execute(
-                "",
-                "promoteReleaseArtifact",
-                "--no-commit",
-                "--from-track=myFromTrack",
-                "--promote-track=myPromoteTrack",
-                "--release-name=myRelName",
-                "--release-status=draft",
-                "--user-fraction=.88",
-                "--update-priority=3"
-        )
-
-        result.requireTask(outcome = SUCCESS)
-        assertThat(result.output).contains("promoteRelease(")
-        assertThat(result.output).contains("fromTrackName=myFromTrack")
-        assertThat(result.output).contains("promoteTrackName=myPromoteTrack")
-        assertThat(result.output).contains("releaseName=myRelName")
-        assertThat(result.output).contains("releaseStatus=DRAFT")
-        assertThat(result.output).contains("userFraction=0.88")
-        assertThat(result.output).contains("updatePriority=3")
-        assertThat(result.output).contains("insertEdit()")
-        assertThat(result.output).doesNotContain("commitEdit(")
-    }
-
-    @Test
-    fun `Global CLI params can be used to configure task`() {
+    @ParameterizedTest
+    @ValueSource(strings = ["", DEFAULT_TASK_VARIANT])
+    fun `CLI params can be used to configure task`(taskVariant: String) {
         // language=gradle
         val config = """
             playConfigs {
@@ -115,7 +93,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase(), SharedIntegrationTe
 
         val result = execute(
                 config,
-                "promoteArtifact",
+                taskName(taskVariant),
                 "--no-commit",
                 "--from-track=myFromTrack",
                 "--promote-track=myPromoteTrack",

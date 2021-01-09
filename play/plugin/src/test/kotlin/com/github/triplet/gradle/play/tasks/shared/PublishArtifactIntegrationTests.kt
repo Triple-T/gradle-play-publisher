@@ -1,43 +1,21 @@
 package com.github.triplet.gradle.play.tasks.shared
 
 import com.github.triplet.gradle.play.helpers.SharedIntegrationTest
+import com.github.triplet.gradle.play.helpers.SharedIntegrationTest.Companion.DEFAULT_TASK_VARIANT
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome.FAILED
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 
 interface PublishArtifactIntegrationTests : SharedIntegrationTest {
     fun assertArtifactUpload(result: BuildResult)
 
-    @Test
-    fun `CLI params can be used to configure task`() {
-        val result = execute(
-                "",
-                taskName(),
-                "--no-commit",
-                "--release-name=myRelName",
-                "--release-status=draft",
-                "--resolution-strategy=ignore",
-                "--track=myCustomTrack",
-                "--user-fraction=.88",
-                "--update-priority=3"
-        )
-
-        result.requireTask(outcome = SUCCESS)
-        assertThat(result.output).contains("releaseName=myRelName")
-        assertThat(result.output).contains("releaseStatus=DRAFT")
-        assertThat(result.output).contains("strategy=IGNORE")
-        assertThat(result.output).contains("trackName=myCustomTrack")
-        assertThat(result.output).contains("userFraction=0.88")
-        assertThat(result.output).contains("updatePriority=3")
-        assertThat(result.output).contains("insertEdit()")
-        assertThat(result.output).doesNotContain("commitEdit(")
-        assertArtifactUpload(result)
-    }
-
-    @Test
-    fun `Global CLI params can be used to configure task`() {
+    @ParameterizedTest
+    @ValueSource(strings = ["", DEFAULT_TASK_VARIANT])
+    fun `CLI params can be used to configure task`(taskVariant: String) {
         // language=gradle
         val config = """
             playConfigs {
@@ -49,7 +27,7 @@ interface PublishArtifactIntegrationTests : SharedIntegrationTest {
 
         val result = execute(
                 config,
-                taskName(/* No variant: */ ""),
+                taskName(taskVariant),
                 "--no-commit",
                 "--release-name=myRelName",
                 "--release-status=draft",
@@ -72,6 +50,31 @@ interface PublishArtifactIntegrationTests : SharedIntegrationTest {
     }
 
     @Test
+    fun `Build properly assigns didSkipCommit param when no-commit flag is passed`() {
+        // language=gradle
+        val config1 = """
+            play.commit = false
+        """
+
+        // language=gradle
+        val config2 = """
+            android.defaultConfig.versionCode 2
+            play.commit = false
+        """
+
+        val result1 = execute(config1, taskName())
+        val result2 = execute(config2, taskName())
+
+        result1.requireTask(outcome = SUCCESS)
+        assertThat(result1.output).contains("didPreviousBuildSkipCommit=false")
+        assertArtifactUpload(result1)
+
+        result2.requireTask(outcome = SUCCESS)
+        assertThat(result2.output).contains("didPreviousBuildSkipCommit=true")
+        assertArtifactUpload(result2)
+    }
+
+    @Test
     fun `Build picks track specific release name when available`() {
         // language=gradle
         val config = """
@@ -80,6 +83,25 @@ interface PublishArtifactIntegrationTests : SharedIntegrationTest {
             }
 
             play.track = 'custom-track'
+        """
+
+        val result = execute(config, taskName("ConsoleNames"))
+
+        result.requireTask(taskName("ConsoleNames"), outcome = SUCCESS)
+        assertThat(result.output).contains("releaseName=myCustomName")
+        assertArtifactUpload(result)
+    }
+
+    @Test
+    fun `Build ignores promote track specific release name when available`() {
+        // language=gradle
+        val config = """
+            android.buildTypes {
+                consoleNames {}
+            }
+
+            play.track = 'custom-track'
+            play.promoteTrack = 'promote-track'
         """
 
         val result = execute(config, taskName("ConsoleNames"))
@@ -126,25 +148,6 @@ interface PublishArtifactIntegrationTests : SharedIntegrationTest {
     }
 
     @Test
-    fun `Build ignores promote track specific release name when available`() {
-        // language=gradle
-        val config = """
-            android.buildTypes {
-                consoleNames {}
-            }
-
-            play.track = 'custom-track'
-            play.promoteTrack = 'promote-track'
-        """
-
-        val result = execute(config, taskName("ConsoleNames"))
-
-        result.requireTask(taskName("ConsoleNames"), outcome = SUCCESS)
-        assertThat(result.output).contains("releaseName=myCustomName")
-        assertArtifactUpload(result)
-    }
-
-    @Test
     fun `Build ignores promote track specific release notes when available`() {
         // language=gradle
         val config = """
@@ -162,31 +165,6 @@ interface PublishArtifactIntegrationTests : SharedIntegrationTest {
         assertThat(result.output).contains("releaseNotes={en-US=Custom track release notes, " +
                                                    "fr-FR=Mes notes de mise à jour}")
         assertArtifactUpload(result)
-    }
-
-    @Test
-    fun `Build properly assigns didSkipCommit param when no-commit flag is passed`() {
-        // language=gradle
-        val config1 = """
-            play.commit = false
-        """
-
-        // language=gradle
-        val config2 = """
-            android.defaultConfig.versionCode 2
-            play.commit = false
-        """
-
-        val result1 = execute(config1, taskName())
-        val result2 = execute(config2, taskName())
-
-        result1.requireTask(outcome = SUCCESS)
-        assertThat(result1.output).contains("didPreviousBuildSkipCommit=false")
-        assertArtifactUpload(result1)
-
-        result2.requireTask(outcome = SUCCESS)
-        assertThat(result2.output).contains("didPreviousBuildSkipCommit=true")
-        assertArtifactUpload(result2)
     }
 
     @Test
