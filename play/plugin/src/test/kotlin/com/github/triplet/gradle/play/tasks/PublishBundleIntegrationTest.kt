@@ -14,9 +14,6 @@ import org.junit.jupiter.api.Test
 import java.io.File
 
 class PublishBundleIntegrationTest : IntegrationTestBase() {
-    override val factoryInstallerStatement = "com.github.triplet.gradle.play.tasks." +
-            "PublishBundleIntegrationTest.installFactories()"
-
     @Test
     fun `Builds bundle on-the-fly by default`() {
         val result = execute("", "publishReleaseBundle")

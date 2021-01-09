@@ -16,9 +16,6 @@ import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 
 class PublishApkIntegrationTest : IntegrationTestBase() {
-    override val factoryInstallerStatement = "com.github.triplet.gradle.play.tasks." +
-            "PublishApkIntegrationTest.installFactories()"
-
     @Test
     fun `Builds apk on-the-fly by default`() {
         val result = execute("", "publishReleaseApk")

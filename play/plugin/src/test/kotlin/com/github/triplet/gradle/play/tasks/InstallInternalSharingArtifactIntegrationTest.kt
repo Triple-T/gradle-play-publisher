@@ -10,9 +10,6 @@ import org.junit.jupiter.api.Test
 import java.io.File
 
 class InstallInternalSharingArtifactIntegrationTest : IntegrationTestBase() {
-    override val factoryInstallerStatement = "com.github.triplet.gradle.play.tasks." +
-            "InstallInternalSharingArtifactIntegrationTest.installFactories()"
-
     @Test
     fun `Build depends on uploading apk artifact by default`() {
         val result = execute("", "installReleasePrivateArtifact")

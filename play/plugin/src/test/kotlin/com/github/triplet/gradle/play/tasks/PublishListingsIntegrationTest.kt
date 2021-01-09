@@ -13,9 +13,6 @@ import org.junit.jupiter.api.Test
 import java.io.File
 
 class PublishListingsIntegrationTest : IntegrationTestBase() {
-    override val factoryInstallerStatement = "com.github.triplet.gradle.play.tasks." +
-            "PublishListingsIntegrationTest.installFactories()"
-
     @Test
     fun `Empty dir of listings skips task`() {
         val result = execute("", "publishReleaseListing")

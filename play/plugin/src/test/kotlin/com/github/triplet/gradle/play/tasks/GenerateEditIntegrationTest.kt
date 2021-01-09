@@ -15,9 +15,6 @@ import org.junit.jupiter.api.Test
 import java.io.File
 
 class GenerateEditIntegrationTest : IntegrationTestBase() {
-    override val factoryInstallerStatement = "com.github.triplet.gradle.play.tasks." +
-            "GenerateEditIntegrationTest.installFactories()"
-
     @Test
     fun `Fresh edit is created by default`() {
         val editFile = File(appDir, "build/gpp/com.example.publisher.txt")

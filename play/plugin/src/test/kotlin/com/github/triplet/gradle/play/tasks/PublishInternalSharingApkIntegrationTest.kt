@@ -11,9 +11,6 @@ import org.junit.jupiter.api.Test
 import java.io.File
 
 class PublishInternalSharingApkIntegrationTest : IntegrationTestBase() {
-    override val factoryInstallerStatement = "com.github.triplet.gradle.play.tasks." +
-            "PublishInternalSharingApkIntegrationTest.installFactories()"
-
     @Test
     fun `Builds apk on-the-fly by default`() {
         val result = execute("", "uploadReleasePrivateApk")
