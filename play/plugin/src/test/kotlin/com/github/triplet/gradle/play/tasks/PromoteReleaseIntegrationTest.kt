@@ -7,11 +7,14 @@ import com.github.triplet.gradle.androidpublisher.ReleaseStatus
 import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.github.triplet.gradle.play.helpers.SharedIntegrationTest
+import com.github.triplet.gradle.play.tasks.shared.PublishOrPromoteArtifactIntegrationTests
 import com.google.common.truth.Truth.assertThat
+import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Test
 
-class PromoteReleaseIntegrationTest : IntegrationTestBase(), SharedIntegrationTest {
+class PromoteReleaseIntegrationTest : IntegrationTestBase(), SharedIntegrationTest,
+        PublishOrPromoteArtifactIntegrationTests {
     override fun taskName(taskVariant: String) = ":promote${taskVariant}Artifact"
 
     @Test
@@ -67,6 +70,10 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase(), SharedIntegrationTe
         assertThat(result.output).contains("promoteRelease(")
         assertThat(result.output).contains("fromTrackName=foobar")
         assertThat(result.output).contains("promoteTrackName=foobar")
+    }
+
+    override fun assertArtifactUpload(result: BuildResult) {
+        assertThat(result.output).contains("promoteRelease(")
     }
 
     @Test
@@ -155,36 +162,6 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase(), SharedIntegrationTe
 
         result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("promoteRelease(")
-    }
-
-    @Test
-    fun `Build uses correct release status`() {
-        // language=gradle
-        val config = """
-            play.releaseStatus = ReleaseStatus.DRAFT
-        """
-
-        val result = execute(config, "promoteReleaseArtifact")
-
-        result.requireTask(outcome = SUCCESS)
-        assertThat(result.output).contains("promoteRelease(")
-        assertThat(result.output).contains("releaseStatus=DRAFT")
-    }
-
-    @Test
-    fun `Build picks default release name when no track specific ones are available`() {
-        // language=gradle
-        val config = """
-            buildTypes {
-                consoleNames {}
-            }
-        """.withAndroidBlock()
-
-        val result = execute(config, "promoteConsoleNamesArtifact")
-
-        result.requireTask(taskName("ConsoleNames"), outcome = SUCCESS)
-        assertThat(result.output).contains("promoteRelease(")
-        assertThat(result.output).contains("releaseName=myDefaultName")
     }
 
     @Test
@@ -280,48 +257,6 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase(), SharedIntegrationTe
     }
 
     @Test
-    fun `Build uses correct user fraction`() {
-        // language=gradle
-        val config = """
-            play.userFraction = 0.123d
-        """
-
-        val result = execute(config, "promoteReleaseArtifact")
-
-        result.requireTask(outcome = SUCCESS)
-        assertThat(result.output).contains("promoteRelease(")
-        assertThat(result.output).contains("userFraction=0.123")
-    }
-
-    @Test
-    fun `Build uses correct update priority`() {
-        // language=gradle
-        val config = """
-            play.updatePriority = 5
-        """
-
-        val result = execute(config, "promoteReleaseArtifact")
-
-        result.requireTask(outcome = SUCCESS)
-        assertThat(result.output).contains("promoteRelease(")
-        assertThat(result.output).contains("updatePriority=5")
-    }
-
-    @Test
-    fun `Build uses correct retained artifacts`() {
-        // language=gradle
-        val config = """
-            play.retain.artifacts = [1l, 2l, 3l]
-        """
-
-        val result = execute(config, "promoteReleaseArtifact")
-
-        result.requireTask(outcome = SUCCESS)
-        assertThat(result.output).contains("promoteRelease(")
-        assertThat(result.output).contains("retainableArtifacts=[1, 2, 3]")
-    }
-
-    @Test
     fun `Build is not cacheable`() {
         val result1 = execute("", "promoteReleaseArtifact")
         val result2 = execute("", "promoteReleaseArtifact")
@@ -330,30 +265,6 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase(), SharedIntegrationTe
         result2.requireTask(outcome = SUCCESS)
         assertThat(result1.output).contains("promoteRelease(")
         assertThat(result2.output).contains("promoteRelease(")
-    }
-
-    @Test
-    fun `Build generates and commits edit by default`() {
-        val result = execute("", "promoteReleaseArtifact")
-
-        result.requireTask(outcome = SUCCESS)
-        assertThat(result.output).contains("insertEdit()")
-        assertThat(result.output).contains("commitEdit(edit-id)")
-    }
-
-    @Test
-    fun `Build skips commit when no-commit flag is passed`() {
-        // language=gradle
-        val config = """
-            play.commit = false
-        """
-
-        val result = execute(config, "promoteReleaseArtifact")
-
-        result.requireTask(outcome = SUCCESS)
-        assertThat(result.output).contains("insertEdit()")
-        assertThat(result.output).doesNotContain("commitEdit(")
-        assertThat(result.output).contains("validateEdit(")
     }
 
     companion object {
