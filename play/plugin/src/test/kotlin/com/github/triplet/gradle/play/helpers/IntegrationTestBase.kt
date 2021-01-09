@@ -12,14 +12,14 @@ import java.util.concurrent.BlockingQueue
 import kotlin.math.max
 import kotlin.random.Random
 
-abstract class IntegrationTestBase {
+abstract class IntegrationTestBase : IntegrationTest {
     @TempDir
     @JvmField
     var _tempDir: File? = null
     private val tempDir get() = _tempDir!!
 
-    protected val appDir by lazy { File(tempDir, "app") }
-    protected val playgroundDir by lazy { File(tempDir, UUID.randomUUID().toString()) }
+    override val appDir by lazy { File(tempDir, "app") }
+    override val playgroundDir by lazy { File(tempDir, UUID.randomUUID().toString()) }
 
     private val factoryInstallerStatement = run {
         try {
@@ -36,17 +36,11 @@ abstract class IntegrationTestBase {
         File("src/test/fixtures/${javaClass.simpleName}").orNull()?.copyRecursively(appDir)
     }
 
-    protected fun File.escaped() = toString().replace("\\", "\\\\")
+    override fun File.escaped() = toString().replace("\\", "\\\\")
 
-    protected fun String.withAndroidBlock() = """
-        android {
-            $this
-        }
-    """.trimIndent()
+    override fun execute(config: String, vararg tasks: String) = execute(config, false, *tasks)
 
-    protected fun execute(config: String, vararg tasks: String) = execute(config, false, *tasks)
-
-    protected fun executeExpectingFailure(config: String, vararg tasks: String) =
+    override fun executeExpectingFailure(config: String, vararg tasks: String) =
             execute(config, true, *tasks)
 
     protected fun executeGradle(
