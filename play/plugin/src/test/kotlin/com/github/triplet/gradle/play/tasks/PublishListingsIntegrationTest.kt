@@ -7,18 +7,21 @@ import com.github.triplet.gradle.androidpublisher.GppImage
 import com.github.triplet.gradle.androidpublisher.newImage
 import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
+import com.github.triplet.gradle.play.helpers.SharedIntegrationTest
 import com.google.common.truth.Truth.assertThat
-import org.gradle.testkit.runner.TaskOutcome
+import org.gradle.testkit.runner.TaskOutcome.NO_SOURCE
+import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Test
 import java.io.File
 
-class PublishListingsIntegrationTest : IntegrationTestBase() {
+class PublishListingsIntegrationTest : IntegrationTestBase(), SharedIntegrationTest {
+    override fun taskName(taskVariant: String) = ":publish${taskVariant}Listing"
+
     @Test
     fun `Empty dir of listings skips task`() {
         val result = execute("", "publishReleaseListing")
 
-        assertThat(result.task(":publishReleaseListing")).isNotNull()
-        assertThat(result.task(":publishReleaseListing")!!.outcome).isEqualTo(TaskOutcome.NO_SOURCE)
+        result.requireTask(outcome = NO_SOURCE)
     }
 
     @Test
@@ -32,8 +35,7 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishInvalidListing")
 
-        assertThat(result.task(":publishInvalidListing")).isNotNull()
-        assertThat(result.task(":publishInvalidListing")!!.outcome).isEqualTo(TaskOutcome.NO_SOURCE)
+        result.requireTask(taskName("Invalid"), outcome = NO_SOURCE)
     }
 
     @Test
@@ -47,8 +49,7 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishHiddenListing")
 
-        assertThat(result.task(":publishHiddenListing")).isNotNull()
-        assertThat(result.task(":publishHiddenListing")!!.outcome).isEqualTo(TaskOutcome.NO_SOURCE)
+        result.requireTask(taskName("Hidden"), outcome = NO_SOURCE)
     }
 
     @Test
@@ -62,8 +63,7 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishDetailsListing")
 
-        assertThat(result.task(":publishDetailsListing")).isNotNull()
-        assertThat(result.task(":publishDetailsListing")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("Details"), outcome = SUCCESS)
         assertThat(result.output).doesNotContain("publishListing")
         assertThat(result.output).doesNotContain("publishImages")
         assertThat(result.output).contains("publishAppDetails(")
@@ -84,9 +84,7 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishSingleListingListing")
 
-        assertThat(result.task(":publishSingleListingListing")).isNotNull()
-        assertThat(result.task(":publishSingleListingListing")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("SingleListing"), outcome = SUCCESS)
         assertThat(result.output).doesNotContain("publishAppDetails")
         assertThat(result.output).doesNotContain("publishImages")
         assertThat(result.output).contains("publishListing(")
@@ -108,9 +106,7 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishMultiLangListingListing")
 
-        assertThat(result.task(":publishMultiLangListingListing")).isNotNull()
-        assertThat(result.task(":publishMultiLangListingListing")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("MultiLangListing"), outcome = SUCCESS)
         assertThat(result.output).doesNotContain("publishAppDetails")
         assertThat(result.output).doesNotContain("publishImages")
         assertThat(result.output).contains("publishListing(")
@@ -130,9 +126,7 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishSingleGraphicsListing")
 
-        assertThat(result.task(":publishSingleGraphicsListing")).isNotNull()
-        assertThat(result.task(":publishSingleGraphicsListing")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("SingleGraphics"), outcome = SUCCESS)
         assertThat(result.output).doesNotContain("publishAppDetails")
         assertThat(result.output).doesNotContain("publishListing")
         assertThat(result.output).contains("publishImages(")
@@ -155,9 +149,7 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishSingleGraphicsListing")
 
-        assertThat(result.task(":publishSingleGraphicsListing")).isNotNull()
-        assertThat(result.task(":publishSingleGraphicsListing")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("SingleGraphics"), outcome = SUCCESS)
         assertThat(result.output).doesNotContain("publishAppDetails")
         assertThat(result.output).doesNotContain("publishListing")
         assertThat(result.output).doesNotContain("publishImages")
@@ -174,9 +166,7 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishMultiGraphicsListing")
 
-        assertThat(result.task(":publishMultiGraphicsListing")).isNotNull()
-        assertThat(result.task(":publishMultiGraphicsListing")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("MultiGraphics"), outcome = SUCCESS)
         assertThat(result.output).doesNotContain("publishAppDetails")
         assertThat(result.output).doesNotContain("publishListing")
         assertThat(result.output).contains("publishImages(")
@@ -200,9 +190,7 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishMultiLangGraphicsListing")
 
-        assertThat(result.task(":publishMultiLangGraphicsListing")).isNotNull()
-        assertThat(result.task(":publishMultiLangGraphicsListing")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("MultiLangGraphics"), outcome = SUCCESS)
         assertThat(result.output).doesNotContain("publishAppDetails")
         assertThat(result.output).doesNotContain("publishListing")
         assertThat(result.output).contains("publishImages(")
@@ -225,9 +213,7 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishTopLevelGraphicsListing")
 
-        assertThat(result.task(":publishTopLevelGraphicsListing")).isNotNull()
-        assertThat(result.task(":publishTopLevelGraphicsListing")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("TopLevelGraphics"), outcome = SUCCESS)
         assertThat(result.output).doesNotContain("publishAppDetails")
         assertThat(result.output).doesNotContain("publishListing")
         assertThat(result.output).contains("publishImages(")
@@ -247,9 +233,7 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishMixedLevelGraphicsListing")
 
-        assertThat(result.task(":publishMixedLevelGraphicsListing")).isNotNull()
-        assertThat(result.task(":publishMixedLevelGraphicsListing")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("MixedLevelGraphics"), outcome = SUCCESS)
         assertThat(result.output).doesNotContain("publishAppDetails")
         assertThat(result.output).doesNotContain("publishListing")
         assertThat(result.output).contains("publishImages(")
@@ -272,9 +256,7 @@ class PublishListingsIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishEverythingListing")
 
-        assertThat(result.task(":publishEverythingListing")).isNotNull()
-        assertThat(result.task(":publishEverythingListing")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("Everything"), outcome = SUCCESS)
         assertThat(result.output).contains("publishAppDetails(")
         assertThat(result.output).contains("defaultLocale=en-US")
 

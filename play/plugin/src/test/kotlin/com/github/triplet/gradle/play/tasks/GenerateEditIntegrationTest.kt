@@ -8,21 +8,23 @@ import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.common.utils.marked
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
+import com.github.triplet.gradle.play.helpers.SharedIntegrationTest
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.BuildResult
-import org.gradle.testkit.runner.TaskOutcome
+import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Test
 import java.io.File
 
-class GenerateEditIntegrationTest : IntegrationTestBase() {
+class GenerateEditIntegrationTest : IntegrationTestBase(), SharedIntegrationTest {
+    override fun taskName(taskVariant: String) = ":gen"
+
     @Test
     fun `Fresh edit is created by default`() {
         val editFile = File(appDir, "build/gpp/com.example.publisher.txt")
 
         val result = configureLazyEditGeneration()
 
-        assertThat(result.task(":gen")).isNotNull()
-        assertThat(result.task(":gen")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).doesNotContain("getEdit")
         assertThat(result.output).contains("insertEdit(")
         assertThat(editFile.readText()).isEqualTo("edit-id")
@@ -36,9 +38,7 @@ class GenerateEditIntegrationTest : IntegrationTestBase() {
 
         val result = configureLazyEditGeneration()
 
-        assertThat(result.task(":gen")).isNotNull()
-        assertThat(result.task(":gen")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).doesNotContain("insertEdit")
         assertThat(result.output).contains("getEdit(foobar)")
         assertThat(editFile.readText()).isEqualTo("foobar")
@@ -56,9 +56,7 @@ class GenerateEditIntegrationTest : IntegrationTestBase() {
 
         val result = configureLazyEditGeneration(config)
 
-        assertThat(result.task(":gen")).isNotNull()
-        assertThat(result.task(":gen")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("getEdit(foobar)")
         assertThat(result.output).contains("insertEdit(")
         assertThat(editFile.readText()).isEqualTo("edit-id")

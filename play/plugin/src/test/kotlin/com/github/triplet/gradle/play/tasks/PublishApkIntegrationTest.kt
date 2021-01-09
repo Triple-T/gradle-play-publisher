@@ -9,19 +9,24 @@ import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.common.utils.nullOrFull
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
+import com.github.triplet.gradle.play.helpers.SharedIntegrationTest
 import com.google.common.truth.Truth.assertThat
-import org.gradle.testkit.runner.TaskOutcome
+import org.gradle.testkit.runner.TaskOutcome.FAILED
+import org.gradle.testkit.runner.TaskOutcome.NO_SOURCE
+import org.gradle.testkit.runner.TaskOutcome.SUCCESS
+import org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
 import org.junit.jupiter.api.Test
 import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 
-class PublishApkIntegrationTest : IntegrationTestBase() {
+class PublishApkIntegrationTest : IntegrationTestBase(), SharedIntegrationTest {
+    override fun taskName(taskVariant: String) = ":publish${taskVariant}Apk"
+
     @Test
     fun `Builds apk on-the-fly by default`() {
         val result = execute("", "publishReleaseApk")
 
-        assertThat(result.task(":packageRelease")).isNotNull()
-        assertThat(result.task(":packageRelease")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(":packageRelease", outcome = SUCCESS)
         assertThat(result.output).contains("uploadApk(")
         assertThat(result.output).contains(".apk")
         assertThat(result.output).contains("publishApk(")
@@ -32,10 +37,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         val result1 = execute("", "publishReleaseApk")
         val result2 = execute("", "publishReleaseApk")
 
-        assertThat(result1.task(":publishReleaseApk")).isNotNull()
-        assertThat(result1.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result2.task(":publishReleaseApk")).isNotNull()
-        assertThat(result2.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.UP_TO_DATE)
+        result1.requireTask(outcome = SUCCESS)
+        result2.requireTask(outcome = UP_TO_DATE)
     }
 
     @Test
@@ -50,8 +53,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         val result = execute(config, "publishReleaseApk")
 
         assertThat(result.task(":packageRelease")).isNull()
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.NO_SOURCE)
+        result.requireTask(outcome = NO_SOURCE)
     }
 
     @Test
@@ -67,8 +69,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         File(playgroundDir, "2.apk").safeCreateNewFile()
         val result = execute(config, "publishReleaseApk")
 
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("1.apk")
         assertThat(result.output).contains("2.apk")
     }
@@ -86,8 +87,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         File(playgroundDir, "mapping.txt").safeCreateNewFile()
         val result = execute(config, "publishReleaseApk")
 
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("mapping.txt")
     }
 
@@ -104,8 +104,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         File(playgroundDir, "1.mapping.txt").safeCreateNewFile()
         val result = execute(config, "publishReleaseApk")
 
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("1.mapping.txt")
     }
 
@@ -123,8 +122,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         File(playgroundDir, "mapping.txt").safeCreateNewFile()
         val result = execute(config, "publishReleaseApk")
 
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("1.mapping.txt")
         assertThat(result.output).doesNotContain("/mapping.txt")
     }
@@ -144,8 +142,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         File(playgroundDir, "mapping.txt").safeCreateNewFile()
         val result = execute(config, "publishReleaseApk")
 
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("/mapping.txt")
         assertThat(result.output).contains("2.mapping.txt")
     }
@@ -163,8 +160,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         val result = execute(config, "publishReleaseApk")
 
         assertThat(result.task(":packageRelease")).isNull()
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadApk(")
         assertThat(result.output).contains(playgroundDir.name)
     }
@@ -182,8 +178,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         val result = execute(config, "publishReleaseApk")
 
         assertThat(result.task(":packageRelease")).isNull()
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadApk(")
         assertThat(result.output).contains(playgroundDir.name)
         assertThat(result.output).contains("foo.apk")
@@ -202,10 +197,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         val result1 = execute(config, "publishReleaseApk")
         val result2 = execute(config, "publishReleaseApk")
 
-        assertThat(result1.task(":publishReleaseApk")).isNotNull()
-        assertThat(result1.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result2.task(":publishReleaseApk")).isNotNull()
-        assertThat(result2.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.UP_TO_DATE)
+        result1.requireTask(outcome = SUCCESS)
+        result2.requireTask(outcome = UP_TO_DATE)
     }
 
     @Test
@@ -234,10 +227,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         val result = execute(config, "publishReleaseApk")
 
         assertThat(result.task(":packageRelease")).isNull()
-        assertThat(result.task(":myCustomTask")).isNotNull()
-        assertThat(result.task(":myCustomTask")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(":myCustomTask", outcome = SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadApk(")
         assertThat(result.output).contains(playgroundDir.name)
         assertThat(result.output).contains("foo.apk")
@@ -249,8 +240,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         val result = execute("", "publishReleaseApk", "--artifact-dir=${playgroundDir}")
 
         assertThat(result.task(":packageRelease")).isNull()
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadApk(")
         assertThat(result.output).contains(playgroundDir.name)
     }
@@ -269,8 +259,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
                 "--update-priority=3"
         )
 
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("publishApk(")
         assertThat(result.output).contains("releaseName=myRelName")
         assertThat(result.output).contains("releaseStatus=DRAFT")
@@ -305,8 +294,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
                 "--update-priority=3"
         )
 
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("publishApk(")
         assertThat(result.output).contains("releaseName=myRelName")
         assertThat(result.output).contains("releaseStatus=DRAFT")
@@ -339,8 +327,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         )
 
         assertThat(result.task(":packageRelease")).isNull()
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("publishApk(")
         assertThat(result.output).contains("trackName=hello")
         assertThat(result.output).contains(playgroundDir.name)
@@ -350,8 +337,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
     fun `Build generates and commits edit by default`() {
         val result = execute("", "publishReleaseApk")
 
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("insertEdit()")
         assertThat(result.output).contains("commitEdit(edit-id)")
     }
@@ -365,8 +351,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishReleaseApk")
 
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("insertEdit()")
         assertThat(result.output).doesNotContain("commitEdit(")
         assertThat(result.output).contains("validateEdit(")
@@ -388,13 +373,11 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
         val result1 = execute(config1, "publishReleaseApk")
         val result2 = execute(config2, "publishReleaseApk")
 
-        assertThat(result1.task(":publishReleaseApk")).isNotNull()
-        assertThat(result1.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result1.requireTask(outcome = SUCCESS)
         assertThat(result1.output).contains("publishApk(")
         assertThat(result1.output).contains("didPreviousBuildSkipCommit=false")
 
-        assertThat(result2.task(":publishReleaseApk")).isNotNull()
-        assertThat(result2.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result2.requireTask(outcome = SUCCESS)
         assertThat(result2.output).contains("publishApk(")
         assertThat(result2.output).contains("didPreviousBuildSkipCommit=true")
     }
@@ -408,10 +391,8 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishReleaseApk")
 
-        assertThat(result.task(":processReleaseVersionCodes")).isNotNull()
-        assertThat(result.task(":processReleaseVersionCodes")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(":processReleaseVersionCodes", outcome = SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("findMaxAppVersionCode(")
         assertThat(result.output).contains("uploadApk(")
     }
@@ -429,8 +410,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishReleaseApk")
 
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadApk(")
         assertThat(result.output).contains("mappingFile=")
         assertThat(result.output).doesNotContain("mappingFile=null")
@@ -451,8 +431,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishReleaseApk")
 
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadApk(")
         assertThat(result.output).contains("debugSymbolsFile=")
         assertThat(result.output).doesNotContain("debugSymbolsFile=null")
@@ -467,8 +446,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
         val result = executeExpectingFailure(config, "publishReleaseApk")
 
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.FAILED)
+        result.requireTask(outcome = FAILED)
         assertThat(result.output).contains("Upload failed")
     }
 
@@ -481,8 +459,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishReleaseApk")
 
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadApk(")
         assertThat(result.output).contains("Soft failure")
         assertThat(result.output).contains("publishApk(versionCodes=[]")
@@ -516,8 +493,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishReleaseApk")
 
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output.split("\n").filter {
             it.contains("uploadApk(")
         }).hasSize(3)
@@ -539,8 +515,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishReleaseApk")
 
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadApk(")
         assertThat(result.output).contains("versionCodes=[8]")
     }
@@ -554,8 +529,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishReleaseApk")
 
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadApk(")
         assertThat(result.output).contains("trackName=myCustomTrack")
     }
@@ -569,8 +543,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishReleaseApk")
 
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadApk(")
         assertThat(result.output).contains("releaseStatus=DRAFT")
     }
@@ -586,9 +559,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishConsoleNamesApk")
 
-        assertThat(result.task(":publishConsoleNamesApk")).isNotNull()
-        assertThat(result.task(":publishConsoleNamesApk")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("ConsoleNames"), outcome = SUCCESS)
         assertThat(result.output).contains("publishApk(")
         assertThat(result.output).contains("releaseName=myDefaultName")
     }
@@ -606,9 +577,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishConsoleNamesApk")
 
-        assertThat(result.task(":publishConsoleNamesApk")).isNotNull()
-        assertThat(result.task(":publishConsoleNamesApk")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("ConsoleNames"), outcome = SUCCESS)
         assertThat(result.output).contains("publishApk(")
         assertThat(result.output).contains("releaseName=myCustomName")
     }
@@ -627,9 +596,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishConsoleNamesApk")
 
-        assertThat(result.task(":publishConsoleNamesApk")).isNotNull()
-        assertThat(result.task(":publishConsoleNamesApk")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("ConsoleNames"), outcome = SUCCESS)
         assertThat(result.output).contains("publishApk(")
         assertThat(result.output).contains("releaseName=myCustomName")
     }
@@ -645,9 +612,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishReleaseNotesApk")
 
-        assertThat(result.task(":publishReleaseNotesApk")).isNotNull()
-        assertThat(result.task(":publishReleaseNotesApk")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("ReleaseNotes"), outcome = SUCCESS)
         assertThat(result.output).contains("publishApk(")
         assertThat(result.output).contains("releaseNotes={en-US=My default release notes, " +
                                                    "fr-FR=Mes notes de mise à jour}")
@@ -666,9 +631,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishReleaseNotesApk")
 
-        assertThat(result.task(":publishReleaseNotesApk")).isNotNull()
-        assertThat(result.task(":publishReleaseNotesApk")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("ReleaseNotes"), outcome = SUCCESS)
         assertThat(result.output).contains("publishApk(")
         assertThat(result.output).contains("releaseNotes={en-US=Custom track release notes, " +
                                                    "fr-FR=Mes notes de mise à jour}")
@@ -688,9 +651,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishReleaseNotesApk")
 
-        assertThat(result.task(":publishReleaseNotesApk")).isNotNull()
-        assertThat(result.task(":publishReleaseNotesApk")!!.outcome)
-                .isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(taskName("ReleaseNotes"), outcome = SUCCESS)
         assertThat(result.output).contains("publishApk(")
         assertThat(result.output).contains("releaseNotes={en-US=Custom track release notes, " +
                                                    "fr-FR=Mes notes de mise à jour}")
@@ -705,8 +666,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishReleaseApk")
 
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("publishApk(")
         assertThat(result.output).contains("userFraction=0.123")
     }
@@ -720,8 +680,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishReleaseApk")
 
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("publishApk(")
         assertThat(result.output).contains("updatePriority=5")
     }
@@ -735,8 +694,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishReleaseApk")
 
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("publishApk(")
         assertThat(result.output).contains("retainableArtifacts=[1, 2, 3]")
     }
@@ -753,8 +711,7 @@ class PublishApkIntegrationTest : IntegrationTestBase() {
 
         val result = execute(config, "publishReleaseApk")
 
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseApk")!!.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadApk(")
         assertThat(result.output).contains("mainObbRetainable=123")
         assertThat(result.output).contains("patchObbRetainable=321")
