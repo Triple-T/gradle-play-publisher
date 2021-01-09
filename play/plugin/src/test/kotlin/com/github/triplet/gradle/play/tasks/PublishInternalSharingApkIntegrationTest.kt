@@ -20,6 +20,15 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase(), Artifact
     override fun taskName(taskVariant: String) =
             ":upload${taskVariant.ifEmpty { DEFAULT_TASK_VARIANT }}PrivateApk"
 
+    override fun customArtifactName() = "foo.apk"
+
+    override fun assertCustomArtifactResults(result: BuildResult) {
+        assertThat(result.task(":packageRelease")).isNull()
+        assertThat(result.output).contains("uploadInternalSharingApk(")
+    }
+
+    override fun outputFile() = "build/outputs/internal-sharing/apk/release"
+
     @Test
     fun `Builds apk on-the-fly by default`() {
         val result = execute("", "uploadReleasePrivateApk")
@@ -44,13 +53,6 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase(), Artifact
         result.requireTask(outcome = NO_SOURCE)
     }
 
-    override fun customArtifactName() = "foo.apk"
-
-    override fun assertCustomArtifactResults(result: BuildResult) {
-        assertThat(result.task(":packageRelease")).isNull()
-        assertThat(result.output).contains("uploadInternalSharingApk(")
-    }
-
     @Test
     fun `Using custom artifact with multiple APKs uploads each one`() {
         // language=gradle
@@ -68,8 +70,6 @@ class PublishInternalSharingApkIntegrationTest : IntegrationTestBase(), Artifact
         assertThat(result.output).contains("1.apk")
         assertThat(result.output).contains("2.apk")
     }
-
-    override fun outputFile() = "build/outputs/internal-sharing/apk/release"
 
     companion object {
         @JvmStatic

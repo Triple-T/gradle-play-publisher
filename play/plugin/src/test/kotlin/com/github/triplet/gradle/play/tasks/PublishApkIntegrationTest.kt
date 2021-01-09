@@ -24,6 +24,17 @@ class PublishApkIntegrationTest : IntegrationTestBase(), ArtifactIntegrationTest
         PublishOrPromoteArtifactIntegrationTests, PublishArtifactIntegrationTests {
     override fun taskName(taskVariant: String) = ":publish${taskVariant}Apk"
 
+    override fun customArtifactName() = "foo.apk"
+
+    override fun assertCustomArtifactResults(result: BuildResult) {
+        assertThat(result.task(":packageRelease")).isNull()
+        assertArtifactUpload(result)
+    }
+
+    override fun assertArtifactUpload(result: BuildResult) {
+        assertThat(result.output).contains("uploadApk(")
+    }
+
     @Test
     fun `Builds apk on-the-fly by default`() {
         val result = execute("", "publishReleaseApk")
@@ -138,17 +149,6 @@ class PublishApkIntegrationTest : IntegrationTestBase(), ArtifactIntegrationTest
         result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("/mapping.txt")
         assertThat(result.output).contains("2.mapping.txt")
-    }
-
-    override fun customArtifactName() = "foo.apk"
-
-    override fun assertCustomArtifactResults(result: BuildResult) {
-        assertThat(result.task(":packageRelease")).isNull()
-        assertArtifactUpload(result)
-    }
-
-    override fun assertArtifactUpload(result: BuildResult) {
-        assertThat(result.output).contains("uploadApk(")
     }
 
     @Test

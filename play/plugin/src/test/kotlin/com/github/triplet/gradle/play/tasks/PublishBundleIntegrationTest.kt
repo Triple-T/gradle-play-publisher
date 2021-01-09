@@ -22,6 +22,17 @@ class PublishBundleIntegrationTest : IntegrationTestBase(), ArtifactIntegrationT
         PublishOrPromoteArtifactIntegrationTests, PublishArtifactIntegrationTests {
     override fun taskName(taskVariant: String) = ":publish${taskVariant}Bundle"
 
+    override fun customArtifactName() = "foo.aab"
+
+    override fun assertCustomArtifactResults(result: BuildResult) {
+        assertThat(result.task(":packageReleaseBundle")).isNull()
+        assertArtifactUpload(result)
+    }
+
+    override fun assertArtifactUpload(result: BuildResult) {
+        assertThat(result.output).contains("uploadBundle(")
+    }
+
     @Test
     fun `Builds bundle on-the-fly by default`() {
         val result = execute("", "publishReleaseBundle")
@@ -63,17 +74,6 @@ class PublishBundleIntegrationTest : IntegrationTestBase(), ArtifactIntegrationT
         result.requireTask(outcome = FAILED)
         assertThat(result.output).contains("ERROR_no-unique-aab-found")
         assertThat(result.output).contains(playgroundDir.name)
-    }
-
-    override fun customArtifactName() = "foo.aab"
-
-    override fun assertCustomArtifactResults(result: BuildResult) {
-        assertThat(result.task(":packageReleaseBundle")).isNull()
-        assertArtifactUpload(result)
-    }
-
-    override fun assertArtifactUpload(result: BuildResult) {
-        assertThat(result.output).contains("uploadBundle(")
     }
 
     companion object {

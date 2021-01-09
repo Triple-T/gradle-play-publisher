@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome
 
-interface SharedIntegrationTest: IntegrationTest {
+interface SharedIntegrationTest : IntegrationTest {
     fun taskName(taskVariant: String = DEFAULT_TASK_VARIANT): String
 
     fun BuildResult.requireTask(task: String = taskName(), outcome: TaskOutcome) {

@@ -20,6 +20,15 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase(), Artif
     override fun taskName(taskVariant: String) =
             ":upload${taskVariant.ifEmpty { DEFAULT_TASK_VARIANT }}PrivateBundle"
 
+    override fun customArtifactName() = "foo.aab"
+
+    override fun assertCustomArtifactResults(result: BuildResult) {
+        assertThat(result.task(":packageReleaseBundle")).isNull()
+        assertThat(result.output).contains("uploadInternalSharingBundle(")
+    }
+
+    override fun outputFile() = "build/outputs/internal-sharing/bundle/release"
+
     @Test
     fun `Builds bundle on-the-fly by default`() {
         val result = execute("", "uploadReleasePrivateBundle")
@@ -63,15 +72,6 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase(), Artif
         assertThat(result.output).contains("ERROR_no-unique-aab-found")
         assertThat(result.output).contains(playgroundDir.name)
     }
-
-    override fun customArtifactName() = "foo.aab"
-
-    override fun assertCustomArtifactResults(result: BuildResult) {
-        assertThat(result.task(":packageReleaseBundle")).isNull()
-        assertThat(result.output).contains("uploadInternalSharingBundle(")
-    }
-
-    override fun outputFile() = "build/outputs/internal-sharing/bundle/release"
 
     companion object {
         @JvmStatic
