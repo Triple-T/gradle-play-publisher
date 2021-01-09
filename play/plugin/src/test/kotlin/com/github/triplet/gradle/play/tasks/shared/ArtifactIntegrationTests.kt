@@ -7,6 +7,8 @@ import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import java.io.File
 
 interface ArtifactIntegrationTests : SharedIntegrationTest {
@@ -52,6 +54,68 @@ interface ArtifactIntegrationTests : SharedIntegrationTest {
         """
 
         val result = execute(config, taskName())
+
+        result.requireTask(outcome = SUCCESS)
+        assertThat(result.output).contains(playgroundDir.name)
+        assertThat(result.output).contains(customArtifactName())
+        assertCustomArtifactResults(result)
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = ["false,false", "false,true", "true,false", "true,true"])
+    fun `Using custom artifact file with supported 3P dep skips on-the-fly build`(
+            eager: Boolean,
+            cliParam: Boolean
+    ) {
+        val app = File(playgroundDir, customArtifactName()).safeCreateNewFile()
+        // language=gradle
+        File(appDir, "build.gradle").writeText("""
+            buildscript {
+                repositories.google()
+
+                dependencies.classpath 'com.google.firebase:firebase-crashlytics-gradle:2.4.1'
+            }
+
+            plugins {
+                id 'com.android.application'
+                id 'com.github.triplet.play'
+            }
+            apply plugin: 'com.google.firebase.crashlytics'
+
+            android {
+                compileSdkVersion 28
+
+                defaultConfig {
+                    applicationId "com.supercilex.test"
+                    minSdkVersion 21
+                    targetSdkVersion 28
+                    versionCode 1
+                    versionName "1.0"
+                }
+
+                buildTypes.release {
+                    shrinkResources true
+                    minifyEnabled true
+                    proguardFiles(getDefaultProguardFile("proguard-android.txt"))
+                }
+            }
+
+            play {
+                serviceAccountCredentials = file('creds.json')
+                ${if (cliParam) "" else "artifactDir = file('${app.escaped()}')"}
+            }
+
+            ${if (eager) "tasks.all {}" else ""}
+
+            $factoryInstallerStatement
+        """)
+
+        val result = executeGradle(expectFailure = false) {
+            withArguments(taskName())
+            if (cliParam) {
+                withArguments(arguments + listOf("--artifact-dir=${app}"))
+            }
+        }
 
         result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains(playgroundDir.name)
