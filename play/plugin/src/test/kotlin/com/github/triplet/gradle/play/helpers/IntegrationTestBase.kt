@@ -78,7 +78,7 @@ abstract class IntegrationTestBase : IntegrationTest {
             expectFailure: Boolean,
             vararg tasks: String
     ): BuildResult {
-        val buildCacheDir = File(tempDir, "gradle").path.replace("\\", "\\\\")
+        val buildCacheDir = File(tempDir, "gradle").escaped()
 
         // language=gradle
         File(appDir, "settings.gradle").writeText("""
