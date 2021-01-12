@@ -5,6 +5,7 @@ import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import com.github.triplet.gradle.play.internal.ExtensionMergeHolder
 import com.github.triplet.gradle.play.internal.mergeExtensions
 import com.google.common.truth.Truth.assertThat
+import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
@@ -12,11 +13,19 @@ import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.listProperty
 import org.gradle.kotlin.dsl.property
 import org.gradle.testfixtures.ProjectBuilder
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.io.TempDir
+import java.io.File
 
 class PlayPublisherExtensionTest {
-    private val project = ProjectBuilder.builder().build()
+    private lateinit var project: Project
+
+    @BeforeEach
+    fun `Initialize Gradle project`(@TempDir tempDir: File) {
+        project = ProjectBuilder.builder().withProjectDir(tempDir).build()
+    }
 
     @Test
     fun `Merging extensions with empty throws`() {
