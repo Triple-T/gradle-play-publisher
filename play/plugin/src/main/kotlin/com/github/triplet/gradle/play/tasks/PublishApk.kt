@@ -89,7 +89,7 @@ internal abstract class PublishApk @Inject constructor(
             val versions = parameters.uploadResults.asFileTree.map {
                 it.name.toLong()
             }.sorted()
-            apiService.edits.publishApk(
+            apiService.edits.publishArtifacts(
                     versions,
                     apiService.shouldSkip(),
                     config.track,

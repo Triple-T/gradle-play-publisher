@@ -10,7 +10,7 @@ import com.github.triplet.gradle.play.tasks.shared.ArtifactIntegrationTests
 import com.github.triplet.gradle.play.tasks.shared.PublishInternalSharingArtifactIntegrationTests
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.BuildResult
-import org.gradle.testkit.runner.TaskOutcome.FAILED
+import org.gradle.testkit.runner.TaskOutcome
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Test
 import java.io.File
@@ -39,7 +39,7 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase(), Artif
     }
 
     @Test
-    fun `Using non-existent custom artifact fails build with warning`() {
+    fun `Using non-existent custom artifact skips build`() {
         // language=gradle
         val config = """
             play {
@@ -47,16 +47,14 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase(), Artif
             }
         """
 
-        val result = executeExpectingFailure(config, "uploadReleasePrivateBundle")
+        val result = execute(config, "uploadReleasePrivateBundle")
 
         assertThat(result.task(":packageReleaseBundle")).isNull()
-        result.requireTask(outcome = FAILED)
-        assertThat(result.output).contains("ERROR_no-unique-aab-found")
-        assertThat(result.output).contains(playgroundDir.name)
+        result.requireTask(outcome = TaskOutcome.NO_SOURCE)
     }
 
     @Test
-    fun `Using custom artifact with multiple bundles fails build with warning`() {
+    fun `Using custom artifact with multiple bundles uploads each one`() {
         // language=gradle
         val config = """
             play {
@@ -66,11 +64,11 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase(), Artif
 
         File(playgroundDir, "1.aab").safeCreateNewFile()
         File(playgroundDir, "2.aab").safeCreateNewFile()
-        val result = executeExpectingFailure(config, "uploadReleasePrivateBundle")
+        val result = execute(config, "uploadReleasePrivateBundle")
 
-        result.requireTask(outcome = FAILED)
-        assertThat(result.output).contains("ERROR_no-unique-aab-found")
-        assertThat(result.output).contains(playgroundDir.name)
+        result.requireTask(outcome = SUCCESS)
+        assertThat(result.output).contains("1.aab")
+        assertThat(result.output).contains("2.aab")
     }
 
     companion object {
