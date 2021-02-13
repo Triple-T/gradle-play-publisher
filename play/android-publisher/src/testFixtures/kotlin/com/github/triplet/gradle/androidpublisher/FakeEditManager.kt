@@ -56,16 +56,8 @@ abstract class FakeEditManager : EditManager {
 
     override fun uploadBundle(
             bundleFile: File,
-            strategy: ResolutionStrategy,
-            didPreviousBuildSkipCommit: Boolean,
-            trackName: String,
-            releaseStatus: ReleaseStatus?,
-            releaseName: String?,
-            releaseNotes: Map<String, String?>?,
-            userFraction: Double?,
-            updatePriority: Int?,
-            retainableArtifacts: List<Long>?
-    ): Unit = throw IllegalStateException("Test wasn't expecting this method to be called.")
+            strategy: ResolutionStrategy
+    ): Long? = throw IllegalStateException("Test wasn't expecting this method to be called.")
 
     override fun uploadApk(
             apkFile: File,
@@ -76,7 +68,7 @@ abstract class FakeEditManager : EditManager {
             patchObbRetainable: Int?
     ): Long? = throw IllegalStateException("Test wasn't expecting this method to be called.")
 
-    override fun publishApk(
+    override fun publishArtifacts(
             versionCodes: List<Long>,
             didPreviousBuildSkipCommit: Boolean,
             trackName: String,

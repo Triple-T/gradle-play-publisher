@@ -42,7 +42,7 @@ class PublishApkIntegrationTest : IntegrationTestBase(), ArtifactIntegrationTest
         result.requireTask(":packageRelease", outcome = SUCCESS)
         assertThat(result.output).contains("uploadApk(")
         assertThat(result.output).contains(".apk")
-        assertThat(result.output).contains("publishApk(")
+        assertThat(result.output).contains("publishArtifacts(")
     }
 
     @Test
@@ -203,7 +203,7 @@ class PublishApkIntegrationTest : IntegrationTestBase(), ArtifactIntegrationTest
         result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("uploadApk(")
         assertThat(result.output).contains("Soft failure")
-        assertThat(result.output).contains("publishApk(versionCodes=[]")
+        assertThat(result.output).contains("publishArtifacts(versionCodes=[]")
     }
 
     @Test
@@ -242,7 +242,7 @@ class PublishApkIntegrationTest : IntegrationTestBase(), ArtifactIntegrationTest
         assertThat(result.output).contains("app-xxxhdpi")
         assertThat(result.output).contains("app-xxhdpi")
         assertThat(result.output.split("\n").filter {
-            it.contains("publishApk(")
+            it.contains("publishArtifacts(")
         }).hasSize(1)
         assertThat(result.output).contains("versionCodes=[1, 2, 3]")
     }
@@ -340,7 +340,7 @@ class PublishApkIntegrationTest : IntegrationTestBase(), ArtifactIntegrationTest
                     return versionCodes[index]
                 }
 
-                override fun publishApk(
+                override fun publishArtifacts(
                         versionCodes: List<Long>,
                         didPreviousBuildSkipCommit: Boolean,
                         trackName: String,
@@ -351,7 +351,7 @@ class PublishApkIntegrationTest : IntegrationTestBase(), ArtifactIntegrationTest
                         updatePriority: Int?,
                         retainableArtifacts: List<Long>?
                 ) {
-                    println("publishApk(" +
+                    println("publishArtifacts(" +
                                     "versionCodes=$versionCodes, " +
                                     "didPreviousBuildSkipCommit=$didPreviousBuildSkipCommit, " +
                                     "trackName=$trackName, " +

@@ -127,35 +127,16 @@ internal class DefaultEditManager(
 
     override fun uploadBundle(
             bundleFile: File,
-            strategy: ResolutionStrategy,
-            didPreviousBuildSkipCommit: Boolean,
-            trackName: String,
-            releaseStatus: ReleaseStatus?,
-            releaseName: String?,
-            releaseNotes: Map<String, String?>?,
-            userFraction: Double?,
-            updatePriority: Int?,
-            retainableArtifacts: List<Long>?
-    ) {
+            strategy: ResolutionStrategy
+    ): Long? {
         val bundle = try {
             publisher.uploadBundle(editId, bundleFile)
         } catch (e: GoogleJsonResponseException) {
             handleUploadFailures(e, strategy, bundleFile)
-        } ?: return
+            return null
+        }
 
-        tracks.update(TrackManager.UpdateConfig(
-                trackName,
-                listOf(bundle.versionCode.toLong()),
-                didPreviousBuildSkipCommit,
-                TrackManager.BaseConfig(
-                        releaseStatus,
-                        userFraction,
-                        updatePriority,
-                        releaseNotes,
-                        retainableArtifacts,
-                        releaseName
-                )
-        ))
+        return bundle.versionCode.toLong()
     }
 
     override fun uploadApk(
@@ -185,7 +166,7 @@ internal class DefaultEditManager(
         return apk.versionCode.toLong()
     }
 
-    override fun publishApk(
+    override fun publishArtifacts(
             versionCodes: List<Long>,
             didPreviousBuildSkipCommit: Boolean,
             trackName: String,
