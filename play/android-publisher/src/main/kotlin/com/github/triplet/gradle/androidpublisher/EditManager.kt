@@ -67,26 +67,13 @@ interface EditManager {
             retainableArtifacts: List<Long>?
     )
 
-    /** Uploads and publishes the given [bundleFile]. */
+    /** Uploads the given [bundleFile]. */
     fun uploadBundle(
             bundleFile: File,
-            strategy: ResolutionStrategy,
-            didPreviousBuildSkipCommit: Boolean,
-            trackName: String,
-            releaseStatus: ReleaseStatus?,
-            releaseName: String?,
-            releaseNotes: Map</* locale= */String, /* text= */String?>?,
-            userFraction: Double?,
-            updatePriority: Int?,
-            retainableArtifacts: List<Long>?
-    )
+            strategy: ResolutionStrategy
+    ) : Long?
 
-    /**
-     * Uploads the given [apkFile].
-     *
-     * Note: since APKs have splits, APK management is a two step process. The APKs must first be
-     * uploaded and then published using [publishApk].
-     */
+    /** Uploads the given [apkFile]. */
     fun uploadApk(
             apkFile: File,
             mappingFile: File?,
@@ -96,8 +83,8 @@ interface EditManager {
             patchObbRetainable: Int?
     ): Long?
 
-    /** Publishes a set of APKs uploaded with [uploadApk]. */
-    fun publishApk(
+    /** Publishes artifacts specified by given [versionCodes] */
+    fun publishArtifacts(
             versionCodes: List<Long>,
             didPreviousBuildSkipCommit: Boolean,
             trackName: String,

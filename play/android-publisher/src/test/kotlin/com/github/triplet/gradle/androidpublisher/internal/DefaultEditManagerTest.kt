@@ -34,37 +34,18 @@ class DefaultEditManagerTest {
     private var mockFile = mock(File::class.java)
 
     @Test
-    fun `uploadBundle forwards config to track manager`() {
+    fun `uploadBundle doesn't update tracks`() {
         `when`(mockPublisher.uploadBundle(any(), any())).thenReturn(Bundle().apply {
             versionCode = 888
         })
 
-        edits.uploadBundle(
+        val versionCode = edits.uploadBundle(
                 bundleFile = mockFile,
-                strategy = ResolutionStrategy.FAIL,
-                didPreviousBuildSkipCommit = false,
-                trackName = "alpha",
-                releaseStatus = ReleaseStatus.COMPLETED,
-                releaseName = "relname",
-                releaseNotes = mapOf("locale" to "notes"),
-                userFraction = .88,
-                updatePriority = 3,
-                retainableArtifacts = listOf(777)
+                strategy = ResolutionStrategy.FAIL
         )
 
-        verify(mockTracks).update(TrackManager.UpdateConfig(
-                trackName = "alpha",
-                versionCodes = listOf(888L),
-                didPreviousBuildSkipCommit = false,
-                base = TrackManager.BaseConfig(
-                        releaseStatus = ReleaseStatus.COMPLETED,
-                        releaseName = "relname",
-                        releaseNotes = mapOf("locale" to "notes"),
-                        userFraction = .88,
-                        updatePriority = 3,
-                        retainableArtifacts = listOf(777)
-                )
-        ))
+        verify(mockTracks, never()).update(any())
+        assertThat(versionCode).isEqualTo(888)
     }
 
     @Test
@@ -75,15 +56,7 @@ class DefaultEditManagerTest {
 
         edits.uploadBundle(
                 bundleFile = mockFile,
-                strategy = ResolutionStrategy.IGNORE,
-                didPreviousBuildSkipCommit = false,
-                trackName = "alpha",
-                releaseStatus = ReleaseStatus.COMPLETED,
-                releaseName = "relname",
-                releaseNotes = mapOf("locale" to "notes"),
-                userFraction = .88,
-                updatePriority = 3,
-                retainableArtifacts = listOf(777)
+                strategy = ResolutionStrategy.IGNORE
         )
 
         verify(mockTracks, never()).update(any())
@@ -98,15 +71,7 @@ class DefaultEditManagerTest {
         assertThrows<IllegalStateException> {
             edits.uploadBundle(
                     bundleFile = mockFile,
-                    strategy = ResolutionStrategy.FAIL,
-                    didPreviousBuildSkipCommit = false,
-                    trackName = "alpha",
-                    releaseStatus = ReleaseStatus.COMPLETED,
-                    releaseName = "relname",
-                    releaseNotes = mapOf("locale" to "notes"),
-                    userFraction = .88,
-                    updatePriority = 3,
-                    retainableArtifacts = listOf(777)
+                    strategy = ResolutionStrategy.FAIL
             )
         }
     }
@@ -282,8 +247,8 @@ class DefaultEditManagerTest {
     }
 
     @Test
-    fun `publishApk ignores empty version codes`() {
-        edits.publishApk(
+    fun `publishArtifacts ignores empty version codes`() {
+        edits.publishArtifacts(
                 versionCodes = emptyList(),
                 didPreviousBuildSkipCommit = false,
                 trackName = "alpha",
@@ -299,8 +264,8 @@ class DefaultEditManagerTest {
     }
 
     @Test
-    fun `publishApk forwards config to track manager`() {
-        edits.publishApk(
+    fun `publishArtifacts forwards config to track manager`() {
+        edits.publishArtifacts(
                 versionCodes = listOf(888L),
                 didPreviousBuildSkipCommit = false,
                 trackName = "alpha",

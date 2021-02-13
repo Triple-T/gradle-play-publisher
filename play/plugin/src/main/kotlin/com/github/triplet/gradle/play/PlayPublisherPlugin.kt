@@ -45,7 +45,6 @@ import com.github.triplet.gradle.play.tasks.internal.WriteTrackLifecycleTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.file.RegularFile
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Provider
 import org.gradle.api.publish.plugins.PublishingPlugin
@@ -198,18 +197,18 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                             ?.elements?.map { it.outputFile }.sneakyNull()
                 })
 
-                fun findBundleFile(
-                ): Provider<RegularFile> = extension.artifactDir.map { customDir ->
-                    if (customDir.asFile.isFile && customDir.asFile.extension == "aab") {
-                        customDir.file(".")
+                fun findBundleFiles(): Provider<List<String>> = extension.artifactDir.map {
+                    val customDir = it.asFile
+                    if (customDir.isFile && customDir.extension == "aab") {
+                        listOf(it.asFile.absolutePath)
                     } else {
-                        customDir.asFileTree.matching {
+                        it.asFileTree.matching {
                             include("*.aab")
-                        }.singleOrNull()?.let {
-                            customDir.file(it.toString())
-                        } ?: customDir.file("ERROR_no-unique-aab-found")
+                        }.map { it.absolutePath }
                     }
-                }.orElse(variant.artifacts.get(ArtifactType.BUNDLE))
+                }.orElse(variant.artifacts.get(ArtifactType.BUNDLE).map {
+                    listOf(it.asFile.absolutePath)
+                })
 
                 val appId = variant.applicationId.get()
                 val api = project.gradle.sharedServices.registerIfAbsent(
@@ -244,7 +243,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                         arrayOf(extension)
                 ) {
                     apiService.set(api)
-                    bundle.set(findBundleFile())
+                    bundles.from(findBundleFiles())
                     outputDirectory.set(project.layout.buildDirectory.dir(
                             "outputs/internal-sharing/bundle/${variant.name}"))
 
@@ -415,7 +414,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                         arrayOf(extension)
                 ) {
                     configureInputs()
-                    bundle.set(findBundleFile())
+                    bundles.from(findBundleFiles())
 
                     finalizedBy(commitEditTask)
                     configure3pDeps(extension, taskVariantName)
