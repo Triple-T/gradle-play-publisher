@@ -550,7 +550,7 @@ File | Description | Character limit
 `full-description.txt` | Full description | 4000
 `video-url.txt` | Youtube product video | N/A
 
-#### Uploading graphic bases listings
+#### Uploading graphic based listings
 
 Directory: `play/listings/[language]/graphics` where `language` is defined as in the previous
 section
