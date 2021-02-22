@@ -77,12 +77,16 @@ class PublishBundleIntegrationTest : IntegrationTestBase(), ArtifactIntegrationT
                 override fun uploadBundle(
                         bundleFile: File,
                         strategy: ResolutionStrategy
-                ): Long {
+                ): Long? {
                     println("uploadBundle(" +
                                     "bundleFile=$bundleFile, " +
                                     "strategy=$strategy)")
 
                     if (System.getProperty("FAIL") != null) error("Upload failed")
+                    if (System.getProperty("SOFT_FAIL") != null) {
+                        println("Soft failure")
+                        return null
+                    }
 
                     val versionCodes = System.getProperty("VERSION_CODES").nullOrFull().orEmpty()
                             .replace(" ", "").ifEmpty { "1" }.split(",")

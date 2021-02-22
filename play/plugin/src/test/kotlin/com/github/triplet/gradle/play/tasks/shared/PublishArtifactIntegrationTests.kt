@@ -1,5 +1,6 @@
 package com.github.triplet.gradle.play.tasks.shared
 
+import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.helpers.SharedIntegrationTest
 import com.github.triplet.gradle.play.helpers.SharedIntegrationTest.Companion.DEFAULT_TASK_VARIANT
 import com.google.common.truth.Truth.assertThat
@@ -9,8 +10,11 @@ import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import java.io.File
 
 interface PublishArtifactIntegrationTests : SharedIntegrationTest {
+    fun customArtifactName(name: String): String
+
     fun assertArtifactUpload(result: BuildResult)
 
     @ParameterizedTest
@@ -207,5 +211,54 @@ interface PublishArtifactIntegrationTests : SharedIntegrationTest {
         result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("trackName=myCustomTrack")
         assertArtifactUpload(result)
+    }
+
+    @Test
+    fun `Build uses correct version code`() {
+        // language=gradle
+        val config = """
+            System.setProperty("VERSION_CODES", "8")
+        """
+
+        val result = execute(config, taskName())
+
+        result.requireTask(outcome = SUCCESS)
+        assertArtifactUpload(result)
+        assertThat(result.output).contains("versionCodes=[8]")
+    }
+
+    @Test
+    fun `Build uses correct version codes with custom artifact`() {
+        // language=gradle
+        val config = """
+            play {
+                artifactDir = file('${playgroundDir.escaped()}')
+            }
+
+            System.setProperty("VERSION_CODES", "42, 88")
+        """
+
+        File(playgroundDir, customArtifactName("1")).safeCreateNewFile()
+        File(playgroundDir, customArtifactName("2")).safeCreateNewFile()
+        val result = execute(config, taskName())
+
+        result.requireTask(outcome = SUCCESS)
+        assertArtifactUpload(result)
+        assertThat(result.output).contains("versionCodes=[42, 88]")
+    }
+
+    @Test
+    fun `Build doesn't publish artifacts when no uploads succeeded`() {
+        // language=gradle
+        val config = """
+            System.setProperty("SOFT_FAIL", "true")
+        """
+
+        val result = execute(config, taskName())
+
+        result.requireTask(outcome = SUCCESS)
+        assertArtifactUpload(result)
+        assertThat(result.output).contains("Soft failure")
+        assertThat(result.output).contains("publishArtifacts(versionCodes=[]")
     }
 }
