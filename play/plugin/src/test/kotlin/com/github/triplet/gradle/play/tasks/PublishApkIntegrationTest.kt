@@ -14,7 +14,6 @@ import com.github.triplet.gradle.play.tasks.shared.PublishArtifactIntegrationTes
 import com.github.triplet.gradle.play.tasks.shared.PublishOrPromoteArtifactIntegrationTests
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.BuildResult
-import org.gradle.testkit.runner.TaskOutcome.NO_SOURCE
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Test
 import java.io.File
@@ -24,11 +23,13 @@ class PublishApkIntegrationTest : IntegrationTestBase(), ArtifactIntegrationTest
         PublishOrPromoteArtifactIntegrationTests, PublishArtifactIntegrationTests {
     override fun taskName(taskVariant: String) = ":publish${taskVariant}Apk"
 
-    override fun customArtifactName() = "foo.apk"
+    override fun customArtifactName(name: String) = "$name.apk"
 
-    override fun assertCustomArtifactResults(result: BuildResult) {
+    override fun assertCustomArtifactResults(result: BuildResult, executed: Boolean) {
         assertThat(result.task(":packageRelease")).isNull()
-        assertArtifactUpload(result)
+        if (executed) {
+            assertArtifactUpload(result)
+        }
     }
 
     override fun assertArtifactUpload(result: BuildResult) {
@@ -43,39 +44,6 @@ class PublishApkIntegrationTest : IntegrationTestBase(), ArtifactIntegrationTest
         assertThat(result.output).contains("uploadApk(")
         assertThat(result.output).contains(".apk")
         assertThat(result.output).contains("publishArtifacts(")
-    }
-
-    @Test
-    fun `Using non-existent custom artifact fails build with warning`() {
-        // language=gradle
-        val config = """
-            play {
-                artifactDir = file('${playgroundDir.escaped()}')
-            }
-        """
-
-        val result = execute(config, "publishReleaseApk")
-
-        assertThat(result.task(":packageRelease")).isNull()
-        result.requireTask(outcome = NO_SOURCE)
-    }
-
-    @Test
-    fun `Using custom artifact with multiple APKs uploads each one`() {
-        // language=gradle
-        val config = """
-            play {
-                artifactDir = file('${playgroundDir.escaped()}')
-            }
-        """
-
-        File(playgroundDir, "1.apk").safeCreateNewFile()
-        File(playgroundDir, "2.apk").safeCreateNewFile()
-        val result = execute(config, "publishReleaseApk")
-
-        result.requireTask(outcome = SUCCESS)
-        assertThat(result.output).contains("1.apk")
-        assertThat(result.output).contains("2.apk")
     }
 
     @Test
