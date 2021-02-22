@@ -1,6 +1,7 @@
 package com.github.triplet.gradle.play.helpers
 
 import com.github.triplet.gradle.common.utils.orNull
+import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.BeforeEach
@@ -65,6 +66,10 @@ abstract class IntegrationTestBase : IntegrationTest {
         ))
 
         val result = if (expectFailure) runner.buildAndFail() else runner.build()
+        if (expectFailure) {
+            assertThat(result.output)
+                    .doesNotContain("Test wasn't expecting this method to be called.")
+        }
 
         if ("--debug" !in runner.arguments) {
             println(result.output)

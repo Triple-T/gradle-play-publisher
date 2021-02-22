@@ -242,10 +242,10 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Variant specific lifecycle task publishes APKs by default`() {
-        val result = executeExpectingFailure("", "publishRelease")
+        val result = execute("", "publishRelease", "--dry-run")
 
-        assertThat(result.task(":publishReleaseApk")).isNotNull()
-        assertThat(result.task(":publishReleaseBundle")).isNull()
+        assertThat(result.output).contains(":publishReleaseApk")
+        assertThat(result.output).doesNotContain(":publishReleaseBundle")
     }
 
     @Test
@@ -257,10 +257,10 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
             }
         """
 
-        val result = executeExpectingFailure(config, "publishRelease")
+        val result = execute(config, "publishRelease", "--dry-run")
 
-        assertThat(result.task(":publishReleaseApk")).isNull()
-        assertThat(result.task(":publishReleaseBundle")).isNotNull()
+        assertThat(result.output).doesNotContain(":publishReleaseApk")
+        assertThat(result.output).contains(":publishReleaseBundle")
     }
 
     @Test
