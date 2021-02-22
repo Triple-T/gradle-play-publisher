@@ -160,21 +160,6 @@ class PublishApkIntegrationTest : IntegrationTestBase(), ArtifactIntegrationTest
     }
 
     @Test
-    fun `Build doesn't publish APKs when no uploads succeeded`() {
-        // language=gradle
-        val config = """
-            System.setProperty("SOFT_FAIL", "true")
-        """
-
-        val result = execute(config, "publishReleaseApk")
-
-        result.requireTask(outcome = SUCCESS)
-        assertThat(result.output).contains("uploadApk(")
-        assertThat(result.output).contains("Soft failure")
-        assertThat(result.output).contains("publishArtifacts(versionCodes=[]")
-    }
-
-    @Test
     fun `Build uploads multiple APKs when splits are used`() {
         // language=gradle
         val config = """
@@ -213,20 +198,6 @@ class PublishApkIntegrationTest : IntegrationTestBase(), ArtifactIntegrationTest
             it.contains("publishArtifacts(")
         }).hasSize(1)
         assertThat(result.output).contains("versionCodes=[1, 2, 3]")
-    }
-
-    @Test
-    fun `Build uses correct version code`() {
-        // language=gradle
-        val config = """
-            System.setProperty("VERSION_CODES", "8")
-        """
-
-        val result = execute(config, "publishReleaseApk")
-
-        result.requireTask(outcome = SUCCESS)
-        assertThat(result.output).contains("uploadApk(")
-        assertThat(result.output).contains("versionCodes=[8]")
     }
 
     @Test
