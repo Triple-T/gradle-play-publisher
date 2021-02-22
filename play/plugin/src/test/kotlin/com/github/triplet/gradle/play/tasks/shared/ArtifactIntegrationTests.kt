@@ -5,6 +5,7 @@ import com.github.triplet.gradle.play.helpers.SharedIntegrationTest
 import com.github.triplet.gradle.play.helpers.SharedIntegrationTest.Companion.DEFAULT_TASK_VARIANT
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.BuildResult
+import org.gradle.testkit.runner.TaskOutcome.NO_SOURCE
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
 import org.junit.jupiter.api.Test
@@ -14,9 +15,9 @@ import org.junit.jupiter.params.provider.ValueSource
 import java.io.File
 
 interface ArtifactIntegrationTests : SharedIntegrationTest {
-    fun customArtifactName(): String
+    fun customArtifactName(name: String = "foo"): String
 
-    fun assertCustomArtifactResults(result: BuildResult)
+    fun assertCustomArtifactResults(result: BuildResult, executed: Boolean = true)
 
     @Test
     fun `Rebuilding artifact on-the-fly uses cached build`() {
@@ -25,6 +26,21 @@ interface ArtifactIntegrationTests : SharedIntegrationTest {
 
         result1.requireTask(outcome = SUCCESS)
         result2.requireTask(outcome = UP_TO_DATE)
+    }
+
+    @Test
+    fun `Using non-existent custom artifact skips build`() {
+        // language=gradle
+        val config = """
+            play {
+                artifactDir = file('${playgroundDir.escaped()}')
+            }
+        """
+
+        val result = execute(config, taskName())
+
+        assertCustomArtifactResults(result, executed = false)
+        result.requireTask(outcome = NO_SOURCE)
     }
 
     @Test
@@ -213,5 +229,23 @@ interface ArtifactIntegrationTests : SharedIntegrationTest {
         result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains(playgroundDir.name)
         assertCustomArtifactResults(result)
+    }
+
+    @Test
+    fun `Using custom artifact with multiple files uploads each one`() {
+        // language=gradle
+        val config = """
+            play {
+                artifactDir = file('${playgroundDir.escaped()}')
+            }
+        """
+
+        File(playgroundDir, customArtifactName("1")).safeCreateNewFile()
+        File(playgroundDir, customArtifactName("2")).safeCreateNewFile()
+        val result = execute(config, taskName())
+
+        result.requireTask(outcome = SUCCESS)
+        assertThat(result.output).contains(customArtifactName("1"))
+        assertThat(result.output).contains(customArtifactName("2"))
     }
 }
