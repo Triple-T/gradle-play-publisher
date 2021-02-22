@@ -3,14 +3,12 @@ package com.github.triplet.gradle.play.tasks
 import com.github.triplet.gradle.androidpublisher.FakePlayPublisher
 import com.github.triplet.gradle.androidpublisher.UploadInternalSharingArtifactResponse
 import com.github.triplet.gradle.androidpublisher.newUploadInternalSharingArtifactResponse
-import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.github.triplet.gradle.play.helpers.SharedIntegrationTest.Companion.DEFAULT_TASK_VARIANT
 import com.github.triplet.gradle.play.tasks.shared.ArtifactIntegrationTests
 import com.github.triplet.gradle.play.tasks.shared.PublishInternalSharingArtifactIntegrationTests
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.BuildResult
-import org.gradle.testkit.runner.TaskOutcome
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Test
 import java.io.File
@@ -20,11 +18,13 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase(), Artif
     override fun taskName(taskVariant: String) =
             ":upload${taskVariant.ifEmpty { DEFAULT_TASK_VARIANT }}PrivateBundle"
 
-    override fun customArtifactName() = "foo.aab"
+    override fun customArtifactName(name: String) = "$name.aab"
 
-    override fun assertCustomArtifactResults(result: BuildResult) {
+    override fun assertCustomArtifactResults(result: BuildResult, executed: Boolean) {
         assertThat(result.task(":packageReleaseBundle")).isNull()
-        assertThat(result.output).contains("uploadInternalSharingBundle(")
+        if (executed) {
+            assertThat(result.output).contains("uploadInternalSharingBundle(")
+        }
     }
 
     override fun outputFile() = "build/outputs/internal-sharing/bundle/release"
@@ -36,39 +36,6 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase(), Artif
         result.requireTask(":packageReleaseBundle", outcome = SUCCESS)
         assertThat(result.output).contains("uploadInternalSharingBundle(")
         assertThat(result.output).contains(".aab")
-    }
-
-    @Test
-    fun `Using non-existent custom artifact skips build`() {
-        // language=gradle
-        val config = """
-            play {
-                artifactDir = file('${playgroundDir.escaped()}')
-            }
-        """
-
-        val result = execute(config, "uploadReleasePrivateBundle")
-
-        assertThat(result.task(":packageReleaseBundle")).isNull()
-        result.requireTask(outcome = TaskOutcome.NO_SOURCE)
-    }
-
-    @Test
-    fun `Using custom artifact with multiple bundles uploads each one`() {
-        // language=gradle
-        val config = """
-            play {
-                artifactDir = file('${playgroundDir.escaped()}')
-            }
-        """
-
-        File(playgroundDir, "1.aab").safeCreateNewFile()
-        File(playgroundDir, "2.aab").safeCreateNewFile()
-        val result = execute(config, "uploadReleasePrivateBundle")
-
-        result.requireTask(outcome = SUCCESS)
-        assertThat(result.output).contains("1.aab")
-        assertThat(result.output).contains("2.aab")
     }
 
     companion object {

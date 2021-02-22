@@ -7,14 +7,12 @@ import com.github.triplet.gradle.androidpublisher.ReleaseStatus
 import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.common.utils.nullOrFull
-import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.github.triplet.gradle.play.tasks.shared.ArtifactIntegrationTests
 import com.github.triplet.gradle.play.tasks.shared.PublishArtifactIntegrationTests
 import com.github.triplet.gradle.play.tasks.shared.PublishOrPromoteArtifactIntegrationTests
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.BuildResult
-import org.gradle.testkit.runner.TaskOutcome
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Test
 import java.io.File
@@ -24,11 +22,13 @@ class PublishBundleIntegrationTest : IntegrationTestBase(), ArtifactIntegrationT
         PublishOrPromoteArtifactIntegrationTests, PublishArtifactIntegrationTests {
     override fun taskName(taskVariant: String) = ":publish${taskVariant}Bundle"
 
-    override fun customArtifactName() = "foo.aab"
+    override fun customArtifactName(name: String) = "$name.aab"
 
-    override fun assertCustomArtifactResults(result: BuildResult) {
+    override fun assertCustomArtifactResults(result: BuildResult, executed: Boolean) {
         assertThat(result.task(":packageReleaseBundle")).isNull()
-        assertArtifactUpload(result)
+        if (executed) {
+            assertArtifactUpload(result)
+        }
     }
 
     override fun assertArtifactUpload(result: BuildResult) {
@@ -42,39 +42,6 @@ class PublishBundleIntegrationTest : IntegrationTestBase(), ArtifactIntegrationT
         result.requireTask(":packageReleaseBundle", outcome = SUCCESS)
         assertThat(result.output).contains("uploadBundle(")
         assertThat(result.output).contains(".aab")
-    }
-
-    @Test
-    fun `Using non-existent custom artifact fails build with warning`() {
-        // language=gradle
-        val config = """
-            play {
-                artifactDir = file('${playgroundDir.escaped()}')
-            }
-        """
-
-        val result = execute(config, "publishReleaseBundle")
-
-        assertThat(result.task(":packageRelease")).isNull()
-        result.requireTask(outcome = TaskOutcome.NO_SOURCE)
-    }
-
-    @Test
-    fun `Using custom artifact with multiple bundles uploads each one`() {
-        // language=gradle
-        val config = """
-            play {
-                artifactDir = file('${playgroundDir.escaped()}')
-            }
-        """
-
-        File(playgroundDir, "1.aab").safeCreateNewFile()
-        File(playgroundDir, "2.aab").safeCreateNewFile()
-        val result = execute(config, "publishReleaseBundle")
-
-        result.requireTask(outcome = SUCCESS)
-        assertThat(result.output).contains("1.aab")
-        assertThat(result.output).contains("2.aab")
     }
 
     companion object {
@@ -110,7 +77,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase(), ArtifactIntegrationT
                 override fun uploadBundle(
                         bundleFile: File,
                         strategy: ResolutionStrategy
-                ) : Long {
+                ): Long {
                     println("uploadBundle(" +
                                     "bundleFile=$bundleFile, " +
                                     "strategy=$strategy)")
