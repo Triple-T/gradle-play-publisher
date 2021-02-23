@@ -46,7 +46,6 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Provider
-import org.gradle.api.publish.plugins.PublishingPlugin
 import org.gradle.kotlin.dsl.container
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.findPlugin
@@ -94,7 +93,14 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 """.trimMargin(),
                 arrayOf(bootstrapOptionsHolder)
         )
-        val publishAllTask = project.newTask("publishApps")
+        val publishAllTask = project.newTask<GlobalPublishableArtifactLifecycleTask>(
+                "publishApps",
+                """
+                |Uploads APK or App Bundle and all Play Store metadata for every variant.
+                |   See https://github.com/Triple-T/gradle-play-publisher#managing-artifacts
+                """.trimMargin(),
+                arrayOf(cliOptionsExtension)
+        )
         val publishApkAllTask = project.newTask<PublishableTrackLifecycleTask>(
                 "publishApk",
                 """
@@ -134,23 +140,6 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 |   See https://github.com/Triple-T/gradle-play-publisher#publishing-in-app-products
                 """.trimMargin()
         )
-
-        project.afterEvaluate {
-            if (project.plugins.findPlugin(PublishingPlugin::class) == null) {
-                project.newTask<GlobalPublishableArtifactLifecycleTask>(
-                        "publish",
-                        """
-                        |Uploads APK or App Bundle and all Play Store metadata for every variant.
-                        |   See https://github.com/Triple-T/gradle-play-publisher#managing-artifacts
-                        """.trimMargin(),
-                        arrayOf(cliOptionsExtension)
-                ) {
-                    dependsOn(publishAllTask)
-                }
-            } else {
-                project.tasks.named("publish") { dependsOn(publishAllTask) }
-            }
-        }
 
         val baseExtension = project.extensions.getByType<PlayPublisherExtension>()
         val extensionContainer = project.container<PlayPublisherExtension>()
