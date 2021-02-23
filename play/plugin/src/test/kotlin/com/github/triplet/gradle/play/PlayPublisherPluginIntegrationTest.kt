@@ -35,16 +35,6 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `Maven publish plugin can be applied`() {
-        // language=gradle
-        val config = """
-            apply plugin: 'maven-publish'
-        """
-
-        execute(config, "help")
-    }
-
-    @Test
     fun `Debuggable build types are ignored`() {
         // language=gradle
         val config = """
