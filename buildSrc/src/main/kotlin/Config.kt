@@ -54,7 +54,7 @@ fun Project.configureMaven(handler: RepositoryHandler) = handler.maven {
 object Config {
     object Libs {
         object All {
-            const val agp = "com.android.tools.build:gradle:4.2.0-beta03"
+            const val agp = "com.android.tools.build:gradle:4.2.0-beta04"
             const val ap =
                     "com.google.apis:google-api-services-androidpublisher:v3-rev20201125-1.31.0"
             const val googleClient = "com.google.api-client:google-api-client:1.31.1"
