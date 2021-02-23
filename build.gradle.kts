@@ -3,8 +3,6 @@ import io.codearte.gradle.nexus.CloseRepositoryTask
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 
 buildscript {
-    repositories.deps()
-
     dependencies {
         classpath(kotlin("gradle-plugin", embeddedKotlinVersion))
     }
@@ -58,8 +56,6 @@ tasks.withType<CloseRepositoryTask> {
 
 val versionName = rootProject.file("version.txt").readText().trim()
 allprojects {
-    repositories.deps()
-
     version = versionName
     group = "com.github.triplet.gradle"
 
