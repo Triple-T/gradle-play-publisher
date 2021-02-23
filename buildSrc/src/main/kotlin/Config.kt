@@ -5,17 +5,6 @@ import org.gradle.api.publish.maven.MavenPublication
 val Project.isSnapshotBuild
     get() = (version as String).contains("snapshot", true)
 
-fun RepositoryHandler.deps() {
-    google().content {
-        includeGroup("com.android")
-        includeGroupByRegex("com\\.android\\..*")
-        includeGroupByRegex("com\\.google\\..*")
-        includeGroupByRegex("androidx\\..*")
-    }
-
-    jcenter()
-}
-
 fun MavenPublication.configurePom() = pom {
     name.set("Google Play Publisher")
     description.set("Gradle Play Publisher is a plugin that allows you to upload your " +
