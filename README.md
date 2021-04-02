@@ -388,11 +388,10 @@ for APKs. To upload an existing artifact, read about
 
 After running an Internal Sharing task, the output of the API response will be stored in the
 following directory: `build/outputs/internal-sharing/[bundle/apk]/[variant]/`. Each file will be
-named `[file creation timestamp].json` so that you can get the latest response by sorting the files
-in descending order and then picking the first entry.
+named `[apk/aab name].json`.
 
 For example, here are the contents
-of `app/build/outputs/internal-sharing/bundle/release/1567900521492.json`:
+of `app/build/outputs/internal-sharing/bundle/release/app-release.json`:
 
 ```json
 {
