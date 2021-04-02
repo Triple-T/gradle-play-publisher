@@ -69,7 +69,7 @@ internal abstract class PublishInternalSharingApk @Inject constructor(
             val response = apiService.publisher.uploadInternalSharingApk(apkFile)
 
             println("Upload successful: ${response.downloadUrl}")
-            parameters.outputDir.get().file("${System.currentTimeMillis()}.json").asFile
+            parameters.outputDir.get().file("${apkFile.name}.json").asFile
                     .writeText(response.json)
         }
 
