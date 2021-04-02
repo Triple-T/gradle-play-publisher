@@ -69,7 +69,7 @@ internal abstract class PublishInternalSharingBundle @Inject constructor(
             val response = apiService.publisher.uploadInternalSharingBundle(bundleFile)
 
             println("Upload successful: ${response.downloadUrl}")
-            parameters.outputDir.get().file("${System.currentTimeMillis()}.json").asFile
+            parameters.outputDir.get().file("${bundleFile.nameWithoutExtension}.json").asFile
                     .writeText(response.json)
         }
 
