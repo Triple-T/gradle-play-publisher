@@ -16,8 +16,8 @@ interface PublishInternalSharingArtifactIntegrationTests : SharedIntegrationTest
 
         assertThat(outputDir.listFiles()).isNotNull()
         assertThat(outputDir.listFiles()!!.size).isEqualTo(1)
-        assertThat(outputDir.listFiles()!!.first().name).endsWith(".json")
-        assertThat(outputDir.listFiles()!!.first().readText()).isEqualTo("json-payload")
+        assertThat(outputDir.listFiles()!!.single().name).endsWith(".json")
+        assertThat(outputDir.listFiles()!!.single().readText()).isEqualTo("json-payload")
     }
 
     @Test
