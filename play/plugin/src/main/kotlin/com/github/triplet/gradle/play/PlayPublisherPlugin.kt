@@ -21,7 +21,6 @@ import com.github.triplet.gradle.play.internal.getCommitEditTask
 import com.github.triplet.gradle.play.internal.newTask
 import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.internal.toConfig
-import com.github.triplet.gradle.play.internal.validateCreds
 import com.github.triplet.gradle.play.internal.validateDebuggability
 import com.github.triplet.gradle.play.tasks.Bootstrap
 import com.github.triplet.gradle.play.tasks.GenerateResources
@@ -168,7 +167,6 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                         "Gradle Play Publisher is disabled for variant '${variant.name}'.")
                 return@v
             }
-            extension.validateCreds()
 
             // Add a pointless run block to keep the same indentation as the code without this patch
             run {
