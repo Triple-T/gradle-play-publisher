@@ -9,7 +9,7 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.googleapis.media.MediaHttpUploader
 import com.google.api.client.googleapis.services.AbstractGoogleClientRequest
 import com.google.api.client.http.FileContent
-import com.google.api.client.json.jackson2.JacksonFactory
+import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.model.Apk
 import com.google.api.services.androidpublisher.model.AppDetails
@@ -177,7 +177,7 @@ internal class DefaultPlayPublisher(
         } while (token != null)
 
         return products.map {
-            GppProduct(it.sku, JacksonFactory.getDefaultInstance().toPrettyString(it))
+            GppProduct(it.sku, it.toPrettyString())
         }
     }
 
@@ -205,7 +205,7 @@ internal class DefaultPlayPublisher(
     }
 
     private fun readProductFile(product: File) = product.inputStream().use {
-        JacksonFactory.getDefaultInstance()
+        GsonFactory.getDefaultInstance()
                 .createJsonParser(it)
                 .parse(InAppProduct::class.java)
     }

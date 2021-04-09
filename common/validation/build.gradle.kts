@@ -2,7 +2,6 @@ plugins {
     `kotlin-dsl`
     `maven-publish`
     signing
-    id("de.marcphilipp.nexus-publish")
 }
 
 dependencies {

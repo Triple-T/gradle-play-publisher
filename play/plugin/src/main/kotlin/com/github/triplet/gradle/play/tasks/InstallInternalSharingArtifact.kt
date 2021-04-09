@@ -5,7 +5,7 @@ import com.android.build.gradle.internal.LoggerWrapper
 import com.android.build.gradle.internal.testing.ConnectedDeviceProvider
 import com.android.builder.testing.api.DeviceProvider
 import com.android.ddmlib.MultiLineReceiver
-import com.google.api.client.json.jackson2.JacksonFactory
+import com.google.api.client.json.gson.GsonFactory
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
@@ -53,7 +53,7 @@ internal abstract class InstallInternalSharingArtifact @Inject constructor(
                     uploads.maxBy { it.nameWithoutExtension.toLong() }
             ) { "Failed to find uploaded artifacts in ${uploads.joinToString()}" }
             val launchUrl = latestUpload.inputStream().use {
-                JacksonFactory.getDefaultInstance().createJsonParser(it).parse(Map::class.java)
+                GsonFactory.getDefaultInstance().createJsonParser(it).parse(Map::class.java)
             }["downloadUrl"] as String
 
             val shell = AdbShell(

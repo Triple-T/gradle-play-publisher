@@ -7,7 +7,7 @@ import com.google.api.client.http.HttpRequest
 import com.google.api.client.http.HttpTransport
 import com.google.api.client.http.apache.v2.ApacheHttpTransport
 import com.google.api.client.http.javanet.NetHttpTransport
-import com.google.api.client.json.jackson2.JacksonFactory
+import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.AndroidPublisherScopes
 import com.google.auth.http.HttpCredentialsAdapter
@@ -27,7 +27,7 @@ internal fun createPublisher(credentials: InputStream): AndroidPublisher {
 
     return AndroidPublisher.Builder(
             transport,
-            JacksonFactory.getDefaultInstance(),
+            GsonFactory.getDefaultInstance(),
             AndroidPublisherAdapter(credential)
     ).setApplicationName(PLUGIN_NAME).build()
 }
@@ -51,7 +51,7 @@ private fun buildTransport(): HttpTransport {
     }
 }
 
-private fun createHttpTransport() : HttpTransport {
+private fun createHttpTransport(): HttpTransport {
     val protocols = arrayOf("http", "https")
     for (protocol in protocols) {
         val proxyHost = System.getProperty("$protocol.proxyHost")

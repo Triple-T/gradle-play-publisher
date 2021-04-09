@@ -116,7 +116,7 @@ jobs:
         run: ./gradlew assemble
       - name: Publish release
         run: |
-          ./gradlew publishToSonatype closeAndReleaseRepository
+          ./gradlew publishToSonatype closeAndReleaseStagingRepository
           ./gradlew publishPlugins \
             -Pgradle.publish.key=$PUBLISH_KEY -Pgradle.publish.secret=$PUBLISH_SECRET
         env:
