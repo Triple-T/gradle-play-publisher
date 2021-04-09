@@ -32,8 +32,20 @@ internal fun PlayPublisherExtension.toConfig() = PlayExtensionConfig(
 )
 
 internal fun PlayExtensionConfig.credentialStream(): InputStream {
-    return serviceAccountCredentials?.inputStream() ?: ByteArrayInputStream(
-            System.getenv(PlayPublisher.CREDENTIAL_ENV_VAR).toByteArray())
+    val credsFile = serviceAccountCredentials
+    if (credsFile != null) {
+        return credsFile.inputStream()
+    }
+
+    val credsString = System.getenv(PlayPublisher.CREDENTIAL_ENV_VAR)
+    if (credsString != null) {
+        return ByteArrayInputStream(credsString.toByteArray())
+    }
+
+    error("""
+        |No credentials specified. Please read our docs for more details:
+        |https://github.com/Triple-T/gradle-play-publisher#authenticating-gradle-play-publisher
+    """.trimMargin())
 }
 
 internal fun mergeExtensions(extensions: List<ExtensionMergeHolder>): PlayPublisherExtension {

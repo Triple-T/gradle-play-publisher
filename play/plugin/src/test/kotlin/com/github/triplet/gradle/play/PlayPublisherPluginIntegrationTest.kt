@@ -9,6 +9,7 @@ import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.ValueSource
 import java.io.File
 
@@ -173,10 +174,18 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
         assertThat(result.output).contains("installDebug")
     }
 
-    @Test
-    fun `No creds fails`() {
+    @ParameterizedTest
+    @CsvSource(value = [
+        "false,false",
+        "false,true",
+        "true,false",
+        "true,true"
+    ])
+    fun `Credentials are validated and used`(envvar: Boolean, present: Boolean) {
         // language=gradle
         File(appDir, "build.gradle").writeText("""
+            import com.github.triplet.gradle.play.tasks.internal.PlayApiService
+
             plugins {
                 id 'com.android.application'
                 id 'com.github.triplet.play'
@@ -193,40 +202,31 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
                     versionName "1.0"
                 }
             }
-        """)
 
-        val result = executeGradle(true) {
-            withArguments("help")
-        }
+            task usePublisher {
+                doLast {
+                    def service = gradle.sharedServices.registrations
+                                .named("playApi-com.example.publisher")
+                                .get().getService().get() as PlayApiService
 
-        assertThat(result.output).contains("No credentials specified.")
-    }
-
-    @Test
-    fun `Credentials can be specified from environment variable`() {
-        // language=gradle
-        File(appDir, "build.gradle").writeText("""
-            plugins {
-                id 'com.android.application'
-                id 'com.github.triplet.play'
-            }
-
-            android {
-                compileSdkVersion 28
-
-                defaultConfig {
-                    applicationId "com.example.publisher"
-                    minSdkVersion 21
-                    targetSdkVersion 28
-                    versionCode 1
-                    versionName "1.0"
+                    service.getPublisher()
                 }
             }
+
+            if (${present && !envvar}) {
+                play.serviceAccountCredentials.set(file('creds.json'))
+            }
+
+            play {}
+
+            $factoryInstallerStatement
         """)
 
-        executeGradle(false) {
-            withArguments("help")
-            withEnvironment(mapOf(PlayPublisher.CREDENTIAL_ENV_VAR to "fake-creds"))
+        executeGradle(!present) {
+            withArguments("usePublisher")
+            if (present && envvar) {
+                withEnvironment(mapOf(PlayPublisher.CREDENTIAL_ENV_VAR to "fake-creds"))
+            }
         }
     }
 
