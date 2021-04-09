@@ -5,7 +5,7 @@ import com.github.triplet.gradle.androidpublisher.ReleaseNote
 import com.github.triplet.gradle.androidpublisher.ReleaseStatus
 import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import com.google.api.client.googleapis.testing.json.GoogleJsonResponseExceptionFactoryTesting
-import com.google.api.client.json.jackson2.JacksonFactory
+import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.androidpublisher.model.Apk
 import com.google.api.services.androidpublisher.model.AppDetails
 import com.google.api.services.androidpublisher.model.Bundle
@@ -52,7 +52,7 @@ class DefaultEditManagerTest {
     fun `uploadBundle fails silently when conflict occurs with ignore strategy`() {
         `when`(mockPublisher.uploadBundle(any(), any())).thenThrow(
                 GoogleJsonResponseExceptionFactoryTesting.newMock(
-                        JacksonFactory.getDefaultInstance(), 400, "apkUpgradeVersionConflict"))
+                        GsonFactory.getDefaultInstance(), 400, "apkUpgradeVersionConflict"))
 
         edits.uploadBundle(
                 bundleFile = mockFile,
@@ -66,7 +66,7 @@ class DefaultEditManagerTest {
     fun `uploadBundle fails when conflict occurs with fail strategy`() {
         `when`(mockPublisher.uploadBundle(any(), any())).thenThrow(
                 GoogleJsonResponseExceptionFactoryTesting.newMock(
-                        JacksonFactory.getDefaultInstance(), 400, "apkUpgradeVersionConflict"))
+                        GsonFactory.getDefaultInstance(), 400, "apkUpgradeVersionConflict"))
 
         assertThrows<IllegalStateException> {
             edits.uploadBundle(
@@ -176,7 +176,7 @@ class DefaultEditManagerTest {
     fun `uploadApk fails silently when conflict occurs with ignore strategy`() {
         `when`(mockPublisher.uploadApk(any(), any())).thenThrow(
                 GoogleJsonResponseExceptionFactoryTesting.newMock(
-                        JacksonFactory.getDefaultInstance(), 400, "apkUpgradeVersionConflict"))
+                        GsonFactory.getDefaultInstance(), 400, "apkUpgradeVersionConflict"))
 
         edits.uploadApk(
                 apkFile = mockFile,
@@ -194,7 +194,7 @@ class DefaultEditManagerTest {
     fun `uploadApk fails when conflict occurs with fail strategy`() {
         `when`(mockPublisher.uploadApk(any(), any())).thenThrow(
                 GoogleJsonResponseExceptionFactoryTesting.newMock(
-                        JacksonFactory.getDefaultInstance(), 400, "apkUpgradeVersionConflict"))
+                        GsonFactory.getDefaultInstance(), 400, "apkUpgradeVersionConflict"))
 
         assertThrows<IllegalStateException> {
             edits.uploadApk(

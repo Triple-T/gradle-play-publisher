@@ -4,7 +4,6 @@ plugins {
     `maven-publish`
     signing
     id("com.gradle.plugin-publish")
-    id("de.marcphilipp.nexus-publish")
 }
 
 dependencies {
@@ -14,7 +13,7 @@ dependencies {
 
     compileOnly(Config.Libs.All.agp) // Compile only to not force a specific AGP version
     implementation(Config.Libs.All.guava)
-    implementation(Config.Libs.All.jackson)
+    implementation(Config.Libs.All.gson)
 
     testImplementation(project(":common:utils"))
     testImplementation(project(":common:validation"))

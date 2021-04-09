@@ -1,6 +1,6 @@
-import de.marcphilipp.gradle.nexus.NexusPublishExtension
-import io.codearte.gradle.nexus.CloseRepositoryTask
+import io.github.gradlenexus.publishplugin.CloseNexusStagingRepository
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
+import java.time.Duration
 
 buildscript {
     dependencies {
@@ -10,13 +10,11 @@ buildscript {
 
 plugins {
     `lifecycle-base`
-    id("com.github.ben-manes.versions") version "0.36.0"
+    id("com.github.ben-manes.versions") version "0.38.0"
 
     // Needed to support publishing all modules atomically
-    id("com.gradle.plugin-publish") version "0.12.0" apply false
-    id("de.marcphilipp.nexus-publish") version "0.4.0" apply false
-    // Needed to deploy library releases
-    id("io.codearte.nexus-staging") version "0.22.0"
+    id("com.gradle.plugin-publish") version "0.14.0" apply false
+    id("io.github.gradle-nexus.publish-plugin") version "1.0.0"
 }
 
 buildScan {
@@ -36,17 +34,22 @@ tasks.register("configureGithubActions") {
     }
 }
 
-nexusStaging {
-    packageGroup = "com.github.triplet"
-    username = System.getenv("SONATYPE_NEXUS_USERNAME")
-    password = System.getenv("SONATYPE_NEXUS_PASSWORD")
+nexusPublishing {
+    repositories {
+        sonatype {
+            username.set(System.getenv("SONATYPE_NEXUS_USERNAME"))
+            password.set(System.getenv("SONATYPE_NEXUS_PASSWORD"))
+        }
+    }
 
-    // 15 minutes
-    delayBetweenRetriesInMillis = 5_000
-    numberOfRetries = 180
+    transitionCheckOptions {
+        // 15 minutes
+        delayBetween.set(Duration.ofSeconds(5))
+        maxRetries.set(180)
+    }
 }
 
-tasks.withType<CloseRepositoryTask> {
+tasks.withType<CloseNexusStagingRepository> {
     mustRunAfter(allprojects.map {
         it.tasks.matching { task ->
             task.name.contains("publishToSonatype")
@@ -75,15 +78,6 @@ allprojects {
 
         convention.findByType<PublishingExtension>()?.apply {
             configureMaven(repositories)
-        }
-
-        convention.findByType<NexusPublishExtension>()?.apply {
-            repositories {
-                sonatype {
-                    username.set(System.getenv("SONATYPE_NEXUS_USERNAME"))
-                    password.set(System.getenv("SONATYPE_NEXUS_PASSWORD"))
-                }
-            }
         }
 
         convention.findByType<SigningExtension>()?.apply {

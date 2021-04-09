@@ -4,7 +4,7 @@ import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.workers.PlayWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
-import com.google.api.client.json.jackson2.JacksonFactory
+import com.google.api.client.json.gson.GsonFactory
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileType
@@ -63,7 +63,7 @@ internal abstract class PublishProducts @Inject constructor(
         override fun execute() {
             val productFile = parameters.target.get().asFile
             val product = productFile.inputStream().use {
-                JacksonFactory.getDefaultInstance().createJsonParser(it).parse(Map::class.java)
+                GsonFactory.getDefaultInstance().createJsonParser(it).parse(Map::class.java)
             }
 
             println("Uploading ${product["sku"]}")

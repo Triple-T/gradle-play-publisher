@@ -5,7 +5,6 @@ plugins {
     `java-test-fixtures`
     `maven-publish`
     signing
-    id("de.marcphilipp.nexus-publish")
 }
 
 dependencies {
