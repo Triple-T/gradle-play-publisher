@@ -41,7 +41,7 @@ import javax.inject.Inject
 
 internal abstract class PublishListings @Inject constructor(
         extension: PlayPublisherExtension,
-        executionDir: Directory
+        executionDir: Directory,
 ) : PublishTaskBase(extension),
         WriteTrackExtensionOptions by CliOptionsImpl(extension, executionDir) {
     @get:Internal
@@ -120,7 +120,7 @@ internal abstract class PublishListings @Inject constructor(
     }
 
     private fun processListings(
-            changes: InputChanges
+            changes: InputChanges,
     ) = changes.getFileChanges(listingFiles).asSequence()
             .filter { it.fileType == FileType.FILE }
             .map { it.file.parentFile }
@@ -130,7 +130,7 @@ internal abstract class PublishListings @Inject constructor(
             .toList()
 
     private fun processMedia(
-            changes: InputChanges
+            changes: InputChanges,
     ) = changes.getFileChanges(mediaFiles).asSequence()
             .filter { it.fileType == FileType.FILE }
             .map { it.file.parentFile }
@@ -142,7 +142,7 @@ internal abstract class PublishListings @Inject constructor(
             .map { Publisher.Media(it.key, it.value) }
 
     internal abstract class Publisher @Inject constructor(
-            private val executor: WorkerExecutor
+            private val executor: WorkerExecutor,
     ) : EditWorkerBase<Publisher.Params>() {
         override fun execute() {
             if (parameters.details.isPresent) {

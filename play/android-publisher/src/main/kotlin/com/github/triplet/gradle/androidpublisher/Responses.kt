@@ -12,7 +12,7 @@ data class GppAppDetails internal constructor(
         /** Developer contact phone. */
         val contactPhone: String?,
         /** Developer contact website. */
-        val contactWebsite: String?
+        val contactWebsite: String?,
 )
 
 /** Response for an app listing request. */
@@ -26,7 +26,7 @@ data class GppListing internal constructor(
         /** The app title. */
         val title: String?,
         /** The app promo url. */
-        val video: String?
+        val video: String?,
 )
 
 /** Response for an app graphic request. */
@@ -34,7 +34,7 @@ data class GppImage internal constructor(
         /** The image's download URL. */
         val url: String,
         /** The image's SHA256 hash. */
-        val sha256: String
+        val sha256: String,
 )
 
 /** Response for a track release note request. */
@@ -44,7 +44,7 @@ data class ReleaseNote internal constructor(
         /** The release note's language. */
         val locale: String,
         /** The release note. */
-        val contents: String
+        val contents: String,
 )
 
 /** Response for an edit request. */
@@ -52,12 +52,12 @@ sealed class EditResponse {
     /** Response for a successful edit request. */
     data class Success internal constructor(
             /** The id of the edit in question. */
-            val id: String
+            val id: String,
     ) : EditResponse()
 
     /** Response for an unsuccessful edit request. */
     class Failure internal constructor(
-            private val e: GoogleJsonResponseException
+            private val e: GoogleJsonResponseException,
     ) : EditResponse() {
         /** @return true if the app wasn't found in the Play Console, false otherwise */
         fun isNewApp(): Boolean = e has "applicationNotFound"
@@ -83,7 +83,7 @@ data class UploadInternalSharingArtifactResponse internal constructor(
         val json: String,
 
         /** The download URL of the uploaded artifact. */
-        val downloadUrl: String
+        val downloadUrl: String,
 )
 
 /** Response for a product request. */
@@ -91,11 +91,11 @@ data class GppProduct internal constructor(
         /** The product ID. */
         val sku: String,
         /** The response's full JSON payload. */
-        val json: String
+        val json: String,
 )
 
 /** Response for a product update request. */
 data class UpdateProductResponse internal constructor(
         /** @return true if the product doesn't exist and needs to be created, false otherwise. */
-        val needsCreating: Boolean
+        val needsCreating: Boolean,
 )

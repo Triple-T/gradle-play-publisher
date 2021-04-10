@@ -32,7 +32,7 @@ interface EditManager {
             defaultLocale: String?,
             contactEmail: String?,
             contactPhone: String?,
-            contactWebsite: String?
+            contactWebsite: String?,
     )
 
     /**
@@ -46,7 +46,7 @@ interface EditManager {
             title: String?,
             shortDescription: String?,
             fullDescription: String?,
-            video: String?
+            video: String?,
     )
 
     /** Publish images for a given [locale] and [type], overwriting any existing values. */
@@ -64,14 +64,14 @@ interface EditManager {
             releaseNotes: Map</* locale= */String, /* text= */String?>?,
             userFraction: Double?,
             updatePriority: Int?,
-            retainableArtifacts: List<Long>?
+            retainableArtifacts: List<Long>?,
     )
 
     /** Uploads the given [bundleFile]. */
     fun uploadBundle(
             bundleFile: File,
-            strategy: ResolutionStrategy
-    ) : Long?
+            strategy: ResolutionStrategy,
+    ): Long?
 
     /** Uploads the given [apkFile]. */
     fun uploadApk(
@@ -80,7 +80,7 @@ interface EditManager {
             debugSymbolsFile: File?,
             strategy: ResolutionStrategy,
             mainObbRetainable: Int?,
-            patchObbRetainable: Int?
+            patchObbRetainable: Int?,
     ): Long?
 
     /** Publishes artifacts specified by given [versionCodes] */
@@ -93,7 +93,7 @@ interface EditManager {
             releaseNotes: Map</* locale= */String, /* text= */String?>?,
             userFraction: Double?,
             updatePriority: Int?,
-            retainableArtifacts: List<Long>?
+            retainableArtifacts: List<Long>?,
     )
 
     /** Basic factory to create [EditManager] instances. */
@@ -106,7 +106,7 @@ interface EditManager {
         /** Creates a new [EditManager]. */
         operator fun invoke(
                 publisher: PlayPublisher,
-                editId: String
+                editId: String,
         ): EditManager = ServiceLoader.load(Factory::class.java).last()
                 .create(publisher, editId)
     }

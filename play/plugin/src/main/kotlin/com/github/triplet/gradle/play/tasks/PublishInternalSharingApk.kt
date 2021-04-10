@@ -26,7 +26,7 @@ import javax.inject.Inject
 
 internal abstract class PublishInternalSharingApk @Inject constructor(
         extension: PlayPublisherExtension,
-        executionDir: Directory
+        executionDir: Directory,
 ) : PublishTaskBase(extension),
         ArtifactExtensionOptions by CliOptionsImpl(extension, executionDir) {
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -48,7 +48,7 @@ internal abstract class PublishInternalSharingApk @Inject constructor(
     }
 
     abstract class Processor @Inject constructor(
-            private val executor: WorkerExecutor
+            private val executor: WorkerExecutor,
     ) : PlayWorkerBase<Processor.Params>() {
         override fun execute() {
             for (apk in parameters.apkFiles.get()) {

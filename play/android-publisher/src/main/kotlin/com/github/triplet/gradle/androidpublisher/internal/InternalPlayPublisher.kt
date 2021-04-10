@@ -46,6 +46,6 @@ internal interface InternalPlayPublisher : PlayPublisher {
             editId: String,
             file: File,
             versionCode: Int,
-            type: String
+            type: String,
     ): DeobfuscationFilesUploadResponse
 }

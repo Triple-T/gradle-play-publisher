@@ -26,7 +26,7 @@ import kotlin.math.roundToInt
 
 internal class DefaultPlayPublisher(
         private val publisher: AndroidPublisher,
-        override val appId: String
+        override val appId: String,
 ) : InternalPlayPublisher {
     override fun insertEdit(): EditResponse {
         return try {
@@ -130,7 +130,7 @@ internal class DefaultPlayPublisher(
             editId: String,
             file: File,
             versionCode: Int,
-            type: String
+            type: String,
     ): DeobfuscationFilesUploadResponse {
         val mapping = FileContent(MIME_TYPE_STREAM, file)
         val humanFileName = when (type) {
@@ -212,7 +212,7 @@ internal class DefaultPlayPublisher(
 
     private fun <T, R : AbstractGoogleClientRequest<T>> R.trackUploadProgress(
             thing: String,
-            file: File
+            file: File,
     ): R {
         mediaHttpUploader?.setProgressListener {
             @Suppress("NON_EXHAUSTIVE_WHEN")
@@ -231,7 +231,7 @@ internal class DefaultPlayPublisher(
     class Factory : PlayPublisher.Factory {
         override fun create(
                 credentials: InputStream,
-                appId: String
+                appId: String,
         ): PlayPublisher {
             val publisher = createPublisher(credentials)
             return DefaultPlayPublisher(publisher, appId)

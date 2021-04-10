@@ -8,7 +8,7 @@ internal class RuntimeValidator(
         private val minGradleVersion: GradleVersion,
 
         private val currentAgpVersion: VersionNumber?,
-        private val minAgpVersion: VersionNumber
+        private val minAgpVersion: VersionNumber,
 ) {
     fun validate() {
         validateGradle()

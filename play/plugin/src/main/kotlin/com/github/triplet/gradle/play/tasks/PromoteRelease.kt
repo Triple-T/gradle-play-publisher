@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 internal abstract class PromoteRelease @Inject constructor(
         extension: PlayPublisherExtension,
-        executionDir: Directory
+        executionDir: Directory,
 ) : PublishArtifactTaskBase(extension),
         UpdatableTrackExtensionOptions by CliOptionsImpl(extension, executionDir) {
     init {

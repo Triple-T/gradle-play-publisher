@@ -46,7 +46,7 @@ abstract class IntegrationTestBase : IntegrationTest {
 
     override fun executeGradle(
             expectFailure: Boolean,
-            block: GradleRunner.() -> Unit
+            block: GradleRunner.() -> Unit,
     ): BuildResult = runWithTestDir { testDir ->
         val runner = GradleRunner.create()
                 .withPluginClasspath()
@@ -81,7 +81,7 @@ abstract class IntegrationTestBase : IntegrationTest {
     private fun execute(
             config: String,
             expectFailure: Boolean,
-            vararg tasks: String
+            vararg tasks: String,
     ): BuildResult {
         val buildCacheDir = File(tempDir, "gradle").escaped()
 
@@ -103,7 +103,7 @@ abstract class IntegrationTestBase : IntegrationTest {
             allprojects {
                 repositories {
                     google()
-                    jcenter()
+                    mavenCentral()
                 }
             }
 

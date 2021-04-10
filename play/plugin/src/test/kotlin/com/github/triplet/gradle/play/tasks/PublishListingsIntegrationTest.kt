@@ -303,7 +303,7 @@ class PublishListingsIntegrationTest : IntegrationTestBase(), SharedIntegrationT
                         defaultLocale: String?,
                         contactEmail: String?,
                         contactPhone: String?,
-                        contactWebsite: String?
+                        contactWebsite: String?,
                 ) {
                     println("publishAppDetails(defaultLocale=$defaultLocale, " +
                                     "contactEmail=$contactEmail, " +
@@ -316,7 +316,7 @@ class PublishListingsIntegrationTest : IntegrationTestBase(), SharedIntegrationT
                         title: String?,
                         shortDescription: String?,
                         fullDescription: String?,
-                        video: String?
+                        video: String?,
                 ) {
                     println("publishListing(locale=$locale, " +
                                     "title=$title, " +

@@ -93,7 +93,7 @@ interface PlayPublisher {
          */
         fun create(
                 credentials: InputStream,
-                appId: String
+                appId: String,
         ): PlayPublisher
     }
 
@@ -104,7 +104,7 @@ interface PlayPublisher {
         /** Creates a new [PlayPublisher]. */
         operator fun invoke(
                 credentials: InputStream,
-                appId: String
+                appId: String,
         ): PlayPublisher = ServiceLoader.load(Factory::class.java).last()
                 .create(credentials, appId)
     }

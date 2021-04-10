@@ -18,7 +18,7 @@ import org.gradle.api.services.BuildServiceParameters
 import javax.inject.Inject
 
 internal abstract class PlayApiService @Inject constructor(
-        private val fileOps: FileSystemOperations
+        private val fileOps: FileSystemOperations,
 ) : BuildService<PlayApiService.Params> {
     val publisher by lazy {
         parameters.config.get().credentialStream().use {

@@ -18,7 +18,7 @@ interface IntegrationTest {
 
     fun executeGradle(
             expectFailure: Boolean,
-            block: GradleRunner.() -> Unit
+            block: GradleRunner.() -> Unit,
     ): BuildResult
 
     fun String.withAndroidBlock() = """

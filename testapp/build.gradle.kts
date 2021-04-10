@@ -15,7 +15,7 @@ buildscript {
         maven("https://oss.sonatype.org/content/repositories/snapshots")
 
         google()
-        jcenter()
+        mavenCentral()
         maven("https://plugins.gradle.org/m2/")
     }
 
@@ -40,7 +40,7 @@ tasks.wrapper {
 allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
 }
 

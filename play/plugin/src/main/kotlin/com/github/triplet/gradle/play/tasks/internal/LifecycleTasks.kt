@@ -8,25 +8,25 @@ import javax.inject.Inject
 
 internal abstract class WriteTrackLifecycleTask @Inject constructor(
         @get:Nested val extension: PlayPublisherExtension,
-        executionDir: Directory
+        executionDir: Directory,
 ) : DefaultTask(), WriteTrackExtensionOptions by CliOptionsImpl(extension, executionDir)
 
 internal abstract class UpdatableTrackLifecycleTask @Inject constructor(
         @get:Nested val extension: PlayPublisherExtension,
-        executionDir: Directory
+        executionDir: Directory,
 ) : DefaultTask(), UpdatableTrackExtensionOptions by CliOptionsImpl(extension, executionDir)
 
 internal abstract class PublishableTrackLifecycleTask @Inject constructor(
         @get:Nested val extension: PlayPublisherExtension,
-        executionDir: Directory
+        executionDir: Directory,
 ) : DefaultTask(), PublishableTrackExtensionOptions by CliOptionsImpl(extension, executionDir)
 
 internal abstract class GlobalPublishableArtifactLifecycleTask @Inject constructor(
         @get:Nested val extension: PlayPublisherExtension,
-        executionDir: Directory
+        executionDir: Directory,
 ) : DefaultTask(),
         GlobalPublishableArtifactExtensionOptions by CliOptionsImpl(extension, executionDir)
 
 internal abstract class BootstrapLifecycleTask @Inject constructor(
-        optionsHolder: BootstrapOptions.Holder
+        optionsHolder: BootstrapOptions.Holder,
 ) : DefaultTask(), BootstrapOptions by optionsHolder

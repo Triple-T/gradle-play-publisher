@@ -26,7 +26,7 @@ internal fun EditWorkerBase.EditPublishingParams.copy(into: EditWorkerBase.EditP
 }
 
 internal fun PublishArtifactWorkerBase.ArtifactPublishingParams.copy(
-        into: PublishArtifactWorkerBase.ArtifactPublishingParams
+        into: PublishArtifactWorkerBase.ArtifactPublishingParams,
 ) {
     (this as EditWorkerBase.EditPublishingParams).copy(into)
 

@@ -8,14 +8,17 @@ package com.github.triplet.gradle.androidpublisher
  */
 enum class ReleaseStatus(
         /** The API name of the status. */
-        val publishedName: String
+        val publishedName: String,
 ) {
     /** The release is live. */
     COMPLETED("completed"),
+
     /** The release is in draft mode. */
     DRAFT("draft"),
+
     /** The release was aborted. */
     HALTED("halted"),
+
     /** The release is still being rolled out. */
     IN_PROGRESS("inProgress")
 }
@@ -28,12 +31,14 @@ enum class ReleaseStatus(
  */
 enum class ResolutionStrategy(
         /** The API name of the strategy. */
-        val publishedName: String
+        val publishedName: String,
 ) {
     /** Conflicts should be automagically resolved. */
     AUTO("auto"),
+
     /** Fail the build at the first sign of conflict. */
     FAIL("fail"),
+
     /** Keep going and pretend like nothing happened. */
     IGNORE("ignore")
 }

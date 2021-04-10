@@ -281,7 +281,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase(), SharedIntegrationTe
                         releaseNotes: Map<String, String?>?,
                         userFraction: Double?,
                         updatePriority: Int?,
-                        retainableArtifacts: List<Long>?
+                        retainableArtifacts: List<Long>?,
                 ) {
                     println("promoteRelease(" +
                                     "promoteTrackName=$promoteTrackName, " +

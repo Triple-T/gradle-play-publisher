@@ -25,7 +25,7 @@ import org.gradle.workers.WorkerExecutor
 import javax.inject.Inject
 
 internal abstract class PublishProducts @Inject constructor(
-        extension: PlayPublisherExtension
+        extension: PlayPublisherExtension,
 ) : PublishTaskBase(extension) {
     @get:Incremental
     @get:PathSensitive(PathSensitivity.RELATIVE)

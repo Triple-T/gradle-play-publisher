@@ -76,7 +76,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase(), ArtifactIntegrationT
 
                 override fun uploadBundle(
                         bundleFile: File,
-                        strategy: ResolutionStrategy
+                        strategy: ResolutionStrategy,
                 ): Long? {
                     println("uploadBundle(" +
                                     "bundleFile=$bundleFile, " +
@@ -106,7 +106,7 @@ class PublishBundleIntegrationTest : IntegrationTestBase(), ArtifactIntegrationT
                         releaseNotes: Map<String, String?>?,
                         userFraction: Double?,
                         updatePriority: Int?,
-                        retainableArtifacts: List<Long>?
+                        retainableArtifacts: List<Long>?,
                 ) {
                     println("publishArtifacts(" +
                                     "versionCodes=$versionCodes, " +

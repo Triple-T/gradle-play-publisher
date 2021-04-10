@@ -26,7 +26,7 @@ import javax.inject.Inject
 
 internal abstract class PublishInternalSharingBundle @Inject constructor(
         extension: PlayPublisherExtension,
-        executionDir: Directory
+        executionDir: Directory,
 ) : PublishTaskBase(extension),
         ArtifactExtensionOptions by CliOptionsImpl(extension, executionDir) {
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -48,7 +48,7 @@ internal abstract class PublishInternalSharingBundle @Inject constructor(
     }
 
     abstract class Processor @Inject constructor(
-            private val executor: WorkerExecutor
+            private val executor: WorkerExecutor,
     ) : PlayWorkerBase<Processor.Params>() {
         override fun execute() {
             for (bundle in parameters.bundleFiles.get()) {

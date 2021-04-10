@@ -70,6 +70,6 @@ class RuntimeValidatorTest {
             currentGradle: GradleVersion = GradleVersion.version("0.0.0"),
             minGradle: GradleVersion = GradleVersion.version("0.0.0"),
             currentAgp: VersionNumber = VersionNumber.parse("0.0.0"),
-            minAgp: VersionNumber = VersionNumber.parse("0.0.0")
+            minAgp: VersionNumber = VersionNumber.parse("0.0.0"),
     ) = RuntimeValidator(currentGradle, minGradle, currentAgp, minAgp)
 }

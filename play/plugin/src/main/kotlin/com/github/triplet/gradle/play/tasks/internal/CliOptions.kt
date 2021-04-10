@@ -117,7 +117,7 @@ internal interface GlobalPublishableArtifactExtensionOptions : PublishableTrackE
 
 internal class CliOptionsImpl(
         private val extension: PlayPublisherExtension,
-        private val executionDir: Directory
+        private val executionDir: Directory,
 ) : ArtifactExtensionOptions, WriteTrackExtensionOptions, TrackExtensionOptions,
         UpdatableTrackExtensionOptions, PublishableTrackExtensionOptions,
         GlobalPublishableArtifactExtensionOptions {

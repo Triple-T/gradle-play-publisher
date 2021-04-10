@@ -254,7 +254,7 @@ class PublishApkIntegrationTest : IntegrationTestBase(), ArtifactIntegrationTest
                         debugSymbolsFile: File?,
                         strategy: ResolutionStrategy,
                         mainObbRetainable: Int?,
-                        patchObbRetainable: Int?
+                        patchObbRetainable: Int?,
                 ): Long? {
                     println("uploadApk(" +
                                     "apkFile=$apkFile, " +
@@ -288,7 +288,7 @@ class PublishApkIntegrationTest : IntegrationTestBase(), ArtifactIntegrationTest
                         releaseNotes: Map<String, String?>?,
                         userFraction: Double?,
                         updatePriority: Int?,
-                        retainableArtifacts: List<Long>?
+                        retainableArtifacts: List<Long>?,
                 ) {
                     println("publishArtifacts(" +
                                     "versionCodes=$versionCodes, " +

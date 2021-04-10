@@ -69,7 +69,7 @@ class InstallInternalSharingArtifactIntegrationTest : IntegrationTestBase(), Sha
         fun installFactories() {
             val publisher = object : FakePlayPublisher() {
                 override fun uploadInternalSharingApk(
-                        apkFile: File
+                        apkFile: File,
                 ): UploadInternalSharingArtifactResponse {
                     println("uploadInternalSharingApk($apkFile)")
                     return newUploadInternalSharingArtifactResponse(
@@ -77,7 +77,7 @@ class InstallInternalSharingArtifactIntegrationTest : IntegrationTestBase(), Sha
                 }
 
                 override fun uploadInternalSharingBundle(
-                        bundleFile: File
+                        bundleFile: File,
                 ): UploadInternalSharingArtifactResponse {
                     println("uploadInternalSharingBundle($bundleFile)")
                     return newUploadInternalSharingArtifactResponse(

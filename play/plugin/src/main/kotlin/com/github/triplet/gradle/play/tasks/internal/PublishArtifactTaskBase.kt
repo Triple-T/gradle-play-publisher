@@ -7,7 +7,7 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 
 internal abstract class PublishArtifactTaskBase(
-        extension: PlayPublisherExtension
+        extension: PlayPublisherExtension,
 ) : PublishTaskBase(extension) {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputDirectory

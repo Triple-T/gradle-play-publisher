@@ -29,7 +29,7 @@ abstract class FakeEditManager : EditManager {
             defaultLocale: String?,
             contactEmail: String?,
             contactPhone: String?,
-            contactWebsite: String?
+            contactWebsite: String?,
     ): Unit = throw IllegalStateException("Test wasn't expecting this method to be called.")
 
     override fun publishListing(
@@ -37,7 +37,7 @@ abstract class FakeEditManager : EditManager {
             title: String?,
             shortDescription: String?,
             fullDescription: String?,
-            video: String?
+            video: String?,
     ): Unit = throw IllegalStateException("Test wasn't expecting this method to be called.")
 
     override fun publishImages(locale: String, type: String, images: List<File>): Unit =
@@ -51,12 +51,12 @@ abstract class FakeEditManager : EditManager {
             releaseNotes: Map<String, String?>?,
             userFraction: Double?,
             updatePriority: Int?,
-            retainableArtifacts: List<Long>?
+            retainableArtifacts: List<Long>?,
     ): Unit = throw IllegalStateException("Test wasn't expecting this method to be called.")
 
     override fun uploadBundle(
             bundleFile: File,
-            strategy: ResolutionStrategy
+            strategy: ResolutionStrategy,
     ): Long? = throw IllegalStateException("Test wasn't expecting this method to be called.")
 
     override fun uploadApk(
@@ -65,7 +65,7 @@ abstract class FakeEditManager : EditManager {
             debugSymbolsFile: File?,
             strategy: ResolutionStrategy,
             mainObbRetainable: Int?,
-            patchObbRetainable: Int?
+            patchObbRetainable: Int?,
     ): Long? = throw IllegalStateException("Test wasn't expecting this method to be called.")
 
     override fun publishArtifacts(
@@ -77,7 +77,7 @@ abstract class FakeEditManager : EditManager {
             releaseNotes: Map<String, String?>?,
             userFraction: Double?,
             updatePriority: Int?,
-            retainableArtifacts: List<Long>?
+            retainableArtifacts: List<Long>?,
     ): Unit = throw IllegalStateException("Test wasn't expecting this method to be called.")
 
     class Factory : EditManager.Factory {

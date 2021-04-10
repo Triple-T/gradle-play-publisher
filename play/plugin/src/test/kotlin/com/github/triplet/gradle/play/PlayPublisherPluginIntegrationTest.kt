@@ -622,7 +622,7 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
         // language=gradle
         File(appDir, "build.gradle").writeText("""
            buildscript {
-                repositories.jcenter()
+                repositories.mavenCentral()
 
                 dependencies.classpath files($classpathJars)
                 dependencies.classpath 'com.bugsnag:bugsnag-android-gradle-plugin:5.6.0'
