@@ -20,30 +20,30 @@ internal interface TrackManager {
             val updatePriority: Int?,
             val releaseNotes: Map<String, String?>?,
             val retainableArtifacts: List<Long>?,
-            val releaseName: String?
+            val releaseName: String?,
     )
 
     data class UpdateConfig(
             val trackName: String,
             val versionCodes: List<Long>,
             val didPreviousBuildSkipCommit: Boolean,
-            val base: BaseConfig
+            val base: BaseConfig,
     )
 
     data class PromoteConfig(
             val promoteTrackName: String,
             val fromTrackName: String,
-            val base: BaseConfig
+            val base: BaseConfig,
     )
 }
 
 internal class DefaultTrackManager(
         private val publisher: InternalPlayPublisher,
-        private val editId: String
+        private val editId: String,
 ) : TrackManager {
     override fun findHighestTrack(): Track? {
-        return publisher.listTracks(editId).maxBy {
-            it.releases.orEmpty().flatMap { it.versionCodes.orEmpty() }.max() ?: 0
+        return publisher.listTracks(editId).maxByOrNull {
+            it.releases.orEmpty().flatMap { it.versionCodes.orEmpty() }.maxOrNull() ?: 0
         }
     }
 
@@ -52,8 +52,8 @@ internal class DefaultTrackManager(
 
         val tracks = publisher.listTracks(editId)
         for (track in tracks) {
-            val notes = track.releases?.maxBy {
-                it.versionCodes?.max() ?: Long.MIN_VALUE
+            val notes = track.releases?.maxByOrNull {
+                it.versionCodes?.maxOrNull() ?: Long.MIN_VALUE
             }?.releaseNotes.orEmpty()
 
             releaseNotes[track.track] = notes
@@ -95,7 +95,7 @@ internal class DefaultTrackManager(
         // not allowed. This is how we deal with an update from inProgress -> completed. We update
         // all the tracks to completed, then get rid of the one that used to be inProgress.
         track.releases = track.releases.sortedByDescending {
-            it.versionCodes?.max()
+            it.versionCodes?.maxOrNull()
         }.distinctBy {
             it.status
         }
@@ -151,13 +151,13 @@ internal class DefaultTrackManager(
 
         val previousRelease = publisher.getTrack(editId, trackName)
                 .releases.orEmpty()
-                .maxBy { it.versionCodes.orEmpty().max() ?: 1 }
+                .maxByOrNull { it.versionCodes.orEmpty().maxOrNull() ?: 1 }
         release.releaseNotes = previousRelease?.releaseNotes
     }
 
     private fun TrackRelease.mergeChanges(
             versionCodes: List<Long>?,
-            config: TrackManager.BaseConfig
+            config: TrackManager.BaseConfig,
     ) = apply {
         updateVersionCodes(versionCodes, config.retainableArtifacts)
         updateStatus(config.releaseStatus)

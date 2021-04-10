@@ -25,14 +25,14 @@ internal val ApplicationVariantProperties.playPath get() = "$RESOURCES_OUTPUT_PA
 internal fun Project.newTask(
         name: String,
         description: String? = null,
-        block: Task.() -> Unit = {}
+        block: Task.() -> Unit = {},
 ) = newTask(name, description, emptyArray(), block)
 
 internal inline fun <reified T : Task> Project.newTask(
         name: String,
         description: String? = null,
         constructorArgs: Array<Any> = emptyArray(),
-        noinline block: T.() -> Unit = {}
+        noinline block: T.() -> Unit = {},
 ): TaskProvider<T> {
     val config: T.() -> Unit = {
         this.description = description
@@ -46,7 +46,7 @@ internal inline fun <reified T : Task> Project.newTask(
 internal fun Project.getCommitEditTask(
         appId: String,
         extension: PlayPublisherExtension,
-        api: Provider<PlayApiService>
+        api: Provider<PlayApiService>,
 ): TaskProvider<CommitEdit> {
     val taskName = "commitEditFor" + appId.split(".").joinToString("Dot") { it.capitalize() }
     return try {
@@ -65,7 +65,7 @@ internal fun ApplicationVariant<ApplicationVariantProperties>.buildExtension(
         project: Project,
         extensionContainer: NamedDomainObjectContainer<PlayPublisherExtension>,
         baseExtension: PlayPublisherExtension,
-        cliOptionsExtension: PlayPublisherExtension
+        cliOptionsExtension: PlayPublisherExtension,
 ): PlayPublisherExtension = buildExtensionInternal(
         project,
         this,
@@ -79,7 +79,7 @@ private fun buildExtensionInternal(
         variant: ApplicationVariant<ApplicationVariantProperties>,
         extensionContainer: NamedDomainObjectContainer<PlayPublisherExtension>,
         baseExtension: PlayPublisherExtension,
-        cliOptionsExtension: PlayPublisherExtension
+        cliOptionsExtension: PlayPublisherExtension,
 ): PlayPublisherExtension {
     val variantExtension = extensionContainer.findByName(variant.name)
     val flavorExtension = variant.productFlavors.mapNotNull { (_, flavor) ->

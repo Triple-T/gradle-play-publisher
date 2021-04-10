@@ -17,7 +17,7 @@ import java.io.File
 internal class DefaultEditManager(
         private val publisher: InternalPlayPublisher,
         private val tracks: TrackManager,
-        private val editId: String
+        private val editId: String,
 ) : EditManager {
     override fun getAppDetails(): GppAppDetails {
         val details = publisher.getAppDetails(editId)
@@ -50,7 +50,7 @@ internal class DefaultEditManager(
     override fun findMaxAppVersionCode(): Long {
         return tracks.findHighestTrack()?.releases.orEmpty()
                 .flatMap { it.versionCodes.orEmpty() }
-                .max() ?: 1
+                .maxOrNull() ?: 1
     }
 
     override fun findLeastStableTrackName(): String? {
@@ -67,7 +67,7 @@ internal class DefaultEditManager(
             defaultLocale: String?,
             contactEmail: String?,
             contactPhone: String?,
-            contactWebsite: String?
+            contactWebsite: String?,
     ) {
         publisher.updateDetails(editId, AppDetails().apply {
             this.defaultLanguage = defaultLocale
@@ -82,7 +82,7 @@ internal class DefaultEditManager(
             title: String?,
             shortDescription: String?,
             fullDescription: String?,
-            video: String?
+            video: String?,
     ) {
         publisher.updateListing(editId, locale, Listing().apply {
             this.title = title
@@ -109,7 +109,7 @@ internal class DefaultEditManager(
             releaseNotes: Map<String, String?>?,
             userFraction: Double?,
             updatePriority: Int?,
-            retainableArtifacts: List<Long>?
+            retainableArtifacts: List<Long>?,
     ) {
         tracks.promote(TrackManager.PromoteConfig(
                 promoteTrackName,
@@ -127,7 +127,7 @@ internal class DefaultEditManager(
 
     override fun uploadBundle(
             bundleFile: File,
-            strategy: ResolutionStrategy
+            strategy: ResolutionStrategy,
     ): Long? {
         val bundle = try {
             publisher.uploadBundle(editId, bundleFile)
@@ -145,7 +145,7 @@ internal class DefaultEditManager(
             debugSymbolsFile: File?,
             strategy: ResolutionStrategy,
             mainObbRetainable: Int?,
-            patchObbRetainable: Int?
+            patchObbRetainable: Int?,
     ): Long? {
         val apk = try {
             publisher.uploadApk(editId, apkFile)
@@ -175,7 +175,7 @@ internal class DefaultEditManager(
             releaseNotes: Map<String, String?>?,
             userFraction: Double?,
             updatePriority: Int?,
-            retainableArtifacts: List<Long>?
+            retainableArtifacts: List<Long>?,
     ) {
         if (versionCodes.isEmpty()) return
 
@@ -208,7 +208,7 @@ internal class DefaultEditManager(
     private fun handleUploadFailures(
             e: GoogleJsonResponseException,
             strategy: ResolutionStrategy,
-            artifact: File
+            artifact: File,
     ): Nothing? = if (
             e has "apkNotificationMessageKeyUpgradeVersionConflict" ||
             e has "apkUpgradeVersionConflict" ||

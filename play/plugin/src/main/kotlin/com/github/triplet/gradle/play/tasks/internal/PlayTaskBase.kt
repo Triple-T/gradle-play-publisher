@@ -5,5 +5,5 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Nested
 
 internal abstract class PlayTaskBase(
-        @get:Nested val extension: PlayPublisherExtension
+        @get:Nested val extension: PlayPublisherExtension,
 ) : DefaultTask()

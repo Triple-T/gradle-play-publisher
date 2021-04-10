@@ -12,7 +12,7 @@ import org.gradle.workers.WorkerExecutor
 import javax.inject.Inject
 
 internal abstract class CommitEdit @Inject constructor(
-        extension: PlayPublisherExtension
+        extension: PlayPublisherExtension,
 ) : PublishTaskBase(extension) {
     @TaskAction
     fun commit() {

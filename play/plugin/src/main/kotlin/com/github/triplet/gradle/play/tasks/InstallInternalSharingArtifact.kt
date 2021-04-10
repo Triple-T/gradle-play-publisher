@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 internal abstract class InstallInternalSharingArtifact @Inject constructor(
-        private val extension: AppExtension
+        private val extension: AppExtension,
 ) : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputDirectory
@@ -50,7 +50,7 @@ internal abstract class InstallInternalSharingArtifact @Inject constructor(
         override fun execute() {
             val uploads = parameters.uploadedArtifacts.get().asFileTree
             val latestUpload = checkNotNull(
-                    uploads.maxBy { it.nameWithoutExtension.toLong() }
+                    uploads.maxByOrNull { it.nameWithoutExtension.toLong() }
             ) { "Failed to find uploaded artifacts in ${uploads.joinToString()}" }
             val launchUrl = latestUpload.inputStream().use {
                 GsonFactory.getDefaultInstance().createJsonParser(it).parse(Map::class.java)
@@ -88,14 +88,14 @@ internal abstract class InstallInternalSharingArtifact @Inject constructor(
 
             operator fun invoke(
                     adbExecutable: File,
-                    timeOutInMs: Int
+                    timeOutInMs: Int,
             ): AdbShell = factory.create(adbExecutable, timeOutInMs)
         }
     }
 
     private class DefaultAdbShell(
             private val deviceProvider: DeviceProvider,
-            private val timeOutInMs: Long
+            private val timeOutInMs: Long,
     ) : AdbShell {
         override fun executeShellCommand(command: String): Boolean {
             return deviceProvider.use {

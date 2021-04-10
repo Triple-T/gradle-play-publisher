@@ -19,7 +19,7 @@ import javax.inject.Inject
 
 /** The entry point for all GPP related configuration. */
 abstract class PlayPublisherExtension @Inject constructor(
-        private val name: String
+        private val name: String,
 ) : Named {
     @Internal
     override fun getName(): String = name

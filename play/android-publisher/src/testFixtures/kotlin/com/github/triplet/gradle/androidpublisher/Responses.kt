@@ -7,7 +7,7 @@ fun newGppAppDetails(
         defaultLocale: String?,
         contactEmail: String?,
         contactPhone: String?,
-        contactWebsite: String?
+        contactWebsite: String?,
 ) = GppAppDetails(defaultLocale, contactEmail, contactPhone, contactWebsite)
 
 fun newGppListing(
@@ -15,7 +15,7 @@ fun newGppListing(
         fullDescription: String?,
         shortDescription: String?,
         title: String?,
-        video: String?
+        video: String?,
 ) = GppListing(locale, fullDescription, shortDescription, title, video)
 
 fun newImage(url: String, sha256: String) = GppImage(url, sha256)
@@ -23,7 +23,7 @@ fun newImage(url: String, sha256: String) = GppImage(url, sha256)
 fun newReleaseNote(
         track: String,
         locale: String,
-        contents: String
+        contents: String,
 ) = ReleaseNote(track, locale, contents)
 
 fun newSuccessEditResponse(id: String) = EditResponse.Success(id)

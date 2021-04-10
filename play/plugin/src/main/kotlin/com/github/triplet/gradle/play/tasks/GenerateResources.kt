@@ -166,7 +166,7 @@ internal abstract class GenerateResources : DefaultTask() {
     }
 
     abstract class Generator @Inject constructor(
-            private val fileOps: FileSystemOperations
+            private val fileOps: FileSystemOperations,
     ) : WorkAction<Generator.Params> {
         private val defaultLocale = findDefaultLocale()
         private val genOrder = newGenOrder()
@@ -268,7 +268,7 @@ internal abstract class GenerateResources : DefaultTask() {
 
         private fun BufferedReader.readIndex(
                 index: MutableMap<File, MutableSet<File>>,
-                reverseIndex: MutableMap<File, MutableSet<File>>
+                reverseIndex: MutableMap<File, MutableSet<File>>,
         ) {
             var line: String?
             lateinit var producer: File
@@ -303,7 +303,7 @@ internal abstract class GenerateResources : DefaultTask() {
         private fun insertNewLocales(
                 index: MutableMap<File, MutableSet<File>>,
                 reverseIndex: MutableMap<File, MutableSet<File>>,
-                locales: Set<String>
+                locales: Set<String>,
         ) {
             for (producer in reverseIndex.keys.toSet()) {
                 if (!producer.isDefaultResource()) continue
@@ -322,7 +322,7 @@ internal abstract class GenerateResources : DefaultTask() {
         private fun mergeExistingReferences(
                 prevIndex: Map<File, Set<File>>,
                 index: MutableMap<File, MutableSet<File>>,
-                reverseIndex: MutableMap<File, MutableSet<File>>
+                reverseIndex: MutableMap<File, MutableSet<File>>,
         ) {
             for (generated in index.keys.toSet()) {
                 val prevProducers = prevIndex[generated].orEmpty()
@@ -336,7 +336,7 @@ internal abstract class GenerateResources : DefaultTask() {
                 prevReverseIndex: Map<File, Set<File>>,
                 index: MutableMap<File, MutableSet<File>>,
                 reverseIndex: MutableMap<File, MutableSet<File>>,
-                prunedResources: Set<File>
+                prunedResources: Set<File>,
         ) {
             for (prevProducer in prunedResources) {
                 val prevGens = prevReverseIndex.getValue(prevProducer)
@@ -352,7 +352,7 @@ internal abstract class GenerateResources : DefaultTask() {
 
         private fun writeIndex(
                 index: Map<File, Set<File>>,
-                reverseIndex: Map<File, Set<File>>
+                reverseIndex: Map<File, Set<File>>,
         ) {
             val projectDir = parameters.projectDirectory.get().asFile
             for ((generated, producers) in index) {
@@ -379,7 +379,7 @@ internal abstract class GenerateResources : DefaultTask() {
                 prevIndex: Map<File, Set<File>>,
                 prevReverseIndex: Map<File, Set<File>>,
                 index: Map<File, Set<File>>,
-                prunedResources: Set<File>
+                prunedResources: Set<File>,
         ) {
             for (producer in prunedResources) {
                 val prevGens = prevReverseIndex.getValue(producer)
@@ -407,7 +407,7 @@ internal abstract class GenerateResources : DefaultTask() {
                 index: MutableMap<File, MutableSet<File>>,
                 reverseIndex: MutableMap<File, MutableSet<File>>,
                 generated: File,
-                producer: File
+                producer: File,
         ) {
             index.safeAddValue(generated, producer)
             reverseIndex.safeAddValue(producer, generated)
@@ -461,13 +461,13 @@ internal abstract class GenerateResources : DefaultTask() {
         data class SourceTree(
                 val locales: Set<String>,
                 val prevIndex: Map<File, Set<File>>,
-                val prevReverseIndex: Map<File, Set<File>>
+                val prevReverseIndex: Map<File, Set<File>>,
         )
 
         data class Index(
                 val index: MutableMap<File, MutableSet<File>>,
                 val reverseIndex: MutableMap<File, MutableSet<File>>,
-                val prunedResources: Set<File>
+                val prunedResources: Set<File>,
         )
 
         interface Params : WorkParameters {

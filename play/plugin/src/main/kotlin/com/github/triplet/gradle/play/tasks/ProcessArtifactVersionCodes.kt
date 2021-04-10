@@ -17,7 +17,7 @@ import javax.inject.Inject
 import kotlin.math.max
 
 internal abstract class ProcessArtifactVersionCodes @Inject constructor(
-        extension: PlayPublisherExtension
+        extension: PlayPublisherExtension,
 ) : PublishTaskBase(extension) {
     @get:Input
     internal abstract val versionCodes: ListProperty<Int>
@@ -43,7 +43,7 @@ internal abstract class ProcessArtifactVersionCodes @Inject constructor(
         override fun execute() {
             val maxVersionCode = apiService.edits.findMaxAppVersionCode()
 
-            val smallestVersionCode = parameters.defaultVersionCodes.get().min() ?: 1
+            val smallestVersionCode = parameters.defaultVersionCodes.get().minOrNull() ?: 1
 
             val outputLines = StringBuilder()
             val patch = max(0, maxVersionCode - smallestVersionCode + 1)

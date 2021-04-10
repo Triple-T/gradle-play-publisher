@@ -43,7 +43,7 @@ class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase(), Artif
         fun installFactories() {
             val publisher = object : FakePlayPublisher() {
                 override fun uploadInternalSharingBundle(
-                        bundleFile: File
+                        bundleFile: File,
                 ): UploadInternalSharingArtifactResponse {
                     println("uploadInternalSharingBundle($bundleFile)")
                     return newUploadInternalSharingArtifactResponse(

@@ -79,7 +79,7 @@ internal fun mergeExtensions(extensions: List<ExtensionMergeHolder>): PlayPublis
  *      have to undo that mapping.
  */
 private fun mergeExtensionsInternal(
-        extensions: List<ExtensionMergeHolder>
+        extensions: List<ExtensionMergeHolder>,
 ): PlayPublisherExtension {
     for (i in 1 until extensions.size) {
         val parentCopy = extensions[i].uninitializedCopy
@@ -143,10 +143,10 @@ internal data class PlayExtensionConfig(
         val resolutionStrategy: ResolutionStrategy,
         val retainArtifacts: List<Long>?,
         val retainMainObb: Int?,
-        val retainPatchObb: Int?
+        val retainPatchObb: Int?,
 ) : Serializable
 
 internal data class ExtensionMergeHolder(
         val original: PlayPublisherExtension,
-        val uninitializedCopy: PlayPublisherExtension
+        val uninitializedCopy: PlayPublisherExtension,
 )

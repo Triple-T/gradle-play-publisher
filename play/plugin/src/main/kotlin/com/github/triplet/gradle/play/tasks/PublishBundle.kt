@@ -28,7 +28,7 @@ import javax.inject.Inject
 
 internal abstract class PublishBundle @Inject constructor(
         extension: PlayPublisherExtension,
-        executionDir: Directory
+        executionDir: Directory,
 ) : PublishArtifactTaskBase(extension),
         PublishableTrackExtensionOptions by CliOptionsImpl(extension, executionDir) {
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -54,7 +54,7 @@ internal abstract class PublishBundle @Inject constructor(
     }
 
     abstract class Processor @Inject constructor(
-            private val executor: WorkerExecutor
+            private val executor: WorkerExecutor,
     ) : PublishArtifactWorkerBase<Processor.Params>() {
         override fun upload() {
             for (bundle in parameters.bundleFiles.get()) {

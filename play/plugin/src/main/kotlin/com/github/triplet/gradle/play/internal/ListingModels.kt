@@ -24,7 +24,7 @@ internal enum class AppDetail(override val fileName: String) : Detail {
 internal enum class ImageType(
         val publishedName: String,
         val dirName: String,
-        val maxNum: Int = 8
+        val maxNum: Int = 8,
 ) {
     ICON("icon", "icon", 1),
     FEATURE_GRAPHIC("featureGraphic", "feature-graphic", 1),

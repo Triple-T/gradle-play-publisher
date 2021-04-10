@@ -56,7 +56,7 @@ private fun createHttpTransport(): HttpTransport {
     for (protocol in protocols) {
         val proxyHost = System.getProperty("$protocol.proxyHost")
         val proxyUser = System.getProperty("$protocol.proxyUser")
-        val proxyPassword = System.getProperty("$protocol.proxyPassword");
+        val proxyPassword = System.getProperty("$protocol.proxyPassword")
         if (proxyHost != null && proxyUser != null && proxyPassword != null) {
             val defaultProxyPort = if (protocol == "http") "80" else "443"
             val proxyPort = Integer.parseInt(System.getProperty("$protocol.proxyPort", defaultProxyPort))
@@ -76,7 +76,7 @@ private fun createHttpTransport(): HttpTransport {
 }
 
 private class AndroidPublisherAdapter(
-        credential: GoogleCredentials
+        credential: GoogleCredentials,
 ) : HttpCredentialsAdapter(credential) {
     override fun initialize(request: HttpRequest) {
         super.initialize(request.setReadTimeout(0))

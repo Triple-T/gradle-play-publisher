@@ -33,7 +33,7 @@ import javax.inject.Inject
 
 internal abstract class Bootstrap @Inject constructor(
         extension: PlayPublisherExtension,
-        optionsHolder: BootstrapOptions.Holder
+        optionsHolder: BootstrapOptions.Holder,
 ) : PublishTaskBase(extension), BootstrapOptions by optionsHolder {
     @get:OutputDirectory
     abstract val srcDir: DirectoryProperty
@@ -102,7 +102,7 @@ internal abstract class Bootstrap @Inject constructor(
     }
 
     abstract class ListingsDownloader @Inject constructor(
-            private val executor: WorkerExecutor
+            private val executor: WorkerExecutor,
     ) : EditWorkerBase<ListingsDownloader.Params>() {
         override fun execute() {
             println("Downloading listings")
@@ -144,7 +144,7 @@ internal abstract class Bootstrap @Inject constructor(
     }
 
     abstract class ImageFetcher @Inject constructor(
-            private val executor: WorkerExecutor
+            private val executor: WorkerExecutor,
     ) : EditWorkerBase<ImageFetcher.Params>() {
         override fun execute() {
             val typeName = parameters.imageType.get().publishedName

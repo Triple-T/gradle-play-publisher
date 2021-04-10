@@ -18,6 +18,5 @@ dependencyResolutionManagement {
         }
 
         mavenCentral()
-        jcenter()
     }
 }
