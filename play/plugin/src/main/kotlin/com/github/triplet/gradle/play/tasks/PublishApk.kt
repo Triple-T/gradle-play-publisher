@@ -2,12 +2,14 @@ package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.PlayPublisherExtension
+import com.github.triplet.gradle.play.tasks.internal.CliOptionsImpl
 import com.github.triplet.gradle.play.tasks.internal.PublishArtifactTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PublishableTrackExtensionOptions
 import com.github.triplet.gradle.play.tasks.internal.workers.PublishArtifactWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.workers.copy
 import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
 import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
@@ -26,8 +28,10 @@ import java.io.File
 import javax.inject.Inject
 
 internal abstract class PublishApk @Inject constructor(
-        extension: PlayPublisherExtension
-) : PublishArtifactTaskBase(extension), PublishableTrackExtensionOptions {
+        extension: PlayPublisherExtension,
+        executionDir: Directory
+) : PublishArtifactTaskBase(extension),
+        PublishableTrackExtensionOptions by CliOptionsImpl(extension, executionDir) {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:SkipWhenEmpty
     @get:InputFiles
