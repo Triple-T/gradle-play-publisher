@@ -717,27 +717,17 @@ this isn't the case, you must use the `commit` property:
 <details open><summary>Kotlin</summary>
 
 ```kt
+// Don't commit any changes by default
+play.commit.set(false)
+
 android {
     // ...
 
     playConfigs {
-        register("someFlavor1") {
-            commit.set(false)
-        }
-
-        register("someFlavor[2..N)") {
-            commit.set(false)
-        }
-
-        register("someFlavorN") {
-            // This isn't actually needed since the default is true. Here's what you *do* need:
-            // 1. A starter no-commit variant (someFlavor1 in this case)
-            // 2. (Optional) Intermediate no-commit variants (someFlavor2, someFlavor3, ...)
-            // 3. One finisher variant to commit (aka do NOT mark someFlavorN as no-commit)
+        register("someFlavorThatWillCommit") {
+            // Pick a flavor that will commit the changes prepared by all flavors
             commit.set(true)
         }
-
-        // ...
     }
 }
 
@@ -748,10 +738,9 @@ afterEvaluate {
             "publishSomeFlavor3Release[Apk/Bundle]",
             ...
     )
-    tasks.matching { it.name in intermediateTasks }.configureEach {
-        mustRunAfter("publishSomeFlavor1Release[Apk/Bundle]")
-    }
-    tasks.named("publishSomeFlavorNRelease[Apk/Bundle]").configure {
+
+    // The commit flavor task must run last so the other tasks can build up changes to commit
+    tasks.named("someFlavorThatWillCommitRelease[Apk/Bundle]").configure {
         mustRunAfter(intermediateTasks)
     }
 }
@@ -762,27 +751,17 @@ afterEvaluate {
 <details><summary>Groovy</summary>
 
 ```groovy
+// Don't commit any changes by default
+play.commit.set(false)
+
 android {
     // ...
 
     playConfigs {
-        someFlavor1 {
-            commit.set(false)
-        }
-
-        someFlavor[2..N) {
-            commit.set(false)
-        }
-
-        someFlavorN {
-            // This isn't actually needed since the default is true. Here's what you *do* need:
-            // 1. A starter no-commit variant (someFlavor1 in this case)
-            // 2. (Optional) Intermediate no-commit variants (someFlavor2, someFlavor3, ...)
-            // 3. One finisher variant to commit (aka do NOT mark someFlavorN as no-commit)
+        someFlavorThatWillCommit {
+            // Pick a flavor that will commit the changes prepared by all flavors
             commit.set(true)
         }
-
-        // ...
     }
 }
 
@@ -793,10 +772,9 @@ afterEvaluate {
             "publishSomeFlavor3Release[Apk/Bundle]",
             ...
     ]
-    tasks.matching { intermediateTasks.contains(it.name) }.configureEach {
-        mustRunAfter("publishSomeFlavor1Release[Apk/Bundle]")
-    }
-    tasks.named("publishSomeFlavorNRelease[Apk/Bundle]").configure {
+
+    // The commit flavor task must run last so the other tasks can build up changes to commit
+    tasks.named("someFlavorThatWillCommitRelease[Apk/Bundle]").configure {
         mustRunAfter(intermediateTasks)
     }
 }
