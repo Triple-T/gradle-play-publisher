@@ -1,6 +1,6 @@
 package com.github.triplet.gradle.play
 
-import com.android.build.api.artifact.ArtifactType
+import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.extension.ApplicationAndroidComponentsExtension
 import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
@@ -180,7 +180,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                             include("*.apk")
                         }.map { it.absolutePath }
                     }
-                }.orElse(variant.artifacts.get(ArtifactType.APK).map {
+                }.orElse(variant.artifacts.get(SingleArtifact.APK).map {
                     variant.artifacts.getBuiltArtifactsLoader().load(it)
                             ?.elements?.map { it.outputFile }.sneakyNull()
                 })
@@ -194,7 +194,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                             include("*.aab")
                         }.map { it.absolutePath }
                     }
-                }.orElse(variant.artifacts.get(ArtifactType.BUNDLE).map {
+                }.orElse(variant.artifacts.get(SingleArtifact.BUNDLE).map {
                     listOf(it.asFile.absolutePath)
                 })
 
@@ -370,7 +370,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                             include("mapping.txt", "*.mapping.txt")
                         })
                     }.orElse(project.provider {
-                        variant.artifacts.get(ArtifactType.OBFUSCATION_MAPPING_FILE).takeUnless {
+                        variant.artifacts.get(SingleArtifact.OBFUSCATION_MAPPING_FILE).takeUnless {
                             extension.artifactDir.isPresent
                         }
                     }.map {
