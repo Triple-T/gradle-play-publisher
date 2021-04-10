@@ -123,7 +123,7 @@ through the `plugins {}` DSL:
 ```kt
 plugins {
     id("com.android.application")
-    id("com.github.triplet.play") version "3.3.0-agp4.2"
+    id("com.github.triplet.play") version "3.4.0-agp4.2"
 }
 ```
 
@@ -134,7 +134,7 @@ plugins {
 ```groovy
 plugins {
     id 'com.android.application'
-    id 'com.github.triplet.play' version '3.3.0-agp4.2'
+    id 'com.github.triplet.play' version '3.4.0-agp4.2'
 }
 ```
 
@@ -157,7 +157,7 @@ buildscript {
 
     dependencies {
         // ...
-        classpath("com.github.triplet.gradle:play-publisher:3.4.0-SNAPSHOT")
+        classpath("com.github.triplet.gradle:play-publisher:3.5.0-SNAPSHOT")
     }
 }
 ```
@@ -175,7 +175,7 @@ buildscript {
 
     dependencies {
         // ...
-        classpath 'com.github.triplet.gradle:play-publisher:3.4.0-SNAPSHOT'
+        classpath 'com.github.triplet.gradle:play-publisher:3.5.0-SNAPSHOT'
     }
 }
 ```
