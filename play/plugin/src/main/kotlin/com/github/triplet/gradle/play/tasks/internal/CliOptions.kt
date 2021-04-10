@@ -4,49 +4,28 @@ import com.github.triplet.gradle.androidpublisher.ReleaseStatus
 import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import com.github.triplet.gradle.common.utils.orNull
 import com.github.triplet.gradle.play.PlayPublisherExtension
-import org.gradle.api.Project
+import org.gradle.api.file.Directory
 import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.options.Option
 import org.gradle.api.tasks.options.OptionValues
 import java.util.concurrent.atomic.AtomicBoolean
 
-internal interface ExtensionOptionsBase {
-    @get:Nested
-    val extension: PlayPublisherExtension
-}
-
-internal interface ArtifactExtensionOptions : ExtensionOptionsBase {
-    @Internal
-    fun getProject(): Project
-
+internal interface ArtifactExtensionOptions {
     @get:Internal
     @set:Option(
             option = "artifact-dir",
             description = "Set the prebuilt artifact (APKs/App Bundles) directory"
     )
     var artifactDirOption: String
-        get() = throw UnsupportedOperationException()
-        set(value) {
-            val dir = getProject().rootProject.file(value)
-            val f = requireNotNull(dir.orNull()) {
-                "Folder '$dir' does not exist."
-            }
-            extension.artifactDir.set(f)
-        }
 }
 
-internal interface WriteTrackExtensionOptions : ExtensionOptionsBase {
+internal interface WriteTrackExtensionOptions {
     @get:Internal
     @set:Option(
             option = "no-commit",
             description = "Don't commit changes from this build."
     )
     var noCommitOption: Boolean
-        get() = throw UnsupportedOperationException()
-        set(value) {
-            extension.commit.set(!value)
-        }
 }
 
 internal interface TrackExtensionOptions : WriteTrackExtensionOptions {
@@ -57,10 +36,6 @@ internal interface TrackExtensionOptions : WriteTrackExtensionOptions {
                     "Ex: 0.1 == 10%"
     )
     var userFractionOption: String
-        get() = throw UnsupportedOperationException()
-        set(value) {
-            extension.userFraction.set(value.toDouble())
-        }
 
     @get:Internal
     @set:Option(
@@ -68,14 +43,9 @@ internal interface TrackExtensionOptions : WriteTrackExtensionOptions {
             description = "Set the update priority for your release."
     )
     var updatePriorityOption: String
-        get() = throw UnsupportedOperationException()
-        set(value) {
-            extension.updatePriority.set(value.toInt())
-        }
 
     @get:OptionValues("release-status")
-    val releaseStatusOptions
-        get() = ReleaseStatus.values().map { it.publishedName }
+    val releaseStatusOptions: List<String>
 
     @get:Internal
     @set:Option(
@@ -83,10 +53,6 @@ internal interface TrackExtensionOptions : WriteTrackExtensionOptions {
             description = "Set the app release status."
     )
     var releaseStatusOption: ReleaseStatus
-        get() = throw UnsupportedOperationException()
-        set(value) {
-            extension.releaseStatus.set(value)
-        }
 
     @get:Internal
     @set:Option(
@@ -94,10 +60,6 @@ internal interface TrackExtensionOptions : WriteTrackExtensionOptions {
             description = "Set the Play Console developer facing release name."
     )
     var releaseName: String
-        get() = throw UnsupportedOperationException()
-        set(value) {
-            extension.releaseName.set(value)
-        }
 }
 
 internal interface UpdatableTrackExtensionOptions : TrackExtensionOptions {
@@ -107,10 +69,6 @@ internal interface UpdatableTrackExtensionOptions : TrackExtensionOptions {
             description = "Set the track from which to promote a release."
     )
     var fromTrackOption: String
-        get() = throw UnsupportedOperationException()
-        set(value) {
-            extension.fromTrack.set(value)
-        }
 
     @get:Internal
     @set:Option(
@@ -118,10 +76,6 @@ internal interface UpdatableTrackExtensionOptions : TrackExtensionOptions {
             description = "Set the track to promote a release to."
     )
     var promoteTrackOption: String
-        get() = throw UnsupportedOperationException()
-        set(value) {
-            extension.promoteTrack.set(value)
-        }
 
     @get:Internal
     @set:Option(
@@ -130,11 +84,6 @@ internal interface UpdatableTrackExtensionOptions : TrackExtensionOptions {
                     "using 'from-track' and 'track' with the same value."
     )
     var updateTrackOption: String
-        get() = throw UnsupportedOperationException()
-        set(value) {
-            fromTrackOption = value
-            promoteTrackOption = value
-        }
 }
 
 internal interface PublishableTrackExtensionOptions : TrackExtensionOptions,
@@ -145,14 +94,9 @@ internal interface PublishableTrackExtensionOptions : TrackExtensionOptions,
             description = "Set the track in which to upload your app."
     )
     var trackOption: String
-        get() = throw UnsupportedOperationException()
-        set(value) {
-            extension.track.set(value)
-        }
 
     @get:OptionValues("resolution-strategy")
-    val resolutionStrategyOptions
-        get() = ResolutionStrategy.values().map { it.publishedName }
+    val resolutionStrategyOptions: List<String>
 
     @get:Internal
     @set:Option(
@@ -160,10 +104,6 @@ internal interface PublishableTrackExtensionOptions : TrackExtensionOptions,
             description = "Set the version conflict resolution strategy."
     )
     var resolutionStrategyOption: ResolutionStrategy
-        get() = throw UnsupportedOperationException()
-        set(value) {
-            extension.resolutionStrategy.set(value)
-        }
 }
 
 internal interface GlobalPublishableArtifactExtensionOptions : PublishableTrackExtensionOptions {
@@ -173,6 +113,92 @@ internal interface GlobalPublishableArtifactExtensionOptions : PublishableTrackE
             description = "Prioritize App Bundles over APKs where applicable."
     )
     var defaultToAppBundlesOption: Boolean
+}
+
+internal class CliOptionsImpl(
+        private val extension: PlayPublisherExtension,
+        private val executionDir: Directory
+) : ArtifactExtensionOptions, WriteTrackExtensionOptions, TrackExtensionOptions,
+        UpdatableTrackExtensionOptions, PublishableTrackExtensionOptions,
+        GlobalPublishableArtifactExtensionOptions {
+    override var artifactDirOption: String
+        get() = throw UnsupportedOperationException()
+        set(value) {
+            val dir = executionDir.file(value).asFile
+            val f = requireNotNull(dir.orNull()) {
+                "Folder '$dir' does not exist."
+            }
+            extension.artifactDir.set(f)
+        }
+
+    override var noCommitOption: Boolean
+        get() = throw UnsupportedOperationException()
+        set(value) {
+            extension.commit.set(!value)
+        }
+
+    override var userFractionOption: String
+        get() = throw UnsupportedOperationException()
+        set(value) {
+            extension.userFraction.set(value.toDouble())
+        }
+
+    override var updatePriorityOption: String
+        get() = throw UnsupportedOperationException()
+        set(value) {
+            extension.updatePriority.set(value.toInt())
+        }
+
+    override val releaseStatusOptions: List<String>
+        get() = ReleaseStatus.values().map { it.publishedName }
+
+    override var releaseStatusOption: ReleaseStatus
+        get() = throw UnsupportedOperationException()
+        set(value) {
+            extension.releaseStatus.set(value)
+        }
+
+    override var releaseName: String
+        get() = throw UnsupportedOperationException()
+        set(value) {
+            extension.releaseName.set(value)
+        }
+
+    override var fromTrackOption: String
+        get() = throw UnsupportedOperationException()
+        set(value) {
+            extension.fromTrack.set(value)
+        }
+
+    override var promoteTrackOption: String
+        get() = throw UnsupportedOperationException()
+        set(value) {
+            extension.promoteTrack.set(value)
+        }
+
+    override var updateTrackOption: String
+        get() = throw UnsupportedOperationException()
+        set(value) {
+            fromTrackOption = value
+            promoteTrackOption = value
+        }
+
+    override var trackOption: String
+        get() = throw UnsupportedOperationException()
+        set(value) {
+            extension.track.set(value)
+        }
+
+    override val resolutionStrategyOptions: List<String>
+        get() = ResolutionStrategy.values().map { it.publishedName }
+
+    override var resolutionStrategyOption: ResolutionStrategy
+        get() = throw UnsupportedOperationException()
+        set(value) {
+            extension.resolutionStrategy.set(value)
+        }
+
+    override var defaultToAppBundlesOption: Boolean
         get() = throw UnsupportedOperationException()
         set(value) {
             extension.defaultToAppBundles.set(value)

@@ -8,6 +8,7 @@ import com.github.triplet.gradle.play.internal.GRAPHICS_PATH
 import com.github.triplet.gradle.play.internal.ImageType
 import com.github.triplet.gradle.play.internal.LISTINGS_PATH
 import com.github.triplet.gradle.play.internal.ListingDetail
+import com.github.triplet.gradle.play.tasks.internal.CliOptionsImpl
 import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.WriteTrackExtensionOptions
 import com.github.triplet.gradle.play.tasks.internal.workers.EditWorkerBase
@@ -39,8 +40,10 @@ import java.io.Serializable
 import javax.inject.Inject
 
 internal abstract class PublishListings @Inject constructor(
-        extension: PlayPublisherExtension
-) : PublishTaskBase(extension), WriteTrackExtensionOptions {
+        extension: PlayPublisherExtension,
+        executionDir: Directory
+) : PublishTaskBase(extension),
+        WriteTrackExtensionOptions by CliOptionsImpl(extension, executionDir) {
     @get:Internal
     internal abstract val resDir: DirectoryProperty
 
