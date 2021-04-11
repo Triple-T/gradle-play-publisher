@@ -54,6 +54,10 @@ abstract class IntegrationTestBase : IntegrationTest {
                 .withTestKitDir(testDir)
                 .apply(block)
 
+        if (!expectFailure) {
+            runner.withArguments(runner.arguments.toMutableList() + "-S")
+        }
+
         // We're doing some pretty wack (and disgusting, shameful) shit to run integration tests without
         // actually publishing anything. The idea is have the build file call into the test class to run
         // some code. Unfortunately, it'll mostly be limited to printlns since we can't actually share
@@ -134,7 +138,7 @@ abstract class IntegrationTestBase : IntegrationTest {
         """)
 
         return executeGradle(expectFailure) {
-            withArguments("-S", "--build-cache", *tasks)
+            withArguments("--build-cache", *tasks)
         }
     }
 
