@@ -218,8 +218,6 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
                 play.serviceAccountCredentials.set(file('creds.json'))
             }
 
-            play {}
-
             $factoryInstallerStatement
         """)
 

@@ -8,8 +8,8 @@ import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.github.triplet.gradle.play.helpers.SharedIntegrationTest
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.io.File
 
 class ProcessArtifactVersionCodesIntegrationTest : IntegrationTestBase(), SharedIntegrationTest {
     override fun taskName(taskVariant: String) = ":process${taskVariant}VersionCodes"
@@ -82,12 +82,35 @@ class ProcessArtifactVersionCodesIntegrationTest : IntegrationTestBase(), Shared
         assertThat(result.output).contains("versionCode=42")
     }
 
-    @Disabled("Known bug with AGP 4.2")
     @Test
     fun `Version code with splits is patch incremented`() {
         // language=gradle
-        val config = """
-            play.resolutionStrategy = ResolutionStrategy.AUTO
+        File(appDir, "build.gradle").writeText("""
+            plugins {
+                id 'com.android.application'
+                id 'com.github.triplet.play' apply false
+            }
+
+            allprojects {
+                repositories {
+                    google()
+                    mavenCentral()
+                }
+            }
+
+            android {
+                compileSdkVersion 28
+
+                defaultConfig {
+                    applicationId "com.example.publisher"
+                    minSdkVersion 21
+                    targetSdkVersion 28
+                    versionCode 1
+                    versionName "1.0"
+                }
+            }
+
+            $factoryInstallerStatement
 
             android.splits.density {
                 enable true
@@ -95,29 +118,105 @@ class ProcessArtifactVersionCodesIntegrationTest : IntegrationTestBase(), Shared
                 include "xxhdpi", "xxxhdpi"
             }
 
-
             def count = 0
             androidComponents {
-                onVariants(selector().all()) {
-                    if (name == 'release') {
-                        for (output in outputs) {
-                            output.versionCode.set(count++)
-                            output.versionName.set(output.versionCode.map {
-                                println('versionCode=' + it)
-                                it.toString()
-                            })
-                        }
+                onVariants(selector().withBuildType('release')) {
+                    for (output in outputs) {
+                        output.versionCode.set(count++)
+                        output.versionName.set(output.versionCode.map {
+                            println('versionCode=' + it)
+                            it.toString()
+                        })
                     }
                 }
             }
-        """
 
-        val result = execute(config, "assembleRelease")
+            apply plugin: 'com.github.triplet.play'
+            play {
+                serviceAccountCredentials = file('creds.json')
+                resolutionStrategy =
+                    com.github.triplet.gradle.androidpublisher.ResolutionStrategy.AUTO
+            }
+        """)
+
+        val result = executeGradle(false) {
+            withArguments("assembleRelease")
+        }
 
         result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("versionCode=42")
         assertThat(result.output).contains("versionCode=44")
         assertThat(result.output).contains("versionCode=46")
+    }
+
+    @Test
+    fun `Version code isn't eagerly evaluated in non-auto resolution`() {
+        // language=gradle
+        File(appDir, "build.gradle").writeText("""
+            plugins {
+                id 'com.android.application'
+                id 'com.github.triplet.play' apply false
+            }
+
+            allprojects {
+                repositories {
+                    google()
+                    mavenCentral()
+                }
+            }
+
+            android {
+                compileSdkVersion 28
+
+                defaultConfig {
+                    applicationId "com.example.publisher"
+                    minSdkVersion 21
+                    targetSdkVersion 28
+                    versionCode 1
+                    versionName "1.0"
+                }
+            }
+
+            $factoryInstallerStatement
+
+            abstract class CustomTask extends DefaultTask {
+                @OutputFile
+                abstract RegularFileProperty getVersionCodeFile()
+
+                @TaskAction
+                void doStuff() {
+                    versionCodeFile.get().asFile.text = '88'
+                }
+            }
+
+            def c = tasks.register("myCustomTask", CustomTask) {
+                versionCodeFile.set(layout.buildDirectory.file('blah/custom-version-code.txt'))
+            }
+
+            androidComponents {
+                onVariants(selector().all()) {
+                    for (output in outputs) {
+                        output.versionCode.set(c.map {
+                            it.versionCodeFile.get().asFile.text as Integer
+                        })
+                        output.versionName.set(output.versionCode.map {
+                            println('versionCode=' + it)
+                            it.toString()
+                        })
+                    }
+                }
+            }
+
+            apply plugin: 'com.github.triplet.play'
+        """)
+
+        val result = executeGradle(false) {
+            withArguments("assembleRelease")
+        }
+
+        assertThat(result.task(taskName())).isNull()
+        result.requireTask(outcome = SUCCESS, task = ":myCustomTask")
+        assertThat(result.output).contains("versionCode=88")
     }
 
     companion object {

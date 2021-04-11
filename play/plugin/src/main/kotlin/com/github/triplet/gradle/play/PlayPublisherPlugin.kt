@@ -326,7 +326,12 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 }
                 publishProductsAllTask { dependsOn(publishProductsTask) }
 
-                val staticVersionCodes = variant.outputs.map { it.versionCode.get() }
+                val staticVersionCodes = if (
+                        extension.resolutionStrategy.get() == ResolutionStrategy.AUTO) {
+                    variant.outputs.map { it.versionCode.get() }
+                } else {
+                    emptyList()
+                }
                 val processArtifactVersionCodes = project.newTask<ProcessArtifactVersionCodes>(
                         "process${taskVariantName}VersionCodes",
                         constructorArgs = arrayOf(extension)
