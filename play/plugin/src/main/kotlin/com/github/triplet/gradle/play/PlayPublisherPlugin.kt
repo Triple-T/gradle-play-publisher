@@ -21,6 +21,7 @@ import com.github.triplet.gradle.play.internal.getCommitEditTask
 import com.github.triplet.gradle.play.internal.newTask
 import com.github.triplet.gradle.play.internal.playPath
 import com.github.triplet.gradle.play.internal.toConfig
+import com.github.triplet.gradle.play.internal.toPriority
 import com.github.triplet.gradle.play.internal.validateDebuggability
 import com.github.triplet.gradle.play.tasks.Bootstrap
 import com.github.triplet.gradle.play.tasks.GenerateResources
@@ -46,11 +47,13 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Provider
+import org.gradle.api.services.BuildServiceRegistration
 import org.gradle.kotlin.dsl.container
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.findPlugin
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.invoke
+import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.newInstance
 import org.gradle.kotlin.dsl.registerIfAbsent
 import org.gradle.kotlin.dsl.the
@@ -202,8 +205,18 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 val api = project.gradle.sharedServices.registerIfAbsent(
                         "playApi-$appId", PlayApiService::class) {
                     parameters.appId.set(appId)
-                    parameters.credentials.set(extension.serviceAccountCredentials)
                     parameters.editIdFile.set(project.layout.buildDirectory.file("$OUTPUT_PATH/$appId.txt"))
+                }
+                project.gradle.sharedServices.registrations.named<
+                        BuildServiceRegistration<PlayApiService, PlayApiService.Params>
+                        >("playApi-$appId") {
+                    val priorityProp = parameters._extensionPriority
+                    val newPriority = extension.toPriority()
+
+                    if (!priorityProp.isPresent || newPriority < priorityProp.get()) {
+                        parameters.credentials.set(extension.serviceAccountCredentials)
+                        priorityProp.set(newPriority)
+                    }
                 }
 
                 val publishInternalSharingApkTask = project.newTask<PublishInternalSharingApk>(

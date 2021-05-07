@@ -122,5 +122,8 @@ internal abstract class PlayApiService @Inject constructor(
         val appId: Property<String>
         val credentials: RegularFileProperty
         val editIdFile: RegularFileProperty
+
+        @Suppress("PropertyName") // Don't use this
+        val _extensionPriority: Property<Int>
     }
 }

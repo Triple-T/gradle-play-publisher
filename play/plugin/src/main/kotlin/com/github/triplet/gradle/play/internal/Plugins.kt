@@ -89,21 +89,25 @@ private fun buildExtensionInternal(
     }.singleOrNull()
     val buildTypeExtension = variant.buildType?.let { extensionContainer.findByName(it) }
 
-    val extensions = listOfNotNull(
+    val rawExtensions = listOf(
             cliOptionsExtension,
             variantExtension,
             flavorExtension,
             dimensionExtension,
             buildTypeExtension,
             baseExtension
-    ).distinctBy {
+    )
+    val extensions = rawExtensions.filterNotNull().distinctBy {
         it.name
     }.map {
+        val priority = rawExtensions.subList(1, rawExtensions.size).indexOfFirst { it != null }
         ExtensionMergeHolder(
                 original = it,
-                uninitializedCopy = project.objects.newInstance(UUID.randomUUID().toString())
+                uninitializedCopy = project.objects.newInstance("$priority:${UUID.randomUUID()}")
         )
     }
 
     return mergeExtensions(extensions)
 }
+
+internal fun PlayPublisherExtension.toPriority() = name.split(":").first().toInt()
