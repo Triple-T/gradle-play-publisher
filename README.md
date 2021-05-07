@@ -15,9 +15,9 @@
     </a>
 </p>
 
-Gradle Play Publisher is Android's unofficial release automation Gradle Plugin. It can do anything
-from building, uploading, and then promoting your App Bundle or APK to publishing app listings and
-other metadata.
+Gradle Play Publisher (GPP) is Android's unofficial release automation Gradle Plugin. It can do
+anything from building, uploading, and then promoting your App Bundle or APK to publishing app
+listings and other metadata.
 
 ## Table of contents
 
@@ -202,8 +202,8 @@ play {
 
 ## Task organization
 
-GPP follows the Android Gradle Plugin's naming convention: `[action][Variant][Thing]`. For example,
-`publishPaidReleaseBundle` will be generated if have a `paid` product flavor.
+GPP follows the Android Gradle Plugin's (AGP) naming convention: `[action][Variant][Thing]`. For
+example, `publishPaidReleaseBundle` will be generated if have a `paid` product flavor.
 
 Lifecycle tasks to publish multiple product flavors at once are also available. For example,
 `publishBundle` publishes all variants.
