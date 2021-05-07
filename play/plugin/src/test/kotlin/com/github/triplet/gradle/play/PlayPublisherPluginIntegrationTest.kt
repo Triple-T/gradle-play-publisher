@@ -386,6 +386,52 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Play API service uses correct credentials`() {
+        // language=gradle
+        val config = """
+            import com.github.triplet.gradle.play.tasks.internal.PlayApiService
+
+            android.flavorDimensions 'a', 'b'
+            android.productFlavors {
+                special {
+                    dimension 'a'
+                    applicationId = 'special'
+                }
+                general { dimension 'b' }
+            }
+            android.buildTypes {
+                zzz { // Add another build alphabetically below release so we can't cheat
+                    initWith(release)
+                }
+            }
+
+            android.playConfigs {
+                specialGeneralRelease {
+                    serviceAccountCredentials.set(file('special'))
+                }
+
+                general {
+                    serviceAccountCredentials.set(file('general'))
+                }
+            }
+
+            task usePublisher {
+                doLast {
+                    def service = gradle.sharedServices.registrations
+                                .named('playApi-special')
+                                .get().service.get() as PlayApiService
+
+                    println('creds=' + service.parameters.credentials.get().asFile.name)
+                }
+            }
+        """
+
+        val result = execute(config, "usePublisher")
+
+        assertThat(result.output).contains("creds=special")
+    }
+
+    @Test
     fun `Combination of extensions merges`() {
         // language=gradle
         val config = """
