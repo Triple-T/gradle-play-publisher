@@ -208,9 +208,9 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
                 doLast {
                     def service = gradle.sharedServices.registrations
                                 .named("playApi-com.example.publisher")
-                                .get().getService().get() as PlayApiService
+                                .get().service.get() as PlayApiService
 
-                    service.getPublisher()
+                    service.publisher
                 }
             }
 

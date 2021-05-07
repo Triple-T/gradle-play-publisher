@@ -202,7 +202,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 val api = project.gradle.sharedServices.registerIfAbsent(
                         "playApi-$appId", PlayApiService::class) {
                     parameters.appId.set(appId)
-                    parameters.config.set(extension.toConfig())
+                    parameters.credentials.set(extension.serviceAccountCredentials)
                     parameters.editIdFile.set(project.layout.buildDirectory.file("$OUTPUT_PATH/$appId.txt"))
                 }
 

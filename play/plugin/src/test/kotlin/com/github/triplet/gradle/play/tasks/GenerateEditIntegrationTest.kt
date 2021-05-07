@@ -70,10 +70,10 @@ class GenerateEditIntegrationTest : IntegrationTestBase(), SharedIntegrationTest
             tasks.register("gen") { gen ->
                 def service = gradle.sharedServices.registrations
                             .named("playApi-com.example.publisher")
-                            .get().getService().get() as PlayApiService
+                            .get().service.get() as PlayApiService
 
                 doLast {
-                    service.getEdits()
+                    service.edits
                 }
             }
 
