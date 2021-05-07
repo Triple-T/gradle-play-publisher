@@ -1,21 +1,18 @@
 package com.github.triplet.gradle.play.internal
 
-import com.github.triplet.gradle.androidpublisher.PlayPublisher
 import com.github.triplet.gradle.androidpublisher.ReleaseStatus
 import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
-import java.io.ByteArrayInputStream
 import java.io.File
-import java.io.InputStream
 import java.io.Serializable
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.declaredMemberProperties
 
 internal fun PlayPublisherExtension.toConfig() = PlayExtensionConfig(
         enabled.get(),
-        serviceAccountCredentials.orNull?.asFile,
+        serviceAccountCredentials.asFile.orNull,
         defaultToAppBundles.get(),
         commit.get(),
         fromTrack.orNull,
@@ -30,23 +27,6 @@ internal fun PlayPublisherExtension.toConfig() = PlayExtensionConfig(
         retain.mainObb.orNull,
         retain.patchObb.orNull
 )
-
-internal fun PlayExtensionConfig.credentialStream(): InputStream {
-    val credsFile = serviceAccountCredentials
-    if (credsFile != null) {
-        return credsFile.inputStream()
-    }
-
-    val credsString = System.getenv(PlayPublisher.CREDENTIAL_ENV_VAR)
-    if (credsString != null) {
-        return ByteArrayInputStream(credsString.toByteArray())
-    }
-
-    error("""
-        |No credentials specified. Please read our docs for more details:
-        |https://github.com/Triple-T/gradle-play-publisher#authenticating-gradle-play-publisher
-    """.trimMargin())
-}
 
 internal fun mergeExtensions(extensions: List<ExtensionMergeHolder>): PlayPublisherExtension {
     requireNotNull(extensions.isNotEmpty()) { "At least one extension must be provided." }

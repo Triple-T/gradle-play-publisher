@@ -7,21 +7,21 @@ import com.github.triplet.gradle.common.utils.marked
 import com.github.triplet.gradle.common.utils.nullOrFull
 import com.github.triplet.gradle.common.utils.orNull
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
-import com.github.triplet.gradle.play.internal.PlayExtensionConfig
-import com.github.triplet.gradle.play.internal.credentialStream
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.logging.Logging
 import org.gradle.api.provider.Property
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
+import java.io.ByteArrayInputStream
+import java.io.InputStream
 import javax.inject.Inject
 
 internal abstract class PlayApiService @Inject constructor(
         private val fileOps: FileSystemOperations,
 ) : BuildService<PlayApiService.Params> {
     val publisher by lazy {
-        parameters.config.get().credentialStream().use {
+        credentialStream().use {
             PlayPublisher(it, parameters.appId.get())
         }
     }
@@ -101,9 +101,26 @@ internal abstract class PlayApiService @Inject constructor(
         }
     }
 
+    private fun credentialStream(): InputStream {
+        val credsFile = parameters.credentials.asFile.orNull
+        if (credsFile != null) {
+            return credsFile.inputStream()
+        }
+
+        val credsString = System.getenv(PlayPublisher.CREDENTIAL_ENV_VAR)
+        if (credsString != null) {
+            return ByteArrayInputStream(credsString.toByteArray())
+        }
+
+        error("""
+            |No credentials specified. Please read our docs for more details:
+            |https://github.com/Triple-T/gradle-play-publisher#authenticating-gradle-play-publisher
+        """.trimMargin())
+    }
+
     interface Params : BuildServiceParameters {
-        val config: Property<PlayExtensionConfig>
         val appId: Property<String>
+        val credentials: RegularFileProperty
         val editIdFile: RegularFileProperty
     }
 }
