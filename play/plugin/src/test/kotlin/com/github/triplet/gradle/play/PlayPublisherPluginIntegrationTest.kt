@@ -217,8 +217,6 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
                 play.serviceAccountCredentials.set(file('creds.json'))
             }
 
-            play {}
-
             $factoryInstallerStatement
         """)
 
@@ -669,7 +667,7 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
                 repositories.mavenCentral()
 
                 dependencies.classpath files($classpathJars)
-                dependencies.classpath 'com.bugsnag:bugsnag-android-gradle-plugin:5.6.0'
+                dependencies.classpath 'com.bugsnag:bugsnag-android-gradle-plugin:5.7.6'
             }
 
             apply plugin: 'com.android.application'

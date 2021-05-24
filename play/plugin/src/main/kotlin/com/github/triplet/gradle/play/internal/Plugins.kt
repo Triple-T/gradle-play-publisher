@@ -1,7 +1,6 @@
 package com.github.triplet.gradle.play.internal
 
 import com.android.build.api.variant.ApplicationVariant
-import com.android.build.api.variant.ApplicationVariantProperties
 import com.github.triplet.gradle.common.utils.PLUGIN_GROUP
 import com.github.triplet.gradle.common.utils.nullOrFull
 import com.github.triplet.gradle.play.PlayPublisherExtension
@@ -17,10 +16,10 @@ import org.gradle.kotlin.dsl.newInstance
 import org.gradle.kotlin.dsl.register
 import java.util.UUID
 
-internal val ApplicationVariantProperties.flavorNameOrDefault
+internal val ApplicationVariant.flavorNameOrDefault
     get() = flavorName.nullOrFull() ?: "main"
 
-internal val ApplicationVariantProperties.playPath get() = "$RESOURCES_OUTPUT_PATH/$name/$PLAY_PATH"
+internal val ApplicationVariant.playPath get() = "$RESOURCES_OUTPUT_PATH/$name/$PLAY_PATH"
 
 internal fun Project.newTask(
         name: String,
@@ -61,7 +60,7 @@ internal fun Project.getCommitEditTask(
     }
 }
 
-internal fun ApplicationVariant<ApplicationVariantProperties>.buildExtension(
+internal fun ApplicationVariant.buildExtension(
         project: Project,
         extensionContainer: NamedDomainObjectContainer<PlayPublisherExtension>,
         baseExtension: PlayPublisherExtension,
@@ -76,7 +75,7 @@ internal fun ApplicationVariant<ApplicationVariantProperties>.buildExtension(
 
 private fun buildExtensionInternal(
         project: Project,
-        variant: ApplicationVariant<ApplicationVariantProperties>,
+        variant: ApplicationVariant,
         extensionContainer: NamedDomainObjectContainer<PlayPublisherExtension>,
         baseExtension: PlayPublisherExtension,
         cliOptionsExtension: PlayPublisherExtension,

@@ -5,7 +5,7 @@ import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.google.common.hash.Hashing
 import com.google.common.io.Files
-import com.supercilex.gradle.versions.VersionMasterExtension
+import com.supercilex.gradle.versions.VersionOrchestratorExtension
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -21,8 +21,8 @@ buildscript {
 
     dependencies {
         classpath(kotlin("gradle-plugin", embeddedKotlinVersion))
-        classpath("com.android.tools.build:gradle:4.1.0-beta01")
-        classpath("com.supercilex.gradle:version-master:1.0.0-SNAPSHOT")
+        classpath("com.android.tools.build:gradle:4.2.0-beta04")
+        classpath("com.supercilex.gradle:version-orchestrator:0.9.0")
         classpath("com.github.triplet.gradle:play-publisher:" +
                           file("../version.txt").readText().trim())
     }
@@ -116,7 +116,7 @@ configure<PlayPublisherExtension> {
     resolutionStrategy.set(ResolutionStrategy.AUTO)
 }
 
-configure<VersionMasterExtension> {
+configure<VersionOrchestratorExtension> {
     configureVersionCode.set(false)
 }
 
