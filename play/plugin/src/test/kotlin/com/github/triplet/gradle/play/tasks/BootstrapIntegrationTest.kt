@@ -22,13 +22,13 @@ import org.junit.jupiter.api.Test
 import java.io.File
 
 class BootstrapIntegrationTest : IntegrationTestBase(), SharedIntegrationTest {
-    override fun taskName(taskVariant: String) = ":bootstrap$taskVariant"
+    override fun taskName(taskVariant: String) = ":bootstrap${taskVariant}Listing"
 
     @Test
     fun `Existing contents get deleted`() {
         File(appDir, "foobar.txt").safeCreateNewFile().writeText("yo")
 
-        val result = execute("", "bootstrapRelease")
+        val result = execute("", "bootstrapReleaseListing")
 
         result.requireTask(outcome = SUCCESS)
 
@@ -37,7 +37,7 @@ class BootstrapIntegrationTest : IntegrationTestBase(), SharedIntegrationTest {
 
     @Test
     fun `App details can be bootstrapped`() {
-        val result = execute("", "bootstrapRelease", "--app-details")
+        val result = execute("", "bootstrapReleaseListing", "--app-details")
 
         result.requireTask(outcome = SUCCESS)
 
@@ -53,7 +53,7 @@ class BootstrapIntegrationTest : IntegrationTestBase(), SharedIntegrationTest {
 
     @Test
     fun `Listings can be bootstrapped`() {
-        val result = execute("", "bootstrapRelease", "--listings")
+        val result = execute("", "bootstrapReleaseListing", "--listings")
 
         result.requireTask(outcome = SUCCESS)
 
@@ -69,7 +69,7 @@ class BootstrapIntegrationTest : IntegrationTestBase(), SharedIntegrationTest {
 
     @Test
     fun `Release notes can be bootstrapped`() {
-        val result = execute("", "bootstrapRelease", "--release-notes")
+        val result = execute("", "bootstrapReleaseListing", "--release-notes")
 
         result.requireTask(outcome = SUCCESS)
 
@@ -83,7 +83,7 @@ class BootstrapIntegrationTest : IntegrationTestBase(), SharedIntegrationTest {
 
     @Test
     fun `Products can be bootstrapped`() {
-        val result = execute("", "bootstrapRelease", "--products")
+        val result = execute("", "bootstrapReleaseListing", "--products")
 
         result.requireTask(outcome = SUCCESS)
 

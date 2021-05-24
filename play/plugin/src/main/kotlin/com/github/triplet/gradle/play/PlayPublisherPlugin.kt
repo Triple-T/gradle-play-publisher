@@ -90,7 +90,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
         val bootstrapOptionsHolder = BootstrapOptions.Holder()
 
         val bootstrapAllTask = project.newTask<BootstrapLifecycleTask>(
-                "bootstrap",
+                "bootstrapListing",
                 """
                 |Downloads the Play Store listing metadata for all variants.
                 |   See https://github.com/Triple-T/gradle-play-publisher#quickstart
@@ -272,7 +272,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 val commitEditTask = project.getCommitEditTask(appId, extension, api)
 
                 val bootstrapTask = project.newTask<Bootstrap>(
-                        "bootstrap$taskVariantName",
+                        "bootstrap${taskVariantName}Listing",
                         """
                         |Downloads the Play Store listing metadata for variant '${variant.name}'.
                         |   See https://github.com/Triple-T/gradle-play-publisher#quickstart
