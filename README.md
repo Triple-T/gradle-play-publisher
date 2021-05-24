@@ -102,9 +102,9 @@ To use GPP, you must create a service account with access to the Play Developer 
     1. Specify which apps the service account should have access to. In this example, GPP has full
        access to testing tracks and app listings, but will be unable to make production releases:
        <img alt="Minimum Service Account permissions" src="assets/min-perms.png" width="66%" />
-1. Run `./gradlew bootstrap` or some other GPP task to validate your setup
+1. Run `./gradlew bootstrapListing` or some other GPP task to validate your setup
 1. Now that you've successfully created the connection between GCP and Google Play, you can remove
-   the Project Owner persmissions
+   the Project Owner permissions
     1. Go to your [IAM settings](https://console.cloud.google.com/iam-admin/iam)
     1. Search for the service account you created
     1. Click the edit icon (found at the end of the row)
@@ -507,7 +507,7 @@ descriptions to in-app purchases and subscriptions.
 ### Quickstart
 
 GPP includes a bootstrap task that pulls down your existing listing and initializes everything for
-you. To use it, run `./gradlew bootstrap`.
+you. To use it, run `./gradlew bootstrapListing`.
 
 > Note: if you have a pre-existing `play` folder, it will be reset.
 
@@ -576,7 +576,7 @@ Directory | Max # of images | Image dimension constraints (px)
 Run `./gradlew publishProducts`.
 
 Manually setting up in-app purchase files is not recommended. [Bootstrap them instead](#quickstart)
-with `./gradlew bootstrap --products`.
+with `./gradlew bootstrapListing --products`.
 
 ## Working with product flavors
 
