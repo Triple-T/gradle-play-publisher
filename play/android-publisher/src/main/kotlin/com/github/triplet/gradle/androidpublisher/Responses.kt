@@ -77,6 +77,23 @@ sealed class EditResponse {
     }
 }
 
+/** Response for an commit request. */
+sealed class CommitResponse {
+    /** Response for a successful commit request. */
+    object Success : CommitResponse()
+
+    /** Response for an unsuccessful commit request. */
+    class Failure internal constructor(
+            private val e: GoogleJsonResponseException,
+    ) : CommitResponse() {
+        /** @return true if the changes cannot be sent for review, false otherwise */
+        fun failedToSendForReview(): Boolean = e has "badRequest"
+
+        /** Cleanly rethrows the error. */
+        fun rethrow(): Nothing = throw e
+    }
+}
+
 /** Response for an internal sharing artifact upload. */
 data class UploadInternalSharingArtifactResponse internal constructor(
         /** The response's full JSON payload. */
