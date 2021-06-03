@@ -21,7 +21,7 @@ buildscript {
 
     dependencies {
         classpath(kotlin("gradle-plugin", embeddedKotlinVersion))
-        classpath("com.android.tools.build:gradle:4.2.0-beta04")
+        classpath("com.android.tools.build:gradle:7.0.0-beta03")
         classpath("com.supercilex.gradle:version-orchestrator:0.9.0")
         classpath("com.github.triplet.gradle:play-publisher:" +
                           file("../version.txt").readText().trim())
@@ -50,11 +50,11 @@ apply(plugin = "com.supercilex.gradle.versions")
 apply(plugin = "com.github.triplet.play")
 
 configure<BaseAppModuleExtension> {
-    compileSdkVersion(29)
+    compileSdk = 29
 
     defaultConfig {
-        minSdkVersion(16)
-        targetSdkVersion(29)
+        minSdk = 16
+        targetSdk = 29
         versionCode = 1 // Updated on every build
         versionName = "1.0.0"
     }
@@ -73,17 +73,17 @@ configure<BaseAppModuleExtension> {
     }
 
     buildTypes {
-        named("debug") {
+        debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-DEBUG"
         }
 
         register("debugPlay") {
-            initWith(named("debug").get())
-            applicationIdSuffix = null
+            isDebuggable = true
+            versionNameSuffix = "-DEBUG"
         }
 
-        named("release") {
+        release {
             signingConfig = signingConfigs.getByName("release")
             isShrinkResources = true
             isMinifyEnabled = true
@@ -98,7 +98,7 @@ configure<BaseAppModuleExtension> {
         }
     }
 
-    lintOptions {
+    lint {
         isAbortOnError = false
     }
 
