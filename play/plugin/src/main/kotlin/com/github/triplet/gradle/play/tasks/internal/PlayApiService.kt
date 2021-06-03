@@ -1,5 +1,6 @@
 package com.github.triplet.gradle.play.tasks.internal
 
+import com.github.triplet.gradle.androidpublisher.CommitResponse
 import com.github.triplet.gradle.androidpublisher.EditManager
 import com.github.triplet.gradle.androidpublisher.EditResponse
 import com.github.triplet.gradle.androidpublisher.PlayPublisher
@@ -43,7 +44,15 @@ internal abstract class PlayApiService @Inject constructor(
     fun shouldCommit(): Boolean = editIdFile.marked("commit").exists()
 
     fun commit() {
-        publisher.commitEdit(editId)
+        val response = publisher.commitEdit(editId)
+        if (response is CommitResponse.Failure) {
+            if (response.failedToSendForReview()) {
+                val retryResponse = publisher.commitEdit(editId, sendChangesForReview = false)
+                (retryResponse as? CommitResponse.Failure)?.rethrow()
+            } else {
+                response.rethrow()
+            }
+        }
     }
 
     fun skipCommit() {

@@ -1,10 +1,12 @@
 package com.github.triplet.gradle.play.tasks
 
+import com.github.triplet.gradle.androidpublisher.CommitResponse
 import com.github.triplet.gradle.androidpublisher.EditResponse
 import com.github.triplet.gradle.androidpublisher.FakeEditManager
 import com.github.triplet.gradle.androidpublisher.FakePlayPublisher
 import com.github.triplet.gradle.androidpublisher.ReleaseStatus
 import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
+import com.github.triplet.gradle.androidpublisher.newSuccessCommitResponse
 import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.common.utils.nullOrFull
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
@@ -58,8 +60,9 @@ class PublishBundleIntegrationTest : IntegrationTestBase(), ArtifactIntegrationT
                     return newSuccessEditResponse(id)
                 }
 
-                override fun commitEdit(id: String) {
-                    println("commitEdit($id)")
+                override fun commitEdit(id: String, sendChangesForReview: Boolean): CommitResponse {
+                    println("commitEdit($id, $sendChangesForReview)")
+                    return newSuccessCommitResponse()
                 }
 
                 override fun validateEdit(id: String) {

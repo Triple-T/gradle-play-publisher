@@ -32,6 +32,8 @@ fun newFailureEditResponse(reason: String) = EditResponse.Failure(
         GoogleJsonResponseExceptionFactoryTesting.newMock(
                 GsonFactory.getDefaultInstance(), 400, reason))
 
+fun newSuccessCommitResponse() = CommitResponse.Success
+
 fun newUploadInternalSharingArtifactResponse(json: String, downloadUrl: String) =
         UploadInternalSharingArtifactResponse(json, downloadUrl)
 

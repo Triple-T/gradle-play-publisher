@@ -15,7 +15,7 @@ interface PublishOrPromoteArtifactIntegrationTests : SharedIntegrationTest {
 
         result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("insertEdit()")
-        assertThat(result.output).contains("commitEdit(edit-id)")
+        assertThat(result.output).contains("commitEdit(edit-id")
     }
 
     @Test

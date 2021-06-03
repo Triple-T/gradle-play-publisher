@@ -14,7 +14,7 @@ abstract class FakePlayPublisher : PlayPublisher {
     override fun getEdit(id: String): EditResponse =
             throw IllegalStateException("Test wasn't expecting this method to be called.")
 
-    override fun commitEdit(id: String): Unit =
+    override fun commitEdit(id: String, sendChangesForReview: Boolean): CommitResponse =
             throw IllegalStateException("Test wasn't expecting this method to be called.")
 
     override fun validateEdit(id: String): Unit =

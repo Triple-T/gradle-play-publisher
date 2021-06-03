@@ -1,6 +1,8 @@
 package com.github.triplet.gradle.play.tasks
 
+import com.github.triplet.gradle.androidpublisher.CommitResponse
 import com.github.triplet.gradle.androidpublisher.FakePlayPublisher
+import com.github.triplet.gradle.androidpublisher.newSuccessCommitResponse
 import com.github.triplet.gradle.common.utils.marked
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
@@ -46,15 +48,16 @@ class CommitEditIntegrationTest : IntegrationTestBase(), SharedIntegrationTest {
         val result = execute("", "commitEditForComDotExampleDotPublisher")
 
         result.requireTask(outcome = SUCCESS)
-        assertThat(result.output).contains("commitEdit(foobar)")
+        assertThat(result.output).contains("commitEdit(foobar")
     }
 
     companion object {
         @JvmStatic
         fun installFactories() {
             val publisher = object : FakePlayPublisher() {
-                override fun commitEdit(id: String) {
-                    println("commitEdit($id)")
+                override fun commitEdit(id: String, sendChangesForReview: Boolean): CommitResponse {
+                    println("commitEdit($id, $sendChangesForReview)")
+                    return newSuccessCommitResponse()
                 }
 
                 override fun validateEdit(id: String) {

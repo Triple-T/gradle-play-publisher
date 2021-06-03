@@ -1,5 +1,6 @@
 package com.github.triplet.gradle.androidpublisher.internal
 
+import com.github.triplet.gradle.androidpublisher.CommitResponse
 import com.github.triplet.gradle.androidpublisher.EditResponse
 import com.github.triplet.gradle.androidpublisher.GppProduct
 import com.github.triplet.gradle.androidpublisher.PlayPublisher
@@ -44,8 +45,15 @@ internal class DefaultPlayPublisher(
         }
     }
 
-    override fun commitEdit(id: String) {
-        publisher.edits().commit(appId, id).execute()
+    override fun commitEdit(id: String, sendChangesForReview: Boolean): CommitResponse {
+        return try {
+            publisher.edits().commit(appId, id)
+                    .setChangesNotSentForReview(!sendChangesForReview)
+                    .execute()
+            CommitResponse.Success
+        } catch (e: GoogleJsonResponseException) {
+            CommitResponse.Failure(e)
+        }
     }
 
     override fun validateEdit(id: String) {
