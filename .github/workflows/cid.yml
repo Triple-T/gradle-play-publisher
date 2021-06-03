@@ -63,7 +63,7 @@ jobs:
   deploy_snapshot:
     needs: [build, test]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' && needs.build.outputs.is_snapshot == 'true'
+    if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/7.0') && needs.build.outputs.is_snapshot == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
