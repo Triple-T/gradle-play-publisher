@@ -60,18 +60,18 @@ object Config {
             const val agpDdms = "com.android.tools.ddms:ddmlib:30.0.0-alpha14"
 
             const val ap =
-                    "com.google.apis:google-api-services-androidpublisher:v3-rev20201125-1.31.0"
-            const val googleClient = "com.google.api-client:google-api-client:1.31.3"
+                    "com.google.apis:google-api-services-androidpublisher:v3-rev20210527-1.31.0"
+            const val googleClient = "com.google.api-client:google-api-client:1.31.5"
             const val apacheClientV2 = "com.google.http-client:google-http-client-apache-v2:1.39.2"
-            const val auth = "com.google.auth:google-auth-library-oauth2-http:0.25.2"
+            const val auth = "com.google.auth:google-auth-library-oauth2-http:0.26.0"
             const val guava = "com.google.guava:guava:30.1.1-jre"
             const val gson = "com.google.http-client:google-http-client-gson:1.39.2"
 
             const val junit = "org.junit.jupiter:junit-jupiter-api:5.7.0"
             const val junitEngine = "org.junit.jupiter:junit-jupiter-engine:5.7.0"
             const val junitParams = "org.junit.jupiter:junit-jupiter-params:5.7.0"
-            const val truth = "com.google.truth:truth:1.1.2"
-            const val mockito = "org.mockito:mockito-core:3.9.0"
+            const val truth = "com.google.truth:truth:1.1.3"
+            const val mockito = "org.mockito:mockito-core:3.10.0"
         }
     }
 }

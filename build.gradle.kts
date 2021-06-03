@@ -10,11 +10,11 @@ buildscript {
 
 plugins {
     `lifecycle-base`
-    id("com.github.ben-manes.versions") version "0.38.0"
+    id("com.github.ben-manes.versions") version "0.39.0"
 
     // Needed to support publishing all modules atomically
-    id("com.gradle.plugin-publish") version "0.14.0" apply false
-    id("io.github.gradle-nexus.publish-plugin") version "1.0.0"
+    id("com.gradle.plugin-publish") version "0.15.0" apply false
+    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
 }
 
 buildScan {
