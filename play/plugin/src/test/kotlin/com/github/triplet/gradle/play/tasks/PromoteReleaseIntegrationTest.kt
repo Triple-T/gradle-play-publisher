@@ -10,6 +10,7 @@ import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.github.triplet.gradle.play.helpers.SharedIntegrationTest
 import com.github.triplet.gradle.play.helpers.SharedIntegrationTest.Companion.DEFAULT_TASK_VARIANT
+import com.github.triplet.gradle.play.tasks.shared.LifecycleIntegrationTests
 import com.github.triplet.gradle.play.tasks.shared.PublishOrPromoteArtifactIntegrationTests
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.BuildResult
@@ -19,7 +20,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 
 class PromoteReleaseIntegrationTest : IntegrationTestBase(), SharedIntegrationTest,
-        PublishOrPromoteArtifactIntegrationTests {
+        PublishOrPromoteArtifactIntegrationTests, LifecycleIntegrationTests {
     override fun taskName(taskVariant: String) = ":promote${taskVariant}Artifact"
 
     override fun assertArtifactUpload(result: BuildResult) {
