@@ -10,13 +10,15 @@ import com.github.triplet.gradle.androidpublisher.newSuccessCommitResponse
 import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.github.triplet.gradle.play.helpers.SharedIntegrationTest
+import com.github.triplet.gradle.play.tasks.shared.LifecycleIntegrationTests
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome.NO_SOURCE
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Test
 import java.io.File
 
-class PublishListingsIntegrationTest : IntegrationTestBase(), SharedIntegrationTest {
+class PublishListingsIntegrationTest : IntegrationTestBase(), SharedIntegrationTest,
+        LifecycleIntegrationTests {
     override fun taskName(taskVariant: String) = ":publish${taskVariant}Listing"
 
     @Test

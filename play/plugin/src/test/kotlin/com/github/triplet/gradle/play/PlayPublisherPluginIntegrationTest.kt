@@ -230,7 +230,7 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
 
     @Test
     fun `Variant specific lifecycle task publishes APKs by default`() {
-        val result = execute("", "publishRelease", "--dry-run")
+        val result = execute("", "publishReleaseApps", "--dry-run")
 
         assertThat(result.output).contains(":publishReleaseApk")
         assertThat(result.output).doesNotContain(":publishReleaseBundle")
@@ -245,7 +245,7 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
             }
         """
 
-        val result = execute(config, "publishRelease", "--dry-run")
+        val result = execute(config, "publishReleaseApps", "--dry-run")
 
         assertThat(result.output).doesNotContain(":publishReleaseApk")
         assertThat(result.output).contains(":publishReleaseBundle")
@@ -478,6 +478,43 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Semi-global task CLI args changes extension`() {
+        // language=gradle
+        val config = """
+            android.flavorDimensions 'pricing'
+            android.productFlavors {
+                free { dimension 'pricing' }
+                paid { dimension 'pricing' }
+            }
+
+            play {
+                track = 'root'
+            }
+
+            task printTrack {
+                doLast {
+                    println 'resolvedTrack=' + play.track.get()
+                }
+            }
+
+            afterEvaluate {
+                tasks.named('publishFreeReleaseApk') {
+                    enabled = false
+                    dependsOn('printTrack')
+                }
+            }
+        """
+
+        val result = execute(
+                config,
+                "publishFreeApk", "--track=free",
+                "--debug",
+        )
+
+        assertThat(result.output).contains("resolvedTrack=free")
+    }
+
+    @Test
     fun `Same-level extensions are resolved independently`() {
         // language=gradle
         val config = """
@@ -503,7 +540,7 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
         val result = execute(config, "help", "--debug")
         val resolvedLines = result.output.lines()
                 .filter { "Extension resolved for variant" in it }
-                .filter { "Release'" in it }
+                .filter { "Release:" in it }
 
         assertThat(resolvedLines).hasSize(2)
         assertThat(resolvedLines.first()).contains("free-creds.json")

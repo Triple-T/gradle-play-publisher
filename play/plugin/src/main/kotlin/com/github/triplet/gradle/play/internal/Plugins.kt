@@ -21,16 +21,11 @@ internal val ApplicationVariant.flavorNameOrDefault
 
 internal val ApplicationVariant.playPath get() = "$RESOURCES_OUTPUT_PATH/$name/$PLAY_PATH"
 
-internal fun Project.newTask(
-        name: String,
-        description: String? = null,
-        block: Task.() -> Unit = {},
-) = newTask(name, description, emptyArray(), block)
-
 internal inline fun <reified T : Task> Project.newTask(
         name: String,
         description: String? = null,
         constructorArgs: Array<Any> = emptyArray(),
+        allowExisting: Boolean = false,
         noinline block: T.() -> Unit = {},
 ): TaskProvider<T> {
     val config: T.() -> Unit = {
@@ -39,7 +34,16 @@ internal inline fun <reified T : Task> Project.newTask(
         block()
     }
 
-    return tasks.register<T>(name, *constructorArgs).apply { configure(config) }
+    return try {
+        tasks.register<T>(name, *constructorArgs).apply { configure(config) }
+    } catch (e: InvalidUserDataException) {
+        if (allowExisting) {
+            @Suppress("UNCHECKED_CAST")
+            tasks.named(name) as TaskProvider<T>
+        } else {
+            throw e
+        }
+    }
 }
 
 internal fun Project.getCommitEditTask(
@@ -48,15 +52,8 @@ internal fun Project.getCommitEditTask(
         api: Provider<PlayApiService>,
 ): TaskProvider<CommitEdit> {
     val taskName = "commitEditFor" + appId.split(".").joinToString("Dot") { it.capitalize() }
-    return try {
-        rootProject.tasks.register<CommitEdit>(taskName, extension).apply {
-            configure {
-                apiService.set(api)
-            }
-        }
-    } catch (e: InvalidUserDataException) {
-        @Suppress("UNCHECKED_CAST")
-        rootProject.tasks.named(taskName) as TaskProvider<CommitEdit>
+    return rootProject.newTask(taskName, allowExisting = true, constructorArgs = arrayOf(extension)) {
+        apiService.set(api)
     }
 }
 
@@ -65,12 +62,21 @@ internal fun ApplicationVariant.buildExtension(
         extensionContainer: NamedDomainObjectContainer<PlayPublisherExtension>,
         baseExtension: PlayPublisherExtension,
         cliOptionsExtension: PlayPublisherExtension,
-): PlayPublisherExtension = buildExtensionInternal(
+): Map<String, PlayPublisherExtension> = buildExtensionInternal(
         project,
         this,
         extensionContainer,
         baseExtension,
         cliOptionsExtension
+)
+
+internal fun ApplicationVariant.generateExtensionOverrideOrdering(): List<String> = listOfNotNull(
+        "__CLI__",
+        name,
+        *productFlavors.map { (_, flavor) -> flavor }.toTypedArray(),
+        *productFlavors.map { (dimension, _) -> dimension }.toTypedArray(),
+        buildType,
+        "__ROOT__",
 )
 
 private fun buildExtensionInternal(
@@ -79,35 +85,29 @@ private fun buildExtensionInternal(
         extensionContainer: NamedDomainObjectContainer<PlayPublisherExtension>,
         baseExtension: PlayPublisherExtension,
         cliOptionsExtension: PlayPublisherExtension,
-): PlayPublisherExtension {
-    val variantExtension = extensionContainer.findByName(variant.name)
-    val flavorExtension = variant.productFlavors.mapNotNull { (_, flavor) ->
-        extensionContainer.findByName(flavor)
-    }.singleOrNull()
-    val dimensionExtension = variant.productFlavors.mapNotNull { (dimension, _) ->
-        extensionContainer.findByName(dimension)
-    }.singleOrNull()
-    val buildTypeExtension = variant.buildType?.let { extensionContainer.findByName(it) }
+): Map<String, PlayPublisherExtension> {
+    val rawExtensions = variant.generateExtensionOverrideOrdering().map { name ->
+        when (name) {
+            "__CLI__" -> cliOptionsExtension
+            "__ROOT__" -> baseExtension
+            else -> extensionContainer.findByName(name)
+        }?.let { name to it }
+    }
 
-    val rawExtensions = listOf(
-            cliOptionsExtension,
-            variantExtension,
-            flavorExtension,
-            dimensionExtension,
-            buildTypeExtension,
-            baseExtension
-    )
-    val extensions = rawExtensions.filterNotNull().distinctBy {
+    val priority = rawExtensions.subList(1, rawExtensions.size).indexOfFirst { it != null }
+    val extensions = rawExtensions.filterNotNull().map { it.second }.distinctBy {
         it.name
-    }.map {
-        val priority = rawExtensions.subList(1, rawExtensions.size).indexOfFirst { it != null }
+    }.map { extension ->
         ExtensionMergeHolder(
-                original = it,
-                uninitializedCopy = project.objects.newInstance("$priority:${UUID.randomUUID()}")
+                original = extension,
+                uninitializedCopy = project.objects.newInstance("$priority:${UUID.randomUUID()}"),
         )
     }
 
-    return mergeExtensions(extensions)
+    return mapOf(
+            *rawExtensions.filterNotNull().toTypedArray(),
+            variant.name to mergeExtensions(extensions),
+    )
 }
 
 internal fun PlayPublisherExtension.toPriority() = name.split(":").first().toInt()

@@ -12,6 +12,7 @@ import com.github.triplet.gradle.common.utils.nullOrFull
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.github.triplet.gradle.play.tasks.shared.ArtifactIntegrationTests
+import com.github.triplet.gradle.play.tasks.shared.LifecycleIntegrationTests
 import com.github.triplet.gradle.play.tasks.shared.PublishArtifactIntegrationTests
 import com.github.triplet.gradle.play.tasks.shared.PublishOrPromoteArtifactIntegrationTests
 import com.google.common.truth.Truth.assertThat
@@ -22,7 +23,8 @@ import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 
 class PublishApkIntegrationTest : IntegrationTestBase(), ArtifactIntegrationTests,
-        PublishOrPromoteArtifactIntegrationTests, PublishArtifactIntegrationTests {
+        PublishOrPromoteArtifactIntegrationTests, PublishArtifactIntegrationTests,
+        LifecycleIntegrationTests {
     override fun taskName(taskVariant: String) = ":publish${taskVariant}Apk"
 
     override fun customArtifactName(name: String) = "$name.apk"

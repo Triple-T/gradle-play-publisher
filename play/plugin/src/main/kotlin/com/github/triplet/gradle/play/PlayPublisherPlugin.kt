@@ -17,6 +17,7 @@ import com.github.triplet.gradle.play.internal.RELEASE_NAMES_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
 import com.github.triplet.gradle.play.internal.buildExtension
 import com.github.triplet.gradle.play.internal.flavorNameOrDefault
+import com.github.triplet.gradle.play.internal.generateExtensionOverrideOrdering
 import com.github.triplet.gradle.play.internal.getCommitEditTask
 import com.github.triplet.gradle.play.internal.newTask
 import com.github.triplet.gradle.play.internal.playPath
@@ -89,61 +90,65 @@ internal class PlayPublisherPlugin : Plugin<Project> {
         val cliOptionsExtension = project.objects.newInstance<CliPlayPublisherExtension>()
         val bootstrapOptionsHolder = BootstrapOptions.Holder()
 
+        // ---------------------------------- START: GLOBAL TASKS ----------------------------------
+
         val bootstrapAllTask = project.newTask<BootstrapLifecycleTask>(
                 "bootstrapListing",
                 """
                 |Downloads the Play Store listing metadata for all variants.
                 |   See https://github.com/Triple-T/gradle-play-publisher#quickstart
                 """.trimMargin(),
-                arrayOf(bootstrapOptionsHolder)
+                arrayOf(bootstrapOptionsHolder),
         )
         val publishAllTask = project.newTask<GlobalPublishableArtifactLifecycleTask>(
                 "publishApps",
                 """
-                |Uploads APK or App Bundle and all Play Store metadata for every variant.
+                |Uploads APK or App Bundle and all Play Store metadata for all variants.
                 |   See https://github.com/Triple-T/gradle-play-publisher#managing-artifacts
                 """.trimMargin(),
-                arrayOf(cliOptionsExtension, executionDir)
+                arrayOf(cliOptionsExtension, executionDir),
         )
         val publishApkAllTask = project.newTask<PublishableTrackLifecycleTask>(
                 "publishApk",
                 """
-                |Uploads APK for every variant.
+                |Uploads APK for all variants.
                 |   See https://github.com/Triple-T/gradle-play-publisher#publishing-apks
                 """.trimMargin(),
-                arrayOf(cliOptionsExtension, executionDir)
+                arrayOf(cliOptionsExtension, executionDir),
         )
         val publishBundleAllTask = project.newTask<PublishableTrackLifecycleTask>(
                 "publishBundle",
                 """
-                |Uploads App Bundle for every variant.
+                |Uploads App Bundle for all variants.
                 |   See https://github.com/Triple-T/gradle-play-publisher#publishing-an-app-bundle
                 """.trimMargin(),
-                arrayOf(cliOptionsExtension, executionDir)
+                arrayOf(cliOptionsExtension, executionDir),
         )
         val promoteReleaseAllTask = project.newTask<UpdatableTrackLifecycleTask>(
                 "promoteArtifact",
                 """
-                |Promotes a release for every variant.
+                |Promotes a release for all variants.
                 |   See https://github.com/Triple-T/gradle-play-publisher#promoting-artifacts
                 """.trimMargin(),
-                arrayOf(cliOptionsExtension, executionDir)
+                arrayOf(cliOptionsExtension, executionDir),
         )
         val publishListingAllTask = project.newTask<WriteTrackLifecycleTask>(
                 "publishListing",
                 """
-                |Uploads all Play Store metadata for every variant.
+                |Uploads all Play Store metadata for all variants.
                 |   See https://github.com/Triple-T/gradle-play-publisher#publishing-listings
                 """.trimMargin(),
-                arrayOf(cliOptionsExtension, executionDir)
+                arrayOf(cliOptionsExtension, executionDir),
         )
-        val publishProductsAllTask = project.newTask(
+        val publishProductsAllTask = project.newTask<Task>(
                 "publishProducts",
                 """
-                |Uploads all Play Store in-app products for every variant.
+                |Uploads all Play Store in-app products for all variants.
                 |   See https://github.com/Triple-T/gradle-play-publisher#publishing-in-app-products
-                """.trimMargin()
+                """.trimMargin(),
         )
+
+        // ----------------------------------- END: GLOBAL TASKS -----------------------------------
 
         val baseExtension = project.extensions.getByType<PlayPublisherExtension>()
         val extensionContainer = project.container<PlayPublisherExtension>()
@@ -153,22 +158,24 @@ internal class PlayPublisherPlugin : Plugin<Project> {
         val androidExtension = project.extensions.getByType<ApplicationAndroidComponentsExtension>()
         androidExtension.onVariants v@{ variant ->
             val taskVariantName = variant.name.capitalize()
-            val extension = variant.buildExtension(
+            val extensionStore = variant.buildExtension(
                     project,
                     extensionContainer,
                     baseExtension,
-                    cliOptionsExtension
+                    cliOptionsExtension,
             )
+            val extension = extensionStore.getValue(variant.name)
+
             project.logger.debug(
-                    "Extension computed for variant '${variant.name}': ${extension.toConfig()}")
+                    "Extension computed for variant $taskVariantName: ${extension.toConfig()}")
             project.afterEvaluate {
                 project.logger.debug(
-                        "Extension resolved for variant '${variant.name}': ${extension.toConfig()}")
+                        "Extension resolved for variant $taskVariantName: ${extension.toConfig()}")
             }
 
             if (!extension.enabled.get()) {
                 project.logger.info(
-                        "Gradle Play Publisher is disabled for variant '${variant.name}'.")
+                        "Gradle Play Publisher is disabled for variant $taskVariantName.")
                 return@v
             }
 
@@ -217,13 +224,15 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 }
             }
 
+            // ------------------- START: ALL BUILD TYPE VARIANT SPECIFIC TASKS -------------------
+
             val publishInternalSharingApkTask = project.newTask<PublishInternalSharingApk>(
                     "upload${taskVariantName}PrivateApk",
                     """
-                        |Uploads Internal Sharing APK for variant '${variant.name}'.
-                        |   See https://github.com/Triple-T/gradle-play-publisher#uploading-an-internal-sharing-artifact
-                        """.trimMargin(),
-                    arrayOf(extension, executionDir)
+                    |Uploads Internal Sharing APK for variant $taskVariantName.
+                    |   See https://github.com/Triple-T/gradle-play-publisher#uploading-an-internal-sharing-artifact
+                    """.trimMargin(),
+                    arrayOf(extension, executionDir),
             ) {
                 apiService.set(api)
                 apks.from(findApkFiles())
@@ -236,10 +245,10 @@ internal class PlayPublisherPlugin : Plugin<Project> {
             val publishInternalSharingBundleTask = project.newTask<PublishInternalSharingBundle>(
                     "upload${taskVariantName}PrivateBundle",
                     """
-                        |Uploads Internal Sharing App Bundle for variant '${variant.name}'.
-                        |   See https://github.com/Triple-T/gradle-play-publisher#uploading-an-internal-sharing-artifact
-                        """.trimMargin(),
-                    arrayOf(extension, executionDir)
+                    |Uploads Internal Sharing App Bundle for variant $taskVariantName.
+                    |   See https://github.com/Triple-T/gradle-play-publisher#uploading-an-internal-sharing-artifact
+                    """.trimMargin(),
+                    arrayOf(extension, executionDir),
             ) {
                 apiService.set(api)
                 bundles.from(findBundleFiles())
@@ -252,10 +261,10 @@ internal class PlayPublisherPlugin : Plugin<Project> {
             project.newTask<InstallInternalSharingArtifact>(
                     "install${taskVariantName}PrivateArtifact",
                     """
-                        |Launches an intent to install an Internal Sharing artifact for variant '${variant.name}'.
-                        |   See https://github.com/Triple-T/gradle-play-publisher#installing-internal-sharing-artifacts
-                        """.trimMargin(),
-                    arrayOf(android)
+                    |Launches an intent to install an Internal Sharing artifact for variant $taskVariantName.
+                    |   See https://github.com/Triple-T/gradle-play-publisher#installing-internal-sharing-artifacts
+                    """.trimMargin(),
+                    arrayOf(android),
             ) {
                 uploadedArtifacts.set(if (extension.defaultToAppBundles.get()) {
                     publishInternalSharingBundleTask.flatMap { it.outputDirectory }
@@ -264,18 +273,21 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 })
             }
 
+            // -------------------- END: ALL BUILD TYPE VARIANT SPECIFIC TASKS --------------------
 
             if (!variant.validateDebuggability()) return@v
 
             val commitEditTask = project.getCommitEditTask(appId, extension, api)
 
+            // -------------------- START: RELEASE ONLY VARIANT SPECIFIC TASKS --------------------
+
             val bootstrapTask = project.newTask<Bootstrap>(
                     "bootstrap${taskVariantName}Listing",
                     """
-                        |Downloads the Play Store listing metadata for variant '${variant.name}'.
-                        |   See https://github.com/Triple-T/gradle-play-publisher#quickstart
-                        """.trimMargin(),
-                    arrayOf(extension, bootstrapOptionsHolder)
+                    |Downloads the Play Store listing metadata for variant $taskVariantName.
+                    |   See https://github.com/Triple-T/gradle-play-publisher#quickstart
+                    """.trimMargin(),
+                    arrayOf(extension, bootstrapOptionsHolder),
             ) {
                 apiService.set(api)
                 srcDir.set(project.file("src/${variant.flavorNameOrDefault}/$PLAY_PATH"))
@@ -310,10 +322,10 @@ internal class PlayPublisherPlugin : Plugin<Project> {
             val publishListingTask = project.newTask<PublishListings>(
                     "publish${taskVariantName}Listing",
                     """
-                        |Uploads all Play Store metadata for variant '${variant.name}'.
-                        |   See https://github.com/Triple-T/gradle-play-publisher#publishing-listings
-                        """.trimMargin(),
-                    arrayOf(extension, executionDir)
+                    |Uploads all Play Store metadata for variant $taskVariantName.
+                    |   See https://github.com/Triple-T/gradle-play-publisher#publishing-listings
+                    """.trimMargin(),
+                    arrayOf(extension, executionDir),
             ) {
                 apiService.set(api)
                 resDir.set(resourceDir)
@@ -325,10 +337,10 @@ internal class PlayPublisherPlugin : Plugin<Project> {
             val publishProductsTask = project.newTask<PublishProducts>(
                     "publish${taskVariantName}Products",
                     """
-                        |Uploads all Play Store in-app products for variant '${variant.name}'.
-                        |   See https://github.com/Triple-T/gradle-play-publisher#publishing-in-app-products
-                        """.trimMargin(),
-                    arrayOf(extension)
+                    |Uploads all Play Store in-app products for variant $taskVariantName.
+                    |   See https://github.com/Triple-T/gradle-play-publisher#publishing-in-app-products
+                    """.trimMargin(),
+                    arrayOf(extension),
             ) {
                 apiService.set(api)
                 productsDir.setFrom(resourceDir.map {
@@ -345,7 +357,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
             }
             val processArtifactVersionCodes = project.newTask<ProcessArtifactVersionCodes>(
                     "process${taskVariantName}VersionCodes",
-                    constructorArgs = arrayOf(extension)
+                    constructorArgs = arrayOf(extension),
             ) {
                 apiService.set(api)
                 versionCodes.set(staticVersionCodes)
@@ -374,10 +386,10 @@ internal class PlayPublisherPlugin : Plugin<Project> {
             val publishApkTask = project.newTask<PublishApk>(
                     "publish${taskVariantName}Apk",
                     """
-                        |Uploads APK for variant '${variant.name}'.
-                        |   See https://github.com/Triple-T/gradle-play-publisher#publishing-apks
-                        """.trimMargin(),
-                    arrayOf(extension, executionDir)
+                    |Uploads APK for variant $taskVariantName.
+                    |   See https://github.com/Triple-T/gradle-play-publisher#publishing-apks
+                    """.trimMargin(),
+                    arrayOf(extension, executionDir),
             ) {
                 configureInputs()
                 apks.from(findApkFiles())
@@ -412,10 +424,10 @@ internal class PlayPublisherPlugin : Plugin<Project> {
             val publishBundleTask = project.newTask<PublishBundle>(
                     "publish${taskVariantName}Bundle",
                     """
-                        |Uploads App Bundle for variant '${variant.name}'.
-                        |   See https://github.com/Triple-T/gradle-play-publisher#publishing-an-app-bundle
-                        """.trimMargin(),
-                    arrayOf(extension, executionDir)
+                    |Uploads App Bundle for variant $taskVariantName.
+                    |   See https://github.com/Triple-T/gradle-play-publisher#publishing-an-app-bundle
+                    """.trimMargin(),
+                    arrayOf(extension, executionDir),
             ) {
                 configureInputs()
                 bundles.from(findBundleFiles())
@@ -428,10 +440,10 @@ internal class PlayPublisherPlugin : Plugin<Project> {
             val promoteReleaseTask = project.newTask<PromoteRelease>(
                     "promote${taskVariantName}Artifact",
                     """
-                        |Promotes a release for variant '${variant.name}'.
-                        |   See https://github.com/Triple-T/gradle-play-publisher#promoting-artifacts
-                        """.trimMargin(),
-                    arrayOf(extension, executionDir)
+                    |Promotes a release for variant $taskVariantName.
+                    |   See https://github.com/Triple-T/gradle-play-publisher#promoting-artifacts
+                    """.trimMargin(),
+                    arrayOf(extension, executionDir),
             ) {
                 configureInputs()
 
@@ -442,12 +454,12 @@ internal class PlayPublisherPlugin : Plugin<Project> {
             promoteReleaseAllTask { dependsOn(promoteReleaseTask) }
 
             val publishTask = project.newTask<GlobalPublishableArtifactLifecycleTask>(
-                    "publish$taskVariantName",
+                    "publish${taskVariantName}Apps",
                     """
-                        |Uploads APK or App Bundle and all Play Store metadata for variant '${variant.name}'.
-                        |   See https://github.com/Triple-T/gradle-play-publisher#managing-artifacts
-                        """.trimMargin(),
-                    arrayOf(extension, executionDir)
+                    |Uploads APK or App Bundle and all Play Store metadata for variant $taskVariantName.
+                    |   See https://github.com/Triple-T/gradle-play-publisher#managing-artifacts
+                    """.trimMargin(),
+                    arrayOf(extension, executionDir),
             ) {
                 dependsOn(if (extension.defaultToAppBundles.get()) {
                     publishBundleTask
@@ -458,6 +470,99 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 dependsOn(publishProductsTask)
             }
             publishAllTask { dependsOn(publishTask) }
+
+            // --------------------- END: RELEASE ONLY VARIANT SPECIFIC TASKS ---------------------
+
+            val availableGlobals = setOfNotNull(
+                    variant.flavorName,
+                    variant.buildType,
+                    *variant.productFlavors.map { (_, flavor) -> flavor }.toTypedArray()
+            ).let {
+                it - variant.name
+            }
+
+            // ----------------------------- START: SEMI-GLOBAL TASKS -----------------------------
+
+            for (global in availableGlobals) {
+                val taskQualifier = global.capitalize()
+                val extension = extensionStore[global] ?: run e@{
+                    val ordering = variant.generateExtensionOverrideOrdering()
+
+                    var i = ordering.indexOf(global)
+                    while (i < ordering.size) {
+                        val nextExtension = extensionStore[ordering[++i]]
+                        if (nextExtension != null) {
+                            return@e nextExtension
+                        }
+                    }
+                    error("Base extension not found.")
+                }
+
+                project.newTask<BootstrapLifecycleTask>(
+                        "bootstrap${taskQualifier}Listing",
+                        """
+                        |Downloads the Play Store listing metadata for all $taskQualifier variants.
+                        |   See https://github.com/Triple-T/gradle-play-publisher#quickstart
+                        """.trimMargin(),
+                        arrayOf(bootstrapOptionsHolder),
+                        allowExisting = true,
+                ).configure { dependsOn(bootstrapTask) }
+                project.newTask<GlobalPublishableArtifactLifecycleTask>(
+                        "publish${taskQualifier}Apps",
+                        """
+                        |Uploads APK or App Bundle and all Play Store metadata for all $taskQualifier variants.
+                        |   See https://github.com/Triple-T/gradle-play-publisher#managing-artifacts
+                        """.trimMargin(),
+                        arrayOf(extension, executionDir),
+                        allowExisting = true,
+                ).configure { dependsOn(publishTask) }
+                project.newTask<PublishableTrackLifecycleTask>(
+                        "publish${taskQualifier}Apk",
+                        """
+                        |Uploads APK for all $taskQualifier variants.
+                        |   See https://github.com/Triple-T/gradle-play-publisher#publishing-apks
+                        """.trimMargin(),
+                        arrayOf(extension, executionDir),
+                        allowExisting = true,
+                ).configure { dependsOn(publishApkTask) }
+                project.newTask<PublishableTrackLifecycleTask>(
+                        "publish${taskQualifier}Bundle",
+                        """
+                        |Uploads App Bundle for all $taskQualifier variants.
+                        |   See https://github.com/Triple-T/gradle-play-publisher#publishing-an-app-bundle
+                        """.trimMargin(),
+                        arrayOf(extension, executionDir),
+                        allowExisting = true,
+                ).configure { dependsOn(publishBundleTask) }
+                project.newTask<UpdatableTrackLifecycleTask>(
+                        "promote${taskQualifier}Artifact",
+                        """
+                        |Promotes a release for all $taskQualifier variants.
+                        |   See https://github.com/Triple-T/gradle-play-publisher#promoting-artifacts
+                        """.trimMargin(),
+                        arrayOf(extension, executionDir),
+                        allowExisting = true,
+                ).configure { dependsOn(promoteReleaseTask) }
+                project.newTask<WriteTrackLifecycleTask>(
+                        "publish${taskQualifier}Listing",
+                        """
+                        |Uploads all Play Store metadata for all $taskQualifier variants.
+                        |   See https://github.com/Triple-T/gradle-play-publisher#publishing-listings
+                        """.trimMargin(),
+                        arrayOf(extension, executionDir),
+                        allowExisting = true,
+                ).configure { dependsOn(publishListingTask) }
+                project.newTask<Task>(
+                        "publish${taskQualifier}Products",
+                        """
+                        |Uploads all Play Store in-app products for all $taskQualifier variants.
+                        |   See https://github.com/Triple-T/gradle-play-publisher#publishing-in-app-products
+                        """.trimMargin(),
+                        allowExisting = true,
+                ).configure { dependsOn(publishProductsTask) }
+            }
+
+            // ----------------------------- END: SEMI-GLOBAL TASKS -----------------------------
         }
 
         project.afterEvaluate {

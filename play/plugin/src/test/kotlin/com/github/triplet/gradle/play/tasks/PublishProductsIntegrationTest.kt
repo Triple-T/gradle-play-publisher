@@ -5,6 +5,7 @@ import com.github.triplet.gradle.androidpublisher.UpdateProductResponse
 import com.github.triplet.gradle.androidpublisher.newUpdateProductResponse
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.github.triplet.gradle.play.helpers.SharedIntegrationTest
+import com.github.triplet.gradle.play.tasks.shared.LifecycleIntegrationTests
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.TaskOutcome.NO_SOURCE
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
@@ -12,7 +13,8 @@ import org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
 import org.junit.jupiter.api.Test
 import java.io.File
 
-class PublishProductsIntegrationTest : IntegrationTestBase(), SharedIntegrationTest {
+class PublishProductsIntegrationTest : IntegrationTestBase(), SharedIntegrationTest,
+        LifecycleIntegrationTests {
     override fun taskName(taskVariant: String) = ":publish${taskVariant}Products"
 
     @Test
