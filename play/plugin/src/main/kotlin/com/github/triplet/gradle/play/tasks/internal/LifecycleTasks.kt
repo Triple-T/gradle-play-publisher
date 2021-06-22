@@ -27,6 +27,11 @@ internal abstract class GlobalPublishableArtifactLifecycleTask @Inject construct
 ) : DefaultTask(),
         GlobalPublishableArtifactExtensionOptions by CliOptionsImpl(extension, executionDir)
 
+internal abstract class GlobalUploadableArtifactLifecycleTask @Inject constructor(
+        @get:Nested val extension: PlayPublisherExtension,
+        executionDir: Directory,
+) : DefaultTask(), ArtifactExtensionOptions by CliOptionsImpl(extension, executionDir)
+
 internal abstract class BootstrapLifecycleTask @Inject constructor(
         optionsHolder: BootstrapOptions.Holder,
 ) : DefaultTask(), BootstrapOptions by optionsHolder
