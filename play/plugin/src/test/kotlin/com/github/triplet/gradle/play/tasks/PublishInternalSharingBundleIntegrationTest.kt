@@ -6,6 +6,7 @@ import com.github.triplet.gradle.androidpublisher.newUploadInternalSharingArtifa
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.github.triplet.gradle.play.helpers.SharedIntegrationTest.Companion.DEFAULT_TASK_VARIANT
 import com.github.triplet.gradle.play.tasks.shared.ArtifactIntegrationTests
+import com.github.triplet.gradle.play.tasks.shared.LifecycleIntegrationTests
 import com.github.triplet.gradle.play.tasks.shared.PublishInternalSharingArtifactIntegrationTests
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.BuildResult
@@ -14,7 +15,7 @@ import org.junit.jupiter.api.Test
 import java.io.File
 
 class PublishInternalSharingBundleIntegrationTest : IntegrationTestBase(), ArtifactIntegrationTests,
-        PublishInternalSharingArtifactIntegrationTests {
+        PublishInternalSharingArtifactIntegrationTests, LifecycleIntegrationTests {
     override fun taskName(taskVariant: String) =
             ":upload${taskVariant.ifEmpty { DEFAULT_TASK_VARIANT }}PrivateBundle"
 

@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.ValueSource
 interface LifecycleIntegrationTests : SharedIntegrationTest {
     @ParameterizedTest
     @ValueSource(strings = [
+        "",
         "release",
         "paid",
         "free",

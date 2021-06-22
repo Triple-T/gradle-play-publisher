@@ -38,6 +38,7 @@ import com.github.triplet.gradle.play.tasks.PublishProducts
 import com.github.triplet.gradle.play.tasks.internal.BootstrapLifecycleTask
 import com.github.triplet.gradle.play.tasks.internal.BootstrapOptions
 import com.github.triplet.gradle.play.tasks.internal.GlobalPublishableArtifactLifecycleTask
+import com.github.triplet.gradle.play.tasks.internal.GlobalUploadableArtifactLifecycleTask
 import com.github.triplet.gradle.play.tasks.internal.PlayApiService
 import com.github.triplet.gradle.play.tasks.internal.PublishArtifactTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PublishableTrackLifecycleTask
@@ -121,6 +122,22 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 """
                 |Uploads App Bundle for all variants.
                 |   See https://github.com/Triple-T/gradle-play-publisher#publishing-an-app-bundle
+                """.trimMargin(),
+                arrayOf(cliOptionsExtension, executionDir),
+        )
+        val publishInternalSharingApkAllTask = project.newTask<GlobalUploadableArtifactLifecycleTask>(
+                "uploadPrivateApk",
+                """
+                |Uploads Internal Sharing APK for all variants.
+                |   See https://github.com/Triple-T/gradle-play-publisher#uploading-an-internal-sharing-artifact
+                """.trimMargin(),
+                arrayOf(cliOptionsExtension, executionDir),
+        )
+        val publishInternalSharingBundleAllTask = project.newTask<GlobalUploadableArtifactLifecycleTask>(
+                "uploadPrivateBundle",
+                """
+                |Uploads Internal Sharing App Bundle for all variants.
+                |   See https://github.com/Triple-T/gradle-play-publisher#uploading-an-internal-sharing-artifact
                 """.trimMargin(),
                 arrayOf(cliOptionsExtension, executionDir),
         )
@@ -241,6 +258,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
 
                 configure3pDeps(extension, taskVariantName)
             }
+            publishInternalSharingApkAllTask { dependsOn(publishInternalSharingApkTask) }
 
             val publishInternalSharingBundleTask = project.newTask<PublishInternalSharingBundle>(
                     "upload${taskVariantName}PrivateBundle",
@@ -257,6 +275,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
 
                 configure3pDeps(extension, taskVariantName)
             }
+            publishInternalSharingBundleAllTask { dependsOn(publishInternalSharingBundleTask) }
 
             project.newTask<InstallInternalSharingArtifact>(
                     "install${taskVariantName}PrivateArtifact",
@@ -485,6 +504,9 @@ internal class PlayPublisherPlugin : Plugin<Project> {
 
             for (global in availableGlobals) {
                 val taskQualifier = global.capitalize()
+
+                // We want to disallow using the leaf extension past this point
+                @Suppress("NAME_SHADOWING")
                 val extension = extensionStore[global] ?: run e@{
                     val ordering = variant.generateExtensionOverrideOrdering()
 
@@ -534,6 +556,24 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                         arrayOf(extension, executionDir),
                         allowExisting = true,
                 ).configure { dependsOn(publishBundleTask) }
+                project.newTask<GlobalUploadableArtifactLifecycleTask>(
+                        "upload${taskQualifier}PrivateApk",
+                        """
+                        |Uploads Internal Sharing APK for all $taskQualifier variants.
+                        |   See https://github.com/Triple-T/gradle-play-publisher#uploading-an-internal-sharing-artifact
+                        """.trimMargin(),
+                        arrayOf(extension, executionDir),
+                        allowExisting = true,
+                ).configure { dependsOn(publishInternalSharingApkTask) }
+                project.newTask<GlobalUploadableArtifactLifecycleTask>(
+                        "upload${taskQualifier}PrivateBundle",
+                        """
+                        |Uploads Internal Sharing App Bundle for all $taskQualifier variants.
+                        |   See https://github.com/Triple-T/gradle-play-publisher#uploading-an-internal-sharing-artifact
+                        """.trimMargin(),
+                        arrayOf(extension, executionDir),
+                        allowExisting = true,
+                ).configure { dependsOn(publishInternalSharingBundleTask) }
                 project.newTask<UpdatableTrackLifecycleTask>(
                         "promote${taskQualifier}Artifact",
                         """
