@@ -8,7 +8,6 @@ import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome.NO_SOURCE
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
@@ -169,7 +168,6 @@ interface ArtifactIntegrationTests : SharedIntegrationTest {
         result2.requireTask(outcome = UP_TO_DATE)
     }
 
-    @Disabled("https://github.com/gradle/gradle/issues/16775")
     @Test
     fun `Using custom artifact correctly tracks dependencies`() {
         // language=gradle
