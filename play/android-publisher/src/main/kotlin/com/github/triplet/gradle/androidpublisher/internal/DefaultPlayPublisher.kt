@@ -48,7 +48,7 @@ internal class DefaultPlayPublisher(
     override fun commitEdit(id: String, sendChangesForReview: Boolean): CommitResponse {
         return try {
             publisher.edits().commit(appId, id)
-                    .apply { if (!sendChangesForReview) changesNotSentForReview = true }
+                    .setChangesNotSentForReview(!sendChangesForReview)
                     .execute()
             CommitResponse.Success
         } catch (e: GoogleJsonResponseException) {

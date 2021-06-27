@@ -87,10 +87,17 @@ sealed class CommitResponse {
             private val e: GoogleJsonResponseException,
     ) : CommitResponse() {
         /** @return true if the changes cannot be sent for review, false otherwise */
-        fun failedToSendForReview(): Boolean = e has "badRequest"
+        fun failedToSendForReview(): Boolean =
+                e has "badRequest" && e.message.orEmpty().contains("changesNotSentForReview")
 
         /** Cleanly rethrows the error. */
-        fun rethrow(): Nothing = throw e
+        fun rethrow(suppressed: Failure? = null): Nothing {
+            if (suppressed != null) {
+                e.addSuppressed(suppressed.e)
+            }
+
+            throw e
+        }
     }
 }
 
