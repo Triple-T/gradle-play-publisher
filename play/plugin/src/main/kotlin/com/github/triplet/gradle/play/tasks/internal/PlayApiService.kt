@@ -48,7 +48,7 @@ internal abstract class PlayApiService @Inject constructor(
         if (response is CommitResponse.Failure) {
             if (response.failedToSendForReview()) {
                 val retryResponse = publisher.commitEdit(editId, sendChangesForReview = false)
-                (retryResponse as? CommitResponse.Failure)?.rethrow()
+                (retryResponse as? CommitResponse.Failure)?.rethrow(response)
             } else {
                 response.rethrow()
             }
