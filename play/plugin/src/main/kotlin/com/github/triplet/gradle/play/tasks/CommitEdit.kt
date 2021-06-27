@@ -7,12 +7,12 @@ import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
 import org.gradle.api.logging.Logging
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
-import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.workers.WorkerExecutor
 import javax.inject.Inject
 
 internal abstract class CommitEdit @Inject constructor(
         extension: PlayPublisherExtension,
+        private val executor: WorkerExecutor,
 ) : PublishTaskBase(extension) {
     @TaskAction
     fun commit() {
@@ -22,7 +22,7 @@ internal abstract class CommitEdit @Inject constructor(
             return
         }
 
-        project.serviceOf<WorkerExecutor>().noIsolation().submit(Committer::class) {
+        executor.noIsolation().submit(Committer::class) {
             paramsForBase(this)
         }
     }

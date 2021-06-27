@@ -9,13 +9,13 @@ import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
 import org.gradle.api.file.Directory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
-import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.workers.WorkerExecutor
 import javax.inject.Inject
 
 internal abstract class PromoteRelease @Inject constructor(
         extension: PlayPublisherExtension,
         executionDir: Directory,
+        private val executor: WorkerExecutor,
 ) : PublishArtifactTaskBase(extension),
         UpdatableTrackExtensionOptions by CliOptionsImpl(extension, executionDir) {
     init {
@@ -25,7 +25,7 @@ internal abstract class PromoteRelease @Inject constructor(
 
     @TaskAction
     fun promote() {
-        project.serviceOf<WorkerExecutor>().noIsolation().submit(Promoter::class) {
+        executor.noIsolation().submit(Promoter::class) {
             paramsForBase(this)
         }
     }
