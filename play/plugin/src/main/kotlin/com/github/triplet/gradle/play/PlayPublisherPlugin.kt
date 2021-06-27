@@ -225,7 +225,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
 
             @Suppress("UNCHECKED_CAST") // Needed for overload ambiguity
             fun getArtifactDependenciesHack(
-                    artifact: ArtifactType<*>,
+                    artifact: SingleArtifact<*>,
             ): Provider<*> = extension.artifactDir.map<String> {
                 ""
             }.orElse(variant.artifacts.get(artifact) as Provider<String>)
@@ -263,7 +263,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 outputDirectory.set(project.layout.buildDirectory.dir(
                         "outputs/internal-sharing/apk/${variant.name}"))
 
-                dependsOn(getArtifactDependenciesHack(ArtifactType.APK))
+                dependsOn(getArtifactDependenciesHack(SingleArtifact.APK))
                 configure3pDeps(extension, taskVariantName)
             }
             publishInternalSharingApkAllTask { dependsOn(publishInternalSharingApkTask) }
@@ -281,7 +281,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 outputDirectory.set(project.layout.buildDirectory.dir(
                         "outputs/internal-sharing/bundle/${variant.name}"))
 
-                dependsOn(getArtifactDependenciesHack(ArtifactType.BUNDLE))
+                dependsOn(getArtifactDependenciesHack(SingleArtifact.BUNDLE))
                 configure3pDeps(extension, taskVariantName)
             }
             publishInternalSharingBundleAllTask { dependsOn(publishInternalSharingBundleTask) }
@@ -437,7 +437,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                     files
                 }))
 
-                dependsOn(getArtifactDependenciesHack(ArtifactType.APK))
+                dependsOn(getArtifactDependenciesHack(SingleArtifact.APK))
                 finalizedBy(commitEditTask)
                 configure3pDeps(extension, taskVariantName)
 
@@ -461,7 +461,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 configureInputs()
                 bundles.from(findBundleFiles())
 
-                dependsOn(getArtifactDependenciesHack(ArtifactType.BUNDLE))
+                dependsOn(getArtifactDependenciesHack(SingleArtifact.BUNDLE))
                 finalizedBy(commitEditTask)
                 configure3pDeps(extension, taskVariantName)
             }
