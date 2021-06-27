@@ -22,6 +22,7 @@ import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.FileType
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.InputFiles
@@ -32,7 +33,6 @@ import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
-import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.work.ChangeType
 import org.gradle.work.InputChanges
 import org.gradle.workers.WorkAction
@@ -44,7 +44,10 @@ import java.util.TreeSet
 import javax.inject.Inject
 
 @CacheableTask
-internal abstract class GenerateResources : DefaultTask() {
+internal abstract class GenerateResources @Inject constructor(
+        private val layout: ProjectLayout,
+        private val executor: WorkerExecutor,
+) : DefaultTask() {
     @get:Internal
     abstract val resSrcDirs: ListProperty<Directory>
 
@@ -66,16 +69,15 @@ internal abstract class GenerateResources : DefaultTask() {
                 .filter { it.fileType == FileType.FILE }
                 .map { it.changeType to it.file }
 
-        val work = project.serviceOf<WorkerExecutor>().noIsolation()
         if (validateChanges.isNotEmpty()) {
-            work.submit(Validator::class) {
+            executor.noIsolation().submit(Validator::class) {
                 files.set(validateChanges)
                 inputDirs.set(resSrcDirs)
             }
         }
         if (generateChanges.isNotEmpty()) {
-            work.submit(Generator::class) {
-                projectDirectory.set(project.layout.projectDirectory)
+            executor.noIsolation().submit(Generator::class) {
+                projectDirectory.set(layout.projectDirectory)
                 inputDirs.set(resSrcDirs)
                 outputDir.set(resDir)
                 changedFiles.set(generateChanges)

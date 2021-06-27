@@ -19,7 +19,6 @@ import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
-import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.workers.WorkerExecutor
 import java.io.File
 import javax.inject.Inject
@@ -27,6 +26,7 @@ import javax.inject.Inject
 internal abstract class PublishInternalSharingApk @Inject constructor(
         extension: PlayPublisherExtension,
         executionDir: Directory,
+        private val executor: WorkerExecutor,
 ) : PublishTaskBase(extension),
         ArtifactExtensionOptions by CliOptionsImpl(extension, executionDir) {
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -39,7 +39,7 @@ internal abstract class PublishInternalSharingApk @Inject constructor(
 
     @TaskAction
     fun publishApk() {
-        project.serviceOf<WorkerExecutor>().noIsolation().submit(Processor::class) {
+        executor.noIsolation().submit(Processor::class) {
             paramsForBase(this)
 
             apkFiles.set(apks)

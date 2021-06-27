@@ -16,7 +16,6 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
-import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkerExecutor
@@ -26,6 +25,7 @@ import javax.inject.Inject
 
 internal abstract class InstallInternalSharingArtifact @Inject constructor(
         private val extension: AppExtension,
+        private val executor: WorkerExecutor,
 ) : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputDirectory
@@ -39,7 +39,7 @@ internal abstract class InstallInternalSharingArtifact @Inject constructor(
     @TaskAction
     fun install() {
         val uploads = uploadedArtifacts
-        project.serviceOf<WorkerExecutor>().noIsolation().submit(Installer::class) {
+        executor.noIsolation().submit(Installer::class) {
             uploadedArtifacts.set(uploads)
             adbExecutable.set(extension.adbExecutable)
             timeOutInMs.set(extension.adbOptions.timeOutInMs)
