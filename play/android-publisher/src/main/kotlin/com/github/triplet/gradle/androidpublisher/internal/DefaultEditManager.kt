@@ -213,7 +213,7 @@ internal class DefaultEditManager(
             e has "apkNotificationMessageKeyUpgradeVersionConflict" ||
             e has "apkUpgradeVersionConflict" ||
             e has "apkNoUpgradePath" ||
-            e has "forbidden" && e.message.orEmpty().contains("version code")
+            e has "forbidden" && e.details.message.orEmpty().contains("version code")
     ) {
         when (strategy) {
             ResolutionStrategy.AUTO -> throw IllegalStateException(

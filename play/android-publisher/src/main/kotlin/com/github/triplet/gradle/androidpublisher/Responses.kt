@@ -56,7 +56,7 @@ sealed class EditResponse {
     ) : EditResponse()
 
     /** Response for an unsuccessful edit request. */
-    class Failure internal constructor(
+    data class Failure internal constructor(
             private val e: GoogleJsonResponseException,
     ) : EditResponse() {
         /** @return true if the app wasn't found in the Play Console, false otherwise */
@@ -83,12 +83,12 @@ sealed class CommitResponse {
     object Success : CommitResponse()
 
     /** Response for an unsuccessful commit request. */
-    class Failure internal constructor(
+    data class Failure internal constructor(
             private val e: GoogleJsonResponseException,
     ) : CommitResponse() {
         /** @return true if the changes cannot be sent for review, false otherwise */
         fun failedToSendForReview(): Boolean =
-                e has "badRequest" && e.message.orEmpty().contains("changesNotSentForReview")
+                e has "badRequest" && e.details.message.orEmpty().contains("changesNotSentForReview")
 
         /** Cleanly rethrows the error. */
         fun rethrow(suppressed: Failure? = null): Nothing {
