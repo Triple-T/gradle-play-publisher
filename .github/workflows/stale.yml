@@ -12,7 +12,8 @@ jobs:
           days-before-stale: 7
           stale-issue-label: waiting-for-reply
           stale-pr-label: waiting-for-reply
-          exempt-issue-labels: feature:apk,feature:bundle,feature:listing,feature:other
+          exempt-issue-labels: feature:apk,feature:bundle,feature:listing,feature:other,dontclose
+          exempt-pr-labels: dontclose
           stale-issue-message: |
             This issue has been automatically marked as stale because it has not had recent
             activity. It will be closed if no further activity occurs. Thank you for your
