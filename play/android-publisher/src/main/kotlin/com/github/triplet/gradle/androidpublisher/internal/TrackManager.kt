@@ -207,6 +207,8 @@ internal class DefaultTrackManager(
             this.userFraction = userFraction.takeIf { isRollout() }
         } else if (isRollout() && this.userFraction == null) {
             this.userFraction = DEFAULT_USER_FRACTION
+        } else if (!isRollout()) {
+            this.userFraction = null
         }
     }
 
