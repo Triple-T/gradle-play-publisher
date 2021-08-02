@@ -12,6 +12,9 @@ dependencies {
     implementation(project(":common:validation"))
 
     compileOnly(Config.Libs.All.agp) // Compile only to not force a specific AGP version
+    compileOnly(Config.Libs.All.agpCommon)
+    compileOnly(Config.Libs.All.agpTest)
+    compileOnly(Config.Libs.All.agpDdms)
     implementation(Config.Libs.All.guava)
     implementation(Config.Libs.All.gson)
 
@@ -27,11 +30,16 @@ dependencies {
 }
 
 tasks.withType<PluginUnderTestMetadata>().configureEach {
+    dependsOn("compileKotlin", "compileTestKotlin", "compileJava", "compileTestJava")
+    dependsOn("processResources", "processTestResources")
+    dependsOn(":play:android-publisher:testFixturesJar")
+
     pluginClasspath.setFrom(/* reset */)
 
     pluginClasspath.from(configurations.compileClasspath)
     pluginClasspath.from(configurations.testCompileClasspath)
-    pluginClasspath.from(sourceSets.main.get().runtimeClasspath)
+    pluginClasspath.from(configurations.runtimeClasspath)
+    pluginClasspath.from(provider { sourceSets.test.get().runtimeClasspath.files })
 }
 
 afterEvaluate {

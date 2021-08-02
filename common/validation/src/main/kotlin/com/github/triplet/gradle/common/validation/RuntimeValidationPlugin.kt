@@ -22,7 +22,7 @@ internal class RuntimeValidationPlugin : Plugin<Project> {
     }
 
     private companion object {
-        val MIN_GRADLE_VERSION = GradleVersion.version("6.8")
-        val MIN_AGP_VERSION = VersionNumber.parse("4.2.0")
+        val MIN_GRADLE_VERSION = GradleVersion.version("7.0.2")
+        val MIN_AGP_VERSION = VersionNumber.parse("7.0.0")
     }
 }

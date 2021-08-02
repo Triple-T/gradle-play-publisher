@@ -704,7 +704,7 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
                 repositories.mavenCentral()
 
                 dependencies.classpath files($classpathJars)
-                dependencies.classpath 'com.bugsnag:bugsnag-android-gradle-plugin:5.7.6'
+                dependencies.classpath 'com.bugsnag:bugsnag-android-gradle-plugin:7.0.0-beta01'
             }
 
             apply plugin: 'com.android.application'
