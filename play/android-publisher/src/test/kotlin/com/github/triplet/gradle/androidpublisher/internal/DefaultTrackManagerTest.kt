@@ -107,6 +107,33 @@ class DefaultTrackManagerTest {
     }
 
     @Test
+    fun `Standard build chooses inProgress status when user fraction is set`() {
+        val config = TrackManager.UpdateConfig(
+                trackName = "alpha",
+                versionCodes = listOf(888),
+                didPreviousBuildSkipCommit = false,
+                base = TrackManager.BaseConfig(
+                        releaseStatus = null,
+                        userFraction = .5,
+                        updatePriority = null,
+                        releaseNotes = null,
+                        retainableArtifacts = null,
+                        releaseName = null
+                )
+        )
+        `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().setTrack("alpha"))
+
+        tracks.update(config)
+
+        val trackCaptor = ArgumentCaptor.forClass(Track::class.java)
+        verify(mockPublisher).updateTrack(eq("edit-id"), trackCaptor.capture())
+        assertThat(trackCaptor.value.track).isEqualTo("alpha")
+        assertThat(trackCaptor.value.releases).hasSize(1)
+        assertThat(trackCaptor.value.releases.single().status).isEqualTo("inProgress")
+        assertThat(trackCaptor.value.releases.single().userFraction).isEqualTo(0.5)
+    }
+
+    @Test
     fun `Standard build with rollout release creates new release`() {
         val config = TrackManager.UpdateConfig(
                 trackName = "alpha",
@@ -906,7 +933,7 @@ class DefaultTrackManagerTest {
                 fromTrackName = "alpha",
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
-                        userFraction = 0.8,
+                        userFraction = .8,
                         updatePriority = null,
                         releaseNotes = null,
                         retainableArtifacts = null,
@@ -932,5 +959,36 @@ class DefaultTrackManagerTest {
         assertThat(trackCaptor.value.releases).hasSize(1)
         assertThat(trackCaptor.value.releases.single().status).isEqualTo("completed")
         assertThat(trackCaptor.value.releases.single().userFraction).isNull()
+    }
+
+    @Test
+    fun `Promotion with user fraction and unspecified status automatically uses inProgress`() {
+        val config = TrackManager.PromoteConfig(
+                promoteTrackName = "alpha",
+                fromTrackName = "internal",
+                base = TrackManager.BaseConfig(
+                        releaseStatus = null,
+                        userFraction = .5,
+                        updatePriority = null,
+                        releaseNotes = null,
+                        retainableArtifacts = null,
+                        releaseName = null
+                )
+        )
+        `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().apply {
+            track = "internal"
+            releases = listOf(TrackRelease().apply {
+                status = "completed"
+                versionCodes = listOf(1)
+            })
+        })
+
+        tracks.promote(config)
+
+        val trackCaptor = ArgumentCaptor.forClass(Track::class.java)
+        verify(mockPublisher).updateTrack(eq("edit-id"), trackCaptor.capture())
+        assertThat(trackCaptor.value.releases).hasSize(1)
+        assertThat(trackCaptor.value.releases.single().status).isEqualTo("inProgress")
+        assertThat(trackCaptor.value.releases.single().userFraction).isEqualTo(0.5)
     }
 }
