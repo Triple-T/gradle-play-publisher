@@ -6,7 +6,6 @@ plugins {
 
 dependencies {
     compileOnly(Config.Libs.All.agp)
-    compileOnly(Config.Libs.All.agpCommon)
 
     testImplementation(Config.Libs.All.junit)
     testImplementation(Config.Libs.All.junitEngine)

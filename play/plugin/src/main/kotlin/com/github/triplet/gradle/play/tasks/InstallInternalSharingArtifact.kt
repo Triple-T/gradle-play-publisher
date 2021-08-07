@@ -138,8 +138,7 @@ internal abstract class InstallInternalSharingArtifact @Inject constructor(
                         adbExecutable,
                         timeOutInMs,
                         LoggerWrapper(Logging.getLogger(
-                                InstallInternalSharingArtifact::class.java)),
-                        System.getenv("ANDROID_SERIAL")
+                                InstallInternalSharingArtifact::class.java))
                 )
                 return DefaultAdbShell(deviceProvider, timeOutInMs.toLong())
             }

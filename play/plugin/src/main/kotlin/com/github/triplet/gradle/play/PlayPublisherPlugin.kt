@@ -1,7 +1,7 @@
 package com.github.triplet.gradle.play
 
-import com.android.build.api.artifact.SingleArtifact
-import com.android.build.api.variant.ApplicationAndroidComponentsExtension
+import com.android.build.api.artifact.ArtifactType
+import com.android.build.api.extension.ApplicationAndroidComponentsExtension
 import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
 import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
@@ -205,7 +205,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                         include("*.apk")
                     }.map { it.absolutePath }
                 }
-            }.orElse(variant.artifacts.get(SingleArtifact.APK).map {
+            }.orElse(variant.artifacts.get(ArtifactType.APK).map {
                 variant.artifacts.getBuiltArtifactsLoader().load(it)
                         ?.elements?.map { it.outputFile }.sneakyNull()
             })
@@ -219,13 +219,13 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                         include("*.aab")
                     }.map { it.absolutePath }
                 }
-            }.orElse(variant.artifacts.get(SingleArtifact.BUNDLE).map {
+            }.orElse(variant.artifacts.get(ArtifactType.BUNDLE).map {
                 listOf(it.asFile.absolutePath)
             })
 
             @Suppress("UNCHECKED_CAST") // Needed for overload ambiguity
             fun getArtifactDependenciesHack(
-                    artifact: SingleArtifact<*>,
+                    artifact: ArtifactType<*>,
             ): Provider<*> = extension.artifactDir.map<String> {
                 ""
             }.orElse(variant.artifacts.get(artifact) as Provider<String>)
@@ -263,7 +263,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 outputDirectory.set(project.layout.buildDirectory.dir(
                         "outputs/internal-sharing/apk/${variant.name}"))
 
-                dependsOn(getArtifactDependenciesHack(SingleArtifact.APK))
+                dependsOn(getArtifactDependenciesHack(ArtifactType.APK))
                 configure3pDeps(extension, taskVariantName)
             }
             publishInternalSharingApkAllTask { dependsOn(publishInternalSharingApkTask) }
@@ -281,7 +281,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 outputDirectory.set(project.layout.buildDirectory.dir(
                         "outputs/internal-sharing/bundle/${variant.name}"))
 
-                dependsOn(getArtifactDependenciesHack(SingleArtifact.BUNDLE))
+                dependsOn(getArtifactDependenciesHack(ArtifactType.BUNDLE))
                 configure3pDeps(extension, taskVariantName)
             }
             publishInternalSharingBundleAllTask { dependsOn(publishInternalSharingBundleTask) }
@@ -426,7 +426,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                         include("mapping.txt", "*.mapping.txt")
                     })
                 }.orElse(project.provider {
-                    variant.artifacts.get(SingleArtifact.OBFUSCATION_MAPPING_FILE).takeUnless {
+                    variant.artifacts.get(ArtifactType.OBFUSCATION_MAPPING_FILE).takeUnless {
                         extension.artifactDir.isPresent
                     }
                 }.map {
@@ -437,7 +437,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                     files
                 }))
 
-                dependsOn(getArtifactDependenciesHack(SingleArtifact.APK))
+                dependsOn(getArtifactDependenciesHack(ArtifactType.APK))
                 finalizedBy(commitEditTask)
                 configure3pDeps(extension, taskVariantName)
 
@@ -461,7 +461,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 configureInputs()
                 bundles.from(findBundleFiles())
 
-                dependsOn(getArtifactDependenciesHack(SingleArtifact.BUNDLE))
+                dependsOn(getArtifactDependenciesHack(ArtifactType.BUNDLE))
                 finalizedBy(commitEditTask)
                 configure3pDeps(extension, taskVariantName)
             }
