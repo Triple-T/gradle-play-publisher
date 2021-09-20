@@ -49,6 +49,12 @@ fun File.safeCreateNewFile(): File = apply {
     check(create() || create()) { "Unable to create $this" }
 }
 
+/** @return this file after ensuring that it has been renamed */
+fun File.safeRenameTo(dest: File): File = apply {
+    val rename = { renameTo(dest) }
+    check(rename() || rename()) { "Unable to rename $this to $dest" }
+}
+
 /**
  * Returns the contents of this file trimmed and with line separators normalized, or null if the
  * file is empty.
