@@ -5,13 +5,13 @@ plugins {
 }
 
 dependencies {
-    compileOnly(Config.Libs.All.agp)
-    compileOnly(Config.Libs.All.agpCommon)
+    compileOnly(libs.agp)
+    compileOnly(libs.agp.common)
 
-    testImplementation(Config.Libs.All.junit)
-    testImplementation(Config.Libs.All.junitEngine)
-    testImplementation(Config.Libs.All.truth)
-    testImplementation(Config.Libs.All.agp)
+    testImplementation(testLibs.junit)
+    testImplementation(testLibs.junit.engine)
+    testImplementation(testLibs.truth)
+    testImplementation(libs.agp)
 }
 
 afterEvaluate {

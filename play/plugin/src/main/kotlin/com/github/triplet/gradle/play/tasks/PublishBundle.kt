@@ -22,10 +22,12 @@ import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
+import org.gradle.work.DisableCachingByDefault
 import org.gradle.workers.WorkerExecutor
 import java.io.File
 import javax.inject.Inject
 
+@DisableCachingByDefault
 internal abstract class PublishBundle @Inject constructor(
         extension: PlayPublisherExtension,
         executionDir: Directory,

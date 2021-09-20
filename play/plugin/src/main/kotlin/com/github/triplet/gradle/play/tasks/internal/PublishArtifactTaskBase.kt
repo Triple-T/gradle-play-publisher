@@ -5,7 +5,9 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
+import org.gradle.work.DisableCachingByDefault
 
+@DisableCachingByDefault
 internal abstract class PublishArtifactTaskBase(
         extension: PlayPublisherExtension,
 ) : PublishTaskBase(extension) {

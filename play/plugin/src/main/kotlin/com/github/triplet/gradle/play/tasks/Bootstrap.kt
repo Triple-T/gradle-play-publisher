@@ -26,6 +26,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
+import org.gradle.work.DisableCachingByDefault
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkerExecutor
@@ -33,6 +34,7 @@ import java.io.File
 import java.net.URL
 import javax.inject.Inject
 
+@DisableCachingByDefault
 internal abstract class Bootstrap @Inject constructor(
         extension: PlayPublisherExtension,
         optionsHolder: BootstrapOptions.Holder,

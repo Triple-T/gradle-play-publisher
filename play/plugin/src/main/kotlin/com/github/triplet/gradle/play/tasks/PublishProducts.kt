@@ -18,11 +18,13 @@ import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
 import org.gradle.work.ChangeType
+import org.gradle.work.DisableCachingByDefault
 import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
 import org.gradle.workers.WorkerExecutor
 import javax.inject.Inject
 
+@DisableCachingByDefault
 internal abstract class PublishProducts @Inject constructor(
         extension: PlayPublisherExtension,
         private val executor: WorkerExecutor,

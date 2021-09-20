@@ -9,9 +9,11 @@ import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
 import org.gradle.api.file.Directory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
+import org.gradle.work.DisableCachingByDefault
 import org.gradle.workers.WorkerExecutor
 import javax.inject.Inject
 
+@DisableCachingByDefault
 internal abstract class PromoteRelease @Inject constructor(
         extension: PlayPublisherExtension,
         executionDir: Directory,

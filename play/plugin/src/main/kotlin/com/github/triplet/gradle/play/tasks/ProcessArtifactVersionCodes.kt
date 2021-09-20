@@ -11,10 +11,12 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
+import org.gradle.work.DisableCachingByDefault
 import org.gradle.workers.WorkerExecutor
 import javax.inject.Inject
 import kotlin.math.max
 
+@DisableCachingByDefault
 internal abstract class ProcessArtifactVersionCodes @Inject constructor(
         extension: PlayPublisherExtension,
         private val executor: WorkerExecutor,

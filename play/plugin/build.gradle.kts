@@ -11,22 +11,22 @@ dependencies {
     implementation(project(":common:utils"))
     implementation(project(":common:validation"))
 
-    compileOnly(Config.Libs.All.agp) // Compile only to not force a specific AGP version
-    compileOnly(Config.Libs.All.agpCommon)
-    compileOnly(Config.Libs.All.agpTest)
-    compileOnly(Config.Libs.All.agpDdms)
-    implementation(Config.Libs.All.guava)
-    implementation(Config.Libs.All.gson)
+    compileOnly(libs.agp) // Compile only to not force a specific AGP version
+    compileOnly(libs.agp.common)
+    compileOnly(libs.agp.test)
+    compileOnly(libs.agp.ddms)
+    implementation(libs.guava)
+    implementation(libs.client.gson)
 
     testImplementation(project(":common:utils"))
     testImplementation(project(":common:validation"))
     testImplementation(testFixtures(project(":play:android-publisher")))
-    testImplementation(Config.Libs.All.agp)
+    testImplementation(libs.agp)
 
-    testImplementation(Config.Libs.All.junit)
-    testImplementation(Config.Libs.All.junitEngine)
-    testImplementation(Config.Libs.All.junitParams)
-    testImplementation(Config.Libs.All.truth)
+    testImplementation(testLibs.junit)
+    testImplementation(testLibs.junit.engine)
+    testImplementation(testLibs.junit.params)
+    testImplementation(testLibs.truth)
 }
 
 tasks.withType<PluginUnderTestMetadata>().configureEach {
