@@ -205,7 +205,7 @@ play {
 ## Task organization
 
 GPP follows the Android Gradle Plugin's (AGP) naming convention: `[action][Variant][Thing]`. For
-example, `publishPaidReleaseBundle` will be generated if have a `paid` product flavor.
+example, `publishPaidReleaseBundle` will be generated if you have a `paid` product flavor.
 
 Lifecycle tasks to publish multiple product flavors at once are also available. For example,
 `publishBundle` publishes all variants.
@@ -476,7 +476,7 @@ play {
 
 #### Post-processing outputs sanitized by auto resolution
 
-For example, you could update you app's version name based on the new version code:
+For example, you could update your app's version name based on the new version code:
 
 ```kt
 import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
@@ -486,9 +486,9 @@ play {
     resolutionStrategy.set(ResolutionStrategy.AUTO)
 }
 
-android {
-  onVariantProperties {
-    for (output in outputs) {
+androidComponents {
+  onVariants { variant ->
+    for (output in variant.outputs) {
       val processedVersionCode = output.versionCode.map { playVersionCode ->
         // Do something to the version code...
         // In this example, version names will look like `myCustomVersionName.123`
