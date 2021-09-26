@@ -22,43 +22,43 @@ listings and other metadata.
 ## Table of contents
 
 1. [Quickstart guide](#quickstart-guide)
-1. [Prerequisites](#prerequisites)
+2. [Prerequisites](#prerequisites)
     1. [Initial Play Store upload](#initial-play-store-upload)
-    1. [Signing configuration](#signing-configuration)
-    1. [Service Account](#service-account)
-1. [Basic setup](#basic-setup)
+    2. [Signing configuration](#signing-configuration)
+    3. [Service Account](#service-account)
+3. [Basic setup](#basic-setup)
     1. [Installation](#installation)
-    1. [Authenticating Gradle Play Publisher](#authenticating-gradle-play-publisher)
-1. [Task organization](#task-organization)
-1. [Managing artifacts](#managing-artifacts)
+    2. [Authenticating Gradle Play Publisher](#authenticating-gradle-play-publisher)
+4. [Task organization](#task-organization)
+5. [Managing artifacts](#managing-artifacts)
     1. [Common configuration](#common-configuration)
-    1. [Publishing an App Bundle](#publishing-an-app-bundle)
-    1. [Publishing APKs](#publishing-apks)
-    1. [Uploading an Internal Sharing artifact](#uploading-an-internal-sharing-artifact)
-    1. [Promoting artifacts](#promoting-artifacts)
-    1. [Handling version conflicts](#handling-version-conflicts)
-1. [Managing Play Store metadata](#managing-play-store-metadata)
+    2. [Publishing an App Bundle](#publishing-an-app-bundle)
+    3. [Publishing APKs](#publishing-apks)
+    4. [Uploading an Internal Sharing artifact](#uploading-an-internal-sharing-artifact)
+    5. [Promoting artifacts](#promoting-artifacts)
+    6. [Handling version conflicts](#handling-version-conflicts)
+6. [Managing Play Store metadata](#managing-play-store-metadata)
     1. [Quickstart](#quickstart)
-    1. [Directory structure](#directory-structure)
-    1. [Publishing listings](#publishing-listings)
-    1. [Publishing in-app products](#publishing-in-app-products)
-1. [Working with product flavors](#working-with-product-flavors)
+    2. [Directory structure](#directory-structure)
+    3. [Publishing listings](#publishing-listings)
+    4. [Publishing in-app products](#publishing-in-app-products)
+7. [Working with product flavors](#working-with-product-flavors)
     1. [Disabling publishing](#disabling-publishing)
-    1. [Combining artifacts into a single release](#combining-artifacts-into-a-single-release)
-    1. [Using multiple Service Accounts](#using-multiple-service-accounts)
-1. [Advanced topics](#advanced-topics)
+    2. [Combining artifacts into a single release](#combining-artifacts-into-a-single-release)
+    3. [Using multiple Service Accounts](#using-multiple-service-accounts)
+8. [Advanced topics](#advanced-topics)
     1. [Using CLI options](#using-cli-options)
-    1. [Using HTTPS proxies](#using-https-proxies)
+    2. [Using HTTPS proxies](#using-https-proxies)
 
 ## Quickstart guide
 
 1. Upload the first version of your APK or App Bundle using the
    [Google Play Console](https://play.google.com/apps/publish)
-1. [Create a Google Play Service Account](#service-account)
-1. [Sign your release builds](https://developer.android.com/studio/publish/app-signing#gradle-sign)
+2. [Create a Google Play Service Account](#service-account)
+3. [Sign your release builds](https://developer.android.com/studio/publish/app-signing#gradle-sign)
    with a valid `signingConfig`
-1. [Add and apply the plugin](#installation)
-1. [Authenticate GPP](#authenticating-gradle-play-publisher)
+4. [Add and apply the plugin](#installation)
+5. [Authenticate GPP](#authenticating-gradle-play-publisher)
 
 ## Prerequisites
 
@@ -79,37 +79,37 @@ sure you have
 To use GPP, you must create a service account with access to the Play Developer API:
 
 1. If you don't already have one, create a GCP project for your app(s)
-1. Enable the
+2. Enable the
    [AndroidPublisher API](https://console.cloud.google.com/apis/library/androidpublisher.googleapis.com)
    for that GCP project
-1. [Link your Google Play developer account](https://play.google.com/console/developers/api-access)
+3. [Link your Google Play developer account](https://play.google.com/console/developers/api-access)
    to your GCP project
-1. Create a
+4. Create a
    [service account and key](https://console.cloud.google.com/apis/credentials/serviceaccountkey)
     1. Make sure you're in the GCP project you used above (check the `project` query param in the
        URL)
-    1. Select `New service account`
-    1. Give it a name and the Project Owner role (don't worry, we'll remove this later)
-    1. Leave JSON checked
-1. Move the downloaded JSON credentials into your project and
+    2. Select `New service account`
+    3. Give it a name and the Project Owner role (don't worry, we'll remove this later)
+    4. Leave JSON checked
+5. Move the downloaded JSON credentials into your project and
    [tell GPP about it](#authenticating-gradle-play-publisher)
-1. Give your service account
+6. Give your service account
    [permissions to publish apps](https://play.google.com/console/developers/users-and-permissions)
    on your behalf
     1. Click `Invite new user`
-    1. Copy/paste the service account email (you can find it in the JSON credentials)
-    1. Don't touch the roles
-    1. Specify which apps the service account should have access to. In this example, GPP has full
+    2. Copy/paste the service account email (you can find it in the JSON credentials)
+    3. Don't touch the roles
+    4. Specify which apps the service account should have access to. In this example, GPP has full
        access to testing tracks and app listings, but will be unable to make production releases:
        <img alt="Minimum Service Account permissions" src="assets/min-perms.png" width="66%" />
-1. Run `./gradlew bootstrapListing` or some other GPP task to validate your setup
-1. Now that you've successfully created the connection between GCP and Google Play, you can remove
+7. Run `./gradlew bootstrapListing` or some other GPP task to validate your setup
+8. Now that you've successfully created the connection between GCP and Google Play, you can remove
    the Project Owner permissions
     1. Go to your [IAM settings](https://console.cloud.google.com/iam-admin/iam)
-    1. Search for the service account you created
-    1. Click the edit icon (found at the end of the row)
-    1. In the permission selection panel that opens, click the trash icon to remove the owner role
-    1. Click save
+    2. Search for the service account you created
+    3. Click the edit icon (found at the end of the row)
+    4. In the permission selection panel that opens, click the trash icon to remove the owner role
+    5. Click save
 
 ## Basic setup
 
