@@ -90,7 +90,9 @@ To use GPP, you must create a service account with access to the Play Developer 
        URL)
     2. Select `New service account`
     3. Give it a name and the Project Owner role (don't worry, we'll remove this later)
-    4. Leave JSON checked
+    4. After creating the service account, find it in the list of all service accounts and use the 3
+       dots menu to `Manage keys`
+    5. From there, create a new key using the `Add key` menu (leave JSON selected)
 5. Move the downloaded JSON credentials into your project and
    [tell GPP about it](#authenticating-gradle-play-publisher)
 6. Give your service account
