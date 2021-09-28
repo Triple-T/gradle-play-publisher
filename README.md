@@ -449,6 +449,13 @@ would promote an artifact from the alpha ➡️ beta track with only 25% of user
   --release-status inProgress --user-fraction .25
 ```
 
+If you need to update the existing in-progress release rollout percentage only. For example, this is how 
+you would increase the % rollout of an existng in-progress production track release to 50% of users.
+
+```sh
+/gradlew promoteArtifact --update production --user-fraction 0.50 --release-status IN_PROGRESS
+```
+
 #### Finishing a rollout
 
 If you have an ongoing `inProgress` release and would like to perform a full rollout, simply change
