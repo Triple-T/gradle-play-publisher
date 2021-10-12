@@ -63,20 +63,15 @@ internal class DefaultTrackManager(
     }
 
     override fun update(config: TrackManager.UpdateConfig) {
-        val resolvedReleaseStatus = config.base.releaseStatus ?: DEFAULT_RELEASE_STATUS
-        val resolvedConfig = config.copy(base = config.base.copy(
-                releaseStatus = resolvedReleaseStatus
-        ))
-
-        val track = if (resolvedConfig.didPreviousBuildSkipCommit) {
-            createTrackForSkippedCommit(resolvedConfig)
-        } else if (resolvedReleaseStatus.isRollout()) {
-            createTrackForRollout(resolvedConfig)
+        val track = if (config.didPreviousBuildSkipCommit) {
+            createTrackForSkippedCommit(config)
+        } else if (config.base.releaseStatus.orDefault().isRollout()) {
+            createTrackForRollout(config)
         } else {
-            createDefaultTrack(resolvedConfig)
+            createDefaultTrack(config)
         }
 
-        track.maybeCopyChangelogFromPreviousRelease(resolvedConfig.trackName)
+        track.maybeCopyChangelogFromPreviousRelease(config.trackName)
 
         publisher.updateTrack(editId, track)
     }
@@ -112,12 +107,12 @@ internal class DefaultTrackManager(
             track.releases = listOf(TrackRelease().mergeChanges(config.versionCodes, config.base))
         } else {
             val hasReleaseToBeUpdated = track.releases.firstOrNull {
-                it.status == config.base.releaseStatus?.publishedName
+                it.status == config.base.releaseStatus.orDefault().publishedName
             } != null
 
             if (hasReleaseToBeUpdated) {
                 for (release in track.releases) {
-                    if (release.status == config.base.releaseStatus?.publishedName) {
+                    if (release.status == config.base.releaseStatus.orDefault().publishedName) {
                         release.mergeChanges(
                                 release.versionCodes.orEmpty() + config.versionCodes, config.base)
                     }
@@ -160,7 +155,7 @@ internal class DefaultTrackManager(
             config: TrackManager.BaseConfig,
     ) = apply {
         updateVersionCodes(versionCodes, config.retainableArtifacts)
-        updateStatus(config.releaseStatus)
+        updateStatus(config.releaseStatus, config.userFraction != null)
         updateConsoleName(config.releaseName)
         updateReleaseNotes(config.releaseNotes)
         updateUserFraction(config.userFraction)
@@ -172,8 +167,14 @@ internal class DefaultTrackManager(
         this.versionCodes = newVersions + retainableArtifacts.orEmpty()
     }
 
-    private fun TrackRelease.updateStatus(releaseStatus: ReleaseStatus?) {
-        if (releaseStatus != null) status = releaseStatus.publishedName
+    private fun TrackRelease.updateStatus(releaseStatus: ReleaseStatus?, hasUserFraction: Boolean) {
+        if (releaseStatus != null) {
+            status = releaseStatus.publishedName
+        } else if (hasUserFraction) {
+            status = ReleaseStatus.IN_PROGRESS.publishedName
+        } else if (status == null) {
+            status = DEFAULT_RELEASE_STATUS.publishedName
+        }
     }
 
     private fun TrackRelease.updateConsoleName(releaseName: String?) {
@@ -207,6 +208,8 @@ internal class DefaultTrackManager(
             this.userFraction = userFraction.takeIf { isRollout() }
         } else if (isRollout() && this.userFraction == null) {
             this.userFraction = DEFAULT_USER_FRACTION
+        } else if (!isRollout()) {
+            this.userFraction = null
         }
     }
 
@@ -222,6 +225,8 @@ internal class DefaultTrackManager(
     private fun TrackRelease.isRollout() =
             status == ReleaseStatus.IN_PROGRESS.publishedName ||
                     status == ReleaseStatus.HALTED.publishedName
+
+    private fun ReleaseStatus?.orDefault() = this ?: DEFAULT_RELEASE_STATUS
 
     private companion object {
         const val DEFAULT_USER_FRACTION = 0.1

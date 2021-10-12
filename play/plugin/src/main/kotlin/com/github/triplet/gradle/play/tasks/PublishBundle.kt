@@ -11,6 +11,7 @@ import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.tasks.InputFiles
@@ -21,14 +22,17 @@ import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
-import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.work.DisableCachingByDefault
 import org.gradle.workers.WorkerExecutor
 import java.io.File
 import javax.inject.Inject
 
+@DisableCachingByDefault
 internal abstract class PublishBundle @Inject constructor(
         extension: PlayPublisherExtension,
         executionDir: Directory,
+        private val fileOps: FileSystemOperations,
+        private val executor: WorkerExecutor,
 ) : PublishArtifactTaskBase(extension),
         PublishableTrackExtensionOptions by CliOptionsImpl(extension, executionDir) {
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -44,8 +48,8 @@ internal abstract class PublishBundle @Inject constructor(
 
     @TaskAction
     fun publishBundles() {
-        project.delete(temporaryDir) // Make sure previous executions get cleared out
-        project.serviceOf<WorkerExecutor>().noIsolation().submit(Processor::class) {
+        fileOps.delete { delete(temporaryDir) } // Make sure previous executions get cleared out
+        executor.noIsolation().submit(Processor::class) {
             paramsForBase(this)
 
             bundleFiles.set(bundles)

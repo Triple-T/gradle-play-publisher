@@ -9,15 +9,15 @@ plugins {
 
 dependencies {
     implementation(project(":common:utils"))
-    implementation(Config.Libs.All.ap)
-    implementation(Config.Libs.All.googleClient)
-    implementation(Config.Libs.All.auth)
-    implementation(Config.Libs.All.apacheClientV2)
+    implementation(libs.androidpublisher)
+    implementation(libs.client.api)
+    implementation(libs.client.auth)
+    implementation(libs.client.http)
 
-    testImplementation(Config.Libs.All.junit)
-    testImplementation(Config.Libs.All.junitEngine)
-    testImplementation(Config.Libs.All.truth)
-    testImplementation(Config.Libs.All.mockito)
+    testImplementation(testLibs.junit)
+    testImplementation(testLibs.junit.engine)
+    testImplementation(testLibs.truth)
+    testImplementation(testLibs.mockito)
 }
 
 // Mockito needs to be able to pass in null params

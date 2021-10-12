@@ -31,7 +31,7 @@ import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
-import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.work.DisableCachingByDefault
 import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
 import org.gradle.workers.WorkerExecutor
@@ -39,9 +39,11 @@ import java.io.File
 import java.io.Serializable
 import javax.inject.Inject
 
+@DisableCachingByDefault
 internal abstract class PublishListings @Inject constructor(
         extension: PlayPublisherExtension,
         executionDir: Directory,
+        private val executor: WorkerExecutor,
 ) : PublishTaskBase(extension),
         WriteTrackExtensionOptions by CliOptionsImpl(extension, executionDir) {
     @get:Internal
@@ -99,7 +101,7 @@ internal abstract class PublishListings @Inject constructor(
 
         if (details == null && listings.isEmpty() && media.isEmpty()) return
 
-        project.serviceOf<WorkerExecutor>().noIsolation().submit(Publisher::class) {
+        executor.noIsolation().submit(Publisher::class) {
             paramsForBase(this)
 
             this.details.set(details)

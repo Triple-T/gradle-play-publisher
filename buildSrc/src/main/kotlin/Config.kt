@@ -50,24 +50,3 @@ fun Project.configureMaven(handler: RepositoryHandler) = handler.maven {
         password = System.getenv("SONATYPE_NEXUS_PASSWORD")
     }
 }
-
-object Config {
-    object Libs {
-        object All {
-            const val agp = "com.android.tools.build:gradle:4.2.1"
-            const val ap =
-                    "com.google.apis:google-api-services-androidpublisher:v3-rev20210527-1.31.0"
-            const val googleClient = "com.google.api-client:google-api-client:1.31.5"
-            const val apacheClientV2 = "com.google.http-client:google-http-client-apache-v2:1.39.2"
-            const val auth = "com.google.auth:google-auth-library-oauth2-http:0.26.0"
-            const val guava = "com.google.guava:guava:30.1.1-jre"
-            const val gson = "com.google.http-client:google-http-client-gson:1.39.2"
-
-            const val junit = "org.junit.jupiter:junit-jupiter-api:5.7.0"
-            const val junitEngine = "org.junit.jupiter:junit-jupiter-engine:5.7.0"
-            const val junitParams = "org.junit.jupiter:junit-jupiter-params:5.7.0"
-            const val truth = "com.google.truth:truth:1.1.3"
-            const val mockito = "org.mockito:mockito-core:3.10.0"
-        }
-    }
-}

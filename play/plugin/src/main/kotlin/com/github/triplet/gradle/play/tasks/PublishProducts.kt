@@ -17,15 +17,17 @@ import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
-import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.work.ChangeType
+import org.gradle.work.DisableCachingByDefault
 import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
 import org.gradle.workers.WorkerExecutor
 import javax.inject.Inject
 
+@DisableCachingByDefault
 internal abstract class PublishProducts @Inject constructor(
         extension: PlayPublisherExtension,
+        private val executor: WorkerExecutor,
 ) : PublishTaskBase(extension) {
     @get:Incremental
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -47,7 +49,6 @@ internal abstract class PublishProducts @Inject constructor(
 
     @TaskAction
     fun publishProducts(changes: InputChanges) {
-        val executor = project.serviceOf<WorkerExecutor>()
         changes.getFileChanges(productsDir)
                 .filterNot { it.changeType == ChangeType.REMOVED }
                 .filter { it.fileType == FileType.FILE }

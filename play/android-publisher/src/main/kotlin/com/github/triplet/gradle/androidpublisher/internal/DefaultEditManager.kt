@@ -213,7 +213,11 @@ internal class DefaultEditManager(
             e has "apkNotificationMessageKeyUpgradeVersionConflict" ||
             e has "apkUpgradeVersionConflict" ||
             e has "apkNoUpgradePath" ||
-            e has "forbidden" && e.message.orEmpty().contains("version code")
+            e has "forbidden" && e.details.message.orEmpty().let { m ->
+                // Bundle message: APK specifies a version code that has already been used.
+                // APK message: Cannot update a published APK.
+                m.contains("version code") || m.contains("Cannot update", ignoreCase = true)
+            }
     ) {
         when (strategy) {
             ResolutionStrategy.AUTO -> throw IllegalStateException(

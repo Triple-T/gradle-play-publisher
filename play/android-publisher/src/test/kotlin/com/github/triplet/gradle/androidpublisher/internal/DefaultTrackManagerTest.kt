@@ -107,6 +107,33 @@ class DefaultTrackManagerTest {
     }
 
     @Test
+    fun `Standard build chooses inProgress status when user fraction is set`() {
+        val config = TrackManager.UpdateConfig(
+                trackName = "alpha",
+                versionCodes = listOf(888),
+                didPreviousBuildSkipCommit = false,
+                base = TrackManager.BaseConfig(
+                        releaseStatus = null,
+                        userFraction = .5,
+                        updatePriority = null,
+                        releaseNotes = null,
+                        retainableArtifacts = null,
+                        releaseName = null
+                )
+        )
+        `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().setTrack("alpha"))
+
+        tracks.update(config)
+
+        val trackCaptor = ArgumentCaptor.forClass(Track::class.java)
+        verify(mockPublisher).updateTrack(eq("edit-id"), trackCaptor.capture())
+        assertThat(trackCaptor.value.track).isEqualTo("alpha")
+        assertThat(trackCaptor.value.releases).hasSize(1)
+        assertThat(trackCaptor.value.releases.single().status).isEqualTo("inProgress")
+        assertThat(trackCaptor.value.releases.single().userFraction).isEqualTo(0.5)
+    }
+
+    @Test
     fun `Standard build with rollout release creates new release`() {
         val config = TrackManager.UpdateConfig(
                 trackName = "alpha",
@@ -342,7 +369,7 @@ class DefaultTrackManagerTest {
                 versionCodes = listOf(888),
                 didPreviousBuildSkipCommit = true,
                 base = TrackManager.BaseConfig(
-                        releaseStatus = ReleaseStatus.DRAFT,
+                        releaseStatus = ReleaseStatus.IN_PROGRESS,
                         userFraction = null,
                         updatePriority = null,
                         releaseNotes = null,
@@ -352,7 +379,7 @@ class DefaultTrackManagerTest {
         )
         `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().apply {
             releases = listOf(TrackRelease().apply {
-                status = "draft"
+                status = "inProgress"
                 name = "foobar"
                 userFraction = 789.0
                 inAppUpdatePriority = 599
@@ -372,7 +399,7 @@ class DefaultTrackManagerTest {
         verify(mockPublisher).updateTrack(eq("edit-id"), trackCaptor.capture())
         assertThat(trackCaptor.value.releases).hasSize(1)
         assertThat(trackCaptor.value.releases.single().name).isEqualTo("foobar")
-        assertThat(trackCaptor.value.releases.single().status).isEqualTo("draft")
+        assertThat(trackCaptor.value.releases.single().status).isEqualTo("inProgress")
         assertThat(trackCaptor.value.releases.single().userFraction).isEqualTo(789.0)
         assertThat(trackCaptor.value.releases.single().inAppUpdatePriority).isEqualTo(599)
         assertThat(trackCaptor.value.releases.single().versionCodes).containsExactly(3L, 4L, 5L, 888L)
@@ -748,7 +775,7 @@ class DefaultTrackManagerTest {
         `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().apply {
             track = "internal"
             releases = listOf(TrackRelease().apply {
-                status = "completed"
+                status = "inProgress"
                 name = "foobar"
                 userFraction = 789.0
                 inAppUpdatePriority = 599
@@ -768,7 +795,7 @@ class DefaultTrackManagerTest {
         verify(mockPublisher).updateTrack(eq("edit-id"), trackCaptor.capture())
         assertThat(trackCaptor.value.releases).hasSize(1)
         assertThat(trackCaptor.value.releases.single().name).isEqualTo("foobar")
-        assertThat(trackCaptor.value.releases.single().status).isEqualTo("completed")
+        assertThat(trackCaptor.value.releases.single().status).isEqualTo("inProgress")
         assertThat(trackCaptor.value.releases.single().userFraction).isEqualTo(789.0)
         assertThat(trackCaptor.value.releases.single().inAppUpdatePriority).isEqualTo(599)
         assertThat(trackCaptor.value.releases.single().versionCodes).containsExactly(3L, 4L, 5L)
@@ -862,5 +889,106 @@ class DefaultTrackManagerTest {
                 .isEqualTo("lang2")
         assertThat(trackCaptor.value.releases.single().releaseNotes.last().text)
                 .isEqualTo("notes2")
+    }
+
+    @Test
+    fun `Promoting track from inProgress to completed removes userFraction when unspecified`() {
+        val config = TrackManager.PromoteConfig(
+                promoteTrackName = "alpha",
+                fromTrackName = "alpha",
+                base = TrackManager.BaseConfig(
+                        releaseStatus = ReleaseStatus.COMPLETED,
+                        userFraction = null,
+                        updatePriority = null,
+                        releaseNotes = null,
+                        retainableArtifacts = null,
+                        releaseName = null
+                )
+        )
+        `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().apply {
+            track = "alpha"
+            releases = listOf(TrackRelease().apply {
+                status = "completed"
+                versionCodes = listOf(1)
+            }, TrackRelease().apply {
+                status = "inProgress"
+                versionCodes = listOf(2)
+                userFraction = .5
+            })
+        })
+
+        tracks.promote(config)
+
+        val trackCaptor = ArgumentCaptor.forClass(Track::class.java)
+        verify(mockPublisher).updateTrack(eq("edit-id"), trackCaptor.capture())
+        assertThat(trackCaptor.value.releases).hasSize(1)
+        assertThat(trackCaptor.value.releases.single().status).isEqualTo("completed")
+        assertThat(trackCaptor.value.releases.single().userFraction).isNull()
+    }
+
+    @Test
+    fun `Promoting track from inProgress to completed removes userFraction when specified`() {
+        val config = TrackManager.PromoteConfig(
+                promoteTrackName = "alpha",
+                fromTrackName = "alpha",
+                base = TrackManager.BaseConfig(
+                        releaseStatus = ReleaseStatus.COMPLETED,
+                        userFraction = .8,
+                        updatePriority = null,
+                        releaseNotes = null,
+                        retainableArtifacts = null,
+                        releaseName = null
+                )
+        )
+        `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().apply {
+            track = "alpha"
+            releases = listOf(TrackRelease().apply {
+                status = "completed"
+                versionCodes = listOf(1)
+            }, TrackRelease().apply {
+                status = "inProgress"
+                versionCodes = listOf(2)
+                userFraction = .5
+            })
+        })
+
+        tracks.promote(config)
+
+        val trackCaptor = ArgumentCaptor.forClass(Track::class.java)
+        verify(mockPublisher).updateTrack(eq("edit-id"), trackCaptor.capture())
+        assertThat(trackCaptor.value.releases).hasSize(1)
+        assertThat(trackCaptor.value.releases.single().status).isEqualTo("completed")
+        assertThat(trackCaptor.value.releases.single().userFraction).isNull()
+    }
+
+    @Test
+    fun `Promotion with user fraction and unspecified status automatically uses inProgress`() {
+        val config = TrackManager.PromoteConfig(
+                promoteTrackName = "alpha",
+                fromTrackName = "internal",
+                base = TrackManager.BaseConfig(
+                        releaseStatus = null,
+                        userFraction = .5,
+                        updatePriority = null,
+                        releaseNotes = null,
+                        retainableArtifacts = null,
+                        releaseName = null
+                )
+        )
+        `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().apply {
+            track = "internal"
+            releases = listOf(TrackRelease().apply {
+                status = "completed"
+                versionCodes = listOf(1)
+            })
+        })
+
+        tracks.promote(config)
+
+        val trackCaptor = ArgumentCaptor.forClass(Track::class.java)
+        verify(mockPublisher).updateTrack(eq("edit-id"), trackCaptor.capture())
+        assertThat(trackCaptor.value.releases).hasSize(1)
+        assertThat(trackCaptor.value.releases.single().status).isEqualTo("inProgress")
+        assertThat(trackCaptor.value.releases.single().userFraction).isEqualTo(0.5)
     }
 }

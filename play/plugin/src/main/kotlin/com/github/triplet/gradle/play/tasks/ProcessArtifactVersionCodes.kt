@@ -11,13 +11,15 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
-import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.work.DisableCachingByDefault
 import org.gradle.workers.WorkerExecutor
 import javax.inject.Inject
 import kotlin.math.max
 
+@DisableCachingByDefault
 internal abstract class ProcessArtifactVersionCodes @Inject constructor(
         extension: PlayPublisherExtension,
+        private val executor: WorkerExecutor,
 ) : PublishTaskBase(extension) {
     @get:Input
     internal abstract val versionCodes: ListProperty<Int>
@@ -32,7 +34,7 @@ internal abstract class ProcessArtifactVersionCodes @Inject constructor(
 
     @TaskAction
     fun process() {
-        project.serviceOf<WorkerExecutor>().noIsolation().submit(VersionCoder::class) {
+        executor.noIsolation().submit(VersionCoder::class) {
             paramsForBase(this)
             defaultVersionCodes.set(versionCodes)
             nextAvailableVersionCodes.set(playVersionCodes)

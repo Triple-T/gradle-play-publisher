@@ -16,7 +16,7 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
-import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.work.DisableCachingByDefault
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkerExecutor
@@ -24,8 +24,10 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
+@DisableCachingByDefault
 internal abstract class InstallInternalSharingArtifact @Inject constructor(
         private val extension: AppExtension,
+        private val executor: WorkerExecutor,
 ) : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputDirectory
@@ -39,7 +41,7 @@ internal abstract class InstallInternalSharingArtifact @Inject constructor(
     @TaskAction
     fun install() {
         val uploads = uploadedArtifacts
-        project.serviceOf<WorkerExecutor>().noIsolation().submit(Installer::class) {
+        executor.noIsolation().submit(Installer::class) {
             uploadedArtifacts.set(uploads)
             adbExecutable.set(extension.adbExecutable)
             timeOutInMs.set(extension.adbOptions.timeOutInMs)
@@ -138,7 +140,8 @@ internal abstract class InstallInternalSharingArtifact @Inject constructor(
                         adbExecutable,
                         timeOutInMs,
                         LoggerWrapper(Logging.getLogger(
-                                InstallInternalSharingArtifact::class.java))
+                                InstallInternalSharingArtifact::class.java)),
+                        System.getenv("ANDROID_SERIAL")
                 )
                 return DefaultAdbShell(deviceProvider, timeOutInMs.toLong())
             }
