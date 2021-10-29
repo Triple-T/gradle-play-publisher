@@ -23,6 +23,20 @@ dependencyResolutionManagement {
     enableFeaturePreview("VERSION_CATALOGS")
     versionCatalogs {
         create("libs") {
+            version("depUpdates", "0.39.0")
+            version("gradlePublish", "0.15.0")
+            version("nexusPublish", "1.1.0")
+
+            alias("depUpdates")
+                    .toPluginId("com.github.ben-manes.versions")
+                    .versionRef("depUpdates")
+            alias("gradlePublish")
+                    .toPluginId("com.gradle.plugin-publish")
+                    .versionRef("gradlePublish")
+            alias("nexusPublish")
+                    .toPluginId("io.github.gradle-nexus.publish-plugin")
+                    .versionRef("nexusPublish")
+
             version("agp", "7.0.0")
             version("agp-tools", "30.0.0")
             version("android-publisher", "v3-rev20210527-1.31.0")
