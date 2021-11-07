@@ -1,21 +1,13 @@
 package com.github.triplet.gradle.common.validation
 
+import com.android.build.api.AndroidPluginVersion
 import org.gradle.util.GradleVersion
-import org.gradle.util.VersionNumber
 
-internal class RuntimeValidator(
+internal class GradleRuntimeValidator(
         private val currentGradleVersion: GradleVersion,
         private val minGradleVersion: GradleVersion,
-
-        private val currentAgpVersion: VersionNumber?,
-        private val minAgpVersion: VersionNumber,
 ) {
     fun validate() {
-        validateGradle()
-        validateAgp()
-    }
-
-    private fun validateGradle() {
         check(currentGradleVersion >= minGradleVersion) {
             """
             |Gradle Play Publisher's minimum Gradle version is at least $minGradleVersion and yours
@@ -25,8 +17,13 @@ internal class RuntimeValidator(
             """.trimMargin()
         }
     }
+}
 
-    private fun validateAgp() {
+internal class AgpRuntimeValidator(
+        private val currentAgpVersion: AndroidPluginVersion?,
+        private val minAgpVersion: AndroidPluginVersion,
+) {
+    fun validate() {
         check(null != currentAgpVersion && currentAgpVersion >= minAgpVersion) {
             """
             |Gradle Play Publisher's minimum Android Gradle Plugin version is at least
