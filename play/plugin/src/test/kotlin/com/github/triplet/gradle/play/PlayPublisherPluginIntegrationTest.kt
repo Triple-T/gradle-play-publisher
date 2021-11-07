@@ -107,12 +107,12 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
             }
 
             android {
-                compileSdkVersion(28)
+                compileSdk = 31
 
                 defaultConfig {
                     applicationId = "com.example.publisher"
-                    minSdkVersion(21)
-                    targetSdkVersion(28)
+                    minSdk = 31
+                    targetSdk = 31
                     versionCode = 1
                     versionName = "1.0"
                 }
@@ -192,12 +192,12 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
             }
 
             android {
-                compileSdkVersion 28
+                compileSdk 31
 
                 defaultConfig {
                     applicationId "com.example.publisher"
-                    minSdkVersion 21
-                    targetSdkVersion 28
+                    minSdk 31
+                    targetSdk 31
                     versionCode 1
                     versionName "1.0"
                 }
@@ -635,12 +635,12 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
             apply plugin: 'com.google.firebase.crashlytics'
 
             android {
-                compileSdkVersion 28
+                compileSdk 31
 
                 defaultConfig {
                     applicationId "com.supercilex.test"
-                    minSdkVersion 21
-                    targetSdkVersion 28
+                    minSdk 31
+                    targetSdk 31
                     versionCode 1
                     versionName "1.0"
                 }
@@ -712,12 +712,12 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
             apply plugin: 'com.bugsnag.android.gradle'
 
             android {
-                compileSdkVersion 28
+                compileSdk 31
 
                 defaultConfig {
                     applicationId "com.supercilex.test"
-                    minSdkVersion 21
-                    targetSdkVersion 28
+                    minSdk 31
+                    targetSdk 31
                     versionCode 1
                     versionName "1.0"
                 }

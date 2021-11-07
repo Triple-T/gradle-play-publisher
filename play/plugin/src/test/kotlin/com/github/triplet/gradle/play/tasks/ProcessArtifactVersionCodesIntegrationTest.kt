@@ -99,12 +99,12 @@ class ProcessArtifactVersionCodesIntegrationTest : IntegrationTestBase(), Shared
             }
 
             android {
-                compileSdkVersion 28
+                compileSdk 31
 
                 defaultConfig {
                     applicationId "com.example.publisher"
-                    minSdkVersion 21
-                    targetSdkVersion 28
+                    minSdk 31
+                    targetSdk 31
                     versionCode 1
                     versionName "1.0"
                 }
@@ -166,12 +166,12 @@ class ProcessArtifactVersionCodesIntegrationTest : IntegrationTestBase(), Shared
             }
 
             android {
-                compileSdkVersion 28
+                compileSdk 31
 
                 defaultConfig {
                     applicationId "com.example.publisher"
-                    minSdkVersion 21
-                    targetSdkVersion 28
+                    minSdk 31
+                    targetSdk 31
                     versionCode 1
                     versionName "1.0"
                 }

@@ -50,11 +50,11 @@ apply(plugin = "com.supercilex.gradle.versions")
 apply(plugin = "com.github.triplet.play")
 
 configure<BaseAppModuleExtension> {
-    compileSdkVersion(29)
+    compileSdk = 31
 
     defaultConfig {
-        minSdkVersion(16)
-        targetSdkVersion(29)
+        minSdk = 31
+        targetSdk = 31
         versionCode = 1 // Updated on every build
         versionName = "1.0.0"
     }
