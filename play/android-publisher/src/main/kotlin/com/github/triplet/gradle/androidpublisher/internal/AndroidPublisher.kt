@@ -22,8 +22,15 @@ import java.security.KeyStore
 
 internal fun createPublisher(credentials: InputStream): AndroidPublisher {
     val transport = buildTransport()
-    val credential = GoogleCredentials.fromStream(credentials) { transport }
-            .createScoped(listOf(AndroidPublisherScopes.ANDROIDPUBLISHER))
+    val credential = try {
+        GoogleCredentials.fromStream(credentials) { transport }
+    } catch (e: Exception) {
+        throw Exception(
+                "Credential parsing may have failed. " +
+                        "Ensure credential files supplied in the DSL contain valid JSON " +
+                        "and/or the ANDROID_PUBLISHER_CREDENTIALS envvar contains valid JSON " +
+                        "(not a file path).", e)
+    }.createScoped(listOf(AndroidPublisherScopes.ANDROIDPUBLISHER))
 
     return AndroidPublisher.Builder(
             transport,
