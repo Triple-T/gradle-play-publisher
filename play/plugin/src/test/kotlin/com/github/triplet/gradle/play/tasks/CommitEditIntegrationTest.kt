@@ -8,6 +8,7 @@ import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.github.triplet.gradle.play.helpers.SharedIntegrationTest
 import com.google.common.truth.Truth.assertThat
+import org.gradle.testkit.runner.TaskOutcome.SKIPPED
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Test
 import java.io.File
@@ -49,6 +50,30 @@ class CommitEditIntegrationTest : IntegrationTestBase(), SharedIntegrationTest {
 
         result.requireTask(outcome = SUCCESS)
         assertThat(result.output).contains("commitEdit(foobar")
+    }
+
+    @Test
+    fun `Commit task is not run if build failed`() {
+        val editFile = File(appDir, "build/gpp/com.example.publisher.txt")
+        editFile.safeCreateNewFile().writeText("foobar")
+        editFile.marked("commit").safeCreateNewFile()
+
+        // language=gradle
+        val config = """
+            afterEvaluate {
+                tasks.named("promoteReleaseArtifact").configure {
+                    doFirst {
+                        throw new IllegalStateException("Dang :(")
+                    }
+                }
+            }
+        """
+        val result = executeExpectingFailure(config, "promoteReleaseArtifact")
+
+        result.requireTask(outcome = SKIPPED)
+        assertThat(result.output).doesNotContain("commitEdit(")
+        assertThat(editFile.exists()).isFalse()
+        assertThat(editFile.marked("commit").exists()).isFalse()
     }
 
     companion object {
