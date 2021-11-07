@@ -16,14 +16,16 @@ internal abstract class CommitEdit @Inject constructor(
         extension: PlayPublisherExtension,
         private val executor: WorkerExecutor,
 ) : PublishTaskBase(extension) {
+    init {
+        onlyIf {
+            val buildFailed = project.gradle.taskGraph.allTasks.any { it.state.failure != null }
+            if (buildFailed) apiService.get().cleanup()
+            !buildFailed
+        }
+    }
+
     @TaskAction
     fun commit() {
-        if (project.gradle.taskGraph.allTasks.any { it.state.failure != null }) {
-            logger.info("Build failed, skipping")
-            apiService.get().cleanup()
-            return
-        }
-
         executor.noIsolation().submit(Committer::class) {
             paramsForBase(this)
         }
