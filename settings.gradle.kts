@@ -24,7 +24,7 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
             version("depUpdates", "0.39.0")
-            version("gradlePublish", "0.15.0")
+            version("gradlePublish", "0.17.0")
             version("nexusPublish", "1.1.0")
 
             alias("depUpdates")
@@ -39,11 +39,11 @@ dependencyResolutionManagement {
 
             version("agp", "7.0.0")
             version("agp-tools", "30.0.0")
-            version("android-publisher", "v3-rev20210527-1.31.0")
-            version("api-client", "1.31.5")
-            version("http-client", "1.39.2")
-            version("http-auth", "0.26.0")
-            version("guava", "30.1.1-jre")
+            version("android-publisher", "v3-rev20211021-1.32.1")
+            version("api-client", "1.32.2")
+            version("http-client", "1.40.1")
+            version("http-auth", "1.2.2")
+            version("guava", "31.0.1-jre")
 
             alias("agp").to("com.android.tools.build", "gradle").versionRef("agp")
             alias("agp-test").to("com.android.tools.build", "builder-test-api").versionRef("agp")
@@ -68,9 +68,9 @@ dependencyResolutionManagement {
         }
 
         create("testLibs") {
-            version("junit", "5.7.0")
+            version("junit", "5.8.1")
             version("truth", "1.1.3")
-            version("mockito", "3.10.0")
+            version("mockito", "4.0.0")
 
             alias("junit").to("org.junit.jupiter", "junit-jupiter-api").versionRef("junit")
             alias("junit-engine")
