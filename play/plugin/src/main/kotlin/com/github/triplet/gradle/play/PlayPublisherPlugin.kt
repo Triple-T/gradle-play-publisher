@@ -225,10 +225,12 @@ internal class PlayPublisherPlugin : Plugin<Project> {
 
             @Suppress("UNCHECKED_CAST") // Needed for overload ambiguity
             fun getArtifactDependenciesHack(
-                    artifact: ArtifactType<*>,
-            ): Provider<*> = extension.artifactDir.map<String> {
-                ""
-            }.orElse(variant.artifacts.get(artifact) as Provider<String>)
+                artifact: ArtifactType<*>,
+            ): Provider<*> = extension.artifactDir.map<List<Provider<String>>> {
+                emptyList()
+            }.orElse(project.provider {
+                listOf(variant.artifacts.get(artifact) as Provider<String>)
+            })
 
             val appId = variant.applicationId.get()
             val api = project.gradle.sharedServices.registerIfAbsent(
