@@ -11,6 +11,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Setup
+        run: cd testapp && ./gradlew help || ./gradlew help -S
       - name: Update Gradle Wrapper
         uses: gradle-update/update-gradle-wrapper-action@v1
         with:
