@@ -14,7 +14,6 @@ import org.gradle.kotlin.dsl.submit
 import org.gradle.work.DisableCachingByDefault
 import org.gradle.workers.WorkerExecutor
 import javax.inject.Inject
-import kotlin.math.max
 
 @DisableCachingByDefault
 internal abstract class ProcessArtifactVersionCodes @Inject constructor(
@@ -44,13 +43,18 @@ internal abstract class ProcessArtifactVersionCodes @Inject constructor(
     abstract class VersionCoder : EditWorkerBase<VersionCoder.Params>() {
         override fun execute() {
             val maxVersionCode = apiService.edits.findMaxAppVersionCode()
-
-            val smallestVersionCode = parameters.defaultVersionCodes.get().minOrNull() ?: 1
+            val defaults = parameters.defaultVersionCodes.get()
+            val doesNotNeedTransformation = defaults.all { it > maxVersionCode }
 
             val outputLines = StringBuilder()
-            val patch = max(0, maxVersionCode - smallestVersionCode + 1)
-            for ((i, default) in parameters.defaultVersionCodes.get().withIndex()) {
-                outputLines.append(default + patch.toInt() + i).append("\n")
+            for (default in defaults) {
+                val code = if (doesNotNeedTransformation) {
+                    default
+                } else {
+                    default + maxVersionCode
+                }
+
+                outputLines.append(code).appendLine()
             }
 
             parameters.nextAvailableVersionCodes.get().asFile.safeCreateNewFile()

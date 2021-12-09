@@ -118,15 +118,17 @@ class ProcessArtifactVersionCodesIntegrationTest : IntegrationTestBase(), Shared
                 include "xxhdpi", "xxxhdpi"
             }
 
-            def count = 0
+            def count = 1
             androidComponents {
                 onVariants(selector().withBuildType('release')) {
                     for (output in outputs) {
-                        output.versionCode.set(count++)
+                        output.versionCode.set(count)
                         output.versionName.set(output.versionCode.map {
                             println('versionCode=' + it)
                             it.toString()
                         })
+
+                        count += 2
                     }
                 }
             }
