@@ -3,11 +3,13 @@ package com.github.triplet.gradle.androidpublisher.internal
 import com.github.triplet.gradle.common.utils.PLUGIN_NAME
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
+import com.google.api.client.http.HttpBackOffUnsuccessfulResponseHandler
 import com.google.api.client.http.HttpRequest
 import com.google.api.client.http.HttpTransport
 import com.google.api.client.http.apache.v2.ApacheHttpTransport
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
+import com.google.api.client.util.ExponentialBackOff
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.AndroidPublisherScopes
 import com.google.auth.http.HttpCredentialsAdapter
@@ -19,6 +21,7 @@ import org.apache.http.impl.client.ProxyAuthenticationStrategy
 import java.io.FileInputStream
 import java.io.InputStream
 import java.security.KeyStore
+import java.util.concurrent.TimeUnit
 
 internal fun createPublisher(credentials: InputStream): AndroidPublisher {
     val transport = buildTransport()
@@ -86,6 +89,15 @@ private class AndroidPublisherAdapter(
         credential: GoogleCredentials,
 ) : HttpCredentialsAdapter(credential) {
     override fun initialize(request: HttpRequest) {
-        super.initialize(request.setReadTimeout(0))
+        val backOffHandler = HttpBackOffUnsuccessfulResponseHandler(
+                ExponentialBackOff.Builder()
+                        .setMaxElapsedTimeMillis(TimeUnit.MINUTES.toMillis(3).toInt())
+                        .build()
+        )
+
+        super.initialize(
+                request.setReadTimeout(0)
+                        .setUnsuccessfulResponseHandler(backOffHandler)
+        )
     }
 }
