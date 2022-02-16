@@ -7,7 +7,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":play:android-publisher"))
+    api(project(":play:android-publisher"))
     implementation(project(":common:utils"))
     implementation(project(":common:validation"))
 
