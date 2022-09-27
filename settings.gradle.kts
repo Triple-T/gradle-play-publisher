@@ -37,7 +37,7 @@ dependencyResolutionManagement {
                     .toPluginId("io.github.gradle-nexus.publish-plugin")
                     .versionRef("nexusPublish")
 
-            version("agp", "7.0.0")
+            version("agp", "7.1.0")
             version("agp-tools", "30.0.0")
             version("android-publisher", "v3-rev20211021-1.32.1")
             version("api-client", "1.32.2")
