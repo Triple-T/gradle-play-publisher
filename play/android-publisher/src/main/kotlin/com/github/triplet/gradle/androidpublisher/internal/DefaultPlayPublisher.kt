@@ -231,8 +231,8 @@ internal class DefaultPlayPublisher(
                     println("Uploading $thing: ${(it.progress * 100).roundToInt()}% complete")
                 MediaHttpUploader.UploadState.MEDIA_COMPLETE ->
                     println("${thing.capitalize()} upload complete")
-                MediaHttpUploader.UploadState.NOT_STARTED -> TODO()
-                MediaHttpUploader.UploadState.INITIATION_COMPLETE -> TODO()
+                MediaHttpUploader.UploadState.NOT_STARTED -> {}
+                MediaHttpUploader.UploadState.INITIATION_COMPLETE -> {}
             }
         }
         return this
