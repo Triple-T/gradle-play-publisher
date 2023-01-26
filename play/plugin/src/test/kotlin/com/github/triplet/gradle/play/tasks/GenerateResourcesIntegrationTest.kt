@@ -381,8 +381,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase(), SharedIntegratio
     }
 
     @Test
-    @Ignore("Previously this test worked because empty catalogs were generated and passed into the task")
-    fun `'play' file name is not allowed`() {
+    fun `'play' name is not allowed for files and child dirs`() {
         // language=gradle
         val config = """
             flavorDimensions 'pricing'

@@ -87,7 +87,24 @@ internal abstract class GenerateResources @Inject constructor(
 
     abstract class Validator : WorkAction<Validator.Params> {
         override fun execute() {
-            for (file in parameters.files.get()) file.validate()
+            for (dir in parameters.inputDirs.get()) {
+                dir.validate()
+            }
+            for (file in parameters.files.get()) {
+                file.validate()
+            }
+        }
+
+        private fun Directory.validate() {
+            val pathWithChildPlayDir = asFileTree.find {
+                val filePath = it.path
+                val relativePath = filePath.removePrefix(this.asFile.absolutePath)
+                relativePath.contains(PLAY_PATH)
+            }
+
+            check(pathWithChildPlayDir == null) {
+                "The child directory name 'play' is illegal: $pathWithChildPlayDir"
+            }
         }
 
         private fun File.validate() {
@@ -99,10 +116,8 @@ internal abstract class GenerateResources @Inject constructor(
                     isChildOf(PRODUCTS_PATH)
             check(areRootsValid) { "Unknown Play resource file: $this" }
 
-            val isPlayKeywordReserved = name != PLAY_PATH || parameters.inputDirs.get().any {
-                it.asFile == this
-            }
-            check(isPlayKeywordReserved) {
+            val fileNotNamedPlay = name != PLAY_PATH
+            check(fileNotNamedPlay) {
                 "The file name 'play' is illegal: $this"
             }
 
