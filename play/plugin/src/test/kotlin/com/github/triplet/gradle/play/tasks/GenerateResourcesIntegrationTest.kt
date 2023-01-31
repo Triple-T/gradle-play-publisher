@@ -381,19 +381,51 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase(), SharedIntegratio
     }
 
     @Test
-    fun `'play' name is not allowed for files and child dirs`() {
+    fun `file named 'play' is not allowed`() {
         // language=gradle
         val config = """
             flavorDimensions 'pricing'
             productFlavors {
-                illegalPlay { dimension 'pricing' }
+                illegalPlayFile { dimension 'pricing' }
             }
         """.withAndroidBlock()
 
         val result = executeExpectingFailure(
-                config, "generateIllegalPlayReleasePlayResources")
+                config, "generateIllegalPlayFileReleasePlayResources")
 
-        result.requireTask(taskName("IllegalPlayRelease"), outcome = FAILED)
+        result.requireTask(taskName("IllegalPlayFileRelease"), outcome = FAILED)
+    }
+
+    @Test
+    fun `files named 'play' with extensions are allowed`() {
+        // language=gradle
+        val config = """
+            flavorDimensions 'pricing'
+            productFlavors {
+                validPlayFile { dimension 'pricing' }
+            }
+        """.withAndroidBlock()
+
+
+        val result = execute(config, "generateValidPlayFileReleasePlayResources")
+
+        result.requireTask(taskName("ValidPlayFileRelease"), outcome = SUCCESS)
+    }
+
+    @Test
+    fun `child 'play' directory is not allowed`() {
+        // language=gradle
+        val config = """
+            flavorDimensions 'pricing'
+            productFlavors {
+                illegalPlayDir { dimension 'pricing' }
+            }
+        """.withAndroidBlock()
+
+        val result = executeExpectingFailure(
+                config, "generateIllegalPlayDirReleasePlayResources")
+
+        result.requireTask(taskName("IllegalPlayDirRelease"), outcome = FAILED)
     }
 
     @Test
