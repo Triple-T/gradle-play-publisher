@@ -87,24 +87,11 @@ internal abstract class GenerateResources @Inject constructor(
 
     abstract class Validator : WorkAction<Validator.Params> {
         override fun execute() {
-            for (dir in parameters.inputDirs.get()) {
-                dir.validate()
-            }
             for (file in parameters.files.get()) {
+                println(file.path)
                 file.validate()
             }
-        }
-
-        private fun Directory.validate() {
-            val pathWithChildPlayDir = asFileTree.find {
-                val filePath = it.path
-                val relativePath = filePath.removePrefix(this.asFile.absolutePath)
-                relativePath.contains(PLAY_PATH)
-            }
-
-            check(pathWithChildPlayDir == null) {
-                "The child directory name 'play' is illegal: $pathWithChildPlayDir"
-            }
+            println(parameters.inputDirs.get())
         }
 
         private fun File.validate() {
@@ -116,9 +103,18 @@ internal abstract class GenerateResources @Inject constructor(
                     isChildOf(PRODUCTS_PATH)
             check(areRootsValid) { "Unknown Play resource file: $this" }
 
-            val fileNotNamedPlay = name != PLAY_PATH
-            check(fileNotNamedPlay) {
+            check(name != PLAY_PATH) {
                 "The file name 'play' is illegal: $this"
+            }
+
+            val closestPlayDirIsValid =
+                    parameters.inputDirs.get().any { inputDir ->
+                        val closestPlayDir = climbUpTo(PLAY_PATH)
+                        closestPlayDir != null && closestPlayDir == inputDir.asFile
+                    }
+
+            check(closestPlayDirIsValid) {
+                "Illegal play directory in path: $this"
             }
 
             check(extension != INDEX_MARKER) { "Resources cannot use the 'index' extension: $this" }
