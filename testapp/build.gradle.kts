@@ -7,7 +7,7 @@ import com.google.common.hash.Hashing
 import com.google.common.io.Files
 import com.supercilex.gradle.versions.VersionOrchestratorExtension
 import java.io.FileInputStream
-import java.util.Properties
+import java.util.*
 
 buildscript {
     repositories {
@@ -22,9 +22,11 @@ buildscript {
     dependencies {
         classpath(kotlin("gradle-plugin", embeddedKotlinVersion))
         classpath("com.android.tools.build:gradle:7.3.0")
-        classpath("com.supercilex.gradle:version-orchestrator:0.9.0")
-        classpath("com.github.triplet.gradle:play-publisher:" +
-                          file("../version.txt").readText().trim())
+        classpath("com.supercilex.gradle:version-orchestrator:0.10.0")
+        classpath(
+            "com.github.triplet.gradle:play-publisher:" +
+                    file("../version.txt").readText().trim()
+        )
     }
 }
 
@@ -50,6 +52,7 @@ apply(plugin = "com.supercilex.gradle.versions")
 apply(plugin = "com.github.triplet.play")
 
 configure<BaseAppModuleExtension> {
+    namespace = "com.supercilex.test"
     compileSdk = 31
 
     defaultConfig {
@@ -99,7 +102,7 @@ configure<BaseAppModuleExtension> {
     }
 
     lint {
-        isAbortOnError = false
+        abortOnError = false
     }
 
     compileOptions {
