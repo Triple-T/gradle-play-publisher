@@ -40,7 +40,7 @@ import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkerExecutor
 import java.io.BufferedReader
 import java.io.File
-import java.util.TreeSet
+import java.util.*
 import javax.inject.Inject
 
 @CacheableTask
@@ -87,11 +87,7 @@ internal abstract class GenerateResources @Inject constructor(
 
     abstract class Validator : WorkAction<Validator.Params> {
         override fun execute() {
-            for (file in parameters.files.get()) {
-                println(file.path)
-                file.validate()
-            }
-            println(parameters.inputDirs.get())
+            for (file in parameters.files.get()) file.validate()
         }
 
         private fun File.validate() {
@@ -103,18 +99,13 @@ internal abstract class GenerateResources @Inject constructor(
                     isChildOf(PRODUCTS_PATH)
             check(areRootsValid) { "Unknown Play resource file: $this" }
 
-            check(name != PLAY_PATH) {
-                "The file name 'play' is illegal: $this"
-            }
-
             val closestPlayDirIsValid =
                     parameters.inputDirs.get().any { inputDir ->
                         val closestPlayDir = climbUpTo(PLAY_PATH)
                         closestPlayDir != null && closestPlayDir == inputDir.asFile
                     }
-
             check(closestPlayDirIsValid) {
-                "Illegal play directory in path: $this"
+                "Illegal or missing 'play' directory in path: $this"
             }
 
             check(extension != INDEX_MARKER) { "Resources cannot use the 'index' extension: $this" }

@@ -12,7 +12,6 @@ import org.gradle.testkit.runner.TaskOutcome.FROM_CACHE
 import org.gradle.testkit.runner.TaskOutcome.NO_SOURCE
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
-import org.junit.Ignore
 import org.junit.jupiter.api.Test
 import java.io.File
 
@@ -381,7 +380,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase(), SharedIntegratio
     }
 
     @Test
-    fun `file named 'play' is not allowed`() {
+    fun `File named 'play' is not allowed`() {
         // language=gradle
         val config = """
             flavorDimensions 'pricing'
@@ -397,7 +396,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase(), SharedIntegratio
     }
 
     @Test
-    fun `files named 'play' with extensions are allowed`() {
+    fun `File containing 'play' is allowed`() {
         // language=gradle
         val config = """
             flavorDimensions 'pricing'
@@ -413,7 +412,7 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase(), SharedIntegratio
     }
 
     @Test
-    fun `child 'play' directory is not allowed`() {
+    fun `Child 'play' directory is not allowed`() {
         // language=gradle
         val config = """
             flavorDimensions 'pricing'
