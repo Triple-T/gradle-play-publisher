@@ -392,7 +392,6 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                     ),
             ) {
                 apiService.set(api)
-                simple.set(extension.resolutionStrategy.get() == ResolutionStrategy.AUTO_OFFSET)
                 versionCodes.set(staticVersionCodes)
                 playVersionCodes.set(project.layout.buildDirectory.file(
                         "$INTERMEDIATES_OUTPUT_PATH/${variant.name}/available-version-codes.txt"))
