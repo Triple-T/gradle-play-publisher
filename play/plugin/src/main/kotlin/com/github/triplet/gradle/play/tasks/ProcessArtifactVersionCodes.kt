@@ -14,11 +14,12 @@ import org.gradle.kotlin.dsl.submit
 import org.gradle.work.DisableCachingByDefault
 import org.gradle.workers.WorkerExecutor
 import javax.inject.Inject
+import kotlin.math.max
 
 @DisableCachingByDefault
 internal abstract class ProcessArtifactVersionCodes @Inject constructor(
         extension: PlayPublisherExtension,
-        simple: Boolean,
+        private val simple: Boolean,
         private val executor: WorkerExecutor,
 ) : PublishTaskBase(extension) {
     @get:Input
@@ -47,7 +48,7 @@ internal abstract class ProcessArtifactVersionCodes @Inject constructor(
             val maxVersionCode = apiService.edits.findMaxAppVersionCode()
             val outputLines = StringBuilder()
 
-            if (simple) {
+            if (parameters.simpleStrategy) {
                 val defaults = parameters.defaultVersionCodes.get()
                 val doesNotNeedTransformation = defaults.all { it > maxVersionCode }
 
