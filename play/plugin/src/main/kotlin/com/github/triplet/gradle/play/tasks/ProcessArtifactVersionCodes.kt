@@ -18,6 +18,7 @@ import javax.inject.Inject
 @DisableCachingByDefault
 internal abstract class ProcessArtifactVersionCodes @Inject constructor(
         extension: PlayPublisherExtension,
+        simple: Boolean,
         private val executor: WorkerExecutor,
 ) : PublishTaskBase(extension) {
     @get:Input
@@ -35,6 +36,7 @@ internal abstract class ProcessArtifactVersionCodes @Inject constructor(
     fun process() {
         executor.noIsolation().submit(VersionCoder::class) {
             paramsForBase(this)
+            simpleStrategy.set(simple)
             defaultVersionCodes.set(versionCodes)
             nextAvailableVersionCodes.set(playVersionCodes)
         }
@@ -43,18 +45,27 @@ internal abstract class ProcessArtifactVersionCodes @Inject constructor(
     abstract class VersionCoder : EditWorkerBase<VersionCoder.Params>() {
         override fun execute() {
             val maxVersionCode = apiService.edits.findMaxAppVersionCode()
-            val defaults = parameters.defaultVersionCodes.get()
-            val doesNotNeedTransformation = defaults.all { it > maxVersionCode }
-
             val outputLines = StringBuilder()
-            for (default in defaults) {
-                val code = if (doesNotNeedTransformation) {
-                    default
-                } else {
-                    default + maxVersionCode
-                }
 
-                outputLines.append(code).appendLine()
+            if (simple) {
+                val defaults = parameters.defaultVersionCodes.get()
+                val doesNotNeedTransformation = defaults.all { it > maxVersionCode }
+
+                for (default in defaults) {
+                    val code = if (doesNotNeedTransformation) {
+                        default
+                    } else {
+                        default + maxVersionCode
+                    }
+
+                    outputLines.append(code).appendLine()
+                }
+            } else {
+                val smallestVersionCode = parameters.defaultVersionCodes.get().minOrNull() ?: 1
+
+                val patch = max(0, maxVersionCode - smallestVersionCode + 1)
+                for ((i, default) in parameters.defaultVersionCodes.get().withIndex()) {
+                    outputLines.append(default + patch.toInt() + i).append("\n")
             }
 
             parameters.nextAvailableVersionCodes.get().asFile.safeCreateNewFile()
@@ -62,6 +73,7 @@ internal abstract class ProcessArtifactVersionCodes @Inject constructor(
         }
 
         interface Params : EditPublishingParams {
+            val simpleStrategy: Property<Boolean>
             val defaultVersionCodes: ListProperty<Int>
             val nextAvailableVersionCodes: RegularFileProperty
         }

@@ -118,6 +118,73 @@ class ProcessArtifactVersionCodesIntegrationTest : IntegrationTestBase(), Shared
                 include "xxhdpi", "xxxhdpi"
             }
 
+            def count = 0
+            androidComponents {
+                onVariants(selector().withBuildType('release')) {
+                    for (output in outputs) {
+                        output.versionCode.set(count++)
+                        output.versionName.set(output.versionCode.map {
+                            println('versionCode=' + it)
+                            it.toString()
+                        })
+                    }
+                }
+            }
+
+            apply plugin: 'com.github.triplet.play'
+            play {
+                serviceAccountCredentials = file('creds.json')
+                resolutionStrategy =
+                    com.github.triplet.gradle.androidpublisher.ResolutionStrategy.AUTO
+            }
+        """)
+
+        val result = executeGradle(false) {
+            withArguments("assembleRelease")
+        }
+
+        result.requireTask(outcome = SUCCESS)
+        assertThat(result.output).contains("versionCode=42")
+        assertThat(result.output).contains("versionCode=44")
+        assertThat(result.output).contains("versionCode=46")
+    }
+
+    @Test
+    fun `Version code with splits is offset incremented`() {
+        // language=gradle
+        File(appDir, "build.gradle").writeText("""
+            plugins {
+                id 'com.android.application'
+                id 'com.github.triplet.play' apply false
+            }
+
+            allprojects {
+                repositories {
+                    google()
+                    mavenCentral()
+                }
+            }
+
+            android {
+                compileSdk 31
+
+                defaultConfig {
+                    applicationId "com.example.publisher"
+                    minSdk 31
+                    targetSdk 31
+                    versionCode 1
+                    versionName "1.0"
+                }
+            }
+
+            $factoryInstallerStatement
+
+            android.splits.density {
+                enable true
+                reset()
+                include "xxhdpi", "xxxhdpi"
+            }
+
             def count = 1
             androidComponents {
                 onVariants(selector().withBuildType('release')) {
@@ -137,7 +204,7 @@ class ProcessArtifactVersionCodesIntegrationTest : IntegrationTestBase(), Shared
             play {
                 serviceAccountCredentials = file('creds.json')
                 resolutionStrategy =
-                    com.github.triplet.gradle.androidpublisher.ResolutionStrategy.AUTO
+                    com.github.triplet.gradle.androidpublisher.ResolutionStrategy.AUTO_OFFSET
             }
         """)
 
