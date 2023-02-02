@@ -36,6 +36,13 @@ enum class ResolutionStrategy(
     /** Conflicts should be automagically resolved. */
     AUTO("auto"),
 
+    /**
+     * Unlike [AUTO] which diffs your Play Store version code with the local one, [AUTO_OFFSET] is
+     * much simpler and just adds the local version code to the Play Store one when
+     * `local <= play_store`.
+     */
+    AUTO_OFFSET("auto_offset"),
+
     /** Fail the build at the first sign of conflict. */
     FAIL("fail"),
 

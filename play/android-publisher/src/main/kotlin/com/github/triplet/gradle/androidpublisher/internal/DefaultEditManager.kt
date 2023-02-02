@@ -220,7 +220,7 @@ internal class DefaultEditManager(
             }
     ) {
         when (strategy) {
-            ResolutionStrategy.AUTO -> throw IllegalStateException(
+            ResolutionStrategy.AUTO, ResolutionStrategy.AUTO_OFFSET -> throw IllegalStateException(
                     "Concurrent uploads for app ${publisher.appId} (version code " +
                             "already used). Make sure to synchronously upload your APKs such " +
                             "that they don't conflict. If this problem persists, delete your " +

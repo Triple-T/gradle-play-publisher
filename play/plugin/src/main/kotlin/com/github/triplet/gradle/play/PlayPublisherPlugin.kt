@@ -377,22 +377,26 @@ internal class PlayPublisherPlugin : Plugin<Project> {
             }
             publishProductsAllTask { dependsOn(publishProductsTask) }
 
-            val staticVersionCodes = if (
-                    extension.resolutionStrategy.get() == ResolutionStrategy.AUTO) {
+            val isAuto = extension.resolutionStrategy.get() == ResolutionStrategy.AUTO
+                    || extension.resolutionStrategy.get() == ResolutionStrategy.AUTO_OFFSET
+            val staticVersionCodes = if (isAuto) {
                 variant.outputs.map { it.versionCode.get() }
             } else {
                 emptyList()
             }
             val processArtifactVersionCodes = project.newTask<ProcessArtifactVersionCodes>(
                     "process${taskVariantName}VersionCodes",
-                    constructorArgs = arrayOf(extension),
+                    constructorArgs = arrayOf(
+                            extension,
+                            extension.resolutionStrategy.get() == ResolutionStrategy.AUTO_OFFSET,
+                    ),
             ) {
                 apiService.set(api)
                 versionCodes.set(staticVersionCodes)
                 playVersionCodes.set(project.layout.buildDirectory.file(
                         "$INTERMEDIATES_OUTPUT_PATH/${variant.name}/available-version-codes.txt"))
             }
-            if (extension.resolutionStrategy.get() == ResolutionStrategy.AUTO) {
+            if (isAuto) {
                 for ((i, output) in variant.outputs.withIndex()) {
                     output.versionCode.set(processArtifactVersionCodes.map {
                         it.playVersionCodes.get().asFile.readLines()[i].toInt()
