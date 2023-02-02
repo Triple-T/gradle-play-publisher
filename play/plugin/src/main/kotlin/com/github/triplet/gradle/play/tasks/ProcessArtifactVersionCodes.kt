@@ -66,6 +66,7 @@ internal abstract class ProcessArtifactVersionCodes @Inject constructor(
                 val patch = max(0, maxVersionCode - smallestVersionCode + 1)
                 for ((i, default) in parameters.defaultVersionCodes.get().withIndex()) {
                     outputLines.append(default + patch.toInt() + i).append("\n")
+                }
             }
 
             parameters.nextAvailableVersionCodes.get().asFile.safeCreateNewFile()
