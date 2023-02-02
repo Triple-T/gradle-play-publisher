@@ -7,6 +7,7 @@ import com.github.triplet.gradle.play.tasks.internal.workers.EditWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
@@ -48,7 +49,7 @@ internal abstract class ProcessArtifactVersionCodes @Inject constructor(
             val maxVersionCode = apiService.edits.findMaxAppVersionCode()
             val outputLines = StringBuilder()
 
-            if (parameters.simpleStrategy) {
+            if (parameters.simpleStrategy.get()) {
                 val defaults = parameters.defaultVersionCodes.get()
                 val doesNotNeedTransformation = defaults.all { it > maxVersionCode }
 
