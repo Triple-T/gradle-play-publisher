@@ -19,7 +19,6 @@ internal abstract class CommitEdit @Inject constructor(
         extension: PlayPublisherExtension,
         private val executor: WorkerExecutor,
 ) : PublishTaskBase(extension) {
-
     init {
         onlyIf {
             val buildFailed = gradle.taskGraph.allTasks.any { it.state.failure != null }
