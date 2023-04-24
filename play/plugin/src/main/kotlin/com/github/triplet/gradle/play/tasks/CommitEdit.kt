@@ -4,6 +4,7 @@ import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.workers.PlayWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
+import org.gradle.api.invocation.Gradle
 import org.gradle.api.logging.Logging
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
@@ -11,14 +12,17 @@ import org.gradle.work.DisableCachingByDefault
 import org.gradle.workers.WorkerExecutor
 import javax.inject.Inject
 
+@Suppress("LeakingThis")
 @DisableCachingByDefault
 internal abstract class CommitEdit @Inject constructor(
+        private val gradle: Gradle,
         extension: PlayPublisherExtension,
         private val executor: WorkerExecutor,
 ) : PublishTaskBase(extension) {
+
     init {
         onlyIf {
-            val buildFailed = project.gradle.taskGraph.allTasks.any { it.state.failure != null }
+            val buildFailed = gradle.taskGraph.allTasks.any { it.state.failure != null }
             if (buildFailed) apiService.get().cleanup()
             !buildFailed
         }
