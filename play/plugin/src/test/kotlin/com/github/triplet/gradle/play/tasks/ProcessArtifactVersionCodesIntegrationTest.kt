@@ -100,6 +100,7 @@ class ProcessArtifactVersionCodesIntegrationTest : IntegrationTestBase(), Shared
 
             android {
                 compileSdk 31
+                namespace = "com.example.publisher"
 
                 defaultConfig {
                     applicationId "com.example.publisher"
@@ -167,6 +168,7 @@ class ProcessArtifactVersionCodesIntegrationTest : IntegrationTestBase(), Shared
 
             android {
                 compileSdk 31
+                namespace = "com.example.publisher"
 
                 defaultConfig {
                     applicationId "com.example.publisher"
@@ -236,6 +238,7 @@ class ProcessArtifactVersionCodesIntegrationTest : IntegrationTestBase(), Shared
 
             android {
                 compileSdk 31
+                namespace = "com.example.publisher"
 
                 defaultConfig {
                     applicationId "com.example.publisher"

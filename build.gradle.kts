@@ -63,24 +63,24 @@ allprojects {
     group = "com.github.triplet.gradle"
 
     afterEvaluate {
-        convention.findByType<JavaPluginExtension>()?.apply {
-            sourceCompatibility = JavaVersion.VERSION_1_8
+        extensions.findByType<JavaPluginExtension>()?.apply {
+            toolchain.languageVersion.convention(JavaLanguageVersion.of(11))
             withJavadocJar()
             withSourcesJar()
         }
 
-        convention.findByType<KotlinProjectExtension>()?.apply {
+        extensions.findByType<KotlinProjectExtension>()?.apply {
             sourceSets.configureEach {
                 languageSettings.progressiveMode = true
                 languageSettings.enableLanguageFeature("NewInference")
             }
         }
 
-        convention.findByType<PublishingExtension>()?.apply {
+        extensions.findByType<PublishingExtension>()?.apply {
             configureMaven(repositories)
         }
 
-        convention.findByType<SigningExtension>()?.apply {
+        extensions.findByType<SigningExtension>()?.apply {
             isRequired = false
 
             useInMemoryPgpKeys(System.getenv("SIGNING_KEY"), System.getenv("SIGNING_PASSWORD"))

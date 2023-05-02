@@ -25,6 +25,7 @@ import org.gradle.api.file.FileType
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.tasks.CacheableTask
+import org.gradle.api.tasks.IgnoreEmptyDirectories
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
@@ -52,6 +53,7 @@ internal abstract class GenerateResources @Inject constructor(
     abstract val resSrcDirs: ListProperty<Directory>
 
     @get:SkipWhenEmpty
+    @get:IgnoreEmptyDirectories
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
     abstract val resSrcTree: ConfigurableFileCollection

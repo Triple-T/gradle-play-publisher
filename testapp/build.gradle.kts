@@ -51,6 +51,8 @@ apply(plugin = "kotlin-android")
 apply(plugin = "com.supercilex.gradle.versions")
 apply(plugin = "com.github.triplet.play")
 
+the<JavaPluginExtension>().toolchain.languageVersion.convention(JavaLanguageVersion.of(8))
+
 configure<BaseAppModuleExtension> {
     namespace = "com.supercilex.test"
     compileSdk = 31
@@ -154,6 +156,6 @@ abstract class BuildReadinessValidator : DefaultTask() {
 
 val ready = tasks.register<BuildReadinessValidator>("validateBuildReadiness") {
     dependsOn(gradle.includedBuild("gradle-play-publisher")
-                      .task(":play:plugin:publishToMavenLocal"))
+                      .task(":play:play-publisher:publishToMavenLocal"))
 }
 tasks.matching { it.name != "validateBuildReadiness" }.configureEach { dependsOn(ready) }

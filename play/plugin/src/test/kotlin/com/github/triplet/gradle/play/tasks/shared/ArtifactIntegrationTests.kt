@@ -112,6 +112,7 @@ interface ArtifactIntegrationTests : SharedIntegrationTest {
 
             android {
                 compileSdk 31
+                namespace = "com.example.publisher"
 
                 defaultConfig {
                     applicationId "com.supercilex.test"

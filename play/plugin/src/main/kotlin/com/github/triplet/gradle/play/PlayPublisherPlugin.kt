@@ -173,7 +173,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
         (android as ExtensionAware).extensions.add(PLAY_CONFIGS_PATH, extensionContainer)
 
         val androidExtension = project.extensions.getByType<ApplicationAndroidComponentsExtension>()
-        androidExtension.onVariants v@{ variant ->
+        androidExtension.onVariants(androidExtension.selector().all()) v@{ variant ->
             val taskVariantName = variant.name.capitalize()
             val extensionStore = variant.buildExtension(
                     project,
