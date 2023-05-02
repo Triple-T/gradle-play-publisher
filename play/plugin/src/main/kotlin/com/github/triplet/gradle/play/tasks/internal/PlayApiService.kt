@@ -14,13 +14,17 @@ import org.gradle.api.logging.Logging
 import org.gradle.api.provider.Property
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
+import org.gradle.tooling.events.FinishEvent
+import org.gradle.tooling.events.OperationCompletionListener
+import org.gradle.tooling.events.task.TaskFailureResult
+import org.gradle.tooling.events.task.TaskFinishEvent
 import java.io.ByteArrayInputStream
 import java.io.InputStream
 import javax.inject.Inject
 
 internal abstract class PlayApiService @Inject constructor(
         private val fileOps: FileSystemOperations,
-) : BuildService<PlayApiService.Params> {
+) : BuildService<PlayApiService.Params>, OperationCompletionListener, AutoCloseable {
     val publisher by lazy {
         credentialStream().use {
             PlayPublisher(it, parameters.appId.get())
@@ -37,11 +41,17 @@ internal abstract class PlayApiService @Inject constructor(
     private val editIdFileAndFriends
         get() = listOf(editIdFile, editIdFile.marked("commit"), editIdFile.marked("skipped"))
 
+    var tasksHasFailed = false
+        private set
+
+    var cleanupAtClose = true
+        get() = field && shouldCommit
+
     fun scheduleCommit() {
         editIdFile.marked("commit").safeCreateNewFile()
     }
 
-    fun shouldCommit(): Boolean = editIdFile.marked("commit").exists()
+    val shouldCommit get() = editIdFile.marked("commit").exists()
 
     fun commit() {
         val response = publisher.commitEdit(editId)
@@ -59,7 +69,7 @@ internal abstract class PlayApiService @Inject constructor(
         editIdFile.marked("skipped").safeCreateNewFile()
     }
 
-    fun shouldSkip(): Boolean = editIdFile.marked("skipped").exists()
+    val shouldSkip get() = editIdFile.marked("skipped").exists()
 
     fun validate() {
         publisher.validateEdit(editId)
@@ -67,6 +77,18 @@ internal abstract class PlayApiService @Inject constructor(
 
     fun cleanup() {
         fileOps.delete { delete(editIdFileAndFriends) }
+    }
+
+    override fun close() {
+        if (cleanupAtClose) {
+            cleanup()
+        }
+    }
+
+    override fun onFinish(event: FinishEvent) {
+        if (event is TaskFinishEvent) {
+            tasksHasFailed = tasksHasFailed || (event.result is TaskFailureResult)
+        }
     }
 
     private fun getOrCreateEditId(): String {

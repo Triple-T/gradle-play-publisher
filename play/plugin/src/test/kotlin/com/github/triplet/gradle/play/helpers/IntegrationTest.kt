@@ -10,6 +10,8 @@ interface IntegrationTest {
 
     val factoryInstallerStatement: String
 
+    val withConfigurationCache: Boolean
+
     fun File.escaped(): String
 
     fun execute(config: String, vararg tasks: String): BuildResult

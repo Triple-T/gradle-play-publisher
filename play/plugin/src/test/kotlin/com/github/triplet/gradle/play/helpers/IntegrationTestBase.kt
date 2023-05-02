@@ -13,7 +13,9 @@ import java.util.concurrent.BlockingQueue
 import kotlin.math.max
 import kotlin.random.Random
 
-abstract class IntegrationTestBase : IntegrationTest {
+abstract class IntegrationTestBase(
+        override val withConfigurationCache: Boolean = false
+) : IntegrationTest {
     @TempDir
     @JvmField
     var _tempDir: File? = null
@@ -54,9 +56,10 @@ abstract class IntegrationTestBase : IntegrationTest {
                 .withTestKitDir(testDir)
                 .apply(block)
 
-        if (!expectFailure) {
-            runner.withArguments(runner.arguments.toMutableList() + "-S")
-        }
+        runner.withArguments(runner.arguments + listOfNotNull(
+                "-S".takeIf { !expectFailure },
+                "--configuration-cache".takeIf { withConfigurationCache },
+        ))
 
         // We're doing some pretty wack (and disgusting, shameful) shit to run integration tests without
         // actually publishing anything. The idea is have the build file call into the test class to run

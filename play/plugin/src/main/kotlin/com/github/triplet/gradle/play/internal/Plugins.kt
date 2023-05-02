@@ -6,6 +6,7 @@ import com.github.triplet.gradle.common.utils.nullOrFull
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.tasks.CommitEdit
 import com.github.triplet.gradle.play.tasks.internal.PlayApiService
+import org.gradle.api.DomainObjectSet
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
@@ -53,7 +54,9 @@ internal fun Project.getCommitEditTask(
 ): TaskProvider<CommitEdit> {
     val taskName = "commitEditFor" + appId.split(".").joinToString("Dot") { it.capitalize() }
     return rootProject.newTask(taskName, allowExisting = true, constructorArgs = arrayOf(extension)) {
+        usesService(api)
         apiService.set(api)
+        onlyIf { !api.get().tasksHasFailed }
     }
 }
 

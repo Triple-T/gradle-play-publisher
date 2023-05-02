@@ -72,6 +72,8 @@ class GenerateEditIntegrationTest : IntegrationTestBase(), SharedIntegrationTest
                             .named("playApi-com.example.publisher")
                             .get().service.get() as PlayApiService
 
+                service.cleanupAtClose = false
+
                 doLast {
                     service.edits
                 }

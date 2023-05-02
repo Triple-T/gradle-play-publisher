@@ -13,7 +13,7 @@ import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.jupiter.api.Test
 import java.io.File
 
-class CommitEditIntegrationTest : IntegrationTestBase(), SharedIntegrationTest {
+class CommitEditIntegrationTest : IntegrationTestBase(withConfigurationCache = true), SharedIntegrationTest {
     override fun taskName(taskVariant: String) = ":commitEditForComDotExampleDotPublisher"
 
     @Test
