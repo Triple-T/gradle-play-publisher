@@ -51,6 +51,11 @@ afterEvaluate {
 tasks.withType<Test> {
     inputs.files(fileTree("src/test/fixtures"))
 
+    // AGP 8 requires JDK 17 and we want to to be compatible with previous JDKs
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    })
+
     // Our integration tests need a fully compiled jar
     dependsOn("assemble")
 
@@ -59,23 +64,16 @@ tasks.withType<Test> {
 }
 
 gradlePlugin {
+    website.set("https://github.com/Triple-T/gradle-play-publisher")
+    vcsUrl.set("https://github.com/Triple-T/gradle-play-publisher")
+
     plugins.create("play") {
         id = "com.github.triplet.play"
         displayName = "Gradle Play Publisher"
         description = "Gradle Play Publisher allows you to upload your App Bundle or APK " +
                 "and other app details to the Google Play Store."
         implementationClass = "com.github.triplet.gradle.play.PlayPublisherPlugin"
-    }
-}
-
-pluginBundle {
-    website = "https://github.com/Triple-T/gradle-play-publisher"
-    vcsUrl = "https://github.com/Triple-T/gradle-play-publisher"
-    tags = listOf("android", "google-play", "publishing", "deployment", "apps", "mobile")
-
-    mavenCoordinates {
-        groupId = project.group as String
-        artifactId = "play-publisher"
+        tags.addAll(listOf("android", "google-play", "publishing", "deployment", "apps", "mobile"))
     }
 }
 

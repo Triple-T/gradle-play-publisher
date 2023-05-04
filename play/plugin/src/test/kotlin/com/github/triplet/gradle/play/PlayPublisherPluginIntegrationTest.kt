@@ -108,6 +108,7 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
 
             android {
                 compileSdk = 31
+                namespace = "com.example.publisher"
 
                 defaultConfig {
                     applicationId = "com.example.publisher"
@@ -193,6 +194,7 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
 
             android {
                 compileSdk 31
+                namespace = "com.example.publisher"
 
                 defaultConfig {
                     applicationId "com.example.publisher"
@@ -636,6 +638,7 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
 
             android {
                 compileSdk 31
+                namespace = "com.example.publisher"
 
                 defaultConfig {
                     applicationId "com.supercilex.test"
@@ -713,6 +716,7 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
 
             android {
                 compileSdk 31
+                namespace = "com.example.publisher"
 
                 defaultConfig {
                     applicationId "com.supercilex.test"

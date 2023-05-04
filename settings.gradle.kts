@@ -8,6 +8,9 @@ include(
     ":play:plugin", ":play:android-publisher"
 )
 
+// sets name explicitly to make sure it uses the in intended `artifactId` in the plugin POM
+project(":play:plugin").name = "play-publisher"
+
 dependencyResolutionManagement {
     repositories {
         google().content {
@@ -23,7 +26,7 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
             version("depUpdates", "0.39.0")
-            version("gradlePublish", "0.17.0")
+            version("gradlePublish", "1.1.0")
             version("nexusPublish", "1.1.0")
 
             plugin("depUpdates", "com.github.ben-manes.versions")
@@ -33,8 +36,8 @@ dependencyResolutionManagement {
             plugin("nexusPublish", "io.github.gradle-nexus.publish-plugin")
                 .versionRef("nexusPublish")
 
-            version("agp", "7.3.0")
-            version("agp-tools", "30.3.1")
+            version("agp", "8.0.1")
+            version("agp-tools", "31.0.1")
             version("android-publisher", "v3-rev20211021-1.32.1")
             version("api-client", "1.32.2")
             version("http-client", "1.40.1")

@@ -22,6 +22,7 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileType
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.IgnoreEmptyDirectories
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
@@ -84,6 +85,7 @@ internal abstract class PublishListings @Inject constructor(
     @Suppress("MemberVisibilityCanBePrivate", "unused")
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:SkipWhenEmpty
+    @get:IgnoreEmptyDirectories
     @get:InputFiles
     protected val targetFiles: FileCollection by lazy { detailFiles + listingFiles + mediaFiles }
 
