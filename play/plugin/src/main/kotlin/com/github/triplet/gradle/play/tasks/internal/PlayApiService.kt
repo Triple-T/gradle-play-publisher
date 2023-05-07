@@ -44,9 +44,6 @@ internal abstract class PlayApiService @Inject constructor(
     var buildFailed = false
         private set
 
-    var cleanupAtClose = true
-        get() = field && shouldCommit
-
     fun scheduleCommit() {
         editIdFile.marked("commit").safeCreateNewFile()
     }
@@ -80,7 +77,7 @@ internal abstract class PlayApiService @Inject constructor(
     }
 
     override fun close() {
-        if (cleanupAtClose) {
+        if (shouldCommit) {
             cleanup()
         }
     }
