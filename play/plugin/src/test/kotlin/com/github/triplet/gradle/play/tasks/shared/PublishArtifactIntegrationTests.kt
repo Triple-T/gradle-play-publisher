@@ -63,7 +63,7 @@ interface PublishArtifactIntegrationTests : SharedIntegrationTest {
         // language=gradle
         val config2 = """
             android.defaultConfig.versionCode 2
-            play.commit = true
+            play.commit = false
         """
 
         val result1 = execute(config1, taskName())
