@@ -41,7 +41,7 @@ internal abstract class PlayApiService @Inject constructor(
     private val editIdFileAndFriends
         get() = listOf(editIdFile, editIdFile.marked("commit"), editIdFile.marked("skipped"))
 
-    var tasksHasFailed = false
+    var buildFailed = false
         private set
 
     var cleanupAtClose = true
@@ -87,7 +87,7 @@ internal abstract class PlayApiService @Inject constructor(
 
     override fun onFinish(event: FinishEvent) {
         if (event is TaskFinishEvent) {
-            tasksHasFailed = tasksHasFailed || (event.result is TaskFailureResult)
+            buildFailed = buildFailed || (event.result is TaskFailureResult)
         }
     }
 
