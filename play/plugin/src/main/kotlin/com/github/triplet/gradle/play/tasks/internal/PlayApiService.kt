@@ -83,9 +83,7 @@ internal abstract class PlayApiService @Inject constructor(
     }
 
     override fun onFinish(event: FinishEvent) {
-        if (event is TaskFinishEvent) {
-            buildFailed = buildFailed || (event.result is TaskFailureResult)
-        }
+        buildFailed = buildFailed || event.result is TaskFailureResult
     }
 
     private fun getOrCreateEditId(): String {
