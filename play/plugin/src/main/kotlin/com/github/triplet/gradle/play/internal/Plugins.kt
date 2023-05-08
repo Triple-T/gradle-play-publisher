@@ -53,7 +53,9 @@ internal fun Project.getCommitEditTask(
 ): TaskProvider<CommitEdit> {
     val taskName = "commitEditFor" + appId.split(".").joinToString("Dot") { it.capitalize() }
     return rootProject.newTask(taskName, allowExisting = true, constructorArgs = arrayOf(extension)) {
+        usesService(api)
         apiService.set(api)
+        onlyIf { !api.get().buildFailed }
     }
 }
 

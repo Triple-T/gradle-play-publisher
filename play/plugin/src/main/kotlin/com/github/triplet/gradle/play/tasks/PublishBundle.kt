@@ -76,7 +76,7 @@ internal abstract class PublishBundle @Inject constructor(
             }.sorted()
             apiService.edits.publishArtifacts(
                     versions,
-                    apiService.shouldSkip(),
+                    apiService.shouldSkip,
                     config.track,
                     config.releaseStatus,
                     findReleaseName(config.track),

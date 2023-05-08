@@ -41,28 +41,37 @@ import com.github.triplet.gradle.play.tasks.internal.GlobalPublishableArtifactLi
 import com.github.triplet.gradle.play.tasks.internal.GlobalUploadableArtifactLifecycleTask
 import com.github.triplet.gradle.play.tasks.internal.PlayApiService
 import com.github.triplet.gradle.play.tasks.internal.PublishArtifactTaskBase
+import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PublishableTrackLifecycleTask
 import com.github.triplet.gradle.play.tasks.internal.UpdatableTrackLifecycleTask
 import com.github.triplet.gradle.play.tasks.internal.WriteTrackLifecycleTask
+import org.gradle.api.DomainObjectSet
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Provider
 import org.gradle.api.services.BuildServiceRegistration
+import org.gradle.build.event.BuildEventsListenerRegistry
 import org.gradle.kotlin.dsl.container
 import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.domainObjectSet
 import org.gradle.kotlin.dsl.findPlugin
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.invoke
+import org.gradle.kotlin.dsl.mapProperty
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.newInstance
 import org.gradle.kotlin.dsl.registerIfAbsent
+import org.gradle.kotlin.dsl.setProperty
 import org.gradle.kotlin.dsl.the
 import org.gradle.kotlin.dsl.withType
+import javax.inject.Inject
 
 @Suppress("unused") // Used by Gradle
-internal class PlayPublisherPlugin : Plugin<Project> {
+internal abstract class PlayPublisherPlugin @Inject constructor(
+        private val buildEventsListenerRegistry: BuildEventsListenerRegistry,
+) : Plugin<Project> {
     override fun apply(project: Project) {
         project.validateRuntime()
 
@@ -236,6 +245,8 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 parameters.appId.set(appId)
                 parameters.editIdFile.set(project.layout.buildDirectory.file("$OUTPUT_PATH/$appId.txt"))
             }
+            buildEventsListenerRegistry.onTaskCompletion(api)
+
             project.gradle.sharedServices.registrations.named<
                     BuildServiceRegistration<PlayApiService, PlayApiService.Params>
                     >("playApi-$appId") {
@@ -248,6 +259,11 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                 }
             }
 
+            fun PublishTaskBase.bindApi(api: Provider<PlayApiService>) {
+                usesService(api)
+                apiService.value(api).disallowChanges()
+            }
+
             // ------------------- START: ALL BUILD TYPE VARIANT SPECIFIC TASKS -------------------
 
             val publishInternalSharingApkTask = project.newTask<PublishInternalSharingApk>(
@@ -258,7 +274,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                     """.trimMargin(),
                     arrayOf(extension, executionDir),
             ) {
-                apiService.set(api)
+                bindApi(api)
                 apks.from(findApkFiles())
                 outputDirectory.set(project.layout.buildDirectory.dir(
                         "outputs/internal-sharing/apk/${variant.name}"))
@@ -276,7 +292,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                     """.trimMargin(),
                     arrayOf(extension, executionDir),
             ) {
-                apiService.set(api)
+                bindApi(api)
                 bundles.from(findBundleFiles())
                 outputDirectory.set(project.layout.buildDirectory.dir(
                         "outputs/internal-sharing/bundle/${variant.name}"))
@@ -317,7 +333,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                     """.trimMargin(),
                     arrayOf(extension, bootstrapOptionsHolder),
             ) {
-                apiService.set(api)
+                bindApi(api)
                 srcDir.set(project.file("src/${variant.flavorNameOrDefault}/$PLAY_PATH"))
             }
             bootstrapAllTask { dependsOn(bootstrapTask) }
@@ -355,7 +371,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                     """.trimMargin(),
                     arrayOf(extension, executionDir),
             ) {
-                apiService.set(api)
+                bindApi(api)
                 resDir.set(resourceDir)
 
                 finalizedBy(commitEditTask)
@@ -370,7 +386,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                     """.trimMargin(),
                     arrayOf(extension),
             ) {
-                apiService.set(api)
+                bindApi(api)
                 productsDir.setFrom(resourceDir.map {
                     it.dir(PRODUCTS_PATH).asFileTree.matching { include("*.json") }
                 })
@@ -391,7 +407,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
                             extension.resolutionStrategy.get() == ResolutionStrategy.AUTO_OFFSET,
                     ),
             ) {
-                apiService.set(api)
+                bindApi(api)
                 versionCodes.set(staticVersionCodes)
                 playVersionCodes.set(project.layout.buildDirectory.file(
                         "$INTERMEDIATES_OUTPUT_PATH/${variant.name}/available-version-codes.txt"))
@@ -406,7 +422,7 @@ internal class PlayPublisherPlugin : Plugin<Project> {
 
 
             fun PublishArtifactTaskBase.configureInputs() {
-                apiService.set(api)
+                bindApi(api)
                 releaseNotesDir.set(resourceDir.map {
                     it.dir(RELEASE_NOTES_PATH).also { it.asFile.safeMkdirs() }
                 })
