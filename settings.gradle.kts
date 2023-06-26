@@ -38,8 +38,8 @@ dependencyResolutionManagement {
 
             version("agp", "8.0.1")
             version("agp-tools", "31.0.1")
-            version("android-publisher", "v3-rev20211021-1.32.1")
-            version("api-client", "1.32.2")
+            version("android-publisher", "v3-rev20230615-2.0.0")
+            version("api-client", "2.2.0")
             version("http-client", "1.40.1")
             version("http-auth", "1.2.2")
             version("guava", "31.0.1-jre")
