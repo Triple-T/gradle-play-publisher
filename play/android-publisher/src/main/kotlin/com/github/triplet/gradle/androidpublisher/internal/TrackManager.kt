@@ -71,8 +71,6 @@ internal class DefaultTrackManager(
             createDefaultTrack(config)
         }
 
-        track.maybeCopyChangelogFromPreviousRelease(config.trackName)
-
         publisher.updateTrack(editId, track)
     }
 
@@ -118,8 +116,10 @@ internal class DefaultTrackManager(
                     }
                 }
             } else {
-                track.releases = track.releases +
-                        listOf(TrackRelease().mergeChanges(config.versionCodes, config.base))
+                val release = TrackRelease().mergeChanges(config.versionCodes, config.base).apply {
+                    maybeCopyChangelogFromPreviousRelease(config.trackName)
+                }
+                track.releases = track.releases + release
             }
         }
 
@@ -130,24 +130,29 @@ internal class DefaultTrackManager(
         val track = publisher.getTrack(editId, config.trackName)
 
         val keep = track.releases.orEmpty().filterNot { it.isRollout() }
-        track.releases = keep + listOf(TrackRelease().mergeChanges(config.versionCodes, config.base))
+        val release = TrackRelease().mergeChanges(config.versionCodes, config.base).apply {
+            maybeCopyChangelogFromPreviousRelease(config.trackName)
+        }
+        track.releases = keep + release
 
         return track
     }
 
     private fun createDefaultTrack(config: TrackManager.UpdateConfig) = Track().apply {
         track = config.trackName
-        releases = listOf(TrackRelease().mergeChanges(config.versionCodes, config.base))
+        val release = TrackRelease().mergeChanges(config.versionCodes, config.base).apply {
+            maybeCopyChangelogFromPreviousRelease(config.trackName)
+        }
+        releases = listOf(release)
     }
 
-    private fun Track.maybeCopyChangelogFromPreviousRelease(trackName: String) {
-        val release = releases.singleOrNull { track == trackName } ?: return
-        if (!release.releaseNotes.isNullOrEmpty()) return
+    private fun TrackRelease.maybeCopyChangelogFromPreviousRelease(trackName: String) {
+        if (!releaseNotes.isNullOrEmpty()) return
 
         val previousRelease = publisher.getTrack(editId, trackName)
                 .releases.orEmpty()
                 .maxByOrNull { it.versionCodes.orEmpty().maxOrNull() ?: 1 }
-        release.releaseNotes = previousRelease?.releaseNotes
+        releaseNotes = previousRelease?.releaseNotes
     }
 
     private fun TrackRelease.mergeChanges(
