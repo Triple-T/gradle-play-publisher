@@ -273,6 +273,8 @@ src/main/play/release-notes/en-US/default.txt
 When you publish to the beta channel, the `beta.txt` release notes will be uploaded. For any other
 channel, `default.txt` will be uploaded.
 
+If no release notes are found, GPP will try to copy release notes from the previous release.
+
 > Note: the Play Store limits your release notes to a maximum of 500 characters.
 
 #### Uploading developer facing release names
