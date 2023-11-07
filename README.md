@@ -125,7 +125,7 @@ through the `plugins {}` DSL:
 ```kt
 plugins {
     id("com.android.application")
-    id("com.github.triplet.play") version "3.8.4"
+    id("com.github.triplet.play") version "3.8.5"
 }
 ```
 
@@ -136,7 +136,7 @@ plugins {
 ```groovy
 plugins {
     id 'com.android.application'
-    id 'com.github.triplet.play' version '3.8.4'
+    id 'com.github.triplet.play' version '3.8.5'
 }
 ```
 
@@ -497,17 +497,17 @@ play {
 }
 
 androidComponents {
-  onVariants { variant ->
-    for (output in variant.outputs) {
-      val processedVersionCode = output.versionCode.map { playVersionCode ->
-        // Do something to the version code...
-        // In this example, version names will look like `myCustomVersionName.123`
-        "myCustomVersionName.$playVersionCode"
-      }
+    onVariants { variant ->
+        for (output in variant.outputs) {
+            val processedVersionCode = output.versionCode.map { playVersionCode ->
+                // Do something to the version code...
+                // In this example, version names will look like `myCustomVersionName.123`
+                "myCustomVersionName.$playVersionCode"
+            }
 
-      output.versionName.set(processedVersionCode)
+            output.versionName.set(processedVersionCode)
+        }
     }
-  }
 }
 ```
 
@@ -542,24 +542,24 @@ Run `./gradlew publishListing`.
 
 Base directory: `play`
 
-File | Description
---- | ---
-`contact-email.txt` | Developer email
-`contact-phone.txt` | Developer phone
-`contact-website.txt` | Developer website
-`default-language.txt` | The default language for both your Play Store listing and translation merging as described above
+ File                   | Description                                                                                      
+------------------------|--------------------------------------------------------------------------------------------------
+ `contact-email.txt`    | Developer email                                                                                  
+ `contact-phone.txt`    | Developer phone                                                                                  
+ `contact-website.txt`  | Developer website                                                                                
+ `default-language.txt` | The default language for both your Play Store listing and translation merging as described above 
 
 #### Uploading text based listings
 
 Base directory: `play/listings/[language]` where `language` is one of the
 [Play Store supported codes](https://support.google.com/googleplay/android-developer/answer/3125566)
 
-File | Description | Character limit
---- | --- | ---
-`title.txt`| App title | 50
-`short-description.txt` | Tagline | 80
-`full-description.txt` | Full description | 4000
-`video-url.txt` | Youtube product video | N/A
+ File                    | Description           | Character limit 
+-------------------------|-----------------------|-----------------
+ `title.txt`             | App title             | 50              
+ `short-description.txt` | Tagline               | 80              
+ `full-description.txt`  | Full description      | 4000            
+ `video-url.txt`         | Youtube product video | N/A             
 
 #### Uploading graphic based listings
 
@@ -572,16 +572,16 @@ for the same media type. While file names are arbitrary, they will be uploaded i
 and presented on the Play Store as such. Therefore, we recommend using a number as the file name
 (`1.png` for example). Both PNG and JPEG images are supported.
 
-Directory | Max # of images | Image dimension constraints (px)
---- | --- | ---
-`icon` | 1 | 512x512
-`feature-graphic` | 1 | 1024x500
-`phone-screenshots` | 8 | [320..3840]x[320..3840]
-`tablet-screenshots` | 8 | [320..3840]x[320..3840]
-`large-tablet-screenshots` | 8 | [320..3840]x[320..3840]
-`tv-banner` | 1 | 1280x720
-`tv-screenshots` | 8 | [320..3840]x[320..3840]
-`wear-screenshots` | 8 | [320..3840]x[320..3840]
+ Directory                  | Max # of images | Image dimension constraints (px) 
+----------------------------|-----------------|----------------------------------
+ `icon`                     | 1               | 512x512                          
+ `feature-graphic`          | 1               | 1024x500                         
+ `phone-screenshots`        | 8               | [320..3840]x[320..3840]          
+ `tablet-screenshots`       | 8               | [320..3840]x[320..3840]          
+ `large-tablet-screenshots` | 8               | [320..3840]x[320..3840]          
+ `tv-banner`                | 1               | 1280x720                         
+ `tv-screenshots`           | 8               | [320..3840]x[320..3840]          
+ `wear-screenshots`         | 8               | [320..3840]x[320..3840]          
 
 ### Publishing in-app products
 
