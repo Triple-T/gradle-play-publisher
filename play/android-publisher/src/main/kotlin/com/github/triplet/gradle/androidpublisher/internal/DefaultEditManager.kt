@@ -216,7 +216,7 @@ internal class DefaultEditManager(
             e has "forbidden" && e.details.message.orEmpty().let { m ->
                 // Bundle message: APK specifies a version code that has already been used.
                 // APK message: Cannot update a published APK.
-                m.contains("version code") || m.contains("Cannot update", ignoreCase = true)
+                m.contains("version code", ignoreCase = true) || m.contains("Cannot update", ignoreCase = true)
             }
     ) {
         when (strategy) {
