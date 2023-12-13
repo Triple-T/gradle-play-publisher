@@ -302,19 +302,21 @@ class DefaultEditManagerTest {
                 releaseNotes = mapOf("locale" to "notes"),
                 userFraction = .88,
                 updatePriority = 3,
-                retainableArtifacts = listOf(777)
+                retainableArtifacts = listOf(777),
+                versionCode = 123,
         )
 
         verify(mockTracks).promote(TrackManager.PromoteConfig(
                 promoteTrackName = "alpha",
                 fromTrackName = "internal",
+                versionCode = 123,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         releaseName = "relname",
                         releaseNotes = mapOf("locale" to "notes"),
                         userFraction = .88,
                         updatePriority = 3,
-                        retainableArtifacts = listOf(777)
+                        retainableArtifacts = listOf(777),
                 )
         ))
     }

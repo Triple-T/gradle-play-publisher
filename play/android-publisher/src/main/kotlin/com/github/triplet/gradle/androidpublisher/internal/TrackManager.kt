@@ -33,6 +33,7 @@ internal interface TrackManager {
     data class PromoteConfig(
             val promoteTrackName: String,
             val fromTrackName: String,
+            val versionCode: Long?,
             val base: BaseConfig,
     )
 }
@@ -82,7 +83,7 @@ internal class DefaultTrackManager(
 
         // Update the track
         for (release in track.releases) {
-            release.mergeChanges(null, config.base)
+            release.mergeChanges(config.versionCode?.let { listOf(it) }, config.base)
         }
         // Only keep the unique statuses from the highest version code since duplicate statuses are
         // not allowed. This is how we deal with an update from inProgress -> completed. We update

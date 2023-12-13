@@ -87,6 +87,14 @@ abstract class PlayPublisherExtension @Inject constructor(
     abstract val promoteTrack: Property<String>
 
     /**
+     * Specify the version code to promote from [fromTrack] to [track].
+     * Default is the highest version code in [fromTrack].
+     */
+    @get:Optional
+    @get:Input
+    abstract val versionCode: Property<Long>
+
+    /**
      * Specify the initial user fraction intended to receive an `inProgress` release. Defaults to
      * 0.1 (10%).
      *

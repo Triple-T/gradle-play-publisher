@@ -657,6 +657,7 @@ class DefaultTrackManagerTest {
         val config = TrackManager.PromoteConfig(
                 promoteTrackName = "alpha",
                 fromTrackName = "internal",
+                versionCode = null,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         userFraction = .88,
@@ -682,6 +683,7 @@ class DefaultTrackManagerTest {
         val config = TrackManager.PromoteConfig(
                 promoteTrackName = "alpha",
                 fromTrackName = "internal",
+                versionCode = null,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.IN_PROGRESS,
                         userFraction = .88,
@@ -722,6 +724,7 @@ class DefaultTrackManagerTest {
         val config = TrackManager.PromoteConfig(
                 promoteTrackName = "alpha",
                 fromTrackName = "internal",
+                versionCode = null,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         userFraction = null,
@@ -763,6 +766,7 @@ class DefaultTrackManagerTest {
         val config = TrackManager.PromoteConfig(
                 promoteTrackName = "alpha",
                 fromTrackName = "internal",
+                versionCode = null,
                 base = TrackManager.BaseConfig(
                         releaseStatus = null,
                         userFraction = null,
@@ -811,6 +815,7 @@ class DefaultTrackManagerTest {
         val config = TrackManager.PromoteConfig(
                 promoteTrackName = "alpha",
                 fromTrackName = "internal",
+                versionCode = null,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         userFraction = null,
@@ -839,6 +844,7 @@ class DefaultTrackManagerTest {
         val config = TrackManager.PromoteConfig(
                 promoteTrackName = "alpha",
                 fromTrackName = "internal",
+                versionCode = null,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         userFraction = null,
@@ -896,6 +902,7 @@ class DefaultTrackManagerTest {
         val config = TrackManager.PromoteConfig(
                 promoteTrackName = "alpha",
                 fromTrackName = "alpha",
+                versionCode = null,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         userFraction = null,
@@ -931,6 +938,7 @@ class DefaultTrackManagerTest {
         val config = TrackManager.PromoteConfig(
                 promoteTrackName = "alpha",
                 fromTrackName = "alpha",
+                versionCode = null,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         userFraction = .8,
@@ -966,6 +974,7 @@ class DefaultTrackManagerTest {
         val config = TrackManager.PromoteConfig(
                 promoteTrackName = "alpha",
                 fromTrackName = "internal",
+                versionCode = null,
                 base = TrackManager.BaseConfig(
                         releaseStatus = null,
                         userFraction = .5,
@@ -990,5 +999,48 @@ class DefaultTrackManagerTest {
         assertThat(trackCaptor.value.releases).hasSize(1)
         assertThat(trackCaptor.value.releases.single().status).isEqualTo("inProgress")
         assertThat(trackCaptor.value.releases.single().userFraction).isEqualTo(0.5)
+    }
+
+    @Test
+    fun `Promotion with version code specified promotes that specific version code`() {
+        val config = TrackManager.PromoteConfig(
+                promoteTrackName = "alpha",
+                fromTrackName = "internal",
+                versionCode = 2,
+                base = TrackManager.BaseConfig(
+                        releaseStatus = null,
+                        userFraction = .5,
+                        updatePriority = null,
+                        releaseNotes = null,
+                        retainableArtifacts = null,
+                        releaseName = null
+                )
+        )
+        `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().apply {
+            track = "internal"
+            releases = listOf(
+                    TrackRelease().apply {
+                        status = "completed"
+                        versionCodes = listOf(1)
+                    },
+                    TrackRelease().apply {
+                        status = "draft"
+                        versionCodes = listOf(2)
+                    },
+                    TrackRelease().apply {
+                        status = "draft"
+                        versionCodes = listOf(3)
+                    }
+            )
+        })
+
+        tracks.promote(config)
+
+        val trackCaptor = ArgumentCaptor.forClass(Track::class.java)
+        verify(mockPublisher).updateTrack(eq("edit-id"), trackCaptor.capture())
+        assertThat(trackCaptor.value.releases).hasSize(1)
+        assertThat(trackCaptor.value.releases.single().status).isEqualTo("inProgress")
+        assertThat(trackCaptor.value.releases.single().userFraction).isEqualTo(.5)
+        assertThat(trackCaptor.value.releases.single().versionCodes).containsExactly(2L)
     }
 }

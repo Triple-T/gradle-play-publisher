@@ -110,10 +110,12 @@ internal class DefaultEditManager(
             userFraction: Double?,
             updatePriority: Int?,
             retainableArtifacts: List<Long>?,
+            versionCode: Long?,
     ) {
         tracks.promote(TrackManager.PromoteConfig(
                 promoteTrackName,
                 fromTrackName,
+                versionCode,
                 TrackManager.BaseConfig(
                         releaseStatus,
                         userFraction,
