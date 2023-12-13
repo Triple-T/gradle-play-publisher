@@ -64,7 +64,6 @@ import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.newInstance
 import org.gradle.kotlin.dsl.registerIfAbsent
 import org.gradle.kotlin.dsl.setProperty
-import org.gradle.kotlin.dsl.the
 import org.gradle.kotlin.dsl.withType
 import javax.inject.Inject
 
@@ -178,7 +177,7 @@ internal abstract class PlayPublisherPlugin @Inject constructor(
 
         val baseExtension = project.extensions.getByType<PlayPublisherExtension>()
         val extensionContainer = project.container<PlayPublisherExtension>()
-        val android = project.the<BaseAppModuleExtension>()
+        val android = project.extensions.getByType<BaseAppModuleExtension>()
         (android as ExtensionAware).extensions.add(PLAY_CONFIGS_PATH, extensionContainer)
 
         val androidExtension = project.extensions.getByType<ApplicationAndroidComponentsExtension>()
