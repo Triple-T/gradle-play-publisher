@@ -25,7 +25,7 @@ dependencyResolutionManagement {
 
     versionCatalogs {
         create("libs") {
-            version("depUpdates", "0.39.0")
+            version("depUpdates", "0.50.0")
             version("gradlePublish", "1.1.0")
             version("nexusPublish", "1.1.0")
 
