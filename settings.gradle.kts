@@ -64,7 +64,7 @@ dependencyResolutionManagement {
         create("testLibs") {
             version("junit", "5.8.1")
             version("truth", "1.1.3")
-            version("mockito", "4.0.0")
+            version("mockito", "4.11.0")
 
             library("junit", "org.junit.jupiter", "junit-jupiter-api").versionRef("junit")
             library("junit-engine", "org.junit.jupiter", "junit-jupiter-engine")
