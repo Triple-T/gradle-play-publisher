@@ -17,7 +17,7 @@ jobs:
       is_snapshot: ${{ steps.setup.outputs.is_snapshot }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Install JDK
         uses: actions/setup-java@v4
         with:
@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Install JDK
         uses: actions/setup-java@v4
         with:
@@ -56,7 +56,7 @@ jobs:
     if: github.repository == 'Triple-T/gradle-play-publisher' && github.ref == 'refs/heads/master' && needs.build.outputs.is_snapshot == 'true'
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Install JDK
         uses: actions/setup-java@v4
         with:
@@ -78,7 +78,7 @@ jobs:
     if: github.repository == 'Triple-T/gradle-play-publisher' && startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Install JDK
         uses: actions/setup-java@v4
         with:
