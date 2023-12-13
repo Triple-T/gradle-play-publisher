@@ -129,7 +129,7 @@ dependencies {
     "implementation"(kotlin("stdlib-jdk8", embeddedKotlinVersion))
     "implementation"("androidx.appcompat:appcompat:1.3.1")
     "implementation"("androidx.multidex:multidex:2.0.1")
-    "implementation"("androidx.constraintlayout:constraintlayout:2.1.1")
+    "implementation"("androidx.constraintlayout:constraintlayout:2.1.4")
 }
 
 abstract class BuildReadinessValidator : DefaultTask() {
