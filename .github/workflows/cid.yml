@@ -19,6 +19,8 @@ jobs:
           java-version: 17
       - name: Gradle Cache
         uses: gradle/gradle-build-action@v2
+      - name: Validate Gradle integrity
+        uses: gradle/wrapper-validation-action@v1
       - name: Setup environment
         id: setup
         run: ./gradlew configureGithubActions
