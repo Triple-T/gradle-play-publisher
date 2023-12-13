@@ -62,7 +62,7 @@ dependencyResolutionManagement {
         }
 
         create("testLibs") {
-            version("junit", "5.8.1")
+            version("junit", "5.10.1")
             version("truth", "1.1.3")
             version("mockito", "4.11.0")
 
