@@ -1,12 +1,6 @@
 name: CI/CD
 
-on:
-  push:
-    branches:
-      - master
-  pull_request:
-  workflow_dispatch:
-
+on: [push, pull_request]
 env:
   GRADLE_OPTS: -Dorg.gradle.daemon=false -Dkotlin.incremental=false -Dkotlin.compiler.execution.strategy=in-process
 
