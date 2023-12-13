@@ -27,7 +27,7 @@ dependencyResolutionManagement {
         create("libs") {
             version("depUpdates", "0.50.0")
             version("gradlePublish", "1.1.0")
-            version("nexusPublish", "1.1.0")
+            version("nexusPublish", "1.3.0")
 
             plugin("depUpdates", "com.github.ben-manes.versions")
                 .versionRef("depUpdates")
