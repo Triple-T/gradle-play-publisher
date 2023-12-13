@@ -42,7 +42,7 @@ dependencyResolutionManagement {
             version("api-client", "2.2.0")
             version("http-client", "1.43.3")
             version("http-auth", "1.20.0")
-            version("guava", "31.1-jre")
+            version("guava", "32.1.3-jre")
 
             library("agp", "com.android.tools.build", "gradle").versionRef("agp")
             library("agp-test", "com.android.tools.build", "builder-test-api").versionRef("agp")
