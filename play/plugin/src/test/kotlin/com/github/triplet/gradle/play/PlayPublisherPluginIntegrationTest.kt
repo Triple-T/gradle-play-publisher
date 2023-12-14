@@ -193,13 +193,13 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
             }
 
             android {
-                compileSdk 31
+                compileSdk 34
                 namespace = "com.example.publisher"
 
                 defaultConfig {
                     applicationId "com.example.publisher"
                     minSdk 31
-                    targetSdk 31
+                    targetSdk 33
                     versionCode 1
                     versionName "1.0"
                 }
@@ -637,13 +637,13 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
             apply plugin: 'com.google.firebase.crashlytics'
 
             android {
-                compileSdk 31
+                compileSdk 34
                 namespace = "com.example.publisher"
 
                 defaultConfig {
                     applicationId "com.supercilex.test"
                     minSdk 31
-                    targetSdk 31
+                    targetSdk 33
                     versionCode 1
                     versionName "1.0"
                 }
@@ -715,13 +715,13 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
             apply plugin: 'com.bugsnag.android.gradle'
 
             android {
-                compileSdk 31
+                compileSdk 34
                 namespace = "com.example.publisher"
 
                 defaultConfig {
                     applicationId "com.supercilex.test"
                     minSdk 31
-                    targetSdk 31
+                    targetSdk 33
                     versionCode 1
                     versionName "1.0"
                 }

@@ -7,7 +7,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v3
+      - uses: actions/stale@v9
         with:
           days-before-stale: 7
           stale-issue-label: waiting-for-reply

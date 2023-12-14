@@ -21,7 +21,7 @@ buildscript {
 
     dependencies {
         classpath(kotlin("gradle-plugin", embeddedKotlinVersion))
-        classpath("com.android.tools.build:gradle:7.3.0")
+        classpath("com.android.tools.build:gradle:8.2.0")
         classpath("com.supercilex.gradle:version-orchestrator:0.10.0")
         classpath(
             "com.github.triplet.gradle:play-publisher:" +
@@ -33,10 +33,6 @@ buildscript {
 buildScan {
     termsOfServiceUrl = "https://gradle.com/terms-of-service"
     termsOfServiceAgree = "yes"
-}
-
-tasks.wrapper {
-    distributionType = Wrapper.DistributionType.ALL
 }
 
 allprojects {
@@ -127,9 +123,9 @@ configure<VersionOrchestratorExtension> {
 
 dependencies {
     "implementation"(kotlin("stdlib-jdk8", embeddedKotlinVersion))
-    "implementation"("androidx.appcompat:appcompat:1.3.1")
+    "implementation"("androidx.appcompat:appcompat:1.6.1")
     "implementation"("androidx.multidex:multidex:2.0.1")
-    "implementation"("androidx.constraintlayout:constraintlayout:2.1.1")
+    "implementation"("androidx.constraintlayout:constraintlayout:2.1.4")
 }
 
 abstract class BuildReadinessValidator : DefaultTask() {

@@ -115,13 +115,13 @@ abstract class IntegrationTestBase(
             }
 
             android {
-                compileSdk 31
+                compileSdk 34
                 namespace = "com.example.publisher"
 
                 defaultConfig {
                     applicationId "com.example.publisher"
                     minSdk 31
-                    targetSdk 31
+                    targetSdk 33
                     versionCode 1
                     versionName "1.0"
                 }
