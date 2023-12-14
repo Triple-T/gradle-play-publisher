@@ -25,9 +25,9 @@ dependencyResolutionManagement {
 
     versionCatalogs {
         create("libs") {
-            version("depUpdates", "0.39.0")
-            version("gradlePublish", "1.1.0")
-            version("nexusPublish", "1.1.0")
+            version("depUpdates", "0.50.0")
+            version("gradlePublish", "1.2.1")
+            version("nexusPublish", "1.3.0")
 
             plugin("depUpdates", "com.github.ben-manes.versions")
                 .versionRef("depUpdates")
@@ -36,13 +36,13 @@ dependencyResolutionManagement {
             plugin("nexusPublish", "io.github.gradle-nexus.publish-plugin")
                 .versionRef("nexusPublish")
 
-            version("agp", "8.0.1")
-            version("agp-tools", "31.0.1")
-            version("android-publisher", "v3-rev20230615-2.0.0")
+            version("agp", "8.2.0")
+            version("agp-tools", "31.2.0")
+            version("android-publisher", "v3-rev20231115-2.0.0")
             version("api-client", "2.2.0")
-            version("http-client", "1.40.1")
-            version("http-auth", "1.2.2")
-            version("guava", "31.0.1-jre")
+            version("http-client", "1.43.3")
+            version("http-auth", "1.20.0")
+            version("guava", "32.1.3-jre")
 
             library("agp", "com.android.tools.build", "gradle").versionRef("agp")
             library("agp-test", "com.android.tools.build", "builder-test-api").versionRef("agp")
@@ -62,9 +62,9 @@ dependencyResolutionManagement {
         }
 
         create("testLibs") {
-            version("junit", "5.8.1")
-            version("truth", "1.1.3")
-            version("mockito", "4.0.0")
+            version("junit", "5.10.1")
+            version("truth", "1.1.5")
+            version("mockito", "5.8.0")
 
             library("junit", "org.junit.jupiter", "junit-jupiter-api").versionRef("junit")
             library("junit-engine", "org.junit.jupiter", "junit-jupiter-engine")
