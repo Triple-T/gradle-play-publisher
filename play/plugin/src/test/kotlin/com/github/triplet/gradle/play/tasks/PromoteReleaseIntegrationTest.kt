@@ -286,6 +286,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase(), SharedIntegrationTe
                         userFraction: Double?,
                         updatePriority: Int?,
                         retainableArtifacts: List<Long>?,
+                        versionCode: Long?,
                 ) {
                     println("promoteRelease(" +
                                     "promoteTrackName=$promoteTrackName, " +

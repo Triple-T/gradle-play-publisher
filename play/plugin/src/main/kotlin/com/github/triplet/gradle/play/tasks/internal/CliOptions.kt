@@ -39,6 +39,13 @@ internal interface TrackExtensionOptions : WriteTrackExtensionOptions {
 
     @get:Internal
     @set:Option(
+            option = "version-code",
+            description = "Set the version code to promote from [fromTrack] to [track]"
+    )
+    var versionCodeOption: String
+
+    @get:Internal
+    @set:Option(
             option = "update-priority",
             description = "Set the update priority for your release."
     )
@@ -141,6 +148,12 @@ internal class CliOptionsImpl(
         get() = throw UnsupportedOperationException()
         set(value) {
             extension.userFraction.set(value.toDouble())
+        }
+
+    override var versionCodeOption: String
+        get() = throw UnsupportedOperationException()
+        set(value) {
+            extension.versionCode.set(value.toLong())
         }
 
     override var updatePriorityOption: String

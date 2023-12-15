@@ -155,6 +155,7 @@ class PlayPublisherExtensionTest {
             map { ExtensionMergeHolder(it, Extension()) }
 
     private inner class Extension : PlayPublisherExtension("test") {
+        override val versionCode: Property<Long> get() = project.objects.property()
         override val enabled: Property<Boolean> = project.objects.property()
         override val serviceAccountCredentials: RegularFileProperty = project.objects.fileProperty()
         override val defaultToAppBundles: Property<Boolean> = project.objects.property()

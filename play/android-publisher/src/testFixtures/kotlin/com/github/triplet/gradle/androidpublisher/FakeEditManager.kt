@@ -52,6 +52,7 @@ abstract class FakeEditManager : EditManager {
             userFraction: Double?,
             updatePriority: Int?,
             retainableArtifacts: List<Long>?,
+            versionCode: Long?,
     ): Unit = throw IllegalStateException("Test wasn't expecting this method to be called.")
 
     override fun uploadBundle(
