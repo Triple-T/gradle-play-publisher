@@ -51,11 +51,11 @@ the<JavaPluginExtension>().toolchain.languageVersion.convention(JavaLanguageVers
 
 configure<BaseAppModuleExtension> {
     namespace = "com.supercilex.test"
-    compileSdk = 31
+    compileSdk = 34
 
     defaultConfig {
         minSdk = 31
-        targetSdk = 31
+        targetSdk = 34
         versionCode = 1 // Updated on every build
         versionName = "1.0.0"
     }
