@@ -1,3 +1,4 @@
+import com.gradle.publish.PublishTaskShadowAction
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -5,20 +6,27 @@ plugins {
     `java-test-fixtures`
     `maven-publish`
     signing
+    id("com.github.johnrengelman.shadow")
 }
 
 dependencies {
     implementation(project(":common:utils"))
-    implementation(libs.androidpublisher)
-    implementation(libs.client.api)
-    implementation(libs.client.auth)
-    implementation(libs.client.http)
+    shadowImplementation(libs.androidpublisher)
+    shadowImplementation(libs.client.api)
+    shadowImplementation(libs.client.auth)
+    shadowImplementation(libs.client.http)
 
     testImplementation(testLibs.junit)
     testImplementation(testLibs.junit.engine)
     testImplementation(testLibs.truth)
     testImplementation(testLibs.mockito)
 }
+
+// Normally performed by plugin-publish
+pluginManager.withPlugin(
+    "com.github.johnrengelman.shadow",
+    PublishTaskShadowAction(project, logger)
+)
 
 // Mockito needs to be able to pass in null params
 tasks.named<KotlinCompile>("compileTestKotlin") {

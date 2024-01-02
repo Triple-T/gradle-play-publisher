@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.ShadowPlugin
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import io.github.gradlenexus.publishplugin.CloseNexusStagingRepository
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import java.time.Duration
@@ -15,6 +17,7 @@ plugins {
     // Needed to support publishing all modules atomically
     alias(libs.plugins.gradlePublish) apply false
     alias(libs.plugins.nexusPublish)
+    alias(libs.plugins.shadow) apply false
 }
 
 buildScan {
@@ -81,6 +84,25 @@ allprojects {
 
             useInMemoryPgpKeys(System.getenv("SIGNING_KEY"), System.getenv("SIGNING_PASSWORD"))
         }
+    }
+
+    plugins.withType<ShadowPlugin> {
+        val shadowImplementation by configurations.creating
+        configurations["compileOnly"].extendsFrom(shadowImplementation)
+        configurations["testImplementation"].extendsFrom(shadowImplementation)
+
+        tasks.withType<ShadowJar> {
+            archiveClassifier.set("")
+            configurations = listOf(shadowImplementation)
+            isEnableRelocation = true
+            relocationPrefix = "com.github.triplet.gradle.shaded"
+        }
+    }
+
+    // Needed to preserve JAR hash for testapp build
+    tasks.withType<AbstractArchiveTask> {
+        isPreserveFileTimestamps = false
+        isReproducibleFileOrder = true
     }
 
     tasks.withType<Test> {

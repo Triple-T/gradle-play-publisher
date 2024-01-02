@@ -28,6 +28,7 @@ dependencyResolutionManagement {
             version("depUpdates", "0.50.0")
             version("gradlePublish", "1.2.1")
             version("nexusPublish", "1.3.0")
+            version("shadow", "8.1.1")
 
             plugin("depUpdates", "com.github.ben-manes.versions")
                 .versionRef("depUpdates")
@@ -35,6 +36,8 @@ dependencyResolutionManagement {
                 .versionRef("gradlePublish")
             plugin("nexusPublish", "io.github.gradle-nexus.publish-plugin")
                 .versionRef("nexusPublish")
+            plugin("shadow", "com.github.johnrengelman.shadow")
+                .versionRef("shadow")
 
             version("agp", "8.2.0")
             version("agp-tools", "31.2.0")

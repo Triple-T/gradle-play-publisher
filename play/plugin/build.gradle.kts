@@ -3,11 +3,12 @@ plugins {
     `kotlin-dsl`
     `maven-publish`
     signing
+    id("com.github.johnrengelman.shadow")
     id("com.gradle.plugin-publish")
 }
 
 dependencies {
-    implementation(project(":play:android-publisher"))
+    implementation(project(":play:android-publisher", "shadow"))
     implementation(project(":common:utils"))
     implementation(project(":common:validation"))
 
@@ -15,8 +16,8 @@ dependencies {
     compileOnly(libs.agp.common)
     compileOnly(libs.agp.test)
     compileOnly(libs.agp.ddms)
-    implementation(libs.guava)
-    implementation(libs.client.gson)
+    shadowImplementation(libs.guava)
+    shadowImplementation(libs.client.gson)
 
     testImplementation(project(":common:utils"))
     testImplementation(project(":common:validation"))
