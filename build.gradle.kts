@@ -1,8 +1,9 @@
 import com.github.jengelman.gradle.plugins.shadow.ShadowPlugin
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import io.github.gradlenexus.publishplugin.CloseNexusStagingRepository
-import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import java.time.Duration
+import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper
 
 buildscript {
     dependencies {
@@ -61,25 +62,31 @@ allprojects {
     version = versionName
     group = "com.github.triplet.gradle"
 
-    afterEvaluate {
-        extensions.findByType<JavaPluginExtension>()?.apply {
+    plugins.withType<JavaPlugin> {
+        configure<JavaPluginExtension> {
             toolchain.languageVersion.convention(JavaLanguageVersion.of(11))
             withJavadocJar()
             withSourcesJar()
         }
+    }
 
-        extensions.findByType<KotlinProjectExtension>()?.apply {
+    plugins.withType<KotlinPluginWrapper> {
+        configure<KotlinProjectExtension> {
             sourceSets.configureEach {
                 languageSettings.progressiveMode = true
                 languageSettings.enableLanguageFeature("NewInference")
             }
         }
+    }
 
-        extensions.findByType<PublishingExtension>()?.apply {
+    plugins.withType<PublishingPlugin> {
+        configure<PublishingExtension> {
             configureMaven(repositories)
         }
+    }
 
-        extensions.findByType<SigningExtension>()?.apply {
+    plugins.withType<SigningPlugin> {
+        configure<SigningExtension> {
             isRequired = false
 
             useInMemoryPgpKeys(System.getenv("SIGNING_KEY"), System.getenv("SIGNING_PASSWORD"))
