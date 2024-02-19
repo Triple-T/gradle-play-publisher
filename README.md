@@ -82,9 +82,7 @@ To use GPP, you must create a service account with access to the Play Developer 
 2. Enable the
    [AndroidPublisher API](https://console.cloud.google.com/apis/library/androidpublisher.googleapis.com)
    for that GCP project
-3. [Link your Google Play developer account](https://play.google.com/console/developers/api-access)
-   to your GCP project
-4. Create a
+3. Create a
    [service account and key](https://console.cloud.google.com/apis/credentials/serviceaccountkey)
     1. Make sure you're in the GCP project you used above (check the `project` query param in the
        URL)
@@ -93,9 +91,9 @@ To use GPP, you must create a service account with access to the Play Developer 
     4. After creating the service account, find it in the list of all service accounts and use the 3
        dots menu to `Manage keys`
     5. From there, create a new key using the `Add key` menu (leave JSON selected)
-5. Move the downloaded JSON credentials into your project and
+4. Move the downloaded JSON credentials into your project and
    [tell GPP about it](#authenticating-gradle-play-publisher)
-6. Give your service account
+5. Give your service account
    [permissions to publish apps](https://play.google.com/console/developers/users-and-permissions)
    on your behalf
     1. Click `Invite new user`
@@ -104,8 +102,8 @@ To use GPP, you must create a service account with access to the Play Developer 
     4. Specify which apps the service account should have access to. In this example, GPP has full
        access to testing tracks and app listings, but will be unable to make production releases:
        <img alt="Minimum Service Account permissions" src="assets/min-perms.png" width="66%" />
-7. Run `./gradlew bootstrapListing` or some other GPP task to validate your setup
-8. Now that you've successfully created the connection between GCP and Google Play, you can remove
+6. Run `./gradlew bootstrapListing` or some other GPP task to validate your setup
+7. Now that you've successfully created the connection between GCP and Google Play, you can remove
    the Project Owner permissions
     1. Go to your [IAM settings](https://console.cloud.google.com/iam-admin/iam)
     2. Search for the service account you created
