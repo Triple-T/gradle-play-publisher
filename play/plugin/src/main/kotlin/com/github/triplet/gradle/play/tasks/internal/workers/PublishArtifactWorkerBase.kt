@@ -22,9 +22,9 @@ internal abstract class PublishArtifactWorkerBase<T : PublishArtifactWorkerBase.
         return if (config.releaseName != null) {
             config.releaseName
         } else if (parameters.consoleNamesDir.isPresent) {
-            val dir = parameters.consoleNamesDir.get()
-            val file = dir.file("$track.txt").asFile.orNull()
-                    ?: dir.file(RELEASE_NAMES_DEFAULT_NAME).asFile.orNull()
+            val dir = parameters.consoleNamesDir.get().asFile
+            val file = File(dir, "$track.txt").orNull()
+                    ?: File(dir, RELEASE_NAMES_DEFAULT_NAME).orNull()
 
             file?.readProcessed()?.lines()?.firstOrNull()
         } else {
