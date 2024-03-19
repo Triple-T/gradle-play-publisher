@@ -26,7 +26,7 @@ buildScan {
 
 tasks.register("configureGithubActions") {
     doLast {
-        println("is_snapshot=\"$isSnapshotBuild\" >> $GITHUB_OUTPUT")
+        println("is_snapshot=$isSnapshotBuild >> $GITHUB_OUTPUT")
     }
 }
 
