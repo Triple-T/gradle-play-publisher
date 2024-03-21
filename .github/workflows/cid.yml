@@ -23,7 +23,9 @@ jobs:
         uses: gradle/wrapper-validation-action@v1
       - name: Setup environment
         id: setup
-        run: ./gradlew configureGithubActions
+        run: |
+          if grep -qi "snapshot" version.txt; then is_snapshot=true; else is_snapshot=false; fi
+          echo "is_snapshot=$is_snapshot" >> "$GITHUB_OUTPUT"
       - name: Build project
         run: |
           ./gradlew assemble publishToMavenLocal -S

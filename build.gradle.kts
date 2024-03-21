@@ -24,12 +24,6 @@ buildScan {
     publishAlways()
 }
 
-tasks.register("configureGithubActions") {
-    doLast {
-        println("::set-output name=is_snapshot::$isSnapshotBuild")
-    }
-}
-
 nexusPublishing {
     repositories {
         sonatype {
