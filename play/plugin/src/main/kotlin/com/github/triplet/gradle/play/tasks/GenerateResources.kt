@@ -16,6 +16,7 @@ import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NAMES_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
+import com.github.triplet.gradle.play.internal.SUBSCRIPTIONS_PATH
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
@@ -98,7 +99,8 @@ internal abstract class GenerateResources @Inject constructor(
                     isChildOf(LISTINGS_PATH) ||
                     isChildOf(RELEASE_NOTES_PATH) ||
                     isChildOf(RELEASE_NAMES_PATH) ||
-                    isChildOf(PRODUCTS_PATH)
+                    isChildOf(PRODUCTS_PATH) ||
+                    isChildOf(SUBSCRIPTIONS_PATH)
             check(areRootsValid) { "Unknown Play resource file: $this" }
 
             val closestPlayDirIsValid =
@@ -115,6 +117,7 @@ internal abstract class GenerateResources @Inject constructor(
             validateReleaseNotes()
             validateReleaseNames()
             validateProducts()
+            validateSubscriptions()
         }
 
         private fun File.validateListings() {
@@ -150,6 +153,16 @@ internal abstract class GenerateResources @Inject constructor(
             }
             check(products.isDirectory) {
                 "$products must be a directory"
+            }
+        }
+
+        private fun File.validateSubscriptions() {
+            val subscriptions = climbUpTo(SUBSCRIPTIONS_PATH) ?: return
+            check(subscriptions.isDirectChildOf(PLAY_PATH)) {
+                "Subscriptions ($subscriptions) must be under the '$PLAY_PATH' directory"
+            }
+            check(subscriptions.isDirectory) {
+                "$subscriptions must be a directory"
             }
         }
 

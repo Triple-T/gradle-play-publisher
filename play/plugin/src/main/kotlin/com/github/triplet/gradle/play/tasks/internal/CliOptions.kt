@@ -238,8 +238,12 @@ internal interface BootstrapOptions {
     var downloadReleaseNotes: Boolean
 
     @get:Internal
-    @set:Option(option = "products", description = "Download in-app purchases and subscriptions.")
+    @set:Option(option = "products", description = "Download in-app purchases and subscriptions (legacy api).")
     var downloadProducts: Boolean
+
+    @get:Internal
+    @set:Option(option = "subscriptions", description = "Download in-app subscriptions (monetization api).")
+    var downloadSubscriptions: Boolean
 
     class Holder : BootstrapOptions {
         private val isRequestingSpecificFeature = AtomicBoolean()
@@ -265,6 +269,12 @@ internal interface BootstrapOptions {
                 field = value
             }
 
+        override var downloadSubscriptions = true
+            set(value) {
+                onSet()
+                field = value
+            }
+
         /**
          * By default, we download all features. However, if they are specified with CLI options, we
          * only download those features.
@@ -277,6 +287,7 @@ internal interface BootstrapOptions {
                 downloadListings = false
                 downloadReleaseNotes = false
                 downloadProducts = false
+                downloadSubscriptions = false
             }
         }
     }

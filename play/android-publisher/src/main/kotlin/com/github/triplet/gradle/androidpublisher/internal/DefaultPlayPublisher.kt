@@ -3,8 +3,10 @@ package com.github.triplet.gradle.androidpublisher.internal
 import com.github.triplet.gradle.androidpublisher.CommitResponse
 import com.github.triplet.gradle.androidpublisher.EditResponse
 import com.github.triplet.gradle.androidpublisher.GppProduct
+import com.github.triplet.gradle.androidpublisher.GppSubscription
 import com.github.triplet.gradle.androidpublisher.PlayPublisher
 import com.github.triplet.gradle.androidpublisher.UpdateProductResponse
+import com.github.triplet.gradle.androidpublisher.UpdateSubscriptionResponse
 import com.github.triplet.gradle.androidpublisher.UploadInternalSharingArtifactResponse
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.googleapis.media.MediaHttpUploader
@@ -20,6 +22,7 @@ import com.google.api.services.androidpublisher.model.ExpansionFile
 import com.google.api.services.androidpublisher.model.Image
 import com.google.api.services.androidpublisher.model.InAppProduct
 import com.google.api.services.androidpublisher.model.Listing
+import com.google.api.services.androidpublisher.model.Subscription
 import com.google.api.services.androidpublisher.model.Track
 import java.io.File
 import java.io.InputStream
@@ -212,10 +215,65 @@ internal class DefaultPlayPublisher(
         return UpdateProductResponse(false)
     }
 
+    override fun getInAppSubscriptions(): List<GppSubscription> {
+        fun AndroidPublisher.Monetization.Subscriptions.List.withPageToken(pageToken: String?) = apply {
+            this.pageToken = pageToken
+        }
+
+        val subscriptions = mutableListOf<Subscription>()
+
+        var token: String? = null
+        do {
+            val response = publisher.monetization().subscriptions().list(appId).withPageToken(token).execute()
+            subscriptions += response.subscriptions.orEmpty()
+            token = response.nextPageToken
+        } while (token != null)
+
+        return subscriptions.map {
+            GppSubscription(it.productId, it.toPrettyString())
+        }
+    }
+
+    override fun insertInAppSubscription(subscriptionFile: File) {
+        val subscription = readSubscriptionFile(subscriptionFile)
+        publisher.monetization().subscriptions().create(subscription.packageName, subscription)
+                .apply {
+                    regionsVersionVersion = SUBSCRIPTIONS_REGIONS_VERSION
+                    productId = subscription.productId
+                }
+                .execute()
+    }
+
+    override fun updateInAppSubscription(subscriptionFile: File): UpdateSubscriptionResponse {
+        val subscription = readSubscriptionFile(subscriptionFile)
+        try {
+            publisher.monetization().subscriptions().patch(subscription.packageName, subscription.productId, subscription)
+                    .apply {
+                        regionsVersionVersion = SUBSCRIPTIONS_REGIONS_VERSION
+                        updateMask = SUBSCRIPTIONS_UPDATE_MASK
+                    }
+                    .execute()
+        } catch (e: GoogleJsonResponseException) {
+            if (e.statusCode == 404) {
+                return UpdateSubscriptionResponse(true)
+            } else {
+                throw e
+            }
+        }
+
+        return UpdateSubscriptionResponse(false)
+    }
+
     private fun readProductFile(product: File) = product.inputStream().use {
         GsonFactory.getDefaultInstance()
                 .createJsonParser(it)
                 .parse(InAppProduct::class.java)
+    }
+
+    private fun readSubscriptionFile(product: File) = product.inputStream().use {
+        GsonFactory.getDefaultInstance()
+                .createJsonParser(it)
+                .parse(Subscription::class.java)
     }
 
     private fun <T, R : AbstractGoogleClientRequest<T>> R.trackUploadProgress(
@@ -252,5 +310,8 @@ internal class DefaultPlayPublisher(
         const val MIME_TYPE_STREAM = "application/octet-stream"
         const val MIME_TYPE_APK = "application/vnd.android.package-archive"
         const val MIME_TYPE_IMAGE = "image/*"
+
+        const val SUBSCRIPTIONS_REGIONS_VERSION = "2022/02"
+        const val SUBSCRIPTIONS_UPDATE_MASK = "listings,basePlans"
     }
 }
