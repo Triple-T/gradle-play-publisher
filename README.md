@@ -596,7 +596,6 @@ Run `./gradlew publishSubscriptions`.
 Manually setting up in-app subscriptions files is not recommended. [Bootstrap them instead](#quickstart)
 with `./gradlew bootstrapListing --subscriptions`.
 
-
 ## Working with product flavors
 
 When working with product flavors, granular configuration is key. GPP provides varying levels of
