@@ -596,6 +596,12 @@ Run `./gradlew publishSubscriptions`.
 Manually setting up in-app subscriptions files is not recommended. [Bootstrap them instead](#quickstart)
 with `./gradlew bootstrapListing --subscriptions`.
 
+Each subscription bootstraps with additional metadata-file (`subscriptions/<subscription product id>.metadata.json`)
+which should contains `regionsVersion` code (https://developers.google.com/android-publisher/api-ref/rest/v3/RegionsVersion, latest is `2022/02`).
+Using this field will ensure that creating and updating the resource with an older region's version
+and set of regional prices and currencies will succeed even though a new version is available.
+Currently, there is no way to get this value from the Google Play Developer API, so you should
+manually set regions version for each subscription metadata file.
 
 ## Working with product flavors
 

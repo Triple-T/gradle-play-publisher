@@ -234,22 +234,22 @@ internal class DefaultPlayPublisher(
         }
     }
 
-    override fun insertInAppSubscription(subscriptionFile: File) {
+    override fun insertInAppSubscription(subscriptionFile: File, regionsVersion: String) {
         val subscription = readSubscriptionFile(subscriptionFile)
         publisher.monetization().subscriptions().create(subscription.packageName, subscription)
                 .apply {
-                    regionsVersionVersion = SUBSCRIPTIONS_REGIONS_VERSION
+                    regionsVersionVersion = regionsVersion
                     productId = subscription.productId
                 }
                 .execute()
     }
 
-    override fun updateInAppSubscription(subscriptionFile: File): UpdateSubscriptionResponse {
+    override fun updateInAppSubscription(subscriptionFile: File, regionsVersion: String): UpdateSubscriptionResponse {
         val subscription = readSubscriptionFile(subscriptionFile)
         try {
             publisher.monetization().subscriptions().patch(subscription.packageName, subscription.productId, subscription)
                     .apply {
-                        regionsVersionVersion = SUBSCRIPTIONS_REGIONS_VERSION
+                        regionsVersionVersion = regionsVersion
                         updateMask = SUBSCRIPTIONS_UPDATE_MASK
                     }
                     .execute()
@@ -311,7 +311,6 @@ internal class DefaultPlayPublisher(
         const val MIME_TYPE_APK = "application/vnd.android.package-archive"
         const val MIME_TYPE_IMAGE = "image/*"
 
-        const val SUBSCRIPTIONS_REGIONS_VERSION = "2022/02"
         const val SUBSCRIPTIONS_UPDATE_MASK = "listings,basePlans"
     }
 }

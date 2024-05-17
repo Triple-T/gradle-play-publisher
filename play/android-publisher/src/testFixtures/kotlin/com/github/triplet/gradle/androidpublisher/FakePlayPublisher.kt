@@ -38,13 +38,11 @@ abstract class FakePlayPublisher : PlayPublisher {
     override fun getInAppSubscriptions(): List<GppSubscription> =
             throw IllegalStateException("Test wasn't expecting this method to be called.")
 
-    override fun insertInAppSubscription(subscriptionFile: File): Unit =
+    override fun insertInAppSubscription(subscriptionFile: File, regionsVersion: String): Unit =
             throw IllegalStateException("Test wasn't expecting this method to be called.")
 
-    override fun updateInAppSubscription(subscriptionFile: File): UpdateSubscriptionResponse =
+    override fun updateInAppSubscription(subscriptionFile: File, regionsVersion: String): UpdateSubscriptionResponse =
             throw IllegalStateException("Test wasn't expecting this method to be called.")
-
-    // TODO add subscriptions methods
 
     class Factory : PlayPublisher.Factory {
         override fun create(credentials: InputStream, appId: String) = publisher

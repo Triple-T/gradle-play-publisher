@@ -49,13 +49,24 @@ internal abstract class PublishSubscriptions @Inject constructor(
 
     @TaskAction
     fun publishSubscriptions(changes: InputChanges) {
+
         changes.getFileChanges(subscriptionsDir)
                 .filterNot { it.changeType == ChangeType.REMOVED }
                 .filter { it.fileType == FileType.FILE }
+                .map {
+                    if (it.file.name.endsWith(".$SUBSCRIPTION_METADATA_SUFFIX.json")) {
+                        it.file.parentFile.resolve(
+                                it.file.name.replace(
+                                        "\\.$SUBSCRIPTION_METADATA_SUFFIX\\.json$".toRegex(), ".json"))
+                    } else {
+                        it.file
+                    }
+                }
+                .distinct()
                 .forEach {
                     executor.noIsolation().submit(Uploader::class) {
                         paramsForBase(this)
-                        target.set(it.file)
+                        target.set(it)
                     }
                 }
     }
@@ -63,17 +74,27 @@ internal abstract class PublishSubscriptions @Inject constructor(
     abstract class Uploader : PlayWorkerBase<Uploader.Params>() {
         override fun execute() {
             val subscriptionFile = parameters.target.get().asFile
+
             val subscription = subscriptionFile.inputStream().use {
                 GsonFactory.getDefaultInstance().createJsonParser(it).parse(Map::class.java)
             }
+            val metadata = subscriptionFile.parentFile
+                    .resolve("${subscription["productId"]}.$SUBSCRIPTION_METADATA_SUFFIX.json").inputStream().use {
+                        GsonFactory.getDefaultInstance().createJsonParser(it).parse(Map::class.java)
+                    }
 
             println("Uploading ${subscription["productId"]}")
-            val response = apiService.publisher.updateInAppSubscription(subscriptionFile)
-            if (response.needsCreating) apiService.publisher.insertInAppSubscription(subscriptionFile)
+            val response = apiService.publisher.updateInAppSubscription(subscriptionFile, metadata["regionsVersion"] as String)
+            if (response.needsCreating) apiService.publisher.insertInAppSubscription(subscriptionFile, metadata["regionsVersion"] as String)
         }
 
         interface Params : PlayPublishingParams {
             val target: RegularFileProperty
         }
+    }
+
+    companion object {
+        /** The suggested environment variable name in which to store credentials. */
+        const val SUBSCRIPTION_METADATA_SUFFIX: String = "metadata"
     }
 }

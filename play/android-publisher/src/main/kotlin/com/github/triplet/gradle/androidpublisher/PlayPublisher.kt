@@ -97,7 +97,7 @@ interface PlayPublisher {
      * More docs are available
      * [here](https://developers.google.com/android-publisher/api-ref/rest/v3/monetization.subscriptions/create).
      */
-    fun insertInAppSubscription(subscriptionFile: File)
+    fun insertInAppSubscription(subscriptionFile: File, regionsVersion: String)
 
     /**
      * Updates an existing subscription from the given [subscriptionFile].
@@ -105,7 +105,7 @@ interface PlayPublisher {
      * More docs are available
      * [here](https://developers.google.com/android-publisher/api-ref/rest/v3/monetization.subscriptions/patch).
      */
-    fun updateInAppSubscription(subscriptionFile: File): UpdateSubscriptionResponse
+    fun updateInAppSubscription(subscriptionFile: File, regionsVersion: String): UpdateSubscriptionResponse
 
     /** Basic factory to create [PlayPublisher] instances. */
     interface Factory {
