@@ -42,6 +42,7 @@ listings and other metadata.
     2. [Directory structure](#directory-structure)
     3. [Publishing listings](#publishing-listings)
     4. [Publishing in-app products](#publishing-in-app-products)
+    5. [Publishing in-app subscriptions](#publishing-in-app-subscriptions)
 7. [Working with product flavors](#working-with-product-flavors)
     1. [Disabling publishing](#disabling-publishing)
     2. [Combining artifacts into a single release](#combining-artifacts-into-a-single-release)
@@ -540,24 +541,24 @@ Run `./gradlew publishListing`.
 
 Base directory: `play`
 
- File                   | Description                                                                                      
+ File                   | Description
 ------------------------|--------------------------------------------------------------------------------------------------
- `contact-email.txt`    | Developer email                                                                                  
- `contact-phone.txt`    | Developer phone                                                                                  
- `contact-website.txt`  | Developer website                                                                                
- `default-language.txt` | The default language for both your Play Store listing and translation merging as described above 
+ `contact-email.txt`    | Developer email
+ `contact-phone.txt`    | Developer phone
+ `contact-website.txt`  | Developer website
+ `default-language.txt` | The default language for both your Play Store listing and translation merging as described above
 
 #### Uploading text based listings
 
 Base directory: `play/listings/[language]` where `language` is one of the
 [Play Store supported codes](https://support.google.com/googleplay/android-developer/answer/3125566)
 
- File                    | Description           | Character limit 
+ File                    | Description           | Character limit
 -------------------------|-----------------------|-----------------
- `title.txt`             | App title             | 50              
- `short-description.txt` | Tagline               | 80              
- `full-description.txt`  | Full description      | 4000            
- `video-url.txt`         | Youtube product video | N/A             
+ `title.txt`             | App title             | 50
+ `short-description.txt` | Tagline               | 80
+ `full-description.txt`  | Full description      | 4000
+ `video-url.txt`         | Youtube product video | N/A
 
 #### Uploading graphic based listings
 
@@ -570,16 +571,16 @@ for the same media type. While file names are arbitrary, they will be uploaded i
 and presented on the Play Store as such. Therefore, we recommend using a number as the file name
 (`1.png` for example). Both PNG and JPEG images are supported.
 
- Directory                  | Max # of images | Image dimension constraints (px) 
+ Directory                  | Max # of images | Image dimension constraints (px)
 ----------------------------|-----------------|----------------------------------
- `icon`                     | 1               | 512x512                          
- `feature-graphic`          | 1               | 1024x500                         
- `phone-screenshots`        | 8               | [320..3840]x[320..3840]          
- `tablet-screenshots`       | 8               | [320..3840]x[320..3840]          
- `large-tablet-screenshots` | 8               | [320..3840]x[320..3840]          
- `tv-banner`                | 1               | 1280x720                         
- `tv-screenshots`           | 8               | [320..3840]x[320..3840]          
- `wear-screenshots`         | 8               | [320..3840]x[320..3840]          
+ `icon`                     | 1               | 512x512
+ `feature-graphic`          | 1               | 1024x500
+ `phone-screenshots`        | 8               | [320..3840]x[320..3840]
+ `tablet-screenshots`       | 8               | [320..3840]x[320..3840]
+ `large-tablet-screenshots` | 8               | [320..3840]x[320..3840]
+ `tv-banner`                | 1               | 1280x720
+ `tv-screenshots`           | 8               | [320..3840]x[320..3840]
+ `wear-screenshots`         | 8               | [320..3840]x[320..3840]
 
 ### Publishing in-app products
 
@@ -587,6 +588,18 @@ Run `./gradlew publishProducts`.
 
 Manually setting up in-app purchase files is not recommended. [Bootstrap them instead](#quickstart)
 with `./gradlew bootstrapListing --products`.
+
+### Publishing in-app subscriptions
+
+Run `./gradlew publishSubscriptions`.
+
+Manually setting up in-app subscriptions files is not recommended. [Bootstrap them instead](#quickstart)
+with `./gradlew bootstrapListing --subscriptions`.
+
+Each subscription file must have an associated metadata file (`subscriptions/<subscription product id>.metadata.json`)
+that contains JSON of the form `{"regionsVersion": ...}`. The `regionsVersion` is described
+[here](https://developers.google.com/android-publisher/api-ref/rest/v3/RegionsVersion). The Google Play Developer API does
+not have a way to get the latest regions version, so unfortunately bootstrapping uses a hardcoded value that you may need to fix.
 
 ## Working with product flavors
 

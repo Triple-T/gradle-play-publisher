@@ -12,11 +12,15 @@ import com.github.triplet.gradle.play.internal.LISTINGS_PATH
 import com.github.triplet.gradle.play.internal.ListingDetail
 import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
+import com.github.triplet.gradle.play.internal.SUBSCRIPTIONS_PATH
+import com.github.triplet.gradle.play.internal.SubscriptionMetadata
+import com.github.triplet.gradle.play.tasks.PublishSubscriptions.Companion.SUBSCRIPTION_METADATA_SUFFIX
 import com.github.triplet.gradle.play.tasks.internal.BootstrapOptions
 import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.workers.EditWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.workers.copy
 import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
+import com.google.api.client.json.gson.GsonFactory
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileSystemOperations
@@ -57,6 +61,7 @@ internal abstract class Bootstrap @Inject constructor(
         if (downloadListings) bootstrapListings(executor)
         if (downloadReleaseNotes) bootstrapReleaseNotes(executor)
         if (downloadProducts) bootstrapProducts(executor)
+        if (downloadSubscriptions) bootstrapSubscriptions(executor)
     }
 
     private fun bootstrapAppDetails(executor: WorkerExecutor) {
@@ -84,6 +89,13 @@ internal abstract class Bootstrap @Inject constructor(
         executor.noIsolation().submit(ProductsDownloader::class) {
             paramsForBase(this)
             dir.set(srcDir.dir(PRODUCTS_PATH))
+        }
+    }
+
+    private fun bootstrapSubscriptions(executor: WorkerExecutor) {
+        executor.noIsolation().submit(SubscriptionsDownloader::class) {
+            paramsForBase(this)
+            dir.set(srcDir.dir(SUBSCRIPTIONS_PATH))
         }
     }
 
@@ -224,6 +236,24 @@ internal abstract class Bootstrap @Inject constructor(
             val products = apiService.publisher.getInAppProducts()
             for (product in products) {
                 parameters.dir.get().file("${product.sku}.json").write(product.json)
+            }
+        }
+
+        interface Params : EditPublishingParams {
+            val dir: DirectoryProperty
+        }
+    }
+
+    abstract class SubscriptionsDownloader : EditWorkerBase<ProductsDownloader.Params>() {
+        override fun execute() {
+            println("Downloading in-app subscriptions")
+
+            val subscriptions = apiService.publisher.getInAppSubscriptions()
+            for (subscription in subscriptions) {
+                parameters.dir.get().file("${subscription.productId}.json")
+                        .write(subscription.json)
+                parameters.dir.get().file("${subscription.productId}$SUBSCRIPTION_METADATA_SUFFIX")
+                        .write(GsonFactory.getDefaultInstance().toString(SubscriptionMetadata(regionsVersion = "2022/02")))
             }
         }
 

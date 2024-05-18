@@ -12,6 +12,7 @@ class CliOptionsTest {
         assertThat(holder.downloadListings).isTrue()
         assertThat(holder.downloadReleaseNotes).isTrue()
         assertThat(holder.downloadProducts).isTrue()
+        assertThat(holder.downloadSubscriptions).isTrue()
     }
 
     @Test
@@ -24,5 +25,6 @@ class CliOptionsTest {
         assertThat(holder.downloadListings).isFalse()
         assertThat(holder.downloadReleaseNotes).isFalse()
         assertThat(holder.downloadProducts).isFalse()
+        assertThat(holder.downloadSubscriptions).isFalse()
     }
 }

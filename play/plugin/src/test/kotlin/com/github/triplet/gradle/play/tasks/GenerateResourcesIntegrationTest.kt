@@ -29,6 +29,8 @@ class GenerateResourcesIntegrationTest : IntegrationTestBase(), SharedIntegratio
         "release/play/release-notes/fr-FR/default.txt" generated "main"
 
         "release/play/products/sku.json" generated "src/main/play/products/sku.json"()
+        "release/play/subscriptions/subscription.json" generated "src/main/play/subscriptions/subscription.json"()
+        "release/play/subscriptions/subscription.metadata.json" generated "src/main/play/subscriptions/subscription.metadata.json"()
     }
 
     @Test

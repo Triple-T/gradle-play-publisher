@@ -15,6 +15,7 @@ import com.github.triplet.gradle.play.internal.PLAY_PATH
 import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NAMES_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
+import com.github.triplet.gradle.play.internal.SUBSCRIPTIONS_PATH
 import com.github.triplet.gradle.play.internal.buildExtension
 import com.github.triplet.gradle.play.internal.flavorNameOrDefault
 import com.github.triplet.gradle.play.internal.generateExtensionOverrideOrdering
@@ -35,6 +36,7 @@ import com.github.triplet.gradle.play.tasks.PublishInternalSharingApk
 import com.github.triplet.gradle.play.tasks.PublishInternalSharingBundle
 import com.github.triplet.gradle.play.tasks.PublishListings
 import com.github.triplet.gradle.play.tasks.PublishProducts
+import com.github.triplet.gradle.play.tasks.PublishSubscriptions
 import com.github.triplet.gradle.play.tasks.internal.BootstrapLifecycleTask
 import com.github.triplet.gradle.play.tasks.internal.BootstrapOptions
 import com.github.triplet.gradle.play.tasks.internal.GlobalPublishableArtifactLifecycleTask
@@ -170,6 +172,13 @@ internal abstract class PlayPublisherPlugin @Inject constructor(
                 """
                 |Uploads all Play Store in-app products for all variants.
                 |   See https://github.com/Triple-T/gradle-play-publisher#publishing-in-app-products
+                """.trimMargin(),
+        )
+        val publishSubscriptionsAllTask = project.newTask<Task>(
+                "publishSubscriptions",
+                """
+                |Uploads all Play Store in-app subscriptions for all variants.
+                |   See https://github.com/Triple-T/gradle-play-publisher#publishing-in-app-subscriptions
                 """.trimMargin(),
         )
 
@@ -392,6 +401,21 @@ internal abstract class PlayPublisherPlugin @Inject constructor(
             }
             publishProductsAllTask { dependsOn(publishProductsTask) }
 
+            val publishSubscriptionsTask = project.newTask<PublishSubscriptions>(
+                    "publish${taskVariantName}Subscriptions",
+                    """
+                    |Uploads all Play Store in-app subscriptions for variant $taskVariantName.
+                    |   See https://github.com/Triple-T/gradle-play-publisher#publishing-in-app-subscriptions
+                    """.trimMargin(),
+                    arrayOf(extension),
+            ) {
+                bindApi(api)
+                subscriptionsDir.setFrom(resourceDir.map {
+                    it.dir(SUBSCRIPTIONS_PATH).asFileTree.matching { include("*.json") }
+                })
+            }
+            publishSubscriptionsAllTask { dependsOn(publishSubscriptionsTask) }
+
             val isAuto = extension.resolutionStrategy.get() == ResolutionStrategy.AUTO
                     || extension.resolutionStrategy.get() == ResolutionStrategy.AUTO_OFFSET
             val staticVersionCodes = if (isAuto) {
@@ -517,6 +541,7 @@ internal abstract class PlayPublisherPlugin @Inject constructor(
                 })
                 dependsOn(publishListingTask)
                 dependsOn(publishProductsTask)
+                dependsOn(publishSubscriptionsTask)
             }
             publishAllTask { dependsOn(publishTask) }
 
@@ -630,6 +655,14 @@ internal abstract class PlayPublisherPlugin @Inject constructor(
                         """.trimMargin(),
                         allowExisting = true,
                 ).configure { dependsOn(publishProductsTask) }
+                project.newTask<Task>(
+                        "publish${taskQualifier}Subscriptions",
+                        """
+                        |Uploads all Play Store in-app subscriptions for all $taskQualifier variants.
+                        |   See https://github.com/Triple-T/gradle-play-publisher#publishing-in-app-subscriptions
+                        """.trimMargin(),
+                        allowExisting = true,
+                ).configure { dependsOn(publishSubscriptionsTask) }
             }
 
             // ----------------------------- END: SEMI-GLOBAL TASKS -----------------------------

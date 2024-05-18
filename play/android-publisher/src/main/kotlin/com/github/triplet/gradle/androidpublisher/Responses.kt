@@ -118,8 +118,21 @@ data class GppProduct internal constructor(
         val json: String,
 )
 
+data class GppSubscription internal constructor(
+        /** The product ID. */
+        val productId: String,
+        /** The response's full JSON payload. */
+        val json: String,
+)
+
 /** Response for a product update request. */
 data class UpdateProductResponse internal constructor(
+        /** @return true if the product doesn't exist and needs to be created, false otherwise. */
+        val needsCreating: Boolean,
+)
+
+/** Response for a subscription update request. */
+data class UpdateSubscriptionResponse internal constructor(
         /** @return true if the product doesn't exist and needs to be created, false otherwise. */
         val needsCreating: Boolean,
 )

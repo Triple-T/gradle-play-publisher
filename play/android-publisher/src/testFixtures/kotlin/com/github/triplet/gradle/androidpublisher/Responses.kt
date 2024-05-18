@@ -40,3 +40,7 @@ fun newUploadInternalSharingArtifactResponse(json: String, downloadUrl: String) 
 fun newGppProduct(sku: String, json: String) = GppProduct(sku, json)
 
 fun newUpdateProductResponse(needsCreating: Boolean) = UpdateProductResponse(needsCreating)
+
+fun newGppSubscription(productId: String, json: String) = GppSubscription(productId, json)
+
+fun newUpdateSubscriptionResponse(needsCreating: Boolean) = UpdateSubscriptionResponse(needsCreating)
