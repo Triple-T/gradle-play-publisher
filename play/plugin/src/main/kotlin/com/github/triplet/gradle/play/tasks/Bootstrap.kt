@@ -252,7 +252,7 @@ internal abstract class Bootstrap @Inject constructor(
             for (subscription in subscriptions) {
                 parameters.dir.get().file("${subscription.productId}.json")
                         .write(subscription.json)
-                parameters.dir.get().file("${subscription.productId}.$SUBSCRIPTION_METADATA_SUFFIX.json")
+                parameters.dir.get().file("${subscription.productId}$SUBSCRIPTION_METADATA_SUFFIX")
                         .write(GsonFactory.getDefaultInstance().toString(SubscriptionMetadata(regionsVersion = "2022/02")))
             }
         }
