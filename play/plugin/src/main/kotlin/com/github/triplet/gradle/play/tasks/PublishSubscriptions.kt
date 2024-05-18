@@ -1,10 +1,12 @@
 package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.play.PlayPublisherExtension
+import com.github.triplet.gradle.play.internal.SubscriptionMetadata
 import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.workers.PlayWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
 import com.google.api.client.json.gson.GsonFactory
+import com.google.gson.Gson
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileType
@@ -49,15 +51,14 @@ internal abstract class PublishSubscriptions @Inject constructor(
 
     @TaskAction
     fun publishSubscriptions(changes: InputChanges) {
-
         changes.getFileChanges(subscriptionsDir)
                 .filterNot { it.changeType == ChangeType.REMOVED }
                 .filter { it.fileType == FileType.FILE }
                 .map {
-                    if (it.file.name.endsWith(".$SUBSCRIPTION_METADATA_SUFFIX.json")) {
+                    // We should attempt to publish a subscription if it or its metadata changes.
+                    if (it.file.name.endsWith(SUBSCRIPTION_METADATA_SUFFIX)) {
                         it.file.parentFile.resolve(
-                                it.file.name.replace(
-                                        "\\.$SUBSCRIPTION_METADATA_SUFFIX\\.json$".toRegex(), ".json"))
+                                it.file.name.dropLast(SUBSCRIPTION_METADATA_SUFFIX.length) + ".json")
                     } else {
                         it.file
                     }
@@ -78,14 +79,15 @@ internal abstract class PublishSubscriptions @Inject constructor(
             val subscription = subscriptionFile.inputStream().use {
                 GsonFactory.getDefaultInstance().createJsonParser(it).parse(Map::class.java)
             }
+
             val metadata = subscriptionFile.parentFile
-                    .resolve("${subscription["productId"]}.$SUBSCRIPTION_METADATA_SUFFIX.json").inputStream().use {
-                        GsonFactory.getDefaultInstance().createJsonParser(it).parse(Map::class.java)
+                    .resolve(subscriptionFile.name.dropLast(".json".length) + SUBSCRIPTION_METADATA_SUFFIX).inputStream().use {
+                        Gson().fromJson(it.reader(), SubscriptionMetadata::class.java)
                     }
 
             println("Uploading ${subscription["productId"]}")
-            val response = apiService.publisher.updateInAppSubscription(subscriptionFile, metadata["regionsVersion"] as String)
-            if (response.needsCreating) apiService.publisher.insertInAppSubscription(subscriptionFile, metadata["regionsVersion"] as String)
+            val response = apiService.publisher.updateInAppSubscription(subscriptionFile, metadata.regionsVersion)
+            if (response.needsCreating) apiService.publisher.insertInAppSubscription(subscriptionFile, metadata.regionsVersion)
         }
 
         interface Params : PlayPublishingParams {
@@ -94,7 +96,7 @@ internal abstract class PublishSubscriptions @Inject constructor(
     }
 
     companion object {
-        /** The suggested environment variable name in which to store credentials. */
-        const val SUBSCRIPTION_METADATA_SUFFIX: String = "metadata"
+        /** The file name suffix for subscription metadata files. */
+        const val SUBSCRIPTION_METADATA_SUFFIX: String = ".metadata.json"
     }
 }

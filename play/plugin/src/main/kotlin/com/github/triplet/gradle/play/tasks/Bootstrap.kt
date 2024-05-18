@@ -13,6 +13,7 @@ import com.github.triplet.gradle.play.internal.ListingDetail
 import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
 import com.github.triplet.gradle.play.internal.SUBSCRIPTIONS_PATH
+import com.github.triplet.gradle.play.internal.SubscriptionMetadata
 import com.github.triplet.gradle.play.tasks.PublishSubscriptions.Companion.SUBSCRIPTION_METADATA_SUFFIX
 import com.github.triplet.gradle.play.tasks.internal.BootstrapOptions
 import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
@@ -252,8 +253,7 @@ internal abstract class Bootstrap @Inject constructor(
                 parameters.dir.get().file("${subscription.productId}.json")
                         .write(subscription.json)
                 parameters.dir.get().file("${subscription.productId}.$SUBSCRIPTION_METADATA_SUFFIX.json")
-                        .write(GsonFactory.getDefaultInstance().toString(
-                                mapOf("regionsVersion" to "")))
+                        .write(GsonFactory.getDefaultInstance().toString(SubscriptionMetadata(regionsVersion = "2022/02")))
             }
         }
 
