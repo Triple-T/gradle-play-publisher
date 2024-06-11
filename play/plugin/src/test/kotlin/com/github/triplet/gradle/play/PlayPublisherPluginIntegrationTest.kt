@@ -756,6 +756,104 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
         }
     }
 
+    @ParameterizedTest
+    @ValueSource(booleans = [false, true])
+    fun `Sentry runs on publish`(flavors: Boolean) {
+        val classpathJars = GradleRunner.create().withPluginClasspath().pluginClasspath
+                .joinToString { "'$it'" }
+
+        // language=gradle
+        val flavorsConfig = """
+            flavorDimensions "version"
+            productFlavors {
+                demo {
+                    dimension "version"
+                    applicationIdSuffix ".demo"
+                    versionNameSuffix "-demo"
+                }
+
+                full {
+                    dimension "version"
+                    applicationIdSuffix ".full"
+                    versionNameSuffix "-full"
+                }
+            }
+        """
+        // language=gradle
+        File(appDir, "build.gradle").writeText("""
+           buildscript {
+                repositories.mavenCentral()
+
+                dependencies.classpath files($classpathJars)
+                dependencies.classpath 'io.sentry:sentry-android-gradle-plugin:4.7.1'
+            }
+
+            apply plugin: 'com.android.application'
+            apply plugin: 'com.github.triplet.play'
+            apply plugin: 'io.sentry.android.gradle'
+
+            android {
+                compileSdk 34
+                namespace = "com.example.publisher"
+
+                defaultConfig {
+                    applicationId "com.supercilex.test"
+                    minSdk 31
+                    targetSdk 33
+                    versionCode 1
+                    versionName "1.0"
+                }
+
+                buildTypes.release {
+                    shrinkResources true
+                    minifyEnabled true
+                    proguardFiles(getDefaultProguardFile("proguard-android.txt"))
+                }
+
+                ${flavorsConfig.takeIf { flavors } ?: ""}
+            }
+
+            play {
+                serviceAccountCredentials = file('creds.json')
+            }
+
+            sentry {
+                org = "test-org"
+                projectName = "test-project"
+                authToken = "invalid-token"
+
+                includeProguardMapping = true
+                autoUploadProguardMapping = true
+
+                tracingInstrumentation {
+                    enabled = false
+                }
+
+                autoInstallation {
+                    enabled = false
+                }
+
+                includeDependenciesReport = false
+                telemetry = false
+            }
+        """)
+
+        val flavor = if (flavors) "FullRelease" else "Release"
+        val crashingSensitivePublishingTasks = setOf(
+                "publishApk",
+                "publishBundle",
+                "upload${flavor}PrivateApk",
+                "upload${flavor}PrivateBundle"
+        )
+        for (task in crashingSensitivePublishingTasks) {
+            val result = executeGradle(false) {
+                withArguments(task, "--dry-run")
+            }
+
+            assertThat(result.output).contains(":uploadSentryProguardMappings")
+        }
+    }
+
     companion object {
         @JvmStatic
         fun installFactories() {
