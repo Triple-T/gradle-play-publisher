@@ -710,6 +710,8 @@ internal abstract class PlayPublisherPlugin @Inject constructor(
             }
         }
         maybeAddDependency("uploadBugsnag${bugsnagName}Mapping")
+
+        maybeAddDependency("uploadSentryProguardMappings$variantName")
     }
 
     // TODO(asaveau): remove after https://github.com/gradle/gradle/issues/12388
