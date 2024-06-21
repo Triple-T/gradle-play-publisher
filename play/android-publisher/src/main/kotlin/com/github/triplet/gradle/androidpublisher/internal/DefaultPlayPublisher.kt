@@ -225,8 +225,8 @@ internal class DefaultPlayPublisher(
         var token: String? = null
         do {
             val response = publisher.monetization().subscriptions().list(appId).withPageToken(token).execute()
-            subscriptions += response.subscriptions.orEmpty()
-            token = response.nextPageToken
+            subscriptions += response?.subscriptions.orEmpty()
+            token = response?.nextPageToken
         } while (token != null)
 
         return subscriptions.map {
