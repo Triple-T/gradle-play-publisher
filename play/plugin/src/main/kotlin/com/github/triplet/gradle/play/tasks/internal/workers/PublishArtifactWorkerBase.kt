@@ -25,7 +25,6 @@ internal abstract class PublishArtifactWorkerBase<T : PublishArtifactWorkerBase.
             val dir = parameters.consoleNamesDir.get()
             val file = dir.file("${track.replace(':', '-')}.txt").asFile.orNull()
                     ?: dir.file("${track.substringAfter(':')}.txt").asFile.orNull()
-                    ?: dir.file("$track.txt").asFile.orNull()
                     ?: dir.file(RELEASE_NAMES_DEFAULT_NAME).asFile.orNull()
             file?.readProcessed()?.lines()?.firstOrNull()
         } else {
@@ -38,7 +37,6 @@ internal abstract class PublishArtifactWorkerBase<T : PublishArtifactWorkerBase.
         return locales.mapNotNull { locale ->
             File(locale, "${track.replace(':', '-')}.txt").orNull()
                     ?: File(locale, "${track.substringAfter(':')}.txt").orNull()
-                    ?: File(locale, "$track.txt").orNull()
                     ?: File(locale, RELEASE_NOTES_DEFAULT_NAME).orNull()
         }.associate { notes ->
             notes.parentFile.name to notes.readProcessed()
