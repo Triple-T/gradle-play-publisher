@@ -22,10 +22,10 @@ internal abstract class PublishArtifactWorkerBase<T : PublishArtifactWorkerBase.
         return if (config.releaseName != null) {
             config.releaseName
         } else if (parameters.consoleNamesDir.isPresent) {
-            val dir = parameters.consoleNamesDir.get().asFile
-            val file = File(dir, "$track.txt").orNull()
-                    ?: File(dir, RELEASE_NAMES_DEFAULT_NAME).orNull()
-
+            val dir = parameters.consoleNamesDir.get()
+            val file = dir.file("${track.replace(':', '-')}.txt").asFile.orNull()
+                    ?: dir.file("${track.substringAfter(':')}.txt").asFile.orNull()
+                    ?: dir.file(RELEASE_NAMES_DEFAULT_NAME).asFile.orNull()
             file?.readProcessed()?.lines()?.firstOrNull()
         } else {
             null
@@ -35,9 +35,9 @@ internal abstract class PublishArtifactWorkerBase<T : PublishArtifactWorkerBase.
     protected fun findReleaseNotes(track: String): Map<String, String?> {
         val locales = parameters.releaseNotesDir.orNull?.asFile?.listFiles().orEmpty()
         return locales.mapNotNull { locale ->
-            var result = File(locale, "$track.txt").orNull()
-            if (result == null) result = File(locale, RELEASE_NOTES_DEFAULT_NAME).orNull()
-            result
+            File(locale, "${track.replace(':', '-')}.txt").orNull()
+                    ?: File(locale, "${track.substringAfter(':')}.txt").orNull()
+                    ?: File(locale, RELEASE_NOTES_DEFAULT_NAME).orNull()
         }.associate { notes ->
             notes.parentFile.name to notes.readProcessed()
         }.toSortedMap()
