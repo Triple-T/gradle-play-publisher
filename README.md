@@ -19,6 +19,10 @@ Gradle Play Publisher (GPP) is Android's unofficial release automation Gradle Pl
 anything from building, uploading, and then promoting your App Bundle or APK to publishing app
 listings and other metadata.
 
+## Project status: maintenance mode
+
+Issues are ignored, but pull requests are not. If you need to get something done, submit a PR!
+
 ## Table of contents
 
 1. [Quickstart guide](#quickstart-guide)
