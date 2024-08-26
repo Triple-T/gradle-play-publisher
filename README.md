@@ -128,7 +128,7 @@ through the `plugins {}` DSL:
 ```kt
 plugins {
     id("com.android.application")
-    id("com.github.triplet.play") version "3.10.1"
+    id("com.github.triplet.play") version "3.11.0"
 }
 ```
 
@@ -139,7 +139,7 @@ plugins {
 ```groovy
 plugins {
     id 'com.android.application'
-    id 'com.github.triplet.play' version '3.10.1'
+    id 'com.github.triplet.play' version '3.11.0'
 }
 ```
 
