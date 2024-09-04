@@ -97,7 +97,7 @@ internal abstract class PlayPublisherPlugin @Inject constructor(
     }
 
     private fun applyInternal(project: Project) {
-        val executionDir = project.rootProject.layout.projectDirectory
+        val executionDir = project.rootDir
         val cliOptionsExtension = project.objects.newInstance<CliPlayPublisherExtension>()
         val bootstrapOptionsHolder = BootstrapOptions.Holder()
 
