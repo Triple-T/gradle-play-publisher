@@ -10,15 +10,15 @@ import org.gradle.api.logging.Logger
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.withType
+import org.gradle.util.GradleVersion
 
 /**
  * Validates required dependencies. If GPP can't run in the current context, an error will be
  * thrown.
  */
 fun Project.validateRuntime() {
-    rootProject.plugins.apply(RuntimeValidationPlugin::class)
-
-    project.plugins.withType<AppPlugin> {
+    GradleRuntimeValidator(GradleVersion.current(), MIN_GRADLE_VERSION).validate()
+    plugins.withType<AppPlugin> {
         val agpPluginVersion = extensions.findByType<ApplicationAndroidComponentsExtension>()?.pluginVersion
         AgpRuntimeValidator(agpPluginVersion, MIN_AGP_VERSION).validate()
     }
