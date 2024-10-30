@@ -231,6 +231,149 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Application Default Credentials and Service Account Impersonation works`() {
+        // language=gradle
+        File(appDir, "build.gradle").writeText("""
+            import com.github.triplet.gradle.play.tasks.internal.PlayApiService
+
+            plugins {
+                id 'com.android.application'
+                id 'com.github.triplet.play'
+            }
+
+            android {
+                compileSdk 34
+                namespace = "com.example.publisher"
+
+                defaultConfig {
+                    applicationId "com.example.publisher"
+                    minSdk 31
+                    targetSdk 33
+                    versionCode 1
+                    versionName "1.0"
+                }
+            }
+
+            task usePublisher {
+                doLast {
+                    def service = gradle.sharedServices.registrations
+                                .named("playApi-com.example.publisher")
+                                .get().service.get() as PlayApiService
+
+                    service.publisher
+                }
+            }
+
+            play {
+                useApplicationDefaultCredentials = true
+                impersonateServiceAccount = "someaccount@project.com"
+            }
+
+            $factoryInstallerStatement
+        """)
+
+        executeGradle(false) {
+            withArguments("usePublisher")
+            withEnvironment(mapOf("GOOGLE_APPLICATION_CREDENTIALS" to "fake-creds"))
+        }
+    }
+
+    @Test
+    fun `Application Default Credentials without Service Account Impersonation works`() {
+        // language=gradle
+        File(appDir, "build.gradle").writeText("""
+            import com.github.triplet.gradle.play.tasks.internal.PlayApiService
+
+            plugins {
+                id 'com.android.application'
+                id 'com.github.triplet.play'
+            }
+
+            android {
+                compileSdk 34
+                namespace = "com.example.publisher"
+
+                defaultConfig {
+                    applicationId "com.example.publisher"
+                    minSdk 31
+                    targetSdk 33
+                    versionCode 1
+                    versionName "1.0"
+                }
+            }
+
+            task usePublisher {
+                doLast {
+                    def service = gradle.sharedServices.registrations
+                                .named("playApi-com.example.publisher")
+                                .get().service.get() as PlayApiService
+
+                    service.publisher
+                }
+            }
+
+            play {
+                useApplicationDefaultCredentials = true
+            }
+
+            $factoryInstallerStatement
+        """)
+
+        executeGradle(false) {
+            withArguments("usePublisher")
+            withEnvironment(mapOf("GOOGLE_APPLICATION_CREDENTIALS" to "fake-creds"))
+        }
+    }
+
+    @Test
+    fun `Fails if Application Default Credentials and ServiceAccountCredentials both set`() {
+        // language=gradle
+        File(appDir, "build.gradle").writeText("""
+            import com.github.triplet.gradle.play.tasks.internal.PlayApiService
+
+            plugins {
+                id 'com.android.application'
+                id 'com.github.triplet.play'
+            }
+
+            android {
+                compileSdk 34
+                namespace = "com.example.publisher"
+
+                defaultConfig {
+                    applicationId "com.example.publisher"
+                    minSdk 31
+                    targetSdk 33
+                    versionCode 1
+                    versionName "1.0"
+                }
+            }
+
+            task usePublisher {
+                doLast {
+                    def service = gradle.sharedServices.registrations
+                                .named("playApi-com.example.publisher")
+                                .get().service.get() as PlayApiService
+
+                    service.publisher
+                }
+            }
+
+            play {
+                useApplicationDefaultCredentials = true
+                serviceAccountCredentials.set(file('creds.json'))
+            }
+
+            $factoryInstallerStatement
+        """)
+
+        executeGradle(true) {
+            withArguments("usePublisher")
+            withEnvironment(mapOf("GOOGLE_APPLICATION_CREDENTIALS" to "fake-creds"))
+        }
+    }
+
+    @Test
     fun `Variant specific lifecycle task publishes APKs by default`() {
         val result = execute("", "publishReleaseApps", "--dry-run")
 

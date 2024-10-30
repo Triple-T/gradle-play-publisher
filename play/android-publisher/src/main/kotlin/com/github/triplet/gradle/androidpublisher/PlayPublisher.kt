@@ -119,6 +119,16 @@ interface PlayPublisher {
                 credentials: InputStream,
                 appId: String,
         ): PlayPublisher
+
+        /**
+         * Creates a new [PlayPublisher] using ApplicationDefaultCredentials.
+         *
+         * @param appId the app's package name
+         */
+        fun create(
+                appId: String,
+                impersonateServiceAccount: String?
+        ): PlayPublisher
     }
 
     companion object {
@@ -131,5 +141,15 @@ interface PlayPublisher {
                 appId: String,
         ): PlayPublisher = ServiceLoader.load(Factory::class.java).last()
                 .create(credentials, appId)
+
+        /** Creates a new [PlayPublisher] using Application Default Credentials on GCP
+         *  and using Service Account Impersonation if a Service Account to impersonate is
+         *  configured.
+         * */
+        operator fun invoke(
+                appId: String,
+                impersonateServiceAccount: String?
+        ): PlayPublisher = ServiceLoader.load(Factory::class.java).last()
+                .create(appId, impersonateServiceAccount)
     }
 }

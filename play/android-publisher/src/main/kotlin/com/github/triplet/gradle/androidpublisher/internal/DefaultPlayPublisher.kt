@@ -304,6 +304,11 @@ internal class DefaultPlayPublisher(
             val publisher = createPublisher(credentials)
             return DefaultPlayPublisher(publisher, appId)
         }
+
+        override fun create(appId: String, impersonateServiceAccount: String?): PlayPublisher {
+            val publisher = createPublisher(impersonateServiceAccount)
+            return DefaultPlayPublisher(publisher, appId)
+        }
     }
 
     private companion object {

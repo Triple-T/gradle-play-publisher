@@ -205,6 +205,20 @@ play {
 > the `ANDROID_PUBLISHER_CREDENTIALS` environment variable and don't specify the
 > `serviceAccountCredentials` property.
 
+#### Application Default Credentials
+Alternatively, you can use [Application Default Credentials](https://cloud.google.com/docs/authentication/provide-credentials-adc)
+(and optionally [Service Account impersonation](https://cloud.google.com/docs/authentication/use-service-account-impersonation))
+instead of specifying a JSON private key file or environment variable:
+
+```kt
+android { ... }
+
+play {
+    useApplicationDefaultCredentials = true
+    impersonateServiceAccount = "account@your-project.iam.gserviceaccount.com" // Optional
+}
+```
+
 ## Task organization
 
 GPP follows the Android Gradle Plugin's (AGP) naming convention: `[action][Variant][Thing]`. For

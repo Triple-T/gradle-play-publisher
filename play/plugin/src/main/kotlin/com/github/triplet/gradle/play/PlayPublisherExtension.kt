@@ -15,6 +15,7 @@ import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
+import org.gradle.configurationcache.problems.PropertyTrace
 import javax.inject.Inject
 
 /** The entry point for all GPP related configuration. */
@@ -40,6 +41,20 @@ abstract class PlayPublisherExtension @Inject constructor(
     @get:Optional
     @get:InputFile
     abstract val serviceAccountCredentials: RegularFileProperty
+
+    /**
+     * Use GCP Application Default Credentials.
+     */
+    @get:Optional
+    @get:Input
+    abstract val useApplicationDefaultCredentials: Property<Boolean>
+
+    /**
+     * Specify the Service Account to impersonate
+     */
+    @get:Optional
+    @get:Input
+    abstract val impersonateServiceAccount: Property<String>
 
     /**
      * Choose the default packaging method. Either App Bundles or APKs. Affects tasks like
