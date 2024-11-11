@@ -374,6 +374,53 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Fails if Application Default Credentials not set and Impersonate Service Account set`() {
+        // language=gradle
+        File(appDir, "build.gradle").writeText("""
+            import com.github.triplet.gradle.play.tasks.internal.PlayApiService
+
+            plugins {
+                id 'com.android.application'
+                id 'com.github.triplet.play'
+            }
+
+            android {
+                compileSdk 34
+                namespace = "com.example.publisher"
+
+                defaultConfig {
+                    applicationId "com.example.publisher"
+                    minSdk 31
+                    targetSdk 33
+                    versionCode 1
+                    versionName "1.0"
+                }
+            }
+
+            task usePublisher {
+                doLast {
+                    def service = gradle.sharedServices.registrations
+                                .named("playApi-com.example.publisher")
+                                .get().service.get() as PlayApiService
+
+                    service.publisher
+                }
+            }
+
+            play {
+                serviceAccountCredentials.set(file('creds.json'))
+                impersonateServiceAccount = "someaccount@project.com"
+            }
+
+            $factoryInstallerStatement
+        """)
+
+        executeGradle(true) {
+            withArguments("usePublisher")
+        }
+    }
+
+    @Test
     fun `Variant specific lifecycle task publishes APKs by default`() {
         val result = execute("", "publishReleaseApps", "--dry-run")
 

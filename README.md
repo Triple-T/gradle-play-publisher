@@ -219,6 +219,9 @@ play {
 }
 ```
 
+> Note: Currently [Service Account impersonation](https://cloud.google.com/docs/authentication/use-service-account-impersonation)
+is only supported when using [Application Default Credentials](https://cloud.google.com/docs/authentication/provide-credentials-adc)
+
 ## Task organization
 
 GPP follows the Android Gradle Plugin's (AGP) naming convention: `[action][Variant][Thing]`. For

@@ -53,7 +53,6 @@ internal fun createPublisher(impersonateServiceAccount: String?): AndroidPublish
                 .setSourceCredentials(appDefaultCreds)
                 .setTargetPrincipal(impersonateServiceAccount)
                 .setScopes(listOf(AndroidPublisherScopes.ANDROIDPUBLISHER))
-                .setLifetime(300)
                 .setDelegates(null)
                 .build()
     } else {
