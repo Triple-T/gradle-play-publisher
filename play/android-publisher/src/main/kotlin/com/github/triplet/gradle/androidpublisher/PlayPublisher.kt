@@ -142,10 +142,11 @@ interface PlayPublisher {
         ): PlayPublisher = ServiceLoader.load(Factory::class.java).last()
                 .create(credentials, appId)
 
-        /** Creates a new [PlayPublisher] using Application Default Credentials on GCP
-         *  and using Service Account Impersonation if a Service Account to impersonate is
-         *  configured.
-         * */
+        /**
+         * Creates a new [PlayPublisher] using Application Default Credentials on GCP
+         * and using Service Account Impersonation if a Service Account to impersonate is
+         * configured.
+         */
         operator fun invoke(
                 appId: String,
                 impersonateServiceAccount: String?
