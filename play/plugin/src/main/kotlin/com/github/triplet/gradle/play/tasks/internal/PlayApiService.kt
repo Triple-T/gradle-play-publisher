@@ -46,7 +46,7 @@ internal abstract class PlayApiService @Inject constructor(
         }
 
         if (useAppDefaultCreds) {
-            PlayPublisher(parameters.appId.get(), parameters.impersonateServiceAccount.getOrNull())
+            PlayPublisher(parameters.appId.get(), parameters.impersonateServiceAccount.orNull)
         } else {
             credentialStream().use {
                 PlayPublisher(it, parameters.appId.get())
