@@ -50,7 +50,7 @@ abstract class PlayPublisherExtension @Inject constructor(
     abstract val useApplicationDefaultCredentials: Property<Boolean>
 
     /**
-     * Specify the Service Account to impersonate
+     * Specify the Service Account to impersonate.
      */
     @get:Optional
     @get:Input
