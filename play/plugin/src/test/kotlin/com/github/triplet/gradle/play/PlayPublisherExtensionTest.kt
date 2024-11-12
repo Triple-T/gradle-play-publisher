@@ -158,6 +158,8 @@ class PlayPublisherExtensionTest {
         override val versionCode: Property<Long> get() = project.objects.property()
         override val enabled: Property<Boolean> = project.objects.property()
         override val serviceAccountCredentials: RegularFileProperty = project.objects.fileProperty()
+        override val useApplicationDefaultCredentials: Property<Boolean> = project.objects.property()
+        override val impersonateServiceAccount: Property<String> = project.objects.property()
         override val defaultToAppBundles: Property<Boolean> = project.objects.property()
         override val commit: Property<Boolean> = project.objects.property()
         override val fromTrack: Property<String> = project.objects.property()

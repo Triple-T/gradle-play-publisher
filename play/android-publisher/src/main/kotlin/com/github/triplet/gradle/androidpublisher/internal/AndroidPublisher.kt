@@ -14,6 +14,7 @@ import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.AndroidPublisherScopes
 import com.google.auth.http.HttpCredentialsAdapter
 import com.google.auth.oauth2.GoogleCredentials
+import com.google.auth.oauth2.ImpersonatedCredentials
 import org.apache.http.auth.AuthScope
 import org.apache.http.auth.UsernamePasswordCredentials
 import org.apache.http.impl.client.BasicCredentialsProvider
@@ -39,6 +40,29 @@ internal fun createPublisher(credentials: InputStream): AndroidPublisher {
             transport,
             GsonFactory.getDefaultInstance(),
             AndroidPublisherAdapter(credential)
+    ).setApplicationName(PLUGIN_NAME).build()
+}
+
+internal fun createPublisher(impersonateServiceAccount: String?): AndroidPublisher {
+    val transport = buildTransport()
+
+    val appDefaultCreds = GoogleCredentials.getApplicationDefault()
+
+    val credential = if (impersonateServiceAccount != null) {
+        ImpersonatedCredentials.newBuilder()
+                .setSourceCredentials(appDefaultCreds)
+                .setTargetPrincipal(impersonateServiceAccount)
+                .setScopes(listOf(AndroidPublisherScopes.ANDROIDPUBLISHER))
+                .setDelegates(null)
+                .build()
+    } else {
+        appDefaultCreds
+    }
+
+    return AndroidPublisher.Builder(
+            transport,
+            GsonFactory.getDefaultInstance(),
+            AndroidPublisherAdapter(credential as GoogleCredentials)
     ).setApplicationName(PLUGIN_NAME).build()
 }
 

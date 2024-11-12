@@ -46,6 +46,7 @@ abstract class FakePlayPublisher : PlayPublisher {
 
     class Factory : PlayPublisher.Factory {
         override fun create(credentials: InputStream, appId: String) = publisher
+        override fun create(appId: String, impersonateServiceAccount: String?) = publisher
     }
 
     companion object {

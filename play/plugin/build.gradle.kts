@@ -27,6 +27,7 @@ dependencies {
     testImplementation(testLibs.junit.engine)
     testImplementation(testLibs.junit.params)
     testImplementation(testLibs.truth)
+    testImplementation(testLibs.mockito)
 }
 
 tasks.withType<PluginUnderTestMetadata>().configureEach {

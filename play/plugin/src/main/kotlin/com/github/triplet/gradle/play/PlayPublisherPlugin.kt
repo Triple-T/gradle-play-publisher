@@ -47,7 +47,6 @@ import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PublishableTrackLifecycleTask
 import com.github.triplet.gradle.play.tasks.internal.UpdatableTrackLifecycleTask
 import com.github.triplet.gradle.play.tasks.internal.WriteTrackLifecycleTask
-import org.gradle.api.DomainObjectSet
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -57,15 +56,12 @@ import org.gradle.api.services.BuildServiceRegistration
 import org.gradle.build.event.BuildEventsListenerRegistry
 import org.gradle.kotlin.dsl.container
 import org.gradle.kotlin.dsl.create
-import org.gradle.kotlin.dsl.domainObjectSet
 import org.gradle.kotlin.dsl.findPlugin
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.invoke
-import org.gradle.kotlin.dsl.mapProperty
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.newInstance
 import org.gradle.kotlin.dsl.registerIfAbsent
-import org.gradle.kotlin.dsl.setProperty
 import org.gradle.kotlin.dsl.withType
 import javax.inject.Inject
 
@@ -265,6 +261,8 @@ internal abstract class PlayPublisherPlugin @Inject constructor(
 
                 if (!priorityProp.isPresent || newPriority < priorityProp.get()) {
                     parameters.credentials.set(extension.serviceAccountCredentials)
+                    parameters.useApplicationDefaultCredentials.set(extension.useApplicationDefaultCredentials)
+                    parameters.impersonateServiceAccount.set(extension.impersonateServiceAccount)
                     priorityProp.set(newPriority)
                 }
             }
