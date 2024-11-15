@@ -56,7 +56,7 @@ internal fun createPublisher(impersonateServiceAccount: String?): AndroidPublish
                 .setDelegates(null)
                 .build()
     } else {
-        appDefaultCreds
+        appDefaultCreds.createScoped(listOf(AndroidPublisherScopes.ANDROIDPUBLISHER))
     }
 
     return AndroidPublisher.Builder(
