@@ -18,9 +18,7 @@ jobs:
           distribution: 'zulu'
           java-version: 17
       - name: Gradle Cache
-        uses: gradle/gradle-build-action@v2
-      - name: Validate Gradle integrity
-        uses: gradle/wrapper-validation-action@v1
+        uses: gradle/actions/setup-gradle@v4
       - name: Setup environment
         id: setup
         run: |
@@ -42,7 +40,7 @@ jobs:
           distribution: 'zulu'
           java-version: 17
       - name: Gradle Cache
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/actions/setup-gradle@v4
       - name: Setup environment
         run: ./gradlew publishToMavenLocal
       - name: Run tests
@@ -61,7 +59,7 @@ jobs:
           distribution: 'zulu'
           java-version: 17
       - name: Gradle Cache
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/actions/setup-gradle@v4
       - name: Build project
         run: ./gradlew assemble
       - name: Publish snapshot
@@ -83,7 +81,7 @@ jobs:
           distribution: 'zulu'
           java-version: 17
       - name: Gradle Cache
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/actions/setup-gradle@v4
       - name: Build project
         run: ./gradlew assemble
       - name: Publish release
