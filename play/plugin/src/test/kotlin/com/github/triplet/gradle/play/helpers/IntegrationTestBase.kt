@@ -69,7 +69,6 @@ abstract class IntegrationTestBase(
         // correct stuff now.
         runner.withPluginClasspath(runner.pluginClasspath + listOf(
                 File("build/classes/kotlin/test"),
-                File("../android-publisher/build/resources/testFixtures")
         ))
 
         val result = if (expectFailure) runner.buildAndFail() else runner.build()
