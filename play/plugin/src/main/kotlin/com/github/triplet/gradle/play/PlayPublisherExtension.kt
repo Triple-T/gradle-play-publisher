@@ -15,7 +15,6 @@ import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
-import org.gradle.configurationcache.problems.PropertyTrace
 import javax.inject.Inject
 
 /** The entry point for all GPP related configuration. */
