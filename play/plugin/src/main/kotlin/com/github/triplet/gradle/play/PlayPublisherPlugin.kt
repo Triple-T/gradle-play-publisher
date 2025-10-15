@@ -437,8 +437,10 @@ internal abstract class PlayPublisherPlugin @Inject constructor(
             }
             if (isAuto) {
                 for ((i, output) in variant.outputs.withIndex()) {
-                    output.versionCode.set(processArtifactVersionCodes.map {
-                        it.playVersionCodes.get().asFile.readLines()[i].toInt()
+                    output.versionCode.set(processArtifactVersionCodes.flatMap { task ->
+                        task.playVersionCodes.map { file ->
+                            file.asFile.readLines()[i].toInt()
+                        }
                     })
                 }
             }
@@ -481,6 +483,9 @@ internal abstract class PlayPublisherPlugin @Inject constructor(
                 }))
 
                 dependsOn(getArtifactDependenciesHack(SingleArtifact.APK))
+                if (isAuto) {
+                    dependsOn(processArtifactVersionCodes)
+                }
                 finalizedBy(commitEditTask)
                 configure3pDeps(extension, taskVariantName)
 
@@ -505,6 +510,9 @@ internal abstract class PlayPublisherPlugin @Inject constructor(
                 bundles.from(findBundleFiles())
 
                 dependsOn(getArtifactDependenciesHack(SingleArtifact.BUNDLE))
+                if (isAuto) {
+                    dependsOn(processArtifactVersionCodes)
+                }
                 finalizedBy(commitEditTask)
                 configure3pDeps(extension, taskVariantName)
             }
