@@ -483,9 +483,6 @@ internal abstract class PlayPublisherPlugin @Inject constructor(
                 }))
 
                 dependsOn(getArtifactDependenciesHack(SingleArtifact.APK))
-                if (isAuto) {
-                    dependsOn(processArtifactVersionCodes)
-                }
                 finalizedBy(commitEditTask)
                 configure3pDeps(extension, taskVariantName)
 
@@ -510,9 +507,6 @@ internal abstract class PlayPublisherPlugin @Inject constructor(
                 bundles.from(findBundleFiles())
 
                 dependsOn(getArtifactDependenciesHack(SingleArtifact.BUNDLE))
-                if (isAuto) {
-                    dependsOn(processArtifactVersionCodes)
-                }
                 finalizedBy(commitEditTask)
                 configure3pDeps(extension, taskVariantName)
             }
