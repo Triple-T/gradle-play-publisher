@@ -26,7 +26,8 @@ internal fun PlayPublisherExtension.toConfig() = PlayExtensionConfig(
         resolutionStrategy.get(),
         retain.artifacts.orNull,
         retain.mainObb.orNull,
-        retain.patchObb.orNull
+        retain.patchObb.orNull,
+        isolatedSingleProject.get(),
 )
 
 internal fun mergeExtensions(extensions: List<ExtensionMergeHolder>): PlayPublisherExtension {
@@ -126,6 +127,7 @@ internal data class PlayExtensionConfig(
         val retainArtifacts: List<Long>?,
         val retainMainObb: Int?,
         val retainPatchObb: Int?,
+        val isolatedSingleProject: Boolean,
 ) : Serializable
 
 internal data class ExtensionMergeHolder(

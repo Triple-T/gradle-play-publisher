@@ -76,6 +76,7 @@ internal abstract class PlayPublisherPlugin @Inject constructor(
             enabled.convention(true)
             defaultToAppBundles.convention(false)
             commit.convention(true)
+            isolatedSingleProject.convention(false)
             track.convention("internal")
             resolutionStrategy.convention(ResolutionStrategy.FAIL)
         }
