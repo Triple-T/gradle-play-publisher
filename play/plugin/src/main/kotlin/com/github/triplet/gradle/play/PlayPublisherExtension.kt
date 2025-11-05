@@ -200,4 +200,15 @@ abstract class PlayPublisherExtension @Inject constructor(
         @get:Input
         abstract val patchObb: Property<Int>
     }
+
+    /**
+     * Enables support for Gradle Isolated Builds.
+     * If your project has multiple subprojects that produce an APK or App Bundle,
+     * then each of them commits an edit to Play separately when this flag is enabled.
+     * The default behaviour is to commit only once at the end.
+     *
+     * Defaults to `false`.
+     */
+    @get:Input
+    abstract val isolatedSingleProject: Property<Boolean>
 }

@@ -52,7 +52,8 @@ internal fun Project.getCommitEditTask(
         api: Provider<PlayApiService>,
 ): TaskProvider<CommitEdit> {
     val taskName = "commitEditFor" + appId.split(".").joinToString("Dot") { it.capitalize() }
-    return rootProject.newTask(taskName, allowExisting = true, constructorArgs = arrayOf(extension)) {
+    val project = if (extension.isolatedSingleProject.get()) this else rootProject
+    return project.newTask(taskName, allowExisting = true, constructorArgs = arrayOf(extension)) {
         usesService(api)
         apiService.set(api)
         onlyIf { !api.get().buildFailed }

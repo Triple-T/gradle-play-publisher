@@ -176,5 +176,6 @@ class PlayPublisherExtensionTest {
             override val mainObb: Property<Int> = project.objects.property()
             override val patchObb: Property<Int> = project.objects.property()
         }
+        override val isolatedSingleProject: Property<Boolean> = project.objects.property()
     }
 }
