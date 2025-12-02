@@ -4,7 +4,7 @@ import com.github.triplet.gradle.androidpublisher.internal.has
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 
 /** Response for an app details request. */
-data class GppAppDetails internal constructor(
+data class GppAppDetails(
         /** The default language. */
         val defaultLocale: String?,
         /** Developer contact email. */
@@ -16,7 +16,7 @@ data class GppAppDetails internal constructor(
 )
 
 /** Response for an app listing request. */
-data class GppListing internal constructor(
+data class GppListing(
         /** The listing's language. */
         val locale: String,
         /** The app description. */
@@ -30,7 +30,7 @@ data class GppListing internal constructor(
 )
 
 /** Response for an app graphic request. */
-data class GppImage internal constructor(
+data class GppImage(
         /** The image's download URL. */
         val url: String,
         /** The image's SHA256 hash. */
@@ -38,7 +38,7 @@ data class GppImage internal constructor(
 )
 
 /** Response for a track release note request. */
-data class ReleaseNote internal constructor(
+data class ReleaseNote(
         /** The release note's track. */
         val track: String,
         /** The release note's language. */
@@ -50,13 +50,13 @@ data class ReleaseNote internal constructor(
 /** Response for an edit request. */
 sealed class EditResponse {
     /** Response for a successful edit request. */
-    data class Success internal constructor(
+    data class Success(
             /** The id of the edit in question. */
             val id: String,
     ) : EditResponse()
 
     /** Response for an unsuccessful edit request. */
-    data class Failure internal constructor(
+    data class Failure(
             private val e: GoogleJsonResponseException,
     ) : EditResponse() {
         /** @return true if the app wasn't found in the Play Console, false otherwise */
@@ -83,7 +83,7 @@ sealed class CommitResponse {
     object Success : CommitResponse()
 
     /** Response for an unsuccessful commit request. */
-    data class Failure internal constructor(
+    data class Failure(
             private val e: GoogleJsonResponseException,
     ) : CommitResponse() {
         /** @return true if the changes cannot be sent for review, false otherwise */
@@ -102,7 +102,7 @@ sealed class CommitResponse {
 }
 
 /** Response for an internal sharing artifact upload. */
-data class UploadInternalSharingArtifactResponse internal constructor(
+data class UploadInternalSharingArtifactResponse(
         /** The response's full JSON payload. */
         val json: String,
 
@@ -111,14 +111,14 @@ data class UploadInternalSharingArtifactResponse internal constructor(
 )
 
 /** Response for a product request. */
-data class GppProduct internal constructor(
+data class GppProduct(
         /** The product ID. */
         val sku: String,
         /** The response's full JSON payload. */
         val json: String,
 )
 
-data class GppSubscription internal constructor(
+data class GppSubscription(
         /** The product ID. */
         val productId: String,
         /** The response's full JSON payload. */
@@ -126,13 +126,13 @@ data class GppSubscription internal constructor(
 )
 
 /** Response for a product update request. */
-data class UpdateProductResponse internal constructor(
+data class UpdateProductResponse(
         /** @return true if the product doesn't exist and needs to be created, false otherwise. */
         val needsCreating: Boolean,
 )
 
 /** Response for a subscription update request. */
-data class UpdateSubscriptionResponse internal constructor(
+data class UpdateSubscriptionResponse(
         /** @return true if the product doesn't exist and needs to be created, false otherwise. */
         val needsCreating: Boolean,
 )

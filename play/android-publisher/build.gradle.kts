@@ -14,6 +14,9 @@ dependencies {
     implementation(libs.client.auth)
     implementation(libs.client.http)
 
+    testFixturesImplementation(libs.client.api)
+    testFixturesImplementation(libs.client.gson)
+
     testImplementation(testLibs.junit)
     testImplementation(testLibs.junit.engine)
     testImplementation(testLibs.truth)
@@ -22,16 +25,8 @@ dependencies {
 
 // Mockito needs to be able to pass in null params
 tasks.named<KotlinCompile>("compileTestKotlin") {
-    kotlinOptions {
-        freeCompilerArgs += "-Xno-call-assertions"
-    }
-}
-
-// Give testFixtures access to internal symbols
-// TODO(asaveau): remove when https://youtrack.jetbrains.com/issue/KT-34901 gets fixed
-kotlin.target.compilations {
-    named("testFixtures") {
-        associateWith(named("main").get())
+    compilerOptions {
+        freeCompilerArgs.add("-Xno-call-assertions")
     }
 }
 
