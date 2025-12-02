@@ -37,6 +37,13 @@ abstract class IntegrationTestBase(
     fun initTestResources() {
         File("src/test/fixtures/app").copyRecursively(appDir)
         File("src/test/fixtures/${javaClass.simpleName}").orNull()?.copyRecursively(appDir)
+
+        // If a local.properties file exists at project root, copy that file into the temp app
+        val localPropertiesFile = File("../../local.properties")
+        val targetFile = File(appDir, "local.properties")
+        if (localPropertiesFile.exists()) {
+            localPropertiesFile.copyTo(targetFile)
+        }
     }
 
     override fun File.escaped() = toString().replace("\\", "\\\\")
