@@ -83,6 +83,144 @@ class ProcessArtifactVersionCodesIntegrationTest : IntegrationTestBase(), Shared
     }
 
     @Test
+    fun `Version code with splits is patch incremented`() {
+        // language=gradle
+        File(appDir, "build.gradle").writeText("""
+            plugins {
+                id 'com.android.application'
+                id 'com.github.triplet.play' apply false
+            }
+
+            allprojects {
+                repositories {
+                    google()
+                    mavenCentral()
+                }
+            }
+
+            android {
+                compileSdk 34
+                namespace = "com.example.publisher"
+
+                defaultConfig {
+                    applicationId "com.example.publisher"
+                    minSdk 31
+                    targetSdk 33
+                    versionCode 1
+                    versionName "1.0"
+                }
+            }
+
+            $factoryInstallerStatement
+
+            android.splits.abi {
+                enable true
+                reset()
+                include "arm64-v8a", "armeabi-v7a", "x86_64"
+            }
+
+            def count = 0
+            androidComponents {
+                onVariants(selector().withBuildType('release')) {
+                    for (output in outputs) {
+                        output.versionCode.set(count++)
+                        output.versionName.set(output.versionCode.map {
+                            println('versionCode=' + it)
+                            it.toString()
+                        })
+                    }
+                }
+            }
+
+            apply plugin: 'com.github.triplet.play'
+            play {
+                serviceAccountCredentials = file('creds.json')
+                resolutionStrategy =
+                    com.github.triplet.gradle.androidpublisher.ResolutionStrategy.AUTO
+            }
+        """)
+
+        val result = executeGradle(false) {
+            withArguments("assembleRelease")
+        }
+
+        result.requireTask(outcome = SUCCESS)
+        assertThat(result.output).contains("versionCode=42")
+        assertThat(result.output).contains("versionCode=44")
+        assertThat(result.output).contains("versionCode=46")
+    }
+
+    @Test
+    fun `Version code with splits is offset incremented`() {
+        // language=gradle
+        File(appDir, "build.gradle").writeText("""
+            plugins {
+                id 'com.android.application'
+                id 'com.github.triplet.play' apply false
+            }
+
+            allprojects {
+                repositories {
+                    google()
+                    mavenCentral()
+                }
+            }
+
+            android {
+                compileSdk 34
+                namespace = "com.example.publisher"
+
+                defaultConfig {
+                    applicationId "com.example.publisher"
+                    minSdk 31
+                    targetSdk 33
+                    versionCode 1
+                    versionName "1.0"
+                }
+            }
+
+            $factoryInstallerStatement
+
+            android.splits.abi {
+                enable true
+                reset()
+                include "arm64-v8a", "armeabi-v7a", "x86_64"
+            }
+
+            def count = 1
+            androidComponents {
+                onVariants(selector().withBuildType('release')) {
+                    for (output in outputs) {
+                        output.versionCode.set(count)
+                        output.versionName.set(output.versionCode.map {
+                            println('versionCode=' + it)
+                            it.toString()
+                        })
+
+                        count += 2
+                    }
+                }
+            }
+
+            apply plugin: 'com.github.triplet.play'
+            play {
+                serviceAccountCredentials = file('creds.json')
+                resolutionStrategy =
+                    com.github.triplet.gradle.androidpublisher.ResolutionStrategy.AUTO_OFFSET
+            }
+        """)
+
+        val result = executeGradle(false) {
+            withArguments("assembleRelease")
+        }
+
+        result.requireTask(outcome = SUCCESS)
+        assertThat(result.output).contains("versionCode=42")
+        assertThat(result.output).contains("versionCode=44")
+        assertThat(result.output).contains("versionCode=46")
+    }
+
+    @Test
     fun `Version code isn't eagerly evaluated in non-auto resolution`() {
         // language=gradle
         File(appDir, "build.gradle").writeText("""
