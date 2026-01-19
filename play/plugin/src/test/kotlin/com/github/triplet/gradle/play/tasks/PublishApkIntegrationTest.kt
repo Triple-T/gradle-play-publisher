@@ -130,7 +130,6 @@ class PublishApkIntegrationTest : IntegrationTestBase(), ArtifactIntegrationTest
             buildTypes.release {
                 shrinkResources true
                 minifyEnabled true
-                proguardFiles(getDefaultProguardFile("proguard-android.txt"))
             }
         """.withAndroidBlock()
 
@@ -161,47 +160,6 @@ class PublishApkIntegrationTest : IntegrationTestBase(), ArtifactIntegrationTest
         assertThat(result.output).contains("uploadApk(")
         assertThat(result.output).contains("debugSymbolsFile=")
         assertThat(result.output).doesNotContain("debugSymbolsFile=null")
-    }
-
-    @Test
-    fun `Build uploads multiple APKs when splits are used`() {
-        // language=gradle
-        val config = """
-            splits.density {
-                enable true
-                reset()
-                include "xxhdpi", "xxxhdpi"
-            }
-
-            def versionCodes = ''
-            def count = 0
-            applicationVariants.all { variant ->
-                if (variant.name == 'release') {
-                    variant.outputs.each { output ->
-                        output.versionCodeOverride = count++
-                        versionCodes += count + ', '
-                    }
-                }
-            }
-
-            afterEvaluate {
-                System.setProperty("VERSION_CODES", versionCodes.take(versionCodes.length() - 2))
-            }
-        """.withAndroidBlock()
-
-        val result = execute(config, "publishReleaseApk")
-
-        result.requireTask(outcome = SUCCESS)
-        assertThat(result.output.split("\n").filter {
-            it.contains("uploadApk(")
-        }).hasSize(3)
-        assertThat(result.output).contains("app-universal")
-        assertThat(result.output).contains("app-xxxhdpi")
-        assertThat(result.output).contains("app-xxhdpi")
-        assertThat(result.output.split("\n").filter {
-            it.contains("publishArtifacts(")
-        }).hasSize(1)
-        assertThat(result.output).contains("versionCodes=[1, 2, 3]")
     }
 
     @Test

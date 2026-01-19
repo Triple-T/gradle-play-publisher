@@ -1,5 +1,7 @@
+import org.gradle.kotlin.dsl.version
+
 plugins {
-    `gradle-enterprise`
+    id("com.gradle.develocity") version "4.3.1"
 }
 
 include(
@@ -36,8 +38,8 @@ dependencyResolutionManagement {
             plugin("nexusPublish", "io.github.gradle-nexus.publish-plugin")
                 .versionRef("nexusPublish")
 
-            version("agp", "8.2.0")
-            version("agp-tools", "31.2.0")
+            version("agp", "9.0.0")
+            version("agp-tools", "32.0.0")
             version("android-publisher", "v3-rev20231115-2.0.0")
             version("api-client", "2.2.0")
             version("http-client", "1.43.3")
@@ -62,11 +64,14 @@ dependencyResolutionManagement {
         }
 
         create("testLibs") {
-            version("junit", "5.10.1")
+            version("junit", "5.14.2")
+            version("junit-launcher", "1.14.2")
             version("truth", "1.1.5")
             version("mockito", "5.8.0")
 
             library("junit", "org.junit.jupiter", "junit-jupiter-api").versionRef("junit")
+            library("junit-launcher", "org.junit.platform", "junit-platform-launcher")
+                .versionRef("junit-launcher")
             library("junit-engine", "org.junit.jupiter", "junit-jupiter-engine")
                 .versionRef("junit")
             library("junit-params", "org.junit.jupiter", "junit-jupiter-params")

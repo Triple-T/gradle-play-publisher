@@ -448,7 +448,7 @@ internal abstract class GenerateResources @Inject constructor(
         private fun File.findDest(): File {
             val default = File(parameters.outputDir.get().asFile, toRelativeString(findOwner()))
             val isTopLevelGraphic = default.isDirectChildOf(GRAPHICS_PATH) &&
-                    ImageType.values().any { default.nameWithoutExtension == it.dirName }
+                    ImageType.entries.any { default.nameWithoutExtension == it.dirName }
 
             return if (isTopLevelGraphic) {
                 default.sibling(default.nameWithoutExtension + "/" + default.name)
@@ -457,8 +457,21 @@ internal abstract class GenerateResources @Inject constructor(
             }
         }
 
-        private fun File.findOwner() =
-                parameters.inputDirs.get().single { startsWith(it.asFile) }.asFile
+        private fun File.findOwner(): File {
+            val canonicalThis = canonicalFile
+            val inputDirs = parameters.inputDirs.get().map { it.asFile.canonicalFile }
+            val matches = inputDirs.filter { canonicalThis.startsWith(it) }
+
+            return when (matches.size) {
+                0 -> error("File $this is not under any of the input directories: $inputDirs")
+                1 -> matches.single()
+                else -> {
+                    // Multiple matches - pick the longest (most specific) path
+                    // Sort by path length descending to ensure consistent ordering
+                    matches.maxBy { it.path.length }
+                }
+            }
+        }
 
         private fun newGenOrder() = compareBy<File> { f ->
             f.isDefaultResource()

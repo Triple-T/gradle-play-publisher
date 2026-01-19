@@ -4,6 +4,7 @@ import com.github.triplet.gradle.androidpublisher.internal.has
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 
 /** Response for an app details request. */
+@ConsistentCopyVisibility
 data class GppAppDetails internal constructor(
         /** The default language. */
         val defaultLocale: String?,
@@ -16,6 +17,7 @@ data class GppAppDetails internal constructor(
 )
 
 /** Response for an app listing request. */
+@ConsistentCopyVisibility
 data class GppListing internal constructor(
         /** The listing's language. */
         val locale: String,
@@ -30,6 +32,7 @@ data class GppListing internal constructor(
 )
 
 /** Response for an app graphic request. */
+@ConsistentCopyVisibility
 data class GppImage internal constructor(
         /** The image's download URL. */
         val url: String,
@@ -38,6 +41,7 @@ data class GppImage internal constructor(
 )
 
 /** Response for a track release note request. */
+@ConsistentCopyVisibility
 data class ReleaseNote internal constructor(
         /** The release note's track. */
         val track: String,
@@ -50,12 +54,14 @@ data class ReleaseNote internal constructor(
 /** Response for an edit request. */
 sealed class EditResponse {
     /** Response for a successful edit request. */
+    @ConsistentCopyVisibility
     data class Success internal constructor(
             /** The id of the edit in question. */
             val id: String,
     ) : EditResponse()
 
     /** Response for an unsuccessful edit request. */
+    @ConsistentCopyVisibility
     data class Failure internal constructor(
             private val e: GoogleJsonResponseException,
     ) : EditResponse() {
@@ -83,6 +89,7 @@ sealed class CommitResponse {
     object Success : CommitResponse()
 
     /** Response for an unsuccessful commit request. */
+    @ConsistentCopyVisibility
     data class Failure internal constructor(
             private val e: GoogleJsonResponseException,
     ) : CommitResponse() {
@@ -102,6 +109,7 @@ sealed class CommitResponse {
 }
 
 /** Response for an internal sharing artifact upload. */
+@ConsistentCopyVisibility
 data class UploadInternalSharingArtifactResponse internal constructor(
         /** The response's full JSON payload. */
         val json: String,
@@ -111,6 +119,7 @@ data class UploadInternalSharingArtifactResponse internal constructor(
 )
 
 /** Response for a product request. */
+@ConsistentCopyVisibility
 data class GppProduct internal constructor(
         /** The product ID. */
         val sku: String,
@@ -118,6 +127,7 @@ data class GppProduct internal constructor(
         val json: String,
 )
 
+@ConsistentCopyVisibility
 data class GppSubscription internal constructor(
         /** The product ID. */
         val productId: String,
@@ -126,12 +136,14 @@ data class GppSubscription internal constructor(
 )
 
 /** Response for a product update request. */
+@ConsistentCopyVisibility
 data class UpdateProductResponse internal constructor(
         /** @return true if the product doesn't exist and needs to be created, false otherwise. */
         val needsCreating: Boolean,
 )
 
 /** Response for a subscription update request. */
+@ConsistentCopyVisibility
 data class UpdateSubscriptionResponse internal constructor(
         /** @return true if the product doesn't exist and needs to be created, false otherwise. */
         val needsCreating: Boolean,

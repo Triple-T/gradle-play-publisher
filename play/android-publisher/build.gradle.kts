@@ -14,24 +14,24 @@ dependencies {
     implementation(libs.client.auth)
     implementation(libs.client.http)
 
+    testFixturesImplementation(libs.client.api)
+    testFixturesImplementation(libs.client.gson)
+
+    testRuntimeOnly(testLibs.junit.launcher)
     testImplementation(testLibs.junit)
     testImplementation(testLibs.junit.engine)
     testImplementation(testLibs.truth)
     testImplementation(testLibs.mockito)
 }
 
-// Mockito needs to be able to pass in null params
-tasks.named<KotlinCompile>("compileTestKotlin") {
-    kotlinOptions {
-        freeCompilerArgs += "-Xno-call-assertions"
-    }
+tasks.test.configure {
+    useJUnitPlatform()
 }
 
-// Give testFixtures access to internal symbols
-// TODO(asaveau): remove when https://youtrack.jetbrains.com/issue/KT-34901 gets fixed
-kotlin.target.compilations {
-    named("testFixtures") {
-        associateWith(named("main").get())
+// Mockito needs to be able to pass in null params
+tasks.named<KotlinCompile>("compileTestKotlin") {
+    compilerOptions {
+        freeCompilerArgs.add("-Xno-call-assertions")
     }
 }
 

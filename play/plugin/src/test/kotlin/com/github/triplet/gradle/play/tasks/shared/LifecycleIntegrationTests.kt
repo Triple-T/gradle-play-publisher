@@ -1,5 +1,6 @@
 package com.github.triplet.gradle.play.tasks.shared
 
+import com.github.triplet.gradle.common.utils.capitalize
 import com.github.triplet.gradle.play.helpers.SharedIntegrationTest
 import com.google.common.truth.Truth.assertThat
 import org.junit.jupiter.params.ParameterizedTest

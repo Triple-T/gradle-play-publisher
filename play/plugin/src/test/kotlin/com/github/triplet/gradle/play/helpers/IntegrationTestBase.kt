@@ -4,6 +4,7 @@ import com.github.triplet.gradle.common.utils.orNull
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
@@ -20,6 +21,9 @@ abstract class IntegrationTestBase(
     @JvmField
     var _tempDir: File? = null
     private val tempDir get() = _tempDir!!
+
+    // Cache the TestKit directory for the entire test to ensure same daemon is reused
+    private var cachedTestKitDir: File? = null
 
     override val appDir by lazy { File(tempDir, "app") }
     override val playgroundDir by lazy { File(tempDir, UUID.randomUUID().toString()) }
@@ -39,6 +43,12 @@ abstract class IntegrationTestBase(
         File("src/test/fixtures/${javaClass.simpleName}").orNull()?.copyRecursively(appDir)
     }
 
+    @AfterEach
+    fun releaseTestKitDir() {
+        cachedTestKitDir?.let { testDirPool.put(it) }
+        cachedTestKitDir = null
+    }
+
     override fun File.escaped() = toString().replace("\\", "\\\\")
 
     override fun execute(config: String, vararg tasks: String) = execute(config, false, *tasks)
@@ -49,7 +59,9 @@ abstract class IntegrationTestBase(
     override fun executeGradle(
             expectFailure: Boolean,
             block: GradleRunner.() -> Unit,
-    ): BuildResult = runWithTestDir { testDir ->
+    ): BuildResult {
+        // Use cached TestKit directory to ensure same daemon across multiple execute() calls
+        val testDir = cachedTestKitDir ?: testDirPool.take().also { cachedTestKitDir = it }
         val runner = GradleRunner.create()
                 .withPluginClasspath()
                 .withProjectDir(appDir)
@@ -81,7 +93,7 @@ abstract class IntegrationTestBase(
             println(result.output)
         }
 
-        result
+        return result
     }
 
     private fun execute(
@@ -168,15 +180,6 @@ abstract class IntegrationTestBase(
             }
 
             testDirPool = ArrayBlockingQueue(threads, false, dirs)
-        }
-
-        fun <T> runWithTestDir(block: (File) -> T): T {
-            val dir = testDirPool.take()
-            try {
-                return block(dir)
-            } finally {
-                testDirPool.put(dir)
-            }
         }
     }
 }

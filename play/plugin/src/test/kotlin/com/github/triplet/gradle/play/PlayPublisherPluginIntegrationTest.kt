@@ -7,6 +7,7 @@ import com.github.triplet.gradle.androidpublisher.newSuccessEditResponse
 import com.github.triplet.gradle.play.helpers.IntegrationTestBase
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.GradleRunner
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
@@ -54,8 +55,10 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
     fun `Disabled build types are ignored`() {
         // language=gradle
         val config = """
-            variantFilter { variant ->
-                variant.setIgnore(true)
+            androidComponents {
+                beforeVariants(selector().all()) { variant ->
+                    variant.enable = false
+                }
             }
         """.withAndroidBlock()
 
@@ -792,6 +795,7 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
         assertThat(result.output).contains("does not match")
     }
 
+    @Disabled("Crashlytics doesn't support AGP 9 yet - https://github.com/firebase/firebase-android-sdk/issues/7652")
     @ParameterizedTest
     @ValueSource(booleans = [false, true])
     fun `Crashlytics runs on publish`(flavors: Boolean) {
@@ -813,18 +817,26 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
             }
         """
         // language=gradle
+        File(appDir, "settings.gradle").writeText("""
+            pluginManagement {
+                repositories.google()
+            }
+        """)
+
+        // language=gradle
         File(appDir, "build.gradle").writeText("""
             buildscript {
-                repositories.google()
-
-                dependencies.classpath 'com.google.firebase:firebase-crashlytics-gradle:2.4.1'
+                repositories {
+                    google()
+                    mavenCentral()
+                }
             }
 
             plugins {
                 id 'com.android.application'
                 id 'com.github.triplet.play'
+                id 'com.google.firebase.crashlytics' version '3.0.6'
             }
-            apply plugin: 'com.google.firebase.crashlytics'
 
             android {
                 compileSdk 34
@@ -841,7 +853,6 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
                 buildTypes.release {
                     shrinkResources true
                     minifyEnabled true
-                    proguardFiles(getDefaultProguardFile("proguard-android.txt"))
                 }
 
                 ${flavorsConfig.takeIf { flavors } ?: ""}
@@ -897,12 +908,12 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
                 repositories.mavenCentral()
 
                 dependencies.classpath files($classpathJars)
-                dependencies.classpath 'com.bugsnag:bugsnag-android-gradle-plugin:7.0.0-beta01'
+                dependencies.classpath 'com.bugsnag.gradle:com.bugsnag.gradle.gradle.plugin:1.0.0'
             }
 
             apply plugin: 'com.android.application'
             apply plugin: 'com.github.triplet.play'
-            apply plugin: 'com.bugsnag.android.gradle'
+            apply plugin: 'com.bugsnag.gradle'
 
             android {
                 compileSdk 34
@@ -919,7 +930,6 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
                 buildTypes.release {
                     shrinkResources true
                     minifyEnabled true
-                    proguardFiles(getDefaultProguardFile("proguard-android.txt"))
                 }
 
                 ${flavorsConfig.takeIf { flavors } ?: ""}
@@ -942,7 +952,7 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
                 withArguments(task, "--dry-run")
             }
 
-            assertThat(result.output).contains(":uploadBugsnag")
+            assertThat(result.output).contains(":bugsnagUpload${flavor}ProguardMapping")
         }
     }
 
@@ -975,7 +985,7 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
                 repositories.mavenCentral()
 
                 dependencies.classpath files($classpathJars)
-                dependencies.classpath 'io.sentry:sentry-android-gradle-plugin:4.7.1'
+                dependencies.classpath 'io.sentry:sentry-android-gradle-plugin:6.0.0-rc.1'
             }
 
             apply plugin: 'com.android.application'
@@ -997,7 +1007,6 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
                 buildTypes.release {
                     shrinkResources true
                     minifyEnabled true
-                    proguardFiles(getDefaultProguardFile("proguard-android.txt"))
                 }
 
                 ${flavorsConfig.takeIf { flavors } ?: ""}

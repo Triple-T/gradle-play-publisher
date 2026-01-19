@@ -9,11 +9,11 @@ internal class GradleRuntimeValidator(
 ) {
     fun validate() {
         check(currentGradleVersion >= minGradleVersion) {
-            """
-            |Gradle Play Publisher's minimum Gradle version is at least $minGradleVersion and yours
-            |is $currentGradleVersion. Find the latest version at
+            $$"""
+            |Gradle Play Publisher's minimum Gradle version is at least $$minGradleVersion and yours
+            |is $$currentGradleVersion. Find the latest version at
             |https://github.com/gradle/gradle/releases/latest, then run
-            |$ ./gradlew wrapper --gradle-version=${"$"}LATEST --distribution-type=ALL
+            |$ ./gradlew wrapper --gradle-version=$LATEST --distribution-type=ALL
             """.trimMargin()
         }
     }

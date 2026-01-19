@@ -1,10 +1,11 @@
 package com.github.triplet.gradle.play
 
 import com.android.build.api.artifact.SingleArtifact
+import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.android.build.gradle.AppPlugin
-import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
 import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
+import com.github.triplet.gradle.common.utils.capitalize
 import com.github.triplet.gradle.common.utils.safeMkdirs
 import com.github.triplet.gradle.common.validation.validateRuntime
 import com.github.triplet.gradle.play.internal.CliPlayPublisherExtension
@@ -54,7 +55,6 @@ import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Provider
 import org.gradle.api.services.BuildServiceRegistration
 import org.gradle.build.event.BuildEventsListenerRegistry
-import org.gradle.kotlin.dsl.container
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.findPlugin
 import org.gradle.kotlin.dsl.getByType
@@ -184,8 +184,8 @@ internal abstract class PlayPublisherPlugin @Inject constructor(
         // ----------------------------------- END: GLOBAL TASKS -----------------------------------
 
         val baseExtension = project.extensions.getByType<PlayPublisherExtension>()
-        val extensionContainer = project.container<PlayPublisherExtension>()
-        val android = project.extensions.getByType<BaseAppModuleExtension>()
+        val extensionContainer = project.objects.domainObjectContainer(PlayPublisherExtension::class.java)
+        val android = project.extensions.getByType<ApplicationExtension>()
         (android as ExtensionAware).extensions.add(PLAY_CONFIGS_PATH, extensionContainer)
 
         val androidExtension = project.extensions.getByType<ApplicationAndroidComponentsExtension>()
@@ -317,7 +317,7 @@ internal abstract class PlayPublisherPlugin @Inject constructor(
                     |Launches an intent to install an Internal Sharing artifact for variant $taskVariantName.
                     |   See https://github.com/Triple-T/gradle-play-publisher#installing-internal-sharing-artifacts
                     """.trimMargin(),
-                    arrayOf(android),
+                    arrayOf(android, androidExtension),
             ) {
                 uploadedArtifacts.set(if (extension.defaultToAppBundles.get()) {
                     publishInternalSharingBundleTask.flatMap { it.outputDirectory }
@@ -347,27 +347,44 @@ internal abstract class PlayPublisherPlugin @Inject constructor(
             }
             bootstrapAllTask { dependsOn(bootstrapTask) }
 
+            // Get source set names from the variant's sources
+            // The order matters for precedence in GenerateResources (higher index = higher priority)
+            val sourceSetNames = mutableSetOf<String>()
+
+            // Add main source set (lowest priority)
+            sourceSetNames.add("main")
+
+            // Add individual flavor source sets in reverse dimension order
+            // (last dimension first, first dimension last = highest priority)
+            val flavors = variant.productFlavors
+            for ((_, flavor) in flavors.asReversed()) {
+                sourceSetNames.add(flavor)
+            }
+
+            if(flavors.size >= 2) {
+                variant.flavorName?.let(sourceSetNames::add)
+            }
+
+            variant.buildType?.let { sourceSetNames.add(it) }
+
+            // Add variant-specific source set (highest priority)
+            sourceSetNames.add(variant.name)
+
             val resourceDir = project.newTask<GenerateResources>(
                     "generate${taskVariantName}PlayResources"
             ) {
                 resDir.set(project.layout.buildDirectory.dir(variant.playPath))
 
                 mustRunAfter(bootstrapTask)
-            }.also { task ->
-                // TODO(asaveau): remove once there's an API for sourceSets in the new model
-                android.applicationVariants
-                        .matching { it.name == variant.name }
-                        .whenObjectAdded {
-                            val dirs = sourceSets.map {
-                                project.layout.projectDirectory.dir("src/${it.name}/$PLAY_PATH")
-                            }
-                            task {
-                                resSrcDirs.set(dirs)
-                                resSrcTree.setFrom(dirs.map {
-                                    project.fileTree(it).apply { exclude("**/.*") }
-                                })
-                            }
-                        }
+
+                val dirs = sourceSetNames.map {
+                    project.layout.projectDirectory.dir("src/$it/$PLAY_PATH")
+                }
+
+                resSrcDirs.set(dirs)
+                resSrcTree.setFrom(dirs.map { dir ->
+                    project.fileTree(dir).apply { exclude("**/.*") }
+                })
             }.flatMap {
                 it.resDir
             }
@@ -671,14 +688,19 @@ internal abstract class PlayPublisherPlugin @Inject constructor(
             // ----------------------------- END: SEMI-GLOBAL TASKS -----------------------------
         }
 
-        project.afterEvaluate {
-            val allPossiblePlayConfigNames: Set<String> by lazy {
-                android.applicationVariants.flatMapTo(mutableSetOf()) { variant ->
-                    listOf(variant.name, variant.buildType.name) +
-                            variant.productFlavors.flatMap { listOfNotNull(it.name, it.dimension) }
-                }
-            }
+        // Collect all possible play config names from variants processed in onVariants
+        val allPossiblePlayConfigNames = mutableSetOf<String>()
 
+        androidExtension.onVariants(androidExtension.selector().all()) { variant ->
+            allPossiblePlayConfigNames.add(variant.name)
+            variant.buildType?.let { allPossiblePlayConfigNames.add(it) }
+            for ((dimension, flavor) in variant.productFlavors) {
+                allPossiblePlayConfigNames.add(flavor)
+                allPossiblePlayConfigNames.add(dimension)
+            }
+        }
+
+        project.afterEvaluate {
             for (configName in extensionContainer.names) {
                 if (configName !in allPossiblePlayConfigNames) {
                     project.logger.warn(
@@ -700,19 +722,7 @@ internal abstract class PlayPublisherPlugin @Inject constructor(
 
         maybeAddDependency("uploadCrashlyticsMappingFile$variantName")
 
-        val bugsnagName = buildString {
-            var seenUpper = false
-            for (c in variantName) {
-                if (c.isUpperCase() && seenUpper) {
-                    append('-')
-                    append(c.toLowerCase())
-                } else {
-                    append(c)
-                }
-                seenUpper = c.isUpperCase() || seenUpper
-            }
-        }
-        maybeAddDependency("uploadBugsnag${bugsnagName}Mapping")
+        maybeAddDependency("bugsnagUpload${variantName}ProguardMapping")
 
         maybeAddDependency("uploadSentryProguardMappings$variantName")
     }

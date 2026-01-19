@@ -135,7 +135,6 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase(), SharedIntegrationTe
             buildTypes.release {
                 shrinkResources true
                 minifyEnabled true
-                proguardFiles(getDefaultProguardFile("proguard-android.txt"))
             }
         """.withAndroidBlock()
 

@@ -17,11 +17,13 @@ plugins {
     alias(libs.plugins.nexusPublish)
 }
 
-buildScan {
-    termsOfServiceUrl = "https://gradle.com/terms-of-service"
-    termsOfServiceAgree = "yes"
+develocity {
+    buildScan {
+        termsOfUseUrl = "https://gradle.com/terms-of-service"
+        termsOfUseAgree = "yes"
 
-    publishAlways()
+        publishing.onlyIf { true }
+    }
 }
 
 nexusPublishing {
@@ -65,7 +67,6 @@ allprojects {
         extensions.findByType<KotlinProjectExtension>()?.apply {
             sourceSets.configureEach {
                 languageSettings.progressiveMode = true
-                languageSettings.enableLanguageFeature("NewInference")
             }
         }
 
