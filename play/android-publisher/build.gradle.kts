@@ -24,6 +24,12 @@ dependencies {
     testImplementation(testLibs.mockito)
 }
 
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-Xconsistent-data-class-copy-visibility")
+    }
+}
+
 tasks.test.configure {
     useJUnitPlatform()
 }
