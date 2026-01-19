@@ -361,7 +361,7 @@ internal abstract class PlayPublisherPlugin @Inject constructor(
                 sourceSetNames.add(flavor)
             }
 
-            if(flavors.size >= 2) {
+            if (flavors.size >= 2) {
                 variant.flavorName?.let(sourceSetNames::add)
             }
 
