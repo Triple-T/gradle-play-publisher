@@ -457,7 +457,7 @@ internal abstract class GenerateResources @Inject constructor(
             }
         }
 
-        private fun File.findOwner(): File =
+        private fun File.findOwner() =
                 parameters.inputDirs.get().single { startsWith(it.asFile) }.asFile
 
         private fun newGenOrder() = compareBy<File> { f ->
