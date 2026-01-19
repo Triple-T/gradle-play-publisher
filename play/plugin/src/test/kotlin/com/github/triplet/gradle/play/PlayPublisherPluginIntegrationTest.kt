@@ -795,10 +795,12 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
         assertThat(result.output).contains("does not match")
     }
 
-    @Disabled("Crashlytics doesn't support AGP 9 yet - https://github.com/firebase/firebase-android-sdk/issues/7652")
     @ParameterizedTest
     @ValueSource(booleans = [false, true])
     fun `Crashlytics runs on publish`(flavors: Boolean) {
+        val classpathJars = GradleRunner.create().withPluginClasspath().pluginClasspath
+                .joinToString { "'$it'" }
+
         // language=gradle
         val flavorsConfig = """
             flavorDimensions "version"
@@ -818,9 +820,7 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
         """
         // language=gradle
         File(appDir, "settings.gradle").writeText("""
-            pluginManagement {
-                repositories.google()
-            }
+            include(":app")
         """)
 
         // language=gradle
@@ -828,14 +828,31 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
             buildscript {
                 repositories {
                     google()
-                    mavenCentral()
+                    gradlePluginPortal {
+                        content {
+                            excludeGroup('com.github.triplet.gradle')
+                        }
+                    }
+                }
+
+                dependencies {
+                    classpath files($classpathJars)
+                    classpath('com.android.tools.build:gradle:9.0.0')
+                    classpath('com.google.gms:google-services:4.4.4')
+                    classpath('com.google.firebase.crashlytics:com.google.firebase.crashlytics.gradle.plugin:3.0.6')
                 }
             }
+        """)
 
+        val appProjectDir = File(appDir, "app").apply { mkdirs() }
+
+        // language=gradle
+        File(appProjectDir, "build.gradle").writeText("""
             plugins {
                 id 'com.android.application'
                 id 'com.github.triplet.play'
-                id 'com.google.firebase.crashlytics' version '3.0.6'
+                id 'com.google.gms.google-services'
+                id 'com.google.firebase.crashlytics'
             }
 
             android {
@@ -875,7 +892,7 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
                 withArguments(task, "--dry-run")
             }
 
-            assertThat(result.output).contains(":uploadCrashlyticsMappingFile$flavor")
+            assertThat(result.output).contains(":app:uploadCrashlyticsMappingFile$flavor")
         }
     }
 
