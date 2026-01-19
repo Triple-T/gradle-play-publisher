@@ -163,6 +163,47 @@ class PublishApkIntegrationTest : IntegrationTestBase(), ArtifactIntegrationTest
     }
 
     @Test
+    fun `Build uploads multiple APKs when splits are used`() {
+        // language=gradle
+        val config = """
+            splits.abi {
+                enable true
+                reset()
+                include "arm64-v8a", "armeabi-v7a", "x86_64"
+            }
+
+            def versionCodes = ''
+            def count = 0
+            androidComponents {
+                onVariants(selector().withBuildType('release')) {
+                    for (output in outputs) {
+                        output.versionCode.set(count++)
+                        versionCodes += count + ', '
+                    }
+                }
+            }
+
+            afterEvaluate {
+                System.setProperty("VERSION_CODES", versionCodes.take(versionCodes.length() - 2))
+            }
+        """.withAndroidBlock()
+
+        val result = execute(config, "publishReleaseApk")
+
+        result.requireTask(outcome = SUCCESS)
+        assertThat(result.output.split("\n").filter {
+            it.contains("uploadApk(")
+        }).hasSize(3)
+        assertThat(result.output).contains("app-arm64-v8a")
+        assertThat(result.output).contains("app-armeabi-v7a")
+        assertThat(result.output).contains("app-x86_64")
+        assertThat(result.output.split("\n").filter {
+            it.contains("publishArtifacts(")
+        }).hasSize(1)
+        assertThat(result.output).contains("versionCodes=[1, 2, 3]")
+    }
+
+    @Test
     fun `Build uses correct retained OBBs`() {
         // language=gradle
         val config = """
