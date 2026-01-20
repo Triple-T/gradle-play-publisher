@@ -1,11 +1,10 @@
-import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
+import com.android.build.api.dsl.ApplicationExtension
 import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import com.github.triplet.gradle.common.utils.orNull
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.google.common.hash.Hashing
 import com.google.common.io.Files
-import com.supercilex.gradle.versions.VersionOrchestratorExtension
 import java.io.FileInputStream
 import java.util.*
 
@@ -21,8 +20,7 @@ buildscript {
 
     dependencies {
         classpath(kotlin("gradle-plugin", embeddedKotlinVersion))
-        classpath("com.android.tools.build:gradle:8.2.0")
-        classpath("com.supercilex.gradle:version-orchestrator:0.10.0")
+        classpath("com.android.tools.build:gradle:9.0.0")
         classpath(
             "com.github.triplet.gradle:play-publisher:" +
                     file("../version.txt").readText().trim()
@@ -30,9 +28,13 @@ buildscript {
     }
 }
 
-buildScan {
-    termsOfServiceUrl = "https://gradle.com/terms-of-service"
-    termsOfServiceAgree = "yes"
+develocity {
+    buildScan {
+        termsOfUseUrl = "https://gradle.com/terms-of-service"
+        termsOfUseAgree = "yes"
+
+        publishing.onlyIf { true }
+    }
 }
 
 allprojects {
@@ -43,13 +45,11 @@ allprojects {
 }
 
 apply(plugin = "com.android.application")
-apply(plugin = "kotlin-android")
-apply(plugin = "com.supercilex.gradle.versions")
 apply(plugin = "com.github.triplet.play")
 
 the<JavaPluginExtension>().toolchain.languageVersion.convention(JavaLanguageVersion.of(8))
 
-configure<BaseAppModuleExtension> {
+configure<ApplicationExtension> {
     namespace = "com.supercilex.test"
     compileSdk = 31
 
@@ -117,14 +117,9 @@ configure<PlayPublisherExtension> {
     resolutionStrategy.set(ResolutionStrategy.AUTO)
 }
 
-configure<VersionOrchestratorExtension> {
-    configureVersionCode.set(false)
-}
-
 dependencies {
     "implementation"(kotlin("stdlib-jdk8", embeddedKotlinVersion))
     "implementation"("androidx.appcompat:appcompat:1.6.1")
-    "implementation"("androidx.multidex:multidex:2.0.1")
     "implementation"("androidx.constraintlayout:constraintlayout:2.1.4")
 }
 
