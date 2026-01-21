@@ -448,7 +448,7 @@ internal abstract class GenerateResources @Inject constructor(
         private fun File.findDest(): File {
             val default = File(parameters.outputDir.get().asFile, toRelativeString(findOwner()))
             val isTopLevelGraphic = default.isDirectChildOf(GRAPHICS_PATH) &&
-                    ImageType.values().any { default.nameWithoutExtension == it.dirName }
+                    ImageType.entries.any { default.nameWithoutExtension == it.dirName }
 
             return if (isTopLevelGraphic) {
                 default.sibling(default.nameWithoutExtension + "/" + default.name)

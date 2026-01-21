@@ -113,10 +113,10 @@ class ProcessArtifactVersionCodesIntegrationTest : IntegrationTestBase(), Shared
 
             $factoryInstallerStatement
 
-            android.splits.density {
+            android.splits.abi {
                 enable true
                 reset()
-                include "xxhdpi", "xxxhdpi"
+                include "arm64-v8a", "armeabi-v7a", "x86_64"
             }
 
             def count = 0
@@ -181,10 +181,10 @@ class ProcessArtifactVersionCodesIntegrationTest : IntegrationTestBase(), Shared
 
             $factoryInstallerStatement
 
-            android.splits.density {
+            android.splits.abi {
                 enable true
                 reset()
-                include "xxhdpi", "xxxhdpi"
+                include "arm64-v8a", "armeabi-v7a", "x86_64"
             }
 
             def count = 1

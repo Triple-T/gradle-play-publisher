@@ -1,9 +1,9 @@
 package com.github.triplet.gradle.play.tasks
 
-import com.android.build.gradle.AppExtension
-import com.android.build.gradle.internal.LoggerWrapper
-import com.android.build.gradle.internal.testing.ConnectedDeviceProvider
-import com.android.builder.testing.api.DeviceProvider
+import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.variant.ApplicationAndroidComponentsExtension
+import com.android.ddmlib.AndroidDebugBridge
+import com.android.ddmlib.IDevice
 import com.android.ddmlib.MultiLineReceiver
 import com.google.api.client.json.gson.GsonFactory
 import org.gradle.api.DefaultTask
@@ -26,7 +26,8 @@ import javax.inject.Inject
 
 @DisableCachingByDefault
 internal abstract class InstallInternalSharingArtifact @Inject constructor(
-        private val extension: AppExtension,
+        private val extension: ApplicationExtension,
+        private val componentExtension: ApplicationAndroidComponentsExtension,
         private val executor: WorkerExecutor,
 ) : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -43,8 +44,8 @@ internal abstract class InstallInternalSharingArtifact @Inject constructor(
         val uploads = uploadedArtifacts
         executor.noIsolation().submit(Installer::class) {
             uploadedArtifacts.set(uploads)
-            adbExecutable.set(extension.adbExecutable)
-            timeOutInMs.set(extension.adbOptions.timeOutInMs)
+            adbExecutable.set(componentExtension.sdkComponents.adb)
+            timeOutInMs.set(extension.installation.timeOutInMs)
         }
     }
 
@@ -96,18 +97,32 @@ internal abstract class InstallInternalSharingArtifact @Inject constructor(
     }
 
     private class DefaultAdbShell(
-            private val deviceProvider: DeviceProvider,
+            private val adb: AndroidDebugBridge,
             private val timeOutInMs: Long,
+            private val targetSerial: String?,
     ) : AdbShell {
         override fun executeShellCommand(command: String): Boolean {
-            return deviceProvider.use {
-                launchIntents(deviceProvider, command)
+            return try {
+                launchIntents(command)
+            } finally {
+                // Clean up ADB connection
+                @Suppress("DEPRECATION")
+                AndroidDebugBridge.disconnectBridge()
+                AndroidDebugBridge.terminate()
             }
         }
 
-        private fun launchIntents(deviceProvider: DeviceProvider, command: String): Boolean {
+        private fun launchIntents(command: String): Boolean {
             var successfulLaunches = 0
-            for (device in deviceProvider.devices) {
+            val devices = getTargetDevices()
+
+            if (devices.isEmpty()) {
+                Logging.getLogger(InstallInternalSharingArtifact::class.java)
+                    .warn("No connected devices found")
+                return false
+            }
+
+            for (device in devices) {
                 val receiver = object : MultiLineReceiver() {
                     private var _hasErrored = false
                     val hasErrored get() = _hasErrored
@@ -134,16 +149,48 @@ internal abstract class InstallInternalSharingArtifact @Inject constructor(
             return successfulLaunches > 0
         }
 
+        private fun getTargetDevices(): List<IDevice> {
+            val allDevices = adb.devices
+
+            return if (targetSerial != null) {
+                allDevices.filter { it.serialNumber == targetSerial }
+            } else {
+                allDevices.toList()
+            }
+        }
+
         companion object : AdbShell.Factory {
             override fun create(adbExecutable: File, timeOutInMs: Int): AdbShell {
-                val deviceProvider = ConnectedDeviceProvider(
-                        adbExecutable,
-                        timeOutInMs,
-                        LoggerWrapper(Logging.getLogger(
-                                InstallInternalSharingArtifact::class.java)),
+                // Initialize ADB bridge - using deprecated API as the replacement
+                // requires significantly more infrastructure. The deprecation warnings
+                // are less critical than the DeviceProvider removal in AGP 9.
+                @Suppress("DEPRECATION")
+                AndroidDebugBridge.initIfNeeded(false)
+
+                val adb = AndroidDebugBridge.createBridge(
+                        adbExecutable.absolutePath,
+                        false,
+                        timeOutInMs.toLong(),
+                        TimeUnit.MILLISECONDS
+                )
+
+                // Wait for device list to populate
+                var count = 0
+                while (!adb.hasInitialDeviceList() && count < 50) {
+                    Thread.sleep(100)
+                    count++
+                }
+
+                if (!adb.hasInitialDeviceList()) {
+                    Logging.getLogger(InstallInternalSharingArtifact::class.java)
+                        .warn("Timeout waiting for device list from ADB")
+                }
+
+                return DefaultAdbShell(
+                        adb,
+                        timeOutInMs.toLong(),
                         System.getenv("ANDROID_SERIAL")
                 )
-                return DefaultAdbShell(deviceProvider, timeOutInMs.toLong())
             }
         }
     }

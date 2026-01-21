@@ -8,6 +8,7 @@ import com.github.triplet.gradle.androidpublisher.PlayPublisher
 import com.github.triplet.gradle.androidpublisher.UpdateProductResponse
 import com.github.triplet.gradle.androidpublisher.UpdateSubscriptionResponse
 import com.github.triplet.gradle.androidpublisher.UploadInternalSharingArtifactResponse
+import com.github.triplet.gradle.common.utils.capitalize
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.googleapis.media.MediaHttpUploader
 import com.google.api.client.googleapis.services.AbstractGoogleClientRequest

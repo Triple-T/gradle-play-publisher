@@ -130,7 +130,6 @@ class PublishApkIntegrationTest : IntegrationTestBase(), ArtifactIntegrationTest
             buildTypes.release {
                 shrinkResources true
                 minifyEnabled true
-                proguardFiles(getDefaultProguardFile("proguard-android.txt"))
             }
         """.withAndroidBlock()
 
@@ -167,18 +166,18 @@ class PublishApkIntegrationTest : IntegrationTestBase(), ArtifactIntegrationTest
     fun `Build uploads multiple APKs when splits are used`() {
         // language=gradle
         val config = """
-            splits.density {
+            splits.abi {
                 enable true
                 reset()
-                include "xxhdpi", "xxxhdpi"
+                include "arm64-v8a", "armeabi-v7a", "x86_64"
             }
 
             def versionCodes = ''
             def count = 0
-            applicationVariants.all { variant ->
-                if (variant.name == 'release') {
-                    variant.outputs.each { output ->
-                        output.versionCodeOverride = count++
+            androidComponents {
+                onVariants(selector().withBuildType('release')) {
+                    for (output in outputs) {
+                        output.versionCode.set(count++)
                         versionCodes += count + ', '
                     }
                 }
@@ -195,9 +194,9 @@ class PublishApkIntegrationTest : IntegrationTestBase(), ArtifactIntegrationTest
         assertThat(result.output.split("\n").filter {
             it.contains("uploadApk(")
         }).hasSize(3)
-        assertThat(result.output).contains("app-universal")
-        assertThat(result.output).contains("app-xxxhdpi")
-        assertThat(result.output).contains("app-xxhdpi")
+        assertThat(result.output).contains("app-arm64-v8a")
+        assertThat(result.output).contains("app-armeabi-v7a")
+        assertThat(result.output).contains("app-x86_64")
         assertThat(result.output.split("\n").filter {
             it.contains("publishArtifacts(")
         }).hasSize(1)

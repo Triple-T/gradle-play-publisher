@@ -5,9 +5,11 @@ import com.github.triplet.gradle.play.helpers.SharedIntegrationTest
 import com.github.triplet.gradle.play.helpers.SharedIntegrationTest.Companion.DEFAULT_TASK_VARIANT
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.BuildResult
+import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome.NO_SOURCE
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
@@ -95,20 +97,52 @@ interface ArtifactIntegrationTests : SharedIntegrationTest {
             cliParam: Boolean,
             taskVariant: String?,
     ) {
+        val classpathJars = GradleRunner.create().withPluginClasspath().pluginClasspath
+                .joinToString { "'$it'" }
+
         val app = File(playgroundDir, customArtifactName()).safeCreateNewFile()
+        // language=gradle
+        File(appDir, "settings.gradle").writeText("""
+            dependencyResolutionManagement {
+                repositories {
+                    mavenCentral()
+                }
+            }
+            include(":app")
+        """)
+
         // language=gradle
         File(appDir, "build.gradle").writeText("""
             buildscript {
-                repositories.google()
+                repositories {
+                    google()
+                    gradlePluginPortal {
+                        content {
+                            excludeGroup('com.github.triplet.gradle')
+                        }
+                    }
+                }
 
-                dependencies.classpath 'com.google.firebase:firebase-crashlytics-gradle:2.4.1'
+                dependencies {
+                    classpath files($classpathJars)
+                    classpath('com.android.tools.build:gradle:9.0.0')
+                    classpath('com.google.gms:google-services:4.4.4')
+                    classpath('com.google.firebase.crashlytics:com.google.firebase.crashlytics.gradle.plugin:3.0.6')
+                }
             }
+        """)
 
+        val appProjectDir = File(appDir, "app").apply { mkdirs() }
+        File(appDir, "creds.json").copyTo(File(appProjectDir, "creds.json"), overwrite = true)
+
+        // language=gradle
+        File(appProjectDir, "build.gradle").writeText("""
             plugins {
                 id 'com.android.application'
                 id 'com.github.triplet.play'
+                id 'com.google.gms.google-services'
+                id 'com.google.firebase.crashlytics'
             }
-            apply plugin: 'com.google.firebase.crashlytics'
 
             android {
                 compileSdk 34
@@ -125,7 +159,6 @@ interface ArtifactIntegrationTests : SharedIntegrationTest {
                 buildTypes.release {
                     shrinkResources true
                     minifyEnabled true
-                    proguardFiles(getDefaultProguardFile("proguard-android.txt"))
                 }
             }
 
@@ -139,14 +172,15 @@ interface ArtifactIntegrationTests : SharedIntegrationTest {
             $factoryInstallerStatement
         """)
 
+        val taskName = ":app${taskName(taskVariant.orEmpty())}"
         val result = executeGradle(expectFailure = false) {
-            withArguments(taskName(taskVariant.orEmpty()))
+            withArguments(taskName)
             if (cliParam) {
                 withArguments(arguments + listOf("--artifact-dir=${app}"))
             }
         }
 
-        result.requireTask(outcome = SUCCESS)
+        result.requireTask(task = taskName, outcome = SUCCESS)
         assertThat(result.output).contains(playgroundDir.name)
         assertThat(result.output).contains(customArtifactName())
         assertCustomArtifactResults(result)

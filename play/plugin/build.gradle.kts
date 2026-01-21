@@ -23,6 +23,7 @@ dependencies {
     testImplementation(testFixtures(project(":play:android-publisher")))
     testImplementation(libs.agp)
 
+    testRuntimeOnly(testLibs.junit.launcher)
     testImplementation(testLibs.junit)
     testImplementation(testLibs.junit.engine)
     testImplementation(testLibs.junit.params)
@@ -62,6 +63,8 @@ tasks.withType<Test> {
 
     // Those tests also need to know which version was built
     systemProperty("VERSION_NAME", version)
+
+    useJUnitPlatform()
 }
 
 gradlePlugin {
