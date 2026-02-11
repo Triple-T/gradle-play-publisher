@@ -577,7 +577,7 @@ Base directory: `play/listings/[language]` where `language` is one of the
 
  File                    | Description           | Character limit
 -------------------------|-----------------------|-----------------
- `title.txt`             | App title             | 50
+ `title.txt`             | App title             | 30
  `short-description.txt` | Tagline               | 80
  `full-description.txt`  | Full description      | 4000
  `video-url.txt`         | Youtube product video | N/A
