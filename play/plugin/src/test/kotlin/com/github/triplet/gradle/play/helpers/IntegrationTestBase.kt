@@ -56,6 +56,9 @@ abstract class IntegrationTestBase(
     override fun executeExpectingFailure(config: String, vararg tasks: String) =
             execute(config, true, *tasks)
 
+    fun execute(config: String, vararg tasks: String, extraArgs: List<String>) =
+            execute(config, false, *tasks, extraArgs = extraArgs)
+
     override fun executeGradle(
             expectFailure: Boolean,
             block: GradleRunner.() -> Unit,
@@ -100,6 +103,7 @@ abstract class IntegrationTestBase(
             config: String,
             expectFailure: Boolean,
             vararg tasks: String,
+            extraArgs: List<String> = emptyList(),
     ): BuildResult {
         val buildCacheDir = File(tempDir, "gradle").escaped()
 
@@ -153,7 +157,7 @@ abstract class IntegrationTestBase(
         """)
 
         return executeGradle(expectFailure) {
-            withArguments("--build-cache", *tasks)
+            withArguments("--build-cache", *extraArgs.toTypedArray(), *tasks)
         }
     }
 

@@ -2,6 +2,7 @@ package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.common.utils.safeCreateNewFile
 import com.github.triplet.gradle.play.PlayPublisherExtension
+import com.github.triplet.gradle.play.internal.ApkSpec
 import com.github.triplet.gradle.play.tasks.internal.CliOptionsImpl
 import com.github.triplet.gradle.play.tasks.internal.PublishArtifactTaskBase
 import com.github.triplet.gradle.play.tasks.internal.PublishableTrackExtensionOptions
@@ -16,6 +17,7 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
@@ -36,10 +38,8 @@ internal abstract class PublishApk @Inject constructor(
         private val executor: WorkerExecutor,
 ) : PublishArtifactTaskBase(extension),
         PublishableTrackExtensionOptions by CliOptionsImpl(extension, executionDir) {
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    @get:SkipWhenEmpty
-    @get:InputFiles
-    internal abstract val apks: ConfigurableFileCollection
+    @get:Nested
+    internal abstract val apkSpec: ApkSpec
 
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:SkipWhenEmpty
@@ -63,7 +63,7 @@ internal abstract class PublishApk @Inject constructor(
         executor.noIsolation().submit(Processor::class) {
             paramsForBase(this)
 
-            apkFiles.set(apks)
+            apkFiles.set(apkSpec.resolve())
             deobfuscationFiles.from(mappingFiles)
             debugSymbolsFile.set(nativeDebugSymbols)
             uploadResults.set(temporaryDir)

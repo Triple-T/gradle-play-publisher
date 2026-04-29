@@ -51,6 +51,17 @@ class PublishApkIntegrationTest : IntegrationTestBase(), ArtifactIntegrationTest
     }
 
     @Test
+    fun `Builds apk on-the-fly under configuration cache`() {
+        // #1187: Cannot query the value of this provider because it has no value available.
+        val result = execute("", "publishReleaseApk", extraArgs = listOf("--configuration-cache"))
+
+        result.requireTask(":packageRelease", outcome = SUCCESS)
+        assertThat(result.output).contains("uploadApk(")
+        assertThat(result.output).contains(".apk")
+        assertThat(result.output).contains("publishArtifacts(")
+    }
+
+    @Test
     fun `Using custom artifact with single default mapping file uploads it`() {
         // language=gradle
         val config = """

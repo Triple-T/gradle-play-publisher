@@ -51,6 +51,7 @@ import com.github.triplet.gradle.play.tasks.internal.WriteTrackLifecycleTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.FileCollection
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Provider
 import org.gradle.api.services.BuildServiceRegistration
@@ -212,19 +213,15 @@ internal abstract class PlayPublisherPlugin @Inject constructor(
                 return@v
             }
 
-            fun findApkFiles(): Provider<List<String>> = extension.artifactDir.map {
-                val customDir = it.asFile
-                if (customDir.isFile && customDir.extension == "apk") {
-                    listOf(it.asFile.absolutePath)
+            // #1187: Only return the sources. APKs must be resolved by ApkSpec.resolve()
+            fun findApkFileSources(): Provider<FileCollection> = extension.artifactDir.map { dir ->
+                val file = dir.asFile
+                if (file.isFile && file.extension == "apk") {
+                    project.objects.fileCollection().from(file)
                 } else {
-                    it.asFileTree.matching {
-                        include("*.apk")
-                    }.map { it.absolutePath }
+                    dir.asFileTree.matching { include("*.apk") }
                 }
-            }.orElse(variant.artifacts.get(SingleArtifact.APK).map {
-                variant.artifacts.getBuiltArtifactsLoader().load(it)
-                        ?.elements?.map { it.outputFile }.sneakyNull()
-            })
+            }.orElse(variant.artifacts.get(SingleArtifact.APK).map { it.asFileTree })
 
             fun findBundleFiles(): Provider<List<String>> = extension.artifactDir.map {
                 val customDir = it.asFile
@@ -284,7 +281,9 @@ internal abstract class PlayPublisherPlugin @Inject constructor(
                     arrayOf(extension, executionDir),
             ) {
                 bindApi(api)
-                apks.from(findApkFiles())
+                apkSpec.sources.from(findApkFileSources())
+                apkSpec.artifactDir.set(extension.artifactDir)
+                apkSpec.builtArtifactsLoader.set(variant.artifacts.getBuiltArtifactsLoader())
                 outputDirectory.set(project.layout.buildDirectory.dir(
                         "outputs/internal-sharing/apk/${variant.name}"))
 
@@ -483,7 +482,9 @@ internal abstract class PlayPublisherPlugin @Inject constructor(
                     arrayOf(extension, executionDir),
             ) {
                 configureInputs()
-                apks.from(findApkFiles())
+                apkSpec.sources.from(findApkFileSources())
+                apkSpec.artifactDir.set(extension.artifactDir)
+                apkSpec.builtArtifactsLoader.set(variant.artifacts.getBuiltArtifactsLoader())
                 mappingFiles.from(extension.artifactDir.map { customDir ->
                     project.objects.fileCollection().from(customDir.asFileTree.matching {
                         include("mapping.txt", "*.mapping.txt")

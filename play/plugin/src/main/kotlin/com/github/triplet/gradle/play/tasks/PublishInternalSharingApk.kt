@@ -1,22 +1,19 @@
 package com.github.triplet.gradle.play.tasks
 
 import com.github.triplet.gradle.play.PlayPublisherExtension
+import com.github.triplet.gradle.play.internal.ApkSpec
 import com.github.triplet.gradle.play.tasks.internal.ArtifactExtensionOptions
 import com.github.triplet.gradle.play.tasks.internal.CliOptionsImpl
 import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.workers.PlayWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.workers.copy
 import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
-import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
-import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
-import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.submit
 import org.gradle.work.DisableCachingByDefault
@@ -31,10 +28,8 @@ internal abstract class PublishInternalSharingApk @Inject constructor(
         private val executor: WorkerExecutor,
 ) : PublishTaskBase(extension),
         ArtifactExtensionOptions by CliOptionsImpl(extension, executionDir) {
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    @get:SkipWhenEmpty
-    @get:InputFiles
-    internal abstract val apks: ConfigurableFileCollection
+    @get:Nested
+    internal abstract val apkSpec: ApkSpec
 
     @get:OutputDirectory
     abstract val outputDirectory: DirectoryProperty
@@ -44,7 +39,7 @@ internal abstract class PublishInternalSharingApk @Inject constructor(
         executor.noIsolation().submit(Processor::class) {
             paramsForBase(this)
 
-            apkFiles.set(apks)
+            apkFiles.set(apkSpec.resolve())
             outputDir.set(outputDirectory)
         }
     }
