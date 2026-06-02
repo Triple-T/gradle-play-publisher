@@ -485,6 +485,30 @@ percentage to 50% of users.
 If you have an ongoing `inProgress` release and would like to perform a full rollout, simply change
 the release status to `completed`. A user fraction of `1.0` is invalid and will be rejected.
 
+#### Retaining an in-progress rollout while promoting
+
+By default, promoting to a track replaces that track's releases, which halts any in-progress staged
+rollout of a previous version already on the target track. If you want to draft or stage the next
+version while the previous one keeps rolling out, set `retainInProgressRollout`. The promote track's
+existing releases that aren't superseded by the promoted one (same status or version code) are
+carried over, so the rollout is not halted. This only applies when `promoteTrack` differs from
+`fromTrack`.
+
+```kt
+play {
+    // ...
+    retainInProgressRollout.set(true)
+}
+```
+
+Or via the CLI:
+
+```sh
+./gradlew promoteArtifact \
+  --from-track internal --promote-track production \
+  --release-status draft --retain-in-progress-rollout
+```
+
 ### Handling version conflicts
 
 If an artifact already exists with a version code greater than or equal to the one you're trying to

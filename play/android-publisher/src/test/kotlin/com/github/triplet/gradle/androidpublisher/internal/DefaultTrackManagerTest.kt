@@ -840,6 +840,101 @@ class DefaultTrackManagerTest {
     }
 
     @Test
+    fun `Promoting with retainInProgressRollout keeps the promote track's existing releases`() {
+        val config = TrackManager.PromoteConfig(
+                promoteTrackName = "production",
+                fromTrackName = "internal",
+                versionCode = null,
+                base = TrackManager.BaseConfig(
+                        releaseStatus = ReleaseStatus.DRAFT,
+                        userFraction = null,
+                        updatePriority = null,
+                        releaseNotes = null,
+                        retainableArtifacts = null,
+                        releaseName = null
+                ),
+                retainInProgressRollout = true
+        )
+        `when`(mockPublisher.getTrack(eq("edit-id"), eq("internal"))).thenReturn(Track().apply {
+            track = "internal"
+            releases = listOf(TrackRelease().apply {
+                status = "completed"
+                versionCodes = listOf(5)
+            })
+        })
+        `when`(mockPublisher.getTrack(eq("edit-id"), eq("production"))).thenReturn(Track().apply {
+            track = "production"
+            releases = listOf(
+                    TrackRelease().apply {
+                        status = "inProgress"
+                        userFraction = 0.5
+                        versionCodes = listOf(4)
+                    },
+                    TrackRelease().apply {
+                        status = "completed"
+                        versionCodes = listOf(3)
+                    }
+            )
+        })
+
+        tracks.promote(config)
+
+        val trackCaptor = ArgumentCaptor.forClass(Track::class.java)
+        verify(mockPublisher).updateTrack(eq("edit-id"), trackCaptor.capture())
+        assertThat(trackCaptor.value.track).isEqualTo("production")
+        // The promoted draft (5) is committed alongside the promote track's existing in-progress
+        // rollout (4 @ 0.5) and completed baseline (3), so the rollout is not halted.
+        assertThat(trackCaptor.value.releases.map { it.status })
+                .containsExactly("draft", "inProgress", "completed")
+        val rollout = trackCaptor.value.releases.single { it.status == "inProgress" }
+        assertThat(rollout.versionCodes).containsExactly(4L)
+        assertThat(rollout.userFraction).isEqualTo(0.5)
+        assertThat(trackCaptor.value.releases.single { it.status == "draft" }.versionCodes)
+                .containsExactly(5L)
+    }
+
+    @Test
+    fun `Promoting with retainInProgressRollout drops target releases superseded by the promotion`() {
+        val config = TrackManager.PromoteConfig(
+                promoteTrackName = "production",
+                fromTrackName = "internal",
+                versionCode = null,
+                base = TrackManager.BaseConfig(
+                        releaseStatus = ReleaseStatus.DRAFT,
+                        userFraction = null,
+                        updatePriority = null,
+                        releaseNotes = null,
+                        retainableArtifacts = null,
+                        releaseName = null
+                ),
+                retainInProgressRollout = true
+        )
+        `when`(mockPublisher.getTrack(eq("edit-id"), eq("internal"))).thenReturn(Track().apply {
+            track = "internal"
+            releases = listOf(TrackRelease().apply {
+                status = "completed"
+                versionCodes = listOf(5)
+            })
+        })
+        // Promote track already has a stale draft; it must be replaced (one release per status).
+        `when`(mockPublisher.getTrack(eq("edit-id"), eq("production"))).thenReturn(Track().apply {
+            track = "production"
+            releases = listOf(TrackRelease().apply {
+                status = "draft"
+                versionCodes = listOf(2)
+            })
+        })
+
+        tracks.promote(config)
+
+        val trackCaptor = ArgumentCaptor.forClass(Track::class.java)
+        verify(mockPublisher).updateTrack(eq("edit-id"), trackCaptor.capture())
+        assertThat(trackCaptor.value.releases).hasSize(1)
+        assertThat(trackCaptor.value.releases.single().status).isEqualTo("draft")
+        assertThat(trackCaptor.value.releases.single().versionCodes).containsExactly(5L)
+    }
+
+    @Test
     fun `Promoting track uses existing release notes when no local ones are available`() {
         val config = TrackManager.PromoteConfig(
                 promoteTrackName = "alpha",

@@ -35,6 +35,7 @@ internal interface TrackManager {
             val fromTrackName: String,
             val versionCode: Long?,
             val base: BaseConfig,
+            val retainInProgressRollout: Boolean = false,
     )
 }
 
@@ -88,12 +89,30 @@ internal class DefaultTrackManager(
         // Only keep the unique statuses from the highest version code since duplicate statuses are
         // not allowed. This is how we deal with an update from inProgress -> completed. We update
         // all the tracks to completed, then get rid of the one that used to be inProgress.
-        track.releases = track.releases.sortedByDescending {
+        var releases = track.releases.sortedByDescending {
             it.versionCodes?.maxOrNull()
         }.distinctBy {
             it.status
         }
 
+        // updateTrack replaces the promote track's releases wholesale, so any release it already
+        // had (such as an in-progress staged rollout of a previous version) is dropped and
+        // therefore halted by the API. When opted in, carry over the promote track's existing
+        // releases that aren't superseded by the promoted ones (same status or version code) so an
+        // ongoing rollout keeps running.
+        if (config.retainInProgressRollout && config.promoteTrackName != config.fromTrackName) {
+            val promotedStatuses = releases.mapNotNull { it.status }.toSet()
+            val promotedVersionCodes = releases.flatMap { it.versionCodes.orEmpty() }.toSet()
+            val retained = publisher.getTrack(editId, config.promoteTrackName)
+                    .releases.orEmpty()
+                    .filterNot { it.status in promotedStatuses }
+                    .filterNot { release ->
+                        release.versionCodes.orEmpty().any { it in promotedVersionCodes }
+                    }
+            releases = releases + retained
+        }
+
+        track.releases = releases
         println("Promoting release from track '${track.track}'")
         track.track = config.promoteTrackName
         publisher.updateTrack(editId, track)

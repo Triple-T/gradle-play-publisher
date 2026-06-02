@@ -165,6 +165,7 @@ class PlayPublisherExtensionTest {
         override val fromTrack: Property<String> = project.objects.property()
         override val track: Property<String> = project.objects.property()
         override val promoteTrack: Property<String> = project.objects.property()
+        override val retainInProgressRollout: Property<Boolean> = project.objects.property()
         override val userFraction: Property<Double> = project.objects.property()
         override val updatePriority: Property<Int> = project.objects.property()
         override val releaseStatus: Property<ReleaseStatus> = project.objects.property()
