@@ -35,7 +35,7 @@ internal interface TrackManager {
             val fromTrackName: String,
             val versionCode: Long?,
             val base: BaseConfig,
-            val retainInProgressRollout: Boolean = false,
+            val retainInProgressRollout: Boolean,
     )
 }
 
@@ -101,7 +101,7 @@ internal class DefaultTrackManager(
         // releases that aren't superseded by the promoted ones (same status or version code) so an
         // ongoing rollout keeps running.
         if (config.retainInProgressRollout && config.promoteTrackName != config.fromTrackName) {
-            val promotedStatuses = releases.mapNotNull { it.status }.toSet()
+            val promotedStatuses = releases.map { it.status }.toSet()
             val promotedVersionCodes = releases.flatMap { it.versionCodes.orEmpty() }.toSet()
             val retained = publisher.getTrack(editId, config.promoteTrackName)
                     .releases.orEmpty()
