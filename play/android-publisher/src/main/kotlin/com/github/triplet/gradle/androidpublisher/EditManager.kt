@@ -66,7 +66,7 @@ interface EditManager {
             updatePriority: Int?,
             retainableArtifacts: List<Long>?,
             versionCode: Long?,
-            retainInProgressRollout: Boolean = false,
+            retainInProgressRollout: Boolean,
     )
 
     /** Uploads the given [bundleFile]. */
