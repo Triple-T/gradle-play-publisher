@@ -304,6 +304,7 @@ class DefaultEditManagerTest {
                 updatePriority = 3,
                 retainableArtifacts = listOf(777),
                 versionCode = 123,
+                retainExistingRollout = false,
         )
 
         verify(mockTracks).promote(TrackManager.PromoteConfig(
@@ -317,7 +318,8 @@ class DefaultEditManagerTest {
                         userFraction = .88,
                         updatePriority = 3,
                         retainableArtifacts = listOf(777),
-                )
+                ),
+                retainExistingRollout = false,
         ))
     }
 

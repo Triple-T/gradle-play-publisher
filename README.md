@@ -487,17 +487,14 @@ the release status to `completed`. A user fraction of `1.0` is invalid and will 
 
 #### Retaining an in-progress rollout while promoting
 
-By default, promoting to a track replaces that track's releases, which halts any in-progress staged
-rollout of a previous version already on the target track. If you want to draft or stage the next
-version while the previous one keeps rolling out, set `retainInProgressRollout`. The promote track's
-existing releases that aren't superseded by the promoted one (same status or version code) are
-carried over, so the rollout is not halted. This only applies when `promoteTrack` differs from
-`fromTrack`.
+By default, promoting replaces the target track's releases and halts any staged rollout already on
+it. Set `retainExistingRollout` to keep the existing rollout (`inProgress` or `halted`) running
+alongside the promoted release.
 
 ```kt
 play {
     // ...
-    retainInProgressRollout.set(true)
+    retainExistingRollout.set(true)
 }
 ```
 
@@ -506,7 +503,7 @@ Or via the CLI:
 ```sh
 ./gradlew promoteArtifact \
   --from-track internal --promote-track production \
-  --release-status draft --retain-in-progress-rollout
+  --release-status draft --retain-existing-rollout
 ```
 
 ### Handling version conflicts

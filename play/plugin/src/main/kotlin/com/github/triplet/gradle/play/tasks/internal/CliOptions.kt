@@ -86,11 +86,10 @@ internal interface UpdatableTrackExtensionOptions : TrackExtensionOptions {
 
     @get:Internal
     @set:Option(
-            option = "retain-in-progress-rollout",
-            description = "Retain an existing in-progress staged rollout on the promote track " +
-                    "instead of halting it."
+            option = "retain-existing-rollout",
+            description = "Keep an ongoing staged rollout on the promote track running."
     )
-    var retainInProgressRolloutOption: Boolean
+    var retainExistingRolloutOption: Boolean
 
     @get:Internal
     @set:Option(
@@ -197,10 +196,10 @@ internal class CliOptionsImpl(
             extension.promoteTrack.set(value)
         }
 
-    override var retainInProgressRolloutOption: Boolean
+    override var retainExistingRolloutOption: Boolean
         get() = throw UnsupportedOperationException()
         set(value) {
-            extension.retainInProgressRollout.set(value)
+            extension.retainExistingRollout.set(value)
         }
 
     override var updateTrackOption: String

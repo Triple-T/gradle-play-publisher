@@ -104,7 +104,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase(), SharedIntegrationTe
                 "--release-status=draft",
                 "--user-fraction=.88",
                 "--update-priority=3",
-                "--retain-in-progress-rollout"
+                "--retain-existing-rollout"
         )
 
         result.requireTask(outcome = SUCCESS)
@@ -115,7 +115,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase(), SharedIntegrationTe
         assertThat(result.output).contains("releaseStatus=DRAFT")
         assertThat(result.output).contains("userFraction=0.88")
         assertThat(result.output).contains("updatePriority=3")
-        assertThat(result.output).contains("retainInProgressRollout=true")
+        assertThat(result.output).contains("retainExistingRollout=true")
         assertThat(result.output).contains("insertEdit()")
         assertThat(result.output).doesNotContain("commitEdit(")
     }
@@ -288,7 +288,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase(), SharedIntegrationTe
                         updatePriority: Int?,
                         retainableArtifacts: List<Long>?,
                         versionCode: Long?,
-                        retainInProgressRollout: Boolean,
+                        retainExistingRollout: Boolean,
                 ) {
                     println("promoteRelease(" +
                                     "promoteTrackName=$promoteTrackName, " +
@@ -299,7 +299,7 @@ class PromoteReleaseIntegrationTest : IntegrationTestBase(), SharedIntegrationTe
                                     "userFraction=$userFraction, " +
                                     "updatePriority=$updatePriority, " +
                                     "retainableArtifacts=$retainableArtifacts, " +
-                                    "retainInProgressRollout=$retainInProgressRollout)")
+                                    "retainExistingRollout=$retainExistingRollout)")
                 }
             }
 

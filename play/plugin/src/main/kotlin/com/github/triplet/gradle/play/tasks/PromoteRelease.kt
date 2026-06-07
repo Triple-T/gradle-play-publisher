@@ -48,7 +48,7 @@ internal abstract class PromoteRelease @Inject constructor(
                     config.updatePriority,
                     config.retainArtifacts,
                     config.versionCode,
-                    config.retainInProgressRollout,
+                    config.retainExistingRollout,
             )
         }
     }
