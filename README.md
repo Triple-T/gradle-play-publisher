@@ -485,7 +485,7 @@ percentage to 50% of users.
 If you have an ongoing `inProgress` release and would like to perform a full rollout, simply change
 the release status to `completed`. A user fraction of `1.0` is invalid and will be rejected.
 
-#### Retaining an in-progress rollout while promoting
+#### Retaining an existing rollout while promoting
 
 By default, promoting replaces the target track's releases and halts any staged rollout already on
 it. Set `retainExistingRollout` to keep the existing rollout (`inProgress` or `halted`) running
