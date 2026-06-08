@@ -850,6 +850,7 @@ class DefaultTrackManagerTest {
                 promoteTrackName = "production",
                 fromTrackName = "internal",
                 versionCode = null,
+                retainExistingRollout = true,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.DRAFT,
                         userFraction = null,
@@ -858,7 +859,6 @@ class DefaultTrackManagerTest {
                         retainableArtifacts = null,
                         releaseName = null
                 ),
-                retainExistingRollout = true
         )
         `when`(mockPublisher.getTrack(eq("edit-id"), eq("internal"))).thenReturn(Track().apply {
             track = "internal"
@@ -903,6 +903,7 @@ class DefaultTrackManagerTest {
                 promoteTrackName = "production",
                 fromTrackName = "internal",
                 versionCode = null,
+                retainExistingRollout = true,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.DRAFT,
                         userFraction = null,
@@ -911,7 +912,6 @@ class DefaultTrackManagerTest {
                         retainableArtifacts = null,
                         releaseName = null
                 ),
-                retainExistingRollout = true
         )
         `when`(mockPublisher.getTrack(eq("edit-id"), eq("internal"))).thenReturn(Track().apply {
             track = "internal"
@@ -946,6 +946,7 @@ class DefaultTrackManagerTest {
                 promoteTrackName = "production",
                 fromTrackName = "internal",
                 versionCode = null,
+                retainExistingRollout = true,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.DRAFT,
                         userFraction = null,
@@ -954,7 +955,6 @@ class DefaultTrackManagerTest {
                         retainableArtifacts = null,
                         releaseName = null
                 ),
-                retainExistingRollout = true
         )
         `when`(mockPublisher.getTrack(eq("edit-id"), eq("internal"))).thenReturn(Track().apply {
             track = "internal"
@@ -989,6 +989,7 @@ class DefaultTrackManagerTest {
                 promoteTrackName = "production",
                 fromTrackName = "internal",
                 versionCode = null,
+                retainExistingRollout = true,
                 base = TrackManager.BaseConfig(
                         releaseStatus = null,
                         userFraction = null,
@@ -997,7 +998,6 @@ class DefaultTrackManagerTest {
                         retainableArtifacts = null,
                         releaseName = null
                 ),
-                retainExistingRollout = true
         )
         `when`(mockPublisher.getTrack(eq("edit-id"), eq("internal"))).thenReturn(Track().apply {
             track = "internal"
