@@ -106,6 +106,7 @@ internal class DefaultTrackManager(
         }.distinctBy {
             it.status
         }
+
         println("Promoting release from track '${track.track}'")
         track.track = config.promoteTrackName
         publisher.updateTrack(editId, track)
