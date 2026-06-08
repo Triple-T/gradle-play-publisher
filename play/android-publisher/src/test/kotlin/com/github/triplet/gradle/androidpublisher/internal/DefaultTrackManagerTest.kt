@@ -658,6 +658,7 @@ class DefaultTrackManagerTest {
                 promoteTrackName = "alpha",
                 fromTrackName = "internal",
                 versionCode = null,
+                retainExistingRollout = false,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         userFraction = .88,
@@ -666,7 +667,6 @@ class DefaultTrackManagerTest {
                         retainableArtifacts = listOf(777),
                         releaseName = "relname"
                 ),
-                retainExistingRollout = false,
         )
         `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().apply {
             releases = listOf(TrackRelease())
@@ -685,6 +685,7 @@ class DefaultTrackManagerTest {
                 promoteTrackName = "alpha",
                 fromTrackName = "internal",
                 versionCode = null,
+                retainExistingRollout = false,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.IN_PROGRESS,
                         userFraction = .88,
@@ -693,7 +694,6 @@ class DefaultTrackManagerTest {
                         retainableArtifacts = listOf(777),
                         releaseName = "relname"
                 ),
-                retainExistingRollout = false,
         )
         `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().apply {
             track = "internal"
@@ -727,6 +727,7 @@ class DefaultTrackManagerTest {
                 promoteTrackName = "alpha",
                 fromTrackName = "internal",
                 versionCode = null,
+                retainExistingRollout = false,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         userFraction = null,
@@ -735,7 +736,6 @@ class DefaultTrackManagerTest {
                         retainableArtifacts = null,
                         releaseName = null
                 ),
-                retainExistingRollout = false,
         )
         `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().apply {
             track = "internal"
@@ -770,6 +770,7 @@ class DefaultTrackManagerTest {
                 promoteTrackName = "alpha",
                 fromTrackName = "internal",
                 versionCode = null,
+                retainExistingRollout = false,
                 base = TrackManager.BaseConfig(
                         releaseStatus = null,
                         userFraction = null,
@@ -778,7 +779,6 @@ class DefaultTrackManagerTest {
                         retainableArtifacts = null,
                         releaseName = null
                 ),
-                retainExistingRollout = false,
         )
         `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().apply {
             track = "internal"
@@ -820,6 +820,7 @@ class DefaultTrackManagerTest {
                 promoteTrackName = "alpha",
                 fromTrackName = "internal",
                 versionCode = null,
+                retainExistingRollout = false,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         userFraction = null,
@@ -828,7 +829,6 @@ class DefaultTrackManagerTest {
                         retainableArtifacts = null,
                         releaseName = null
                 ),
-                retainExistingRollout = false,
         )
         `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().apply {
             track = "internal"
@@ -1029,6 +1029,7 @@ class DefaultTrackManagerTest {
                 promoteTrackName = "alpha",
                 fromTrackName = "internal",
                 versionCode = null,
+                retainExistingRollout = false,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         userFraction = null,
@@ -1037,7 +1038,6 @@ class DefaultTrackManagerTest {
                         retainableArtifacts = null,
                         releaseName = null
                 ),
-                retainExistingRollout = false,
         )
         `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().apply {
             track = "internal"
@@ -1088,6 +1088,7 @@ class DefaultTrackManagerTest {
                 promoteTrackName = "alpha",
                 fromTrackName = "alpha",
                 versionCode = null,
+                retainExistingRollout = false,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         userFraction = null,
@@ -1096,7 +1097,6 @@ class DefaultTrackManagerTest {
                         retainableArtifacts = null,
                         releaseName = null
                 ),
-                retainExistingRollout = false,
         )
         `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().apply {
             track = "alpha"
@@ -1125,6 +1125,7 @@ class DefaultTrackManagerTest {
                 promoteTrackName = "alpha",
                 fromTrackName = "alpha",
                 versionCode = null,
+                retainExistingRollout = false,
                 base = TrackManager.BaseConfig(
                         releaseStatus = ReleaseStatus.COMPLETED,
                         userFraction = .8,
@@ -1133,7 +1134,6 @@ class DefaultTrackManagerTest {
                         retainableArtifacts = null,
                         releaseName = null
                 ),
-                retainExistingRollout = false,
         )
         `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().apply {
             track = "alpha"
@@ -1162,6 +1162,7 @@ class DefaultTrackManagerTest {
                 promoteTrackName = "alpha",
                 fromTrackName = "internal",
                 versionCode = null,
+                retainExistingRollout = false,
                 base = TrackManager.BaseConfig(
                         releaseStatus = null,
                         userFraction = .5,
@@ -1170,7 +1171,6 @@ class DefaultTrackManagerTest {
                         retainableArtifacts = null,
                         releaseName = null
                 ),
-                retainExistingRollout = false,
         )
         `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().apply {
             track = "internal"
@@ -1195,6 +1195,7 @@ class DefaultTrackManagerTest {
                 promoteTrackName = "alpha",
                 fromTrackName = "internal",
                 versionCode = 2,
+                retainExistingRollout = false,
                 base = TrackManager.BaseConfig(
                         releaseStatus = null,
                         userFraction = .5,
@@ -1203,7 +1204,6 @@ class DefaultTrackManagerTest {
                         retainableArtifacts = null,
                         releaseName = null
                 ),
-                retainExistingRollout = false,
         )
         `when`(mockPublisher.getTrack(any(), any())).thenReturn(Track().apply {
             track = "internal"
