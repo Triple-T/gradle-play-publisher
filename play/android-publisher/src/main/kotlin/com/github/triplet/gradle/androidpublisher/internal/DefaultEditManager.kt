@@ -117,6 +117,7 @@ internal class DefaultEditManager(
                 promoteTrackName,
                 fromTrackName,
                 versionCode,
+                retainExistingRollout,
                 TrackManager.BaseConfig(
                         releaseStatus,
                         userFraction,
@@ -125,7 +126,6 @@ internal class DefaultEditManager(
                         retainableArtifacts,
                         releaseName
                 ),
-                retainExistingRollout,
         ))
     }
 
