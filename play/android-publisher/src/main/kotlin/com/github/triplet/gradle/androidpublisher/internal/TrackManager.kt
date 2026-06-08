@@ -34,8 +34,8 @@ internal interface TrackManager {
             val promoteTrackName: String,
             val fromTrackName: String,
             val versionCode: Long?,
-            val base: BaseConfig,
             val retainExistingRollout: Boolean,
+            val base: BaseConfig,
     )
 }
 
