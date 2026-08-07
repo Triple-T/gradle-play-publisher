@@ -661,13 +661,85 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
             }
         """)
 
-        val result = executeGradle(false) {
-            // Gradle 9.7 is the first version to restrict this API under Isolated Projects.
-            withGradleVersion("9.7.0")
-            withArguments("help", "-Dorg.gradle.isolated-projects=true")
-        }
+        val result = executeWithIsolatedProjects("help")
 
         assertThat(result.output).doesNotContain("when Isolated Projects is enabled")
+    }
+
+    @Test
+    fun `Plugin is compatible with isolated projects in a subproject`() {
+        val classpathJars = GradleRunner.create().withPluginClasspath().pluginClasspath
+                .joinToString { "'$it'" }
+
+        // language=gradle
+        File(appDir, "settings.gradle").writeText("""
+            dependencyResolutionManagement {
+                repositories {
+                    google()
+                    mavenCentral()
+                }
+            }
+            include(":app")
+        """)
+
+        // language=gradle
+        File(appDir, "build.gradle").writeText("""
+            buildscript {
+                repositories {
+                    google()
+                    gradlePluginPortal {
+                        content {
+                            excludeGroup('com.github.triplet.gradle')
+                        }
+                    }
+                }
+
+                dependencies {
+                    classpath files($classpathJars)
+                    classpath('com.android.tools.build:gradle:9.0.0')
+                }
+            }
+        """)
+
+        val appProjectDir = File(appDir, "app").apply { mkdirs() }
+        File(appDir, "creds.json").copyTo(File(appProjectDir, "creds.json"), overwrite = true)
+
+        // language=gradle
+        File(appProjectDir, "build.gradle").writeText("""
+            plugins {
+                id 'com.android.application'
+                id 'com.github.triplet.play'
+            }
+
+            android {
+                compileSdk 34
+                namespace = "com.example.publisher"
+
+                defaultConfig {
+                    applicationId "com.example.publisher"
+                    minSdk 31
+                    targetSdk 33
+                    versionCode 1
+                    versionName "1.0"
+                }
+            }
+
+            play {
+                serviceAccountCredentials = file('creds.json')
+                isolatedSingleProject = true
+            }
+        """)
+
+        val result = executeWithIsolatedProjects(":app:tasks", "--group", "publishing")
+
+        assertThat(result.output).doesNotContain("when Isolated Projects is enabled")
+        assertThat(result.output).contains("publishApk")
+    }
+
+    private fun executeWithIsolatedProjects(vararg args: String) = executeGradle(false) {
+        // Gradle 9.7 is the first version to restrict this API under Isolated Projects.
+        withGradleVersion("9.7.0")
+        withArguments(*args, "-Dorg.gradle.isolated-projects=true")
     }
 
     @Test
