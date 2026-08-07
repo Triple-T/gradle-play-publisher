@@ -625,6 +625,52 @@ class PlayPublisherPluginIntegrationTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Plugin is compatible with isolated projects`() {
+        // language=gradle
+        File(appDir, "settings.gradle").writeText("""
+            dependencyResolutionManagement {
+                repositories {
+                    google()
+                    mavenCentral()
+                }
+            }
+        """)
+
+        // language=gradle
+        File(appDir, "build.gradle").writeText("""
+            plugins {
+                id 'com.android.application'
+                id 'com.github.triplet.play'
+            }
+
+            android {
+                compileSdk 34
+                namespace = "com.example.publisher"
+
+                defaultConfig {
+                    applicationId "com.example.publisher"
+                    minSdk 31
+                    targetSdk 33
+                    versionCode 1
+                    versionName "1.0"
+                }
+            }
+
+            play {
+                serviceAccountCredentials = file('creds.json')
+            }
+        """)
+
+        val result = executeGradle(false) {
+            // Gradle 9.7 is the first version to restrict this API under Isolated Projects.
+            withGradleVersion("9.7.0")
+            withArguments("help", "-Dorg.gradle.isolated-projects=true")
+        }
+
+        assertThat(result.output).doesNotContain("when Isolated Projects is enabled")
+    }
+
+    @Test
     fun `Combination of extensions merges`() {
         // language=gradle
         val config = """

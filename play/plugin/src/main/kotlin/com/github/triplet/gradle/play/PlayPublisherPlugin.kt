@@ -54,13 +54,11 @@ import org.gradle.api.Task
 import org.gradle.api.file.FileCollection
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Provider
-import org.gradle.api.services.BuildServiceRegistration
 import org.gradle.build.event.BuildEventsListenerRegistry
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.findPlugin
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.invoke
-import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.newInstance
 import org.gradle.kotlin.dsl.registerIfAbsent
 import org.gradle.kotlin.dsl.withType
@@ -252,16 +250,17 @@ internal abstract class PlayPublisherPlugin @Inject constructor(
             }
             buildEventsListenerRegistry.onTaskCompletion(api)
 
-            project.gradle.sharedServices.registrations.named<
-                    BuildServiceRegistration<PlayApiService, PlayApiService.Params>
-                    >("playApi-$appId") {
-                val priorityProp = parameters._extensionPriority
+            // Isolated Projects only permits findByName on the registration container.
+            val apiRegistration = checkNotNull(
+                    project.gradle.sharedServices.registrations.findByName("playApi-$appId"))
+            (apiRegistration.parameters as PlayApiService.Params).run {
+                val priorityProp = _extensionPriority
                 val newPriority = extension.toPriority()
 
                 if (!priorityProp.isPresent || newPriority < priorityProp.get()) {
-                    parameters.credentials.set(extension.serviceAccountCredentials)
-                    parameters.useApplicationDefaultCredentials.set(extension.useApplicationDefaultCredentials)
-                    parameters.impersonateServiceAccount.set(extension.impersonateServiceAccount)
+                    credentials.set(extension.serviceAccountCredentials)
+                    useApplicationDefaultCredentials.set(extension.useApplicationDefaultCredentials)
+                    impersonateServiceAccount.set(extension.impersonateServiceAccount)
                     priorityProp.set(newPriority)
                 }
             }
