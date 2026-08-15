@@ -625,12 +625,17 @@ and presented on the Play Store as such. Therefore, we recommend using a number 
  `tv-screenshots`           | 8               | [320..3840]x[320..3840]
  `wear-screenshots`         | 8               | [320..3840]x[320..3840]
 
-### Publishing in-app products
+### Publishing one-time products
 
 Run `./gradlew publishProducts`.
 
-Manually setting up in-app purchase files is not recommended. [Bootstrap them instead](#quickstart)
+Manually setting up one-time product files is not recommended. [Bootstrap them instead](#quickstart)
 with `./gradlew bootstrapListing --products`.
+
+Each product file must have an associated metadata file (`products/<product id>.metadata.json`)
+that contains JSON of the form `{"regionsVersion": ...}`. The `regionsVersion` is described
+[here](https://developers.google.com/android-publisher/api-ref/rest/v3/RegionsVersion). The Google Play Developer API does
+not have a way to get the latest regions version, so unfortunately bootstrapping uses a hardcoded value that you may need to fix.
 
 ### Publishing in-app subscriptions
 

@@ -29,10 +29,10 @@ abstract class FakePlayPublisher : PlayPublisher {
     override fun getInAppProducts(): List<GppProduct> =
             throw IllegalStateException("Test wasn't expecting this method to be called.")
 
-    override fun insertInAppProduct(productFile: File): Unit =
+    override fun insertInAppProduct(productFile: File, regionsVersion: String): Unit =
             throw IllegalStateException("Test wasn't expecting this method to be called.")
 
-    override fun updateInAppProduct(productFile: File): UpdateProductResponse =
+    override fun updateInAppProduct(productFile: File, regionsVersion: String): UpdateProductResponse =
             throw IllegalStateException("Test wasn't expecting this method to be called.")
 
     override fun getInAppSubscriptions(): List<GppSubscription> =

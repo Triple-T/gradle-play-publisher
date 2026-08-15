@@ -73,7 +73,7 @@ interface PlayPublisher {
      * More docs are available
      * [here](https://developers.google.com/android-publisher/api-ref/inappproducts/insert).
      */
-    fun insertInAppProduct(productFile: File)
+    fun insertInAppProduct(productFile: File, regionsVersion: String)
 
     /**
      * Updates an existing product from the given [productFile].
@@ -81,7 +81,7 @@ interface PlayPublisher {
      * More docs are available
      * [here](https://developers.google.com/android-publisher/api-ref/inappproducts/update).
      */
-    fun updateInAppProduct(productFile: File): UpdateProductResponse
+    fun updateInAppProduct(productFile: File, regionsVersion: String): UpdateProductResponse
 
     /**
      * Get all current subscriptions.

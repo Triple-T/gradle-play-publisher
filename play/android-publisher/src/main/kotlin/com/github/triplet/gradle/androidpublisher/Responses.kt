@@ -113,7 +113,7 @@ data class UploadInternalSharingArtifactResponse internal constructor(
 /** Response for a product request. */
 data class GppProduct internal constructor(
         /** The product ID. */
-        val sku: String,
+        val productId: String,
         /** The response's full JSON payload. */
         val json: String,
 )

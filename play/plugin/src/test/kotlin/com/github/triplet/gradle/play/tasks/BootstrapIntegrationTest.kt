@@ -94,8 +94,8 @@ class BootstrapIntegrationTest : IntegrationTestBase(), SharedIntegrationTest,
 
         result.requireTask(outcome = SUCCESS)
 
-        "products/sku1.json" produced "product 1"
-        "products/sku2.json" produced "product 2"
+        "products/productId1.json" produced "product 1"
+        "products/productId2.json" produced "product 2"
 
         "default-language.txt".exists(no)
         "listings".exists(no)
@@ -141,8 +141,8 @@ class BootstrapIntegrationTest : IntegrationTestBase(), SharedIntegrationTest,
 
                 override fun getInAppProducts(): List<GppProduct> {
                     return listOf(
-                            newGppProduct("sku1", "product 1"),
-                            newGppProduct("sku2", "product 2")
+                            newGppProduct("productId1", "product 1"),
+                            newGppProduct("productId2", "product 2")
                     )
                 }
 

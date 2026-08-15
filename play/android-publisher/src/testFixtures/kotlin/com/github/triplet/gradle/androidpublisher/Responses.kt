@@ -37,7 +37,7 @@ fun newSuccessCommitResponse() = CommitResponse.Success
 fun newUploadInternalSharingArtifactResponse(json: String, downloadUrl: String) =
         UploadInternalSharingArtifactResponse(json, downloadUrl)
 
-fun newGppProduct(sku: String, json: String) = GppProduct(sku, json)
+fun newGppProduct(productId: String, json: String) = GppProduct(productId, json)
 
 fun newUpdateProductResponse(needsCreating: Boolean) = UpdateProductResponse(needsCreating)
 

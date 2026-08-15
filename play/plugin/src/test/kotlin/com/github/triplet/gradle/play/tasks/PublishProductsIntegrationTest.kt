@@ -67,7 +67,7 @@ class PublishProductsIntegrationTest : IntegrationTestBase(), SharedIntegrationT
         assertThat(result.output).contains("updateInAppProduct(")
         assertThat(result.output).doesNotContain("insertInAppProduct(")
         assertThat(result.output).contains("product.json")
-        assertThat(result.output).contains("Uploading my-sku")
+        assertThat(result.output).contains("Uploading my-product")
     }
 
     @Test
@@ -82,8 +82,8 @@ class PublishProductsIntegrationTest : IntegrationTestBase(), SharedIntegrationT
         val result = execute(config, "publishMultipleProductsProducts")
 
         result.requireTask(taskName("MultipleProducts"), outcome = SUCCESS)
-        assertThat(result.output).contains("sku1")
-        assertThat(result.output).contains("sku2")
+        assertThat(result.output).contains("productId1")
+        assertThat(result.output).contains("productId2")
     }
 
     @Test
@@ -124,11 +124,11 @@ class PublishProductsIntegrationTest : IntegrationTestBase(), SharedIntegrationT
         @JvmStatic
         fun installFactories() {
             val publisher = object : FakePlayPublisher() {
-                override fun insertInAppProduct(productFile: File) {
+                override fun insertInAppProduct(productFile: File, regionsVersion: String) {
                     println("insertInAppProduct($productFile)")
                 }
 
-                override fun updateInAppProduct(productFile: File): UpdateProductResponse {
+                override fun updateInAppProduct(productFile: File, regionsVersion: String): UpdateProductResponse {
                     println("updateInAppProduct($productFile)")
                     return newUpdateProductResponse(System.getProperty("NEEDS_CREATING") != null)
                 }

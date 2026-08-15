@@ -40,7 +40,7 @@ dependencyResolutionManagement {
 
             version("agp", "9.0.0")
             version("agp-tools", "32.0.0")
-            version("android-publisher", "v3-rev20231115-2.0.0")
+            version("android-publisher", "v3-rev20260706-2.0.0")
             version("api-client", "2.2.0")
             version("http-client", "1.43.3")
             version("http-auth", "1.20.0")

@@ -13,7 +13,9 @@ import com.github.triplet.gradle.play.internal.ListingDetail
 import com.github.triplet.gradle.play.internal.PRODUCTS_PATH
 import com.github.triplet.gradle.play.internal.RELEASE_NOTES_PATH
 import com.github.triplet.gradle.play.internal.SUBSCRIPTIONS_PATH
+import com.github.triplet.gradle.play.internal.ProductMetadata
 import com.github.triplet.gradle.play.internal.SubscriptionMetadata
+import com.github.triplet.gradle.play.tasks.PublishProducts.Companion.PRODUCT_METADATA_SUFFIX
 import com.github.triplet.gradle.play.tasks.PublishSubscriptions.Companion.SUBSCRIPTION_METADATA_SUFFIX
 import com.github.triplet.gradle.play.tasks.internal.BootstrapOptions
 import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
@@ -21,6 +23,7 @@ import com.github.triplet.gradle.play.tasks.internal.workers.EditWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.workers.copy
 import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
 import com.google.api.client.json.gson.GsonFactory
+import com.google.gson.Gson
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileSystemOperations
@@ -235,7 +238,9 @@ internal abstract class Bootstrap @Inject constructor(
 
             val products = apiService.publisher.getInAppProducts()
             for (product in products) {
-                parameters.dir.get().file("${product.sku}.json").write(product.json)
+                parameters.dir.get().file("${product.productId}.json").write(product.json)
+                parameters.dir.get().file("${product.productId}$PRODUCT_METADATA_SUFFIX")
+                        .write(Gson().toJson(ProductMetadata(regionsVersion = "2025/03")))
             }
         }
 
@@ -250,10 +255,9 @@ internal abstract class Bootstrap @Inject constructor(
 
             val subscriptions = apiService.publisher.getInAppSubscriptions()
             for (subscription in subscriptions) {
-                parameters.dir.get().file("${subscription.productId}.json")
-                        .write(subscription.json)
+                parameters.dir.get().file("${subscription.productId}.json").write(subscription.json)
                 parameters.dir.get().file("${subscription.productId}$SUBSCRIPTION_METADATA_SUFFIX")
-                        .write(GsonFactory.getDefaultInstance().toString(SubscriptionMetadata(regionsVersion = "2022/02")))
+                        .write(Gson().toJson(SubscriptionMetadata(regionsVersion = "2022/02")))
             }
         }
 

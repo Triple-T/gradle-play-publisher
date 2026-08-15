@@ -21,7 +21,7 @@ import com.google.api.services.androidpublisher.model.Bundle
 import com.google.api.services.androidpublisher.model.DeobfuscationFilesUploadResponse
 import com.google.api.services.androidpublisher.model.ExpansionFile
 import com.google.api.services.androidpublisher.model.Image
-import com.google.api.services.androidpublisher.model.InAppProduct
+import com.google.api.services.androidpublisher.model.OneTimeProduct
 import com.google.api.services.androidpublisher.model.Listing
 import com.google.api.services.androidpublisher.model.Subscription
 import com.google.api.services.androidpublisher.model.Track
@@ -175,35 +175,42 @@ internal class DefaultPlayPublisher(
     }
 
     override fun getInAppProducts(): List<GppProduct> {
-        fun AndroidPublisher.Inappproducts.List.withToken(token: String?) = apply {
-            this.token = token
+        fun AndroidPublisher.Monetization.Onetimeproducts.List.withPageToken(token: String?) = apply {
+            this.pageToken = token
         }
 
-        val products = mutableListOf<InAppProduct>()
+        val products = mutableListOf<OneTimeProduct>()
 
         var token: String? = null
         do {
-            val response = publisher.inappproducts().list(appId).withToken(token).execute()
-            products += response.inappproduct.orEmpty()
-            token = response.tokenPagination?.nextPageToken
+            val response = publisher.monetization().onetimeproducts().list(appId).withPageToken(token).execute()
+            products += response.oneTimeProducts.orEmpty()
+            token = response.nextPageToken
         } while (token != null)
 
         return products.map {
-            GppProduct(it.sku, it.toPrettyString())
+            GppProduct(it.productId, it.toPrettyString())
         }
     }
 
-    override fun insertInAppProduct(productFile: File) {
-        publisher.inappproducts().insert(appId, readProductFile(productFile))
-                .apply { autoConvertMissingPrices = true }
+    override fun insertInAppProduct(productFile: File, regionsVersion: String) {
+        val product = readProductFile(productFile)
+        publisher.monetization().onetimeproducts().patch(appId, product.productId, product)
+                .apply {
+                    regionsVersionVersion = regionsVersion
+                    updateMask = PRODUCTS_UPDATE_MASK
+                }
                 .execute()
     }
 
-    override fun updateInAppProduct(productFile: File): UpdateProductResponse {
+    override fun updateInAppProduct(productFile: File, regionsVersion: String): UpdateProductResponse {
         val product = readProductFile(productFile)
         try {
-            publisher.inappproducts().update(appId, product.sku, product)
-                    .apply { autoConvertMissingPrices = true }
+            publisher.monetization().onetimeproducts().patch(appId, product.productId, product)
+                    .apply {
+                        regionsVersionVersion = regionsVersion
+                        updateMask = PRODUCTS_UPDATE_MASK
+                    }
                     .execute()
         } catch (e: GoogleJsonResponseException) {
             if (e.statusCode == 404) {
@@ -268,7 +275,7 @@ internal class DefaultPlayPublisher(
     private fun readProductFile(product: File) = product.inputStream().use {
         GsonFactory.getDefaultInstance()
                 .createJsonParser(it)
-                .parse(InAppProduct::class.java)
+                .parse(OneTimeProduct::class.java)
     }
 
     private fun readSubscriptionFile(product: File) = product.inputStream().use {
@@ -318,5 +325,6 @@ internal class DefaultPlayPublisher(
         const val MIME_TYPE_IMAGE = "image/*"
 
         const val SUBSCRIPTIONS_UPDATE_MASK = "listings,basePlans"
+        const val PRODUCTS_UPDATE_MASK = "listings,offerTags,purchaseOptions,restrictedPaymentCountries,taxAndComplianceSettings"
     }
 }
