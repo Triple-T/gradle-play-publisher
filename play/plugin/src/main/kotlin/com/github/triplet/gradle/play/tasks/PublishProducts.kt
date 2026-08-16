@@ -87,7 +87,10 @@ internal abstract class PublishProducts @Inject constructor(
 
             println("Uploading ${product["productId"]}")
             val response = apiService.publisher.updateInAppProduct(productFile, metadata.regionsVersion)
-            if (response.needsCreating) apiService.publisher.insertInAppProduct(productFile, metadata.regionsVersion)
+            if (response.needsCreating) {
+                println("Creating ${product["productId"]}")
+                apiService.publisher.insertInAppProduct(productFile, metadata.regionsVersion)
+            }
         }
 
         interface Params : PlayPublishingParams {

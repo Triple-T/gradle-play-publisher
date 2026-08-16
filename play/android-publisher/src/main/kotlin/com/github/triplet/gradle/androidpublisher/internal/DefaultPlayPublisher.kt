@@ -199,6 +199,7 @@ internal class DefaultPlayPublisher(
                 .apply {
                     regionsVersionVersion = regionsVersion
                     updateMask = PRODUCTS_UPDATE_MASK
+                    allowMissing = true
                 }
                 .execute()
     }
