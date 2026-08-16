@@ -1,7 +1,7 @@
 package com.github.triplet.gradle.play.tasks
 
+import com.github.triplet.gradle.androidpublisher.SubscriptionMetadata
 import com.github.triplet.gradle.play.PlayPublisherExtension
-import com.github.triplet.gradle.play.internal.SubscriptionMetadata
 import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.workers.PlayWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
@@ -25,6 +25,7 @@ import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
 import org.gradle.workers.WorkerExecutor
 import javax.inject.Inject
+import kotlin.jvm.java
 
 @DisableCachingByDefault
 internal abstract class PublishSubscriptions @Inject constructor(

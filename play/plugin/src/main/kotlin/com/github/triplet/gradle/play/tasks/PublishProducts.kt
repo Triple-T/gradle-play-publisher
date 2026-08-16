@@ -1,10 +1,10 @@
 package com.github.triplet.gradle.play.tasks
 
+import com.github.triplet.gradle.androidpublisher.ProductMetadata
 import com.github.triplet.gradle.play.PlayPublisherExtension
 import com.github.triplet.gradle.play.tasks.internal.PublishTaskBase
 import com.github.triplet.gradle.play.tasks.internal.workers.PlayWorkerBase
 import com.github.triplet.gradle.play.tasks.internal.workers.paramsForBase
-import com.github.triplet.gradle.play.internal.ProductMetadata
 import com.google.api.client.json.gson.GsonFactory
 import com.google.gson.Gson
 import org.gradle.api.file.ConfigurableFileCollection
@@ -25,6 +25,7 @@ import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
 import org.gradle.workers.WorkerExecutor
 import javax.inject.Inject
+import kotlin.jvm.java
 
 @DisableCachingByDefault
 internal abstract class PublishProducts @Inject constructor(

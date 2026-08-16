@@ -125,11 +125,11 @@ class PublishSubscriptionsIntegrationTest : IntegrationTestBase(), SharedIntegra
         fun installFactories() {
             val publisher = object : FakePlayPublisher() {
                 override fun insertInAppSubscription(subscriptionFile: File, regionsVersion: String) {
-                    println("insertInAppSubscription($subscriptionFile)")
+                    println("insertInAppSubscription($subscriptionFile, $regionsVersion)")
                 }
 
                 override fun updateInAppSubscription(subscriptionFile: File, regionsVersion: String): UpdateSubscriptionResponse {
-                    println("updateInAppSubscription($subscriptionFile)")
+                    println("updateInAppSubscription($subscriptionFile, $regionsVersion)")
                     return newUpdateSubscriptionResponse(System.getProperty("NEEDS_CREATING") != null)
                 }
             }

@@ -136,3 +136,13 @@ data class UpdateSubscriptionResponse internal constructor(
         /** @return true if the product doesn't exist and needs to be created, false otherwise. */
         val needsCreating: Boolean,
 )
+
+data class ProductMetadata(
+        /** The product regions version */
+        val regionsVersion: String,
+)
+
+data class SubscriptionMetadata(
+        /** The subscription regions version */
+        val regionsVersion: String,
+)

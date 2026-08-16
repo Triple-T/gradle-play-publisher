@@ -125,11 +125,11 @@ class PublishProductsIntegrationTest : IntegrationTestBase(), SharedIntegrationT
         fun installFactories() {
             val publisher = object : FakePlayPublisher() {
                 override fun insertInAppProduct(productFile: File, regionsVersion: String) {
-                    println("insertInAppProduct($productFile)")
+                    println("insertInAppProduct($productFile, $regionsVersion)")
                 }
 
                 override fun updateInAppProduct(productFile: File, regionsVersion: String): UpdateProductResponse {
-                    println("updateInAppProduct($productFile)")
+                    println("updateInAppProduct($productFile, $regionsVersion)")
                     return newUpdateProductResponse(System.getProperty("NEEDS_CREATING") != null)
                 }
             }
