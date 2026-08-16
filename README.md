@@ -634,8 +634,7 @@ with `./gradlew bootstrapListing --products`.
 
 Each product file must have an associated metadata file (`products/<product id>.metadata.json`)
 that contains JSON of the form `{"regionsVersion": ...}`. The `regionsVersion` is described
-[here](https://developers.google.com/android-publisher/api-ref/rest/v3/RegionsVersion). The Google Play Developer API does
-not have a way to get the latest regions version, so unfortunately bootstrapping uses a hardcoded value that you may need to fix.
+[here](https://developers.google.com/android-publisher/api-ref/rest/v3/RegionsVersion).
 
 ### Publishing in-app subscriptions
 
