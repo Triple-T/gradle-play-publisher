@@ -67,6 +67,7 @@ class PublishProductsIntegrationTest : IntegrationTestBase(), SharedIntegrationT
         assertThat(result.output).contains("updateInAppProduct(")
         assertThat(result.output).doesNotContain("insertInAppProduct(")
         assertThat(result.output).contains("product.json")
+        assertThat(result.output).contains("2025/03")
         assertThat(result.output).contains("Uploading my-product")
     }
 

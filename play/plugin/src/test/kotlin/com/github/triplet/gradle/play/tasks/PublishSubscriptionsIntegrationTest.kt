@@ -67,6 +67,7 @@ class PublishSubscriptionsIntegrationTest : IntegrationTestBase(), SharedIntegra
         assertThat(result.output).contains("updateInAppSubscription(")
         assertThat(result.output).doesNotContain("insertInAppSubscription(")
         assertThat(result.output).contains("subscription.json")
+        assertThat(result.output).contains("2025/03")
         assertThat(result.output).contains("Uploading subscription")
     }
 
