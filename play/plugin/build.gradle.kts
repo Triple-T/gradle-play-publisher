@@ -7,6 +7,10 @@ plugins {
     id("com.gradle.plugin-publish")
 }
 
+lint {
+    baseline = file("lint-baseline.xml")
+}
+
 dependencies {
     implementation(project(":play:android-publisher"))
     implementation(project(":common:utils"))
