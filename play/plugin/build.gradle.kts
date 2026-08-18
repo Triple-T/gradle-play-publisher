@@ -3,6 +3,7 @@ plugins {
     `kotlin-dsl`
     `maven-publish`
     signing
+    alias(libs.plugins.lint)
     id("com.gradle.plugin-publish")
 }
 
@@ -17,6 +18,7 @@ dependencies {
     compileOnly(libs.agp.ddms)
     implementation(libs.guava)
     implementation(libs.client.gson)
+    lintChecks(libs.lint.gradle)
 
     testImplementation(project(":common:utils"))
     testImplementation(project(":common:validation"))

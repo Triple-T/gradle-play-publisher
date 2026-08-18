@@ -10,6 +10,7 @@ buildscript {
 
 plugins {
     `lifecycle-base`
+    alias(libs.plugins.lint) apply false
     alias(libs.plugins.depUpdates)
 
     // Needed to support publishing all modules atomically
