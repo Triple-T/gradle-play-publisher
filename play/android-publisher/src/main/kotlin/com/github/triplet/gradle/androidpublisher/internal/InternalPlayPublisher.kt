@@ -34,6 +34,8 @@ internal interface InternalPlayPublisher : PlayPublisher {
 
     fun updateTrack(editId: String, track: Track)
 
+    fun findMaxAppVersionCode(editId: String): Int
+
     @Throws(IOException::class)
     fun uploadBundle(editId: String, bundleFile: File): Bundle
 

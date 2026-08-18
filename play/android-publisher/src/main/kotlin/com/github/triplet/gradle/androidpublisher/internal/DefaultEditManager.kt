@@ -48,9 +48,7 @@ internal class DefaultEditManager(
     }
 
     override fun findMaxAppVersionCode(): Long {
-        return tracks.findHighestTrack()?.releases.orEmpty()
-                .flatMap { it.versionCodes.orEmpty() }
-                .maxOrNull() ?: 1
+        return publisher.findMaxAppVersionCode(editId).toLong()
     }
 
     override fun findLeastStableTrackName(): String? {

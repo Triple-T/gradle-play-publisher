@@ -13,7 +13,6 @@ import com.google.api.services.androidpublisher.model.Image
 import com.google.api.services.androidpublisher.model.Listing
 import com.google.api.services.androidpublisher.model.LocalizedText
 import com.google.api.services.androidpublisher.model.Track
-import com.google.api.services.androidpublisher.model.TrackRelease
 import com.google.common.truth.Truth.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -29,7 +28,8 @@ import java.io.File
 class DefaultEditManagerTest {
     private var mockPublisher = mock(InternalPlayPublisher::class.java)
     private var mockTracks = mock(TrackManager::class.java)
-    private var edits: EditManager = DefaultEditManager(mockPublisher, mockTracks, "edit-id")
+    private val editId = "edit-id"
+    private var edits: EditManager = DefaultEditManager(mockPublisher, mockTracks, editId)
 
     private var mockFile = mock(File::class.java)
 
@@ -149,7 +149,7 @@ class DefaultEditManagerTest {
         )
 
         verify(mockPublisher)
-                .uploadDeobfuscationFile(eq("edit-id"), eq(mockFile), eq(888), eq("proguard"))
+                .uploadDeobfuscationFile(eq(editId), eq(mockFile), eq(888), eq("proguard"))
     }
 
     @Test
@@ -169,7 +169,7 @@ class DefaultEditManagerTest {
         )
 
         verify(mockPublisher)
-                .uploadDeobfuscationFile(eq("edit-id"), eq(mockFile), eq(888), eq("nativeCode"))
+                .uploadDeobfuscationFile(eq(editId), eq(mockFile), eq(888), eq("nativeCode"))
     }
 
     @Test
@@ -223,8 +223,8 @@ class DefaultEditManagerTest {
                 patchObbRetainable = 321
         )
 
-        verify(mockPublisher).attachObb(eq("edit-id"), eq("main"), eq(888), eq(123))
-        verify(mockPublisher).attachObb(eq("edit-id"), eq("patch"), eq(888), eq(321))
+        verify(mockPublisher).attachObb(eq(editId), eq("main"), eq(888), eq(123))
+        verify(mockPublisher).attachObb(eq(editId), eq("patch"), eq(888), eq(321))
     }
 
     @Test
@@ -324,70 +324,14 @@ class DefaultEditManagerTest {
     }
 
     @Test
-    fun `findMaxAppVersionCode returns 1 on empty tracks`() {
-        `when`(mockTracks.findHighestTrack()).thenReturn(null)
+    fun `findMaxAppVersionCode delegates to publisher`() {
+        `when`(mockPublisher.findMaxAppVersionCode(editId)).thenReturn(91)
 
         val max = edits.findMaxAppVersionCode()
 
-        assertThat(max).isEqualTo(1)
+        assertThat(max).isEqualTo(91)
     }
 
-    @Test
-    fun `findMaxAppVersionCode returns 1 on null releases`() {
-        `when`(mockTracks.findHighestTrack()).thenReturn(Track())
-
-        val max = edits.findMaxAppVersionCode()
-
-        assertThat(max).isEqualTo(1)
-    }
-
-    @Test
-    fun `findMaxAppVersionCode succeeds with single track, single release, singe version code`() {
-        `when`(mockTracks.findHighestTrack()).thenReturn(Track().apply {
-            releases = listOf(
-                    TrackRelease().apply {
-                        versionCodes = listOf(5)
-                    }
-            )
-        })
-
-        val max = edits.findMaxAppVersionCode()
-
-        assertThat(max).isEqualTo(5)
-    }
-
-    @Test
-    fun `findMaxAppVersionCode succeeds with single track, single release, multi version code`() {
-        `when`(mockTracks.findHighestTrack()).thenReturn(Track().apply {
-            releases = listOf(
-                    TrackRelease().apply {
-                        versionCodes = listOf(5, 4, 8, 7)
-                    }
-            )
-        })
-
-        val max = edits.findMaxAppVersionCode()
-
-        assertThat(max).isEqualTo(8)
-    }
-
-    @Test
-    fun `findMaxAppVersionCode succeeds with single track, multi release, multi version code`() {
-        `when`(mockTracks.findHighestTrack()).thenReturn(Track().apply {
-            releases = listOf(
-                    TrackRelease().apply {
-                        versionCodes = listOf(5, 4, 8, 7)
-                    },
-                    TrackRelease().apply {
-                        versionCodes = listOf(85, 7, 36, 5)
-                    }
-            )
-        })
-
-        val max = edits.findMaxAppVersionCode()
-
-        assertThat(max).isEqualTo(85)
-    }
 
     @Test
     fun `findLeastStableTrackName returns null on null track`() {
@@ -453,7 +397,7 @@ class DefaultEditManagerTest {
     fun `publishAppDetails forwards data to publisher`() {
         edits.publishAppDetails("lang", "email", "phone", "website")
 
-        verify(mockPublisher).updateDetails(eq("edit-id"), eq(AppDetails().apply {
+        verify(mockPublisher).updateDetails(eq(editId), eq(AppDetails().apply {
             defaultLanguage = "lang"
             contactEmail = "email"
             contactPhone = "phone"
@@ -465,7 +409,7 @@ class DefaultEditManagerTest {
     fun `publishListing forwards data to publisher`() {
         edits.publishListing("lang", "title", "short", "full", "url")
 
-        verify(mockPublisher).updateListing(eq("edit-id"), eq("lang"), eq(Listing().apply {
+        verify(mockPublisher).updateListing(eq(editId), eq("lang"), eq(Listing().apply {
             title = "title"
             shortDescription = "short"
             fullDescription = "full"
@@ -477,8 +421,8 @@ class DefaultEditManagerTest {
     fun `publishImages forwards data to publisher`() {
         edits.publishImages("lang", "phoneScreenshots", listOf(mockFile))
 
-        verify(mockPublisher).deleteImages(eq("edit-id"), eq("lang"), eq("phoneScreenshots"))
+        verify(mockPublisher).deleteImages(eq(editId), eq("lang"), eq("phoneScreenshots"))
         verify(mockPublisher).uploadImage(
-                eq("edit-id"), eq("lang"), eq("phoneScreenshots"), eq(mockFile))
+                eq(editId), eq("lang"), eq("phoneScreenshots"), eq(mockFile))
     }
 }

@@ -106,6 +106,18 @@ internal class DefaultPlayPublisher(
         }
     }
 
+    override fun findMaxAppVersionCode(editId: String): Int {
+        val maxBundle = publisher.edits().bundles().list(appId, editId).execute()
+                ?.bundles.orEmpty()
+                .maxOfOrNull { it.versionCode ?: 0 } ?: 0
+
+        val maxApk = publisher.edits().apks().list(appId, editId).execute()
+                ?.apks.orEmpty()
+                .maxOfOrNull { it.versionCode ?: 0 } ?: 0
+
+        return maxOf(maxBundle, maxApk).takeIf { it > 0 } ?: 1
+    }
+
     override fun listTracks(editId: String): List<Track> {
         return publisher.edits().tracks().list(appId, editId).execute()?.tracks.orEmpty()
     }
