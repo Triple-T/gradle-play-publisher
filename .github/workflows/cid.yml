@@ -44,7 +44,7 @@ jobs:
       - name: Setup environment
         run: ./gradlew publishToMavenLocal
       - name: Run tests
-        run: ./gradlew check test -S -x :play:play-publisher:lint
+        run: ./gradlew check test -S
 
   deploy_snapshot:
     needs: [build, test]
