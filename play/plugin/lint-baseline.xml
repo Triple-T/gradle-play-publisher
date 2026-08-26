@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 9.0.0" type="baseline" client="gradle" dependencies="false" name="AGP (9.0.0)" variant="all" version="9.0.0">
+
+    <issue
+        id="GradleConfigurationCacheBroadInputs"
+        message="Use Project.providers.environmentVariable instead of getenv"
+        errorLine1="                        System.getenv(&quot;ANDROID_SERIAL&quot;)"
+        errorLine2="                               ~~~~~~">
+        <location
+            file="src/main/kotlin/com/github/triplet/gradle/play/tasks/InstallInternalSharingArtifact.kt"
+            line="192"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="GradleConfigurationCacheBroadInputs"
+        message="Use Project.providers.environmentVariable instead of getenv"
+        errorLine1="                System.getenv(PlayPublisher.CREDENTIAL_ENV_VAR) != null)"
+        errorLine2="                       ~~~~~~">
+        <location
+            file="src/main/kotlin/com/github/triplet/gradle/play/tasks/internal/PlayApiService.kt"
+            line="30"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="GradleConfigurationCacheBroadInputs"
+        message="Use Project.providers.environmentVariable instead of getenv"
+        errorLine1="        val credsString = System.getenv(PlayPublisher.CREDENTIAL_ENV_VAR)"
+        errorLine2="                                 ~~~~~~">
+        <location
+            file="src/main/kotlin/com/github/triplet/gradle/play/tasks/internal/PlayApiService.kt"
+            line="159"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="GradleLikelyBug"
+        message="Implicit usage of toString on a Provider"
+        errorLine1="                    |No application found for the package name &apos;$appId&apos;. The first version of your"
+        errorLine2="                                                                 ~~~~~">
+        <location
+            file="src/main/kotlin/com/github/triplet/gradle/play/tasks/internal/PlayApiService.kt"
+            line="136"
+            column="66"/>
+    </issue>
+
+    <issue
+        id="GradlePerformance"
+        message="Avoid using method mustRunAfter"
+        errorLine1="                mustRunAfter(bootstrapTask)"
+        errorLine2="                ~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/com/github/triplet/gradle/play/PlayPublisherPlugin.kt"
+            line="377"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="GradlePerformance"
+        message="Avoid using method mustRunAfter"
+        errorLine1="                mustRunAfter(publishApkTask)"
+        errorLine2="                ~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/com/github/triplet/gradle/play/PlayPublisherPlugin.kt"
+            line="545"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="GradlePerformance"
+        message="Avoid using method mustRunAfter"
+        errorLine1="                mustRunAfter(publishBundleTask)"
+        errorLine2="                ~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/com/github/triplet/gradle/play/PlayPublisherPlugin.kt"
+            line="546"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="GradleProjectIsolation"
+        message="Use isolated.rootProject instead of getRootProject"
+        errorLine1="    val project = if (extension.isolatedSingleProject.get()) this else rootProject"
+        errorLine2="                                                                       ~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/com/github/triplet/gradle/play/internal/Plugins.kt"
+            line="56"
+            column="72"/>
+    </issue>
+
+    <issue
+        id="WithPluginClasspathUsage"
+        message="Avoid usage of GradleRunner#withPluginClasspath, which is broken. Instead use something like https://github.com/autonomousapps/dependency-analysis-gradle-plugin/tree/main/testkit#gradle-testkit-support-plugin"
+        errorLine1="        val classpathJars = GradleRunner.create().withPluginClasspath().pluginClasspath"
+        errorLine2="                                                  ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/test/kotlin/com/github/triplet/gradle/play/tasks/shared/ArtifactIntegrationTests.kt"
+            line="100"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="WithPluginClasspathUsage"
+        message="Avoid usage of GradleRunner#withPluginClasspath, which is broken. Instead use something like https://github.com/autonomousapps/dependency-analysis-gradle-plugin/tree/main/testkit#gradle-testkit-support-plugin"
+        errorLine1="                .withPluginClasspath()"
+        errorLine2="                 ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/test/kotlin/com/github/triplet/gradle/play/helpers/IntegrationTestBase.kt"
+            line="69"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="WithPluginClasspathUsage"
+        message="Avoid usage of GradleRunner#withPluginClasspath, which is broken. Instead use something like https://github.com/autonomousapps/dependency-analysis-gradle-plugin/tree/main/testkit#gradle-testkit-support-plugin"
+        errorLine1="        runner.withPluginClasspath(runner.pluginClasspath + listOf("
+        errorLine2="               ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/test/kotlin/com/github/triplet/gradle/play/helpers/IntegrationTestBase.kt"
+            line="85"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="WithPluginClasspathUsage"
+        message="Avoid usage of GradleRunner#withPluginClasspath, which is broken. Instead use something like https://github.com/autonomousapps/dependency-analysis-gradle-plugin/tree/main/testkit#gradle-testkit-support-plugin"
+        errorLine1="        val classpathJars = GradleRunner.create().withPluginClasspath().pluginClasspath"
+        errorLine2="                                                  ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/test/kotlin/com/github/triplet/gradle/play/PlayPublisherPluginIntegrationTest.kt"
+            line="671"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="WithPluginClasspathUsage"
+        message="Avoid usage of GradleRunner#withPluginClasspath, which is broken. Instead use something like https://github.com/autonomousapps/dependency-analysis-gradle-plugin/tree/main/testkit#gradle-testkit-support-plugin"
+        errorLine1="        val classpathJars = GradleRunner.create().withPluginClasspath().pluginClasspath"
+        errorLine2="                                                  ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/test/kotlin/com/github/triplet/gradle/play/PlayPublisherPluginIntegrationTest.kt"
+            line="919"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="WithPluginClasspathUsage"
+        message="Avoid usage of GradleRunner#withPluginClasspath, which is broken. Instead use something like https://github.com/autonomousapps/dependency-analysis-gradle-plugin/tree/main/testkit#gradle-testkit-support-plugin"
+        errorLine1="        val classpathJars = GradleRunner.create().withPluginClasspath().pluginClasspath"
+        errorLine2="                                                  ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/test/kotlin/com/github/triplet/gradle/play/PlayPublisherPluginIntegrationTest.kt"
+            line="1020"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="WithPluginClasspathUsage"
+        message="Avoid usage of GradleRunner#withPluginClasspath, which is broken. Instead use something like https://github.com/autonomousapps/dependency-analysis-gradle-plugin/tree/main/testkit#gradle-testkit-support-plugin"
+        errorLine1="        val classpathJars = GradleRunner.create().withPluginClasspath().pluginClasspath"
+        errorLine2="                                                  ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/test/kotlin/com/github/triplet/gradle/play/PlayPublisherPluginIntegrationTest.kt"
+            line="1097"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="WithTypeWithoutConfigureEach"
+        message="Avoid passing a closure to withType, use withType().configureEach instead"
+        errorLine1="        project.plugins.withType&lt;AppPlugin> {"
+        errorLine2="                        ~~~~~~~~">
+        <location
+            file="src/main/kotlin/com/github/triplet/gradle/play/PlayPublisherPlugin.kt"
+            line="84"
+            column="25"/>
+    </issue>
+
+</issues>

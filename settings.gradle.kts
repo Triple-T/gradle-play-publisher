@@ -1,5 +1,12 @@
 import org.gradle.kotlin.dsl.version
 
+pluginManagement {
+    repositories {    
+        gradlePluginPortal()
+        google()
+    }
+}
+
 plugins {
     id("com.gradle.develocity") version "4.3.1"
 }
@@ -30,6 +37,7 @@ dependencyResolutionManagement {
             version("depUpdates", "0.50.0")
             version("gradlePublish", "1.2.1")
             version("nexusPublish", "2.0.0")
+            version("lint-gradle", "1.0.0")
 
             plugin("depUpdates", "com.github.ben-manes.versions")
                 .versionRef("depUpdates")
@@ -37,6 +45,7 @@ dependencyResolutionManagement {
                 .versionRef("gradlePublish")
             plugin("nexusPublish", "io.github.gradle-nexus.publish-plugin")
                 .versionRef("nexusPublish")
+            plugin("lint", "com.android.lint").versionRef("agp")
 
             version("agp", "9.0.0")
             version("agp-tools", "32.0.0")
@@ -61,6 +70,7 @@ dependencyResolutionManagement {
             library("client-gson", "com.google.http-client", "google-http-client-gson")
                 .versionRef("http-client")
             library("guava", "com.google.guava", "guava").versionRef("guava")
+            library("lint-gradle", "androidx.lint", "lint-gradle").versionRef("lint-gradle")
         }
 
         create("testLibs") {
