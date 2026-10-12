@@ -3,13 +3,16 @@ package com.github.triplet.gradle.androidpublisher.internal
 import com.github.triplet.gradle.common.utils.PLUGIN_NAME
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
+import com.google.api.client.http.HttpBackOffIOExceptionHandler
 import com.google.api.client.http.HttpBackOffUnsuccessfulResponseHandler
 import com.google.api.client.http.HttpRequest
 import com.google.api.client.http.HttpTransport
+import com.google.api.client.http.HttpUnsuccessfulResponseHandler
 import com.google.api.client.http.apache.v2.ApacheHttpTransport
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.client.util.ExponentialBackOff
+import com.google.api.client.util.Sleeper
 import com.google.api.services.androidpublisher.AndroidPublisher
 import com.google.api.services.androidpublisher.AndroidPublisherScopes
 import com.google.auth.http.HttpCredentialsAdapter
@@ -109,19 +112,30 @@ private fun createHttpTransport(): HttpTransport {
     return GoogleNetHttpTransport.newTrustedTransport()
 }
 
-private class AndroidPublisherAdapter(
+/**
+ * Retries 5XX responses and network errors with exponential backoff as recommended by
+ * https://developers.google.com/android-publisher/upload#exp-backoff.
+ */
+internal class AndroidPublisherAdapter(
         credential: GoogleCredentials,
+        private val sleeper: Sleeper = Sleeper.DEFAULT,
 ) : HttpCredentialsAdapter(credential) {
     override fun initialize(request: HttpRequest) {
-        val backOffHandler = HttpBackOffUnsuccessfulResponseHandler(
-                ExponentialBackOff.Builder()
-                        .setMaxElapsedTimeMillis(TimeUnit.MINUTES.toMillis(3).toInt())
-                        .build()
-        )
+        // Must run first since it installs its own unsuccessful response handler (for 401s)
+        super.initialize(request.setReadTimeout(0))
 
-        super.initialize(
-                request.setReadTimeout(0)
-                        .setUnsuccessfulResponseHandler(backOffHandler)
-        )
+        val backOff = ExponentialBackOff.Builder()
+                .setMaxElapsedTimeMillis(TimeUnit.MINUTES.toMillis(3).toInt())
+                .build()
+        val serverErrorHandler = HttpBackOffUnsuccessfulResponseHandler(backOff)
+                .setSleeper(sleeper)
+        val credentialsHandler = request.unsuccessfulResponseHandler
+
+        request.unsuccessfulResponseHandler =
+                HttpUnsuccessfulResponseHandler { req, response, supportsRetry ->
+                    credentialsHandler.handleResponse(req, response, supportsRetry) ||
+                            serverErrorHandler.handleResponse(req, response, supportsRetry)
+                }
+        request.ioExceptionHandler = HttpBackOffIOExceptionHandler(backOff).setSleeper(sleeper)
     }
 }
