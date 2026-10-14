@@ -129,6 +129,7 @@ internal class AndroidPublisherAdapter(
                 .build()
         val serverErrorHandler = HttpBackOffUnsuccessfulResponseHandler(backOff)
                 .setSleeper(sleeper)
+        // Get the 401 error handler installed by the super call
         val credentialsHandler = request.unsuccessfulResponseHandler
 
         request.unsuccessfulResponseHandler =
